@@ -14,7 +14,7 @@ class LaravelHelperExceptionServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
+        $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
 
         // $this->renderable(function (Throwable $e, $request) {
         //     return app(DefaultExceptionHandler::class)->render($request, $e));

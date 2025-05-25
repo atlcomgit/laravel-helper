@@ -111,7 +111,7 @@ final class TelegramService
             }
 
         } catch (Throwable $exception) {
-            config('laravel-helper.telegram_log.enabled', false);
+            // config('laravel-helper.telegram_log.enabled', false);
 
             return false;
         }
@@ -149,7 +149,6 @@ final class TelegramService
         $method = $dto->method ?? null;
         $uri = $dto->uri ?? null;
         $uuid = $dto->uuid ?? null;
-        $cabinet = $dto->cabinet?->label();
         $user = $dto->userId ? User::find($dto->userId) : null;
         $userId = $user?->id ?? $dto->userId ?? 'Unauthorized';
         $userName = $user?->full_name;
@@ -189,7 +188,6 @@ final class TelegramService
                     . "<tg-spoiler>"
                     . "Проект: <b>{$appName}</b>\n"
                     . "Окружение: <b>{$appEnv}</b>\n"
-                    . ($cabinet ? "Кабинет: <b>{$cabinet}</b>\n" : '')
                     . ($branch ? "Ветка: <b>{$branch}</b>\n" : '')
                     . ($ip ? "Адрес: <b>{$ip}</b>\n" : '')
                     . ($userId ? "UserId: <b>{$userId}</b>\n" : '')

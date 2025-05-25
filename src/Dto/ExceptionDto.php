@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
@@ -112,7 +113,6 @@ class ExceptionDto extends Dto
                             : null,
                         'project' => config('app.name'),
                         'env' => config('app.env'),
-                        'cabinet' => requestCabinet()?->value,
                         'exception' => $exception::class,
                         'message' => $thisDto->message,
                         'file' => $thisDto->debugInfo->file,

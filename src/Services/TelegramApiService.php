@@ -23,6 +23,7 @@ class TelegramApiService
         string $message,
         array $options = [],
     ): ?array {
+        Http::telegram(); //?!? 
         $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
         $params = array_merge([
             'chat_id' => $chatId,
@@ -45,7 +46,9 @@ class TelegramApiService
             return null;
         }
 
-        return json_decode($response, true);
+        $json = json_decode($response, true);
+
+        return ;
     }
 
 
@@ -70,6 +73,8 @@ class TelegramApiService
             // Можно добавить логирование ошибки
             return null;
         }
+
+        Http::telegram(); //?!? 
 
         $url = "https://api.telegram.org/bot{$botToken}/sendDocument";
         $params = array_merge([

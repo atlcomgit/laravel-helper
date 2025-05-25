@@ -82,4 +82,15 @@ return [
             'cache_ttl' => env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
         ],
     ],
+
+    'http' => [
+        'smsru' => [
+            'enabled' => (bool)env('SMS_RU_ENABLED'),
+            'url' => env('SMS_RU_URL', 'https://sms.ru'),
+            'sms_ru_api_key' => env('SMS_RU_API_KEY'),
+            'sms_ru_from' => env('SMS_RU_FROM'),
+            'sms_ru_to' => env('SMS_RU_TO'),
+            'sms_ru_send_ip_address' => (bool)env('SMS_RU_SEND_IP_ADDRESS', false),
+        ],
+    ],
 ];

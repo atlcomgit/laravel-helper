@@ -28,7 +28,7 @@ class TelegramLoggerJob implements ShouldQueue
         protected TelegramLogDto $dto,
         protected ?TelegramService $telegramService = null,
     ) {
-        $this->$telegramService ??= app(TelegramService::class);
+        $this->telegramService ??= app(TelegramService::class);
     }
 
 

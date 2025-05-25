@@ -4,6 +4,7 @@ use Atlcom\Dto;
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\ExceptionDto;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
+use Atlcom\LaravelHelper\Listeners\TelegramLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,7 +17,7 @@ if (!function_exists('isDebug')) {
      */
     function isDebug(): bool
     {
-        return config('app.debug');
+        return (bool)config('app.debug');
     }
 }
 
@@ -29,7 +30,7 @@ if (!function_exists('isDebugData')) {
      */
     function isDebugData(): bool
     {
-        return config('app.debug_data');
+        return (bool)config('app.debug_data');
     }
 }
 
@@ -40,9 +41,9 @@ if (!function_exists('isDebugTrace')) {
      *
      * @return bool|null
      */
-    function isDebugTrace(): ?bool
+    function isDebugTrace(): bool
     {
-        return config('app.debug_trace');
+        return (bool)config('app.debug_trace');
     }
 }
 
@@ -180,15 +181,16 @@ if (!function_exists('telegram')) {
     function telegram(mixed $data, string|TelegramTypeEnum $type = TelegramTypeEnum::Debug, array $context = []): void
     {
         try {
+            $log = Log::build(['driver' => 'custom', 'via' => TelegramLogger::class]);
             $data instanceof Throwable
                 ? ExceptionDto::createFromException(exception: $data)
                 : match (TelegramTypeEnum::enumFrom($type)) {
-                    TelegramTypeEnum::Info => Log::channel('telegram_log')->info(json($data), $context),
-                    TelegramTypeEnum::Error => Log::channel('telegram_log')->error(json($data), $context),
-                    TelegramTypeEnum::Warning => Log::channel('telegram_log')->warning(json($data), $context),
-                    TelegramTypeEnum::Debug => Log::channel('telegram_log')->debug(json($data), $context),
+                    TelegramTypeEnum::Info => $log->info(json($data), $context),
+                    TelegramTypeEnum::Error => $log->error(json($data), $context),
+                    TelegramTypeEnum::Warning => $log->warning(json($data), $context),
+                    TelegramTypeEnum::Debug => $log->debug(json($data), $context),
 
-                    default => Log::channel('telegram_log')->notice(json($data), [...$context, 'level' => $type]),
+                    default => $log->notice(json($data), [...$context, 'level' => $type]),
                 };
         } catch (Throwable $e) {
             !isTesting() ?: throw $e;
