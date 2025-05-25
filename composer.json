@@ -1,0 +1,61 @@
+{
+    "name": "atlcom/laravel-helper",
+    "version": "1.00",
+    "type": "library",
+    "description": "Atlcom Laravel Helper library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alek Chertkov",
+            "email": "alek.fiend@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "funding": [
+        {
+            "type": "yoomoney",
+            "url": "https://yoomoney.ru/to/4100110213116546"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "ext-mbstring": "*",
+        "nesbot/carbon": ">=2.0",
+        "atlcom/helper": "^1.18",
+        "atlcom/dto": "^2.74"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "fakerphp/faker": "^1.23",
+        "orchestra/testbench": "^9.14"
+    },
+    "autoload": {
+        "psr-4": {
+            "Atlcom\\LaravelHelper\\": "src"
+        },
+        "files":[
+            "src/Helpers/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Atlcom\\LaravelHelper\\Tests\\": "tests"
+        }
+    },
+    "archive": {
+        "exclude": [
+            ".idea",
+            "composer.lock"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperServiceProvider",
+                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperMacroServiceProvider",
+                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperDtoServiceProvider",
+                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperExceptionServiceProvider"
+            ]
+        }
+    }
+}
