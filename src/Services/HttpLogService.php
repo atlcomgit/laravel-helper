@@ -35,7 +35,7 @@ class HttpLogService
      */
     public static function getLogHeaders(HttpLogHeaderEnum $headerName): array
     {
-        return config('logging.http_log.out.enabled')
+        return config('laravel-helper.http_log.out.enabled')
             ? ($headerName === HttpLogHeaderEnum::None
                 ? [
                     self::HTTP_HEADER_UUID => '',
@@ -84,7 +84,7 @@ class HttpLogService
      */
     public function update(HttpLogDto $httpLogDto): void
     {
-        config('logging.http_log.only_response')
+        config('laravel-helper.http_log.only_response')
             ? $this->create($httpLogDto)
             : (!($uuid = $this->getUuid($httpLogDto))
                 ?: HttpLog::where('uuid', $uuid)->update(HttpLogUpdateDto::create($httpLogDto)->toArray())
@@ -102,7 +102,7 @@ class HttpLogService
      */
     public function failed(HttpLogDto $httpLogDto): void
     {
-        config('logging.http_log.only_response')
+        config('laravel-helper.http_log.only_response')
             ? $this->create($httpLogDto->merge([
                 'responseCode' => $httpLogDto->responseCode ?? 0,
                 'responseMessage' => $httpLogDto->responseMessage ?? 'Connection error',

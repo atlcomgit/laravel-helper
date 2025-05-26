@@ -17,7 +17,7 @@ if (!function_exists('isDebug')) {
      */
     function isDebug(): bool
     {
-        return (bool)config('app.debug');
+        return (bool)config('laravel-helper.app.debug');
     }
 }
 
@@ -30,7 +30,7 @@ if (!function_exists('isDebugData')) {
      */
     function isDebugData(): bool
     {
-        return (bool)config('app.debug_data');
+        return (bool)config('laravel-helper.app.debug_data');
     }
 }
 
@@ -43,7 +43,7 @@ if (!function_exists('isDebugTrace')) {
      */
     function isDebugTrace(): bool
     {
-        return (bool)config('app.debug_trace');
+        return (bool)config('laravel-helper.app.debug_trace');
     }
 }
 
@@ -193,7 +193,7 @@ if (!function_exists('telegram')) {
                     default => $log->notice(json($data), [...$context, 'level' => $type]),
                 };
         } catch (Throwable $e) {
-            !isTesting() ?: throw $e;
+            // !isTesting() ?: throw $e;
         }
     }
 }

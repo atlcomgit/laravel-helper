@@ -23,10 +23,14 @@ return new class extends Migration {
             $table->uuid('uuid')->index()
                 ->comment('Uuid запроса');
 
-            $table->foreignUuid('user_id')->nullable(true)->index()
-                ->references('id')->on('users')
+            $userTableName = config('laravel-helper.http_log.user.table_name');
+            $userPrimaryKeyName = config('laravel-helper.http_log.user.primary_key');
+            $userPrimaryKeyType = config('laravel-helper.http_log.user.primary_type');
+
+            $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                ->references($userPrimaryKeyName)->on($userTableName)
                 ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Uuid пользователя');
+                ->comment('Id пользователя');
 
             $table->string('name')->nullable(true)->index();
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()

@@ -40,6 +40,28 @@ abstract class DefaultModel extends Model
 
 
     /**
+     * Возвращает имя первичного ключа
+     *
+     * @return string
+     */
+    public static function getPrimaryKeyName(): string
+    {
+        return with(new static)->getKeyName();
+    }
+
+
+    /**
+     * Возвращает тип первичного ключа
+     *
+     * @return string
+     */
+    public static function getPrimaryKeyType(): string
+    {
+        return with(new static)->getKeyType();
+    }
+
+
+    /**
      * возвращает массив с константами настроек у модели
      *
      * @return array

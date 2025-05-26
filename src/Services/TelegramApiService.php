@@ -4,12 +4,45 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use CURLFile;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 
 class TelegramApiService
 {
     /**
-     * Отправляет сообщение в Telegram.
+     * Возвращает фасад запроса
+     *
+     * @return Http|PendingRequest
+     */
+    public function getHttp(): Http|PendingRequest
+    {
+        return Http::telegramOrg();
+    }
+
+
+    /**
+     * Проверяет ответ на успех
+     *
+     * @param Response $response
+     * @return void
+     */
+    public function checkResponse(Response $response): void
+    {
+        $json = $response->json();
+
+        ($response->successful() && ($json['ok'] ?? false) === true)
+            ?: throw new WithoutTelegramException(
+                "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
+                $json['error_code'] ?? $response->getStatusCode() ?? 400,
+            );
+    }
+
+
+    /**
+     * Отправляет сообщение в Telegram
      *
      * @param string $botToken Токен Telegram-бота
      * @param string $chatId   ID чата или username (например, @username)
@@ -23,37 +56,19 @@ class TelegramApiService
         string $message,
         array $options = [],
     ): ?array {
-        Http::telegram(); //?!? 
-        $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-        $params = array_merge([
+        $response = $this->getHttp()->post("bot{$botToken}/sendMessage", [
             'chat_id' => $chatId,
             'text' => $message,
-        ], $options);
+            'parse_mode' => 'HTML',
+            ...$options,
+        ]);
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            // Можно добавить логирование ошибки
-            return null;
-        }
-
-        $json = json_decode($response, true);
-
-        return ;
+        return $this->checkResponse($response);
     }
 
 
     /**
-     * Отправляет сообщение с файлом в начале сообщения.
+     * Отправляет сообщение с файлом в начале сообщения
      *
      * @param string $botToken Токен Telegram-бота
      * @param string $chatId   ID чата или username (например, @username)
@@ -69,36 +84,19 @@ class TelegramApiService
         string $message,
         array $options = [],
     ): ?array {
-        if (!file_exists($filePath)) {
-            // Можно добавить логирование ошибки
-            return null;
-        }
+        file_exists($filePath)
+            ?: throw new WithoutTelegramException("Ошибка отправки сообщения в телеграм: Файл не найден {$filePath}");
 
-        Http::telegram(); //?!? 
+        $response = $this->getHttp()
+            ->attach('document', file_get_contents($filePath), basename($filePath))
+            ->post("bot{$botToken}/sendDocument", [
+                'chat_id' => $chatId,
+                'caption' => $message,
+                // 'document' => new CURLFile($filePath),
+                'parse_mode' => 'HTML',
+                ...$options,
+            ]);
 
-        $url = "https://api.telegram.org/bot{$botToken}/sendDocument";
-        $params = array_merge([
-            'chat_id' => $chatId,
-            'caption' => $message,
-            'document' => new CURLFile($filePath),
-        ], $options);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            // Можно добавить логирование ошибки
-            return null;
-        }
-
-        return json_decode($response, true);
+        return $this->checkResponse($response);
     }
 }

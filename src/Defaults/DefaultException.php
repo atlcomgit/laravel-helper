@@ -25,7 +25,7 @@ abstract class DefaultException extends Exception
     public function render(Request $request): Response|bool
     {
         return (isDebug() || isProd() || $request->isJson())
-            ? app(DefaultExceptionRender::class)->render($request, $this)
+            ? app(DefaultExceptionHandler::class)->render($request, $this)
             : false;
     }
 

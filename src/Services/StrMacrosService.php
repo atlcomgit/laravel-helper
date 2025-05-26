@@ -1,26 +1,17 @@
 <?php
 
-namespace Atlcom\LaravelHelper\Providers;
+declare(strict_types=1);
+
+namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Helper;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
-/**
- * Подключение макросов
- */
-class LaravelHelperMacroServiceProvider extends ServiceProvider
+class StrMacrosService
 {
-    public function register(): void {}
-
-
-    public function boot(): void
+    public static function setMacros(): void
     {
-        if (!config('laravel-helper.str.macros-enabled')) {
-            return;
-        }
-
         if (method_exists(Helper::class, 'intervalBetween')) {
             /**
              * @see \Tests\Unit\Helpers\StrMacrosTest::inInterval()

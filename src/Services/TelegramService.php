@@ -31,9 +31,9 @@ final class TelegramService
      * Отправка в телеграм
      *
      * @param TelegramLogDto $dto
-     * @return bool|string
+     * @return bool
      */
-    public function sendMessage(TelegramLogDto $dto): bool|string
+    public function sendMessage(TelegramLogDto $dto): bool
     {
         if (!config('laravel-helper.telegram_log.enabled')) {
             return false;
@@ -48,10 +48,11 @@ final class TelegramService
 
         try {
             $dtoMessage = trim($dto->message ?? '', '"');
+            $attachFile = null;
 
             if (mb_strlen($dtoMessage) <= 4096 && is_file($dtoMessage) && file_exists($dtoMessage)) {
                 // Отправляем сообщение как файл
-                $response = $this->telegramApiService->sendMessageWithFile(
+                $this->telegramApiService->sendMessageWithFile(
                     $telegramBotToken,
                     $telegramChatId,
                     basename($dtoMessage),
@@ -79,25 +80,22 @@ final class TelegramService
 
                     // Отправляем часть сообщения в телеграм
                     if ($messageIndex === 1 && $hasAttachFile) {
-                        $response = $this->telegramApiService->sendMessageWithFile(
+                        $this->telegramApiService->sendMessageWithFile(
                             $telegramBotToken,
                             $telegramChatId,
                             $attachFile = $this->attachDebugData($dto),
                             $this->prepareMessage($dto, $message, $messageIndex, $messageCount),
                         );
 
-                        !is_file($attachFile) ?: unlink($attachFile);
+                        !($attachFile && is_file($attachFile)) ?: unlink($attachFile);
+                        $attachFile = null;
 
                     } else {
-                        $response = $this->telegramApiService->sendMessage(
+                        $this->telegramApiService->sendMessage(
                             $telegramBotToken,
                             $telegramChatId,
                             $this->prepareMessage($dto, $message, $messageIndex, $messageCount),
                         );
-                    }
-
-                    if (!$this->isSendOk($response)) {
-                        break;
                     }
 
                     if ($messageIndex > self::TELEGRAM_MESSAGE_MAX_COUNT) {
@@ -110,25 +108,13 @@ final class TelegramService
                 }
             }
 
+            return true;
+
         } catch (Throwable $exception) {
-            // config('laravel-helper.telegram_log.enabled', false);
+            !($attachFile && is_file($attachFile)) ?: unlink($attachFile);
 
             return false;
         }
-
-        return $this->isSendOk($response);
-    }
-
-
-    /**
-     * Возвращает результат отправки сообщения в телеграм
-     *
-     * @param TelegraphResponse $response
-     * @return bool
-     */
-    public function isSendOk(TelegraphResponse $response): bool
-    {
-        return isTesting() || $response->telegraphOk();
     }
 
 

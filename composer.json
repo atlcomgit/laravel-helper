@@ -1,6 +1,6 @@
 {
     "name": "atlcom/laravel-helper",
-    "version": "1.00",
+    "version": "1.00.5",
     "type": "library",
     "description": "Atlcom Laravel Helper library",
     "license": "MIT",
@@ -51,10 +51,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperServiceProvider",
-                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperMacroServiceProvider",
-                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperDtoServiceProvider",
-                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperExceptionServiceProvider"
+                "Atlcom\\LaravelHelper\\Providers\\LaravelHelperServiceProvider"
             ]
         }
     }

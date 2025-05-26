@@ -4,24 +4,20 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Tests;
 
-use Atlcom\LaravelHelper\Providers\LaravelHelperDtoServiceProvider;
-use Atlcom\LaravelHelper\Providers\LaravelHelperExceptionServiceProvider;
-use Atlcom\LaravelHelper\Providers\LaravelHelperMacroServiceProvider;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
-    
-
     /**
-     * @inheritDoc
+     * Подключает провайдеры к тестам
+     *
+     * @param mixed $app
+     * @return array
      */
-    protected function getPackageProviders($app) {
+    protected function getPackageProviders($app): array
+    {
         return [
             LaravelHelperServiceProvider::class,
-            LaravelHelperMacroServiceProvider::class,
-            LaravelHelperDtoServiceProvider::class,
-            LaravelHelperExceptionServiceProvider::class,
         ];
     }
 }

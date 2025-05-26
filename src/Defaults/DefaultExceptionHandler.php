@@ -105,7 +105,7 @@ class DefaultExceptionHandler extends Handler
             ], 500, [], Helper::jsonFlags());
         }
 
-        return $request->wantsJson()
+        return (true || $request->wantsJson())
             ? $response
             : parent::render($request, $exception);
     }

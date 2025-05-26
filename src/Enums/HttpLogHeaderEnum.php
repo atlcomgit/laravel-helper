@@ -15,11 +15,11 @@ enum HttpLogHeaderEnum: string
     case None = 'none';
     case Unknown = 'unknown';
     case SmsRu = 'sms.ru';
-    case MangoOffice = 'mango-office.ru';
-    case Devline = 'devline.ru';
-    case Rtspme = 'rtsp.me';
-    case FcmGoogle = 'fcm-google';
-    case Telegram = 'fcm-google';
+    case MangoOfficeRu = 'mango-office.ru';
+    case DevlineRu = 'devline.ru';
+    case RtspMe = 'rtsp.me';
+    case FcmGoogleApisCom = 'fcm-google-apis.com';
+    case TelegramOrg = 'api.telegram.org';
 
 
     /**
@@ -34,11 +34,11 @@ enum HttpLogHeaderEnum: string
             self::None => 'Отключение лога ',
             self::Unknown => 'Неизвестный запрос',
             self::SmsRu => 'Запрос на отправку смс сообщений',
-            self::MangoOffice => 'Сервис звонков',
-            self::Devline => 'Сервис видео-камер',
-            self::Rtspme => 'Сервис rtsp потока',
-            self::FcmGoogle => 'Сервис fcm google apis',
-            self::Telegram => 'Сервис telegram api',
+            self::MangoOfficeRu => 'Сервис звонков',
+            self::DevlineRu => 'Сервис видео-камер',
+            self::RtspMe => 'Сервис rtsp потока',
+            self::FcmGoogleApisCom => 'Сервис fcm google apis',
+            self::TelegramOrg => 'Сервис telegram api',
 
             default => null,
         };

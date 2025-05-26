@@ -1,14 +1,31 @@
 <?php
 
+use Illuminate\Foundation\Auth\User;
+
 /**
  * laravel-helper config
  */
 return [
     /**
-     * Str. Включение макросов хелпера
+     * Настройки вывода denug информации при ошибках
      */
-    'str' => [
-        'macros-enabled' => env('STR_MACROS_ENABLED', true),
+    'app' => [
+        'debug' => (bool)env('APP_DEBUG', false),
+        'debug_data' => (bool)env('APP_DEBUG_DATA', false),
+        'debug_trace' => (bool)env('APP_DEBUG_TRACE', false),
+        'debug_trace_vendor' => (bool)env('APP_DEBUG_TRACE_VENDOR', false),
+    ],
+
+    /**
+     * Включение макросов хелпера
+     */
+    'macros' => [
+        'str' => [
+            'enabled' => env('STR_MACROS_ENABLED', true),
+        ],
+        'http' => [
+            'enabled' => env('HTTP_MACROS_ENABLED', true),
+        ],
     ],
 
     /**
@@ -22,6 +39,16 @@ return [
         'out' => [
             'enabled' => env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
         ],
+        'user' => [
+            'table_name' => (new User())->getTable(), // Название таблицы модели User
+            'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
+            'primary_type' => match ((new User())->getKeyType()) { // Тип первичного ключа модели User
+                'int', 'integer' => 'bigInteger',
+                'string', 'uuid' => 'uuid',
+
+                default => 'text',
+            }, 
+        ],
     ],
 
     /**
@@ -29,10 +56,10 @@ return [
      */
     'telegram_log' => [
         // Вкл/Выкл отправки в телеграм
-        'enabled' => (bool)env('TELEGRAM_ENABLED', true),
+        'enabled' => (bool)env('TELEGRAM_LOG_ENABLED', true),
 
         // Токен бота
-        'token' => env('TELEGRAM_API_TOKEN', env('TELEGRAM_BOT_TOKEN')),
+        'token' => env('TELEGRAM_LOG_TOKEN'),
 
         // Настройка отправки логов информации
         'info' => [
@@ -41,7 +68,7 @@ return [
             // Telegram chat id для информации
             'chat_id' => env('TELEGRAM_INFO_CHAT_ID'),
             // Токен бота для информации
-            'token' => env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_API_TOKEN', env('TELEGRAM_BOT_TOKEN'))),
+            'token' => env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
         ],
@@ -53,7 +80,7 @@ return [
             // Telegram chat id для ошибок
             'chat_id' => env('TELEGRAM_ERROR_CHAT_ID'),
             // Токен бота для ошибок
-            'token' => env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_API_TOKEN', env('TELEGRAM_BOT_TOKEN'))),
+            'token' => env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
         ],
@@ -65,7 +92,7 @@ return [
             // Telegram chat id для предупреждений
             'chat_id' => env('TELEGRAM_WARNING_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_API_TOKEN', env('TELEGRAM_BOT_TOKEN'))),
+            'token' => env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
         ],
@@ -77,20 +104,63 @@ return [
             // Telegram chat id для предупреждений
             'chat_id' => env('TELEGRAM_DEBUG_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_API_TOKEN', env('TELEGRAM_BOT_TOKEN'))),
+            'token' => env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
         ],
     ],
 
     'http' => [
-        'smsru' => [
-            'enabled' => (bool)env('SMS_RU_ENABLED'),
-            'url' => env('SMS_RU_URL', 'https://sms.ru'),
-            'sms_ru_api_key' => env('SMS_RU_API_KEY'),
-            'sms_ru_from' => env('SMS_RU_FROM'),
-            'sms_ru_to' => env('SMS_RU_TO'),
-            'sms_ru_send_ip_address' => (bool)env('SMS_RU_SEND_IP_ADDRESS', false),
+        'smsRu' => [
+            'enabled' => (bool)env('HTTP_SMSRU_ENABLED', false),
+            'url' => env('HTTP_SMSRU_URL', 'https://sms.ru'),
+            'api_key' => env('HTTP_SMSRU_API_KEY'),
+            'from' => env('HTTP_SMSRU_FROM'),
+            'to' => env('HTTP_SMSRU_TO'),
+            'send_ip_address' => (bool)env('HTTP_SMSRU_SEND_IP_ADDRESS', false),
+        ],
+
+        'mangoOfficeRu' => [
+            'enabled' => (bool)env('HTTP_MANGOOFFICERU_ENABLED', false),
+            'url' => env('HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
+            'api_key' => env('HTTP_MANGOOFFICERU_API_KEY', ''),
+            'api_salt' => env('HTTP_MANGOOFFICERU_API_SALT', ''),
+            'webhook_token' => env('HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
+        ],
+
+        'devlineRu' => [
+            'enabled' => (bool)env('HTTP_DEVLINERU_ENABLED', false),
+            'url' => [
+                'http' => env('HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
+                'rtsp' => env('HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
+            ],
+            'timeout' => env('HTTP_DEVLINERU_TIMEOUT', 10),
+            'authorization' => env('HTTP_DEVLINERU_AUTHORIZATION', ''),
+        ],
+
+        'rtspMe' => [
+            'enabled' => (bool)env('HTTP_RTSPME_ENABLED', false),
+            'url' => env('HTTP_RTSPME_URL', 'https://rtsp.me'),
+            'timeout' => env('HTTP_RTSPME_TIMEOUT', 10),
+            'auth' => [
+                'email' => env('HTTP_RTSPME_EMAIL'),
+                'password' => env('HTTP_RTSPME_PASSWORD'),
+            ],
+            'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
+        ],
+
+        'fcmGoogleApisCom' => [
+            'enabled' => (bool)env('HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
+            'url' => env('HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
+            'firebase_credentials' => env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
+            'project_id' => env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
+            'timeout' => env('HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
+        ],
+
+        'telegramOrg' => [
+            'enabled' => (bool)env('HTTP_TELEGRAMORG_ENABLED', true),
+            'url' => env('HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
+            'timeout' => env('HTTP_TELEGRAMORG_TIMEOUT', 10),
         ],
     ],
 ];

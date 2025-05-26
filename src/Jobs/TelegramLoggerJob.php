@@ -42,7 +42,7 @@ class TelegramLoggerJob implements ShouldQueue
         $sendResult = $this->telegramService->sendMessage($this->dto);
 
         // Повторная попытка задачи
-        if (!$sendResult && $this->attempts() <= static::FAILED_REPEAT_COUNT && !isLocal()) {
+        if (isProd() && !$sendResult && $this->attempts() <= static::FAILED_REPEAT_COUNT) {
             $this->release(static::FAILED_REPEAT_DELAY);
         }
     }
