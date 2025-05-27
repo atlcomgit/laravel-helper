@@ -4,7 +4,7 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Carbon\Carbon;
-use Override;
+// use Override;
 use Throwable;
 
 class TelegramLogDto extends Dto
@@ -28,7 +28,7 @@ class TelegramLogDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function mappings(): array
     {
         return [
@@ -45,7 +45,7 @@ class TelegramLogDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function defaults(): array
     {
         try {
@@ -70,7 +70,7 @@ class TelegramLogDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function casts(): array
     {
         return [];
@@ -83,7 +83,7 @@ class TelegramLogDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onSerializing(array &$array): void
     {
         $this->excludeKeys(['timeStamp', 'debugData']);

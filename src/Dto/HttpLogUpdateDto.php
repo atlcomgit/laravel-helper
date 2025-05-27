@@ -10,7 +10,7 @@ use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Override;
+// use Override;
 
 class HttpLogUpdateDto extends Dto
 {

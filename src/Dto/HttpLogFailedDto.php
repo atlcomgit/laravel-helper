@@ -10,7 +10,7 @@ use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Override;
+// use Override;
 
 class HttpLogFailedDto extends Dto
 {
@@ -31,7 +31,7 @@ class HttpLogFailedDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function defaults(): array
     {
         return [

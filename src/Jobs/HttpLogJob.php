@@ -28,7 +28,7 @@ class HttpLogJob implements ShouldQueue
 
     public function __construct(protected HttpLogDto $httpLogDto)
     {
-        // $this->onQueue(HttpLogService::HTTP_QUEUE);
+        $this->onQueue(config('laravel-helper.http_log.queue'));
     }
 
 

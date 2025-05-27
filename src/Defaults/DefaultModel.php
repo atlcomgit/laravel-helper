@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Exception;
-use Override;
+// use Override;
 
 /**
  * Абстрактный класс модели по умолчанию
@@ -220,7 +220,7 @@ abstract class DefaultModel extends Model
      * @param string|BackedEnum|null $resourceClass
      * @return JsonResource
      */
-    #[Override()]
+    // #[Override()]
     public function toResource(string|BackedEnum|null $resourceClass = null): JsonResource
     {
         static::$resource = $resourceClass;
@@ -229,7 +229,7 @@ abstract class DefaultModel extends Model
     }
 
 
-    #[Override()]
+    // #[Override()]
     public static function guessResourceName(): array
     {
         $configResources = static::getModelConfig(static::class)[ModelConfigFilesEnum::ModelConfigResources->value];

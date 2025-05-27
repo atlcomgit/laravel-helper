@@ -21,7 +21,6 @@ use Illuminate\Support\Str;
  */
 class HttpLogService
 {
-    public const HTTP_QUEUE = 'http-log';
     public const HTTP_HEADER_UUID = 'X-UUID';
     public const HTTP_HEADER_NAME = 'X-NAME';
     public const HTTP_HEADER_TIME = 'X-TIME';
@@ -72,7 +71,11 @@ class HttpLogService
      */
     public function create(HttpLogDto $httpLogDto): void
     {
-        !$this->getUuid($httpLogDto) ?: HttpLog::create(HttpLogCreateDto::create($httpLogDto)->toArray());
+        !$this->getUuid($httpLogDto)
+            ?: HttpLog::make()
+                ->setConnection(config('laravel-helper.http_log.connection'))
+                ->setTable(config('laravel-helper.http_log.table'))
+                ->create(HttpLogCreateDto::create($httpLogDto)->toArray());
     }
 
 
@@ -87,7 +90,11 @@ class HttpLogService
         config('laravel-helper.http_log.only_response')
             ? $this->create($httpLogDto)
             : (!($uuid = $this->getUuid($httpLogDto))
-                ?: HttpLog::where('uuid', $uuid)->update(HttpLogUpdateDto::create($httpLogDto)->toArray())
+                ?: HttpLog::make()
+                    ->setConnection(config('laravel-helper.http_log.connection'))
+                    ->setTable(config('laravel-helper.http_log.table'))
+                    ->where('uuid', $uuid)
+                    ->update(HttpLogUpdateDto::create($httpLogDto)->toArray())
             );
 
         $this->telegram($httpLogDto);
@@ -108,7 +115,11 @@ class HttpLogService
                 'responseMessage' => $httpLogDto->responseMessage ?? 'Connection error',
             ]))
             : (!($uuid = $this->getUuid($httpLogDto))
-                ?: HttpLog::where('uuid', $uuid)->update(HttpLogFailedDto::create($httpLogDto)->toArray())
+                ?: HttpLog::make()
+                    ->setConnection(config('laravel-helper.http_log.connection'))
+                    ->setTable(config('laravel-helper.http_log.table'))
+                    ->where('uuid', $uuid)
+                    ->update(HttpLogFailedDto::create($httpLogDto)->toArray())
             );
 
         $this->telegram($httpLogDto);

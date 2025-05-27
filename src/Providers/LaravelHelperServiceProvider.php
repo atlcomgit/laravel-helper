@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Providers;
 
 use Atlcom\Dto;
+use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
@@ -11,6 +12,7 @@ use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\Events\ConnectionFailed;
@@ -48,7 +50,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
     }
 
 
-    public function boot(): void {
+    public function boot(): void
+    {
         // HttpLog events
         if (config('laravel-helper.http_log.out.enabled')) {
             Event::listen(RequestSending::class, HttpRequestSendingListener::class);
@@ -74,5 +77,12 @@ class LaravelHelperServiceProvider extends ServiceProvider
             ],
         ]);
 
+        // Запуск команд по расписанию
+        $this->app->booted(function () {
+            $schedule = app(Schedule::class);
+
+            // Очистка http_logs
+            $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:00');
+        });
     }
 }

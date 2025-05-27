@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User;
  */
 return [
     /**
-     * Настройки вывода denug информации при ошибках
+     * Debug. Настройки вывода debug информации при ошибках
      */
     'app' => [
         'debug' => (bool)env('APP_DEBUG', false),
@@ -17,7 +17,7 @@ return [
     ],
 
     /**
-     * Включение макросов хелпера
+     * Macro. Включение макросов хелпера
      */
     'macros' => [
         'str' => [
@@ -32,13 +32,9 @@ return [
      * HttpLog. Логирование http запросов
      */
     'http_log' => [
-        'only_response' => env('HTTP_LOG_ONLY_RESPONSE', true),
-        'in' => [
-            'enabled' => env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
-        ],
-        'out' => [
-            'enabled' => env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
-        ],
+        'queue' => env('HTTP_LOG_QUEUE', 'default'),
+        'connection' => env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => env('HTTP_LOG_TABLE', 'http_logs'),
         'user' => [
             'table_name' => (new User())->getTable(), // Название таблицы модели User
             'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
@@ -48,6 +44,13 @@ return [
 
                 default => 'text',
             }, 
+        ],
+        'only_response' => env('HTTP_LOG_ONLY_RESPONSE', true),
+        'in' => [
+            'enabled' => env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
+        ],
+        'out' => [
+            'enabled' => env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
         ],
     ],
 

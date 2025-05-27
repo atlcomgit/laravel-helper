@@ -6,7 +6,7 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Override;
+// use Override;
 
 trait ReadonlyModelTrait
 {
@@ -15,7 +15,7 @@ trait ReadonlyModelTrait
     protected $fillable = [];
 
 
-    #[Override()]
+    // #[Override()]
     public function save(array $options = [])
     {
         throw new Exception('Cannot save read-only model');
@@ -29,14 +29,14 @@ trait ReadonlyModelTrait
     }
 
 
-    #[Override()]
+    // #[Override()]
     public function update(array $attributes = [], array $options = [])
     {
         throw new Exception('Cannot update read-only model');
     }
 
 
-    #[Override()]
+    // #[Override()]
     public function delete()
     {
         throw new Exception('Cannot delete read-only model');

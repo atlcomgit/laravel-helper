@@ -15,9 +15,12 @@ return new class extends Migration {
 
     public function up(): void
     {
-        Schema::dropIfExists(self::TABLE);
+        $connection = config('laravel-helper.http_log.connection');
+        $table = config('laravel-helper.http_log.table');
 
-        Schema::create(self::TABLE, static function (Blueprint $table) {
+        Schema::connection($connection)->dropIfExists($table);
+
+        Schema::connection($connection)->create($table, function (Blueprint $table) {
             $table->id();
 
             $table->uuid('uuid')->index()
@@ -27,10 +30,12 @@ return new class extends Migration {
             $userPrimaryKeyName = config('laravel-helper.http_log.user.primary_key');
             $userPrimaryKeyType = config('laravel-helper.http_log.user.primary_type');
 
-            $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
-                ->references($userPrimaryKeyName)->on($userTableName)
-                ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Id пользователя');
+            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
+                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                    ->references($userPrimaryKeyName)->on($userTableName)
+                    ->onUpdate('cascade')->onDelete('restrict')
+                    ->comment('Id пользователя');
+            }
 
             $table->string('name')->nullable(true)->index();
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()
@@ -68,7 +73,10 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists(self::TABLE);
+        $connection = config('laravel-helper.http_log.connection');
+        $table = config('laravel-helper.http_log.table');
+
+        Schema::connection($connection)->dropIfExists($table);
     }
 
 

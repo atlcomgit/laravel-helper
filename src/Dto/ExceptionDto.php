@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Override;
+// use Override;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -146,7 +146,7 @@ class ExceptionDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function mappings(): array
     {
         return [
@@ -161,7 +161,7 @@ class ExceptionDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function defaults(): array
     {
         return [
@@ -180,7 +180,7 @@ class ExceptionDto extends Dto
      *
      * @return array
      */
-    #[Override()]
+    // #[Override()]
     protected function casts(): array
     {
         return [
@@ -196,7 +196,7 @@ class ExceptionDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onFilled(array $array): void
     {
         $this->code = match ($this->exception) {
@@ -268,7 +268,7 @@ class ExceptionDto extends Dto
      * @return void
      * @throws \Exception
      */
-    #[Override()]
+    // #[Override()]
     protected function onException(Throwable $exception): void
     {
         throw $exception; // DtoException::except('');
@@ -281,7 +281,7 @@ class ExceptionDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onSerializing(array &$array): void
     {
         $this->debugInfo->customOptions(['isTelegram' => $this->isTelegram]);

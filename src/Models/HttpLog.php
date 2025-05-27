@@ -8,14 +8,15 @@ use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\HttpLogMethodEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
+use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;
 
 /**
- * Модель: Лог.Http запрос
+ * Модель: Лог http запроса
  *
- * @see HttpLogCreateDto
- * @see HttpLogUpdateDto
+ * @see \Atlcom\LaravelHelper\Dto\HttpLogCreateDto
+ * @see \Atlcom\LaravelHelper\Dto\HttpLogUpdateDto
  * @see ./database/migrations/2025_05_26_000001_create_http_logs_table.php
  * @property int $id
  * @property string $uuid
@@ -32,25 +33,19 @@ use Illuminate\Foundation\Auth\User;
  * @property ?string $response_message
  * @property ?array $response_headers
  * @property ?string $response_data
+ * @property int|null $try_count
+ * @property array|null $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
- * @property int|null $try_count Количество попыток запроса
  * @property-read ?User $user
- * @property-read array $config
- * @property-read array $files
- * @property-read \Illuminate\Support\Collection $media
- * @property-read string|null $morph_name
- * @method static \Illuminate\Database\Eloquent\Builder|HttpLog newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|HttpLog newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|DefaultModel ofPage(int $page, int $limit, int $count)
- * @method static \Illuminate\Database\Eloquent\Builder|DefaultModel ofSort(array|string $column, string $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|HttpLog query()
- * @property mixed|null $info Информация о запросе
  * @mixin \Eloquent
  */
 class HttpLog extends DefaultModel
 {
-    protected $table = 'http_logs';
+    use DynamicTableModelTrait;
+
+    
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
     protected $casts = [
@@ -73,28 +68,13 @@ class HttpLog extends DefaultModel
     ];
 
 
-    /*
-     * ATTRIBUTES
+    /**
+     * Отношение к пользователям
+     *
+     * @return Relation
      */
-
-
-    /*
-     * MUTATORS
-     */
-
-
-    /*
-     * RELATIONS
-     */
-
-
     public function user(): Relation
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
-
-    /*
-     * SCOPES
-     */
 }

@@ -3,11 +3,12 @@
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Error;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Override;
+// use Override;
 
 class ExceptionDebugDto extends Dto
 {
@@ -22,7 +23,7 @@ class ExceptionDebugDto extends Dto
      * Скрытые свойства для сериализации
      */
     public ?array $trace;
-    public Exception|ClientException|null $throw;
+    public Exception|ClientException|Error|null $throw;
     public ?Request $request;
     public ?array $data = [];
 
@@ -33,7 +34,7 @@ class ExceptionDebugDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onFilling(array &$array): void
     {
         $ignoreFiles = [
@@ -78,7 +79,7 @@ class ExceptionDebugDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onFilled(array $array): void
     {
         !($this->throw instanceof ClientException)
@@ -92,7 +93,7 @@ class ExceptionDebugDto extends Dto
      * @param array $array
      * @return void>
      */
-    #[Override()]
+    // #[Override()]
     protected function onSerializing(array &$array): void
     {
         $isTelegram = $this->getOption('customOptions')['isTelegram'] ?? false;
@@ -126,7 +127,7 @@ class ExceptionDebugDto extends Dto
      * @param array $array
      * @return void
      */
-    #[Override()]
+    // #[Override()]
     protected function onSerialized(array &$array): void
     {
         $isTelegram = $this->getOption('customOptions')['isTelegram'] ?? false;
