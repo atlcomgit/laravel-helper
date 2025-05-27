@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
+
 // use Override;
 
 trait DynamicTableModelTrait
@@ -40,5 +42,18 @@ trait DynamicTableModelTrait
         $model->setTable($this->table);
 
         return $model;
+    }
+
+
+    /**
+     * Возвращает контруктор запроса с указанием соединения
+     *
+     * @param string $connection
+     * @param string $table
+     * @return Builder
+     */
+    public static function queryFrom(string $connection, string $table): Builder
+    {
+        return (new static())->setConnection($connection)->setTable($table)->newQuery();
     }
 }

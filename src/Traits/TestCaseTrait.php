@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Atlcom\LaravelHelper\Tests;
+namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
-use Atlcom\LaravelHelper\Traits\CreatesApplication;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-class TestCase extends BaseTestCase
+trait TestCaseTrait
 {
     use CreatesApplication;
     use RefreshDatabase;
@@ -64,8 +64,10 @@ class TestCase extends BaseTestCase
     protected function beforeRefreshingDatabase()
     {
         Config::set('app.env', env('APP_ENV'));
-        (env('APP_ENV') === self::ENV) ?: throw new WithoutTelegramException('База данных не является тестовой');
-        isTesting() ?: throw new WithoutTelegramException('Окружение не является тестовым');
+        (($appEnv = env('APP_ENV')) === self::ENV)
+            ?: throw new WithoutTelegramException("APP_ENV = {$appEnv}: не является тестовой");
+        ($isTesting = (int)isTesting())
+            ?: throw new WithoutTelegramException("isTesting() = {$isTesting}: не является тестовым");
 
         Config::set('app.debug', false);
         Config::set('app.debug_data', true);
@@ -73,7 +75,8 @@ class TestCase extends BaseTestCase
         Config::set('app.debug_trace_vendor', false);
 
         Config::set('database.default', env('DB_CONNECTION'));
-        (env('DB_CONNECTION') === self::ENV) ?: throw new WithoutTelegramException('База данных не является тестовой');
+        (($dbConnection = env('DB_CONNECTION')) === self::ENV)
+            ?: throw new WithoutTelegramException("DB_CONNECTION = {$dbConnection}: не является тестовой");
 
         Config::set('cache.default', env('CACHE_DRIVER'));
         Config::set('session.default', env('SESSION_DRIVER'));
@@ -87,5 +90,13 @@ class TestCase extends BaseTestCase
         Config::set('database.connections.pgsql', config('database.connections.testing'));
         Config::set('database.connections.sqlsrv', config('database.connections.testing'));
         Config::set('telescope.storage.database.connection', self::ENV);
+
+        $databaseTesting = 'testing';
+        switch (env('DB_CONNECTION_TESTING')) {
+            case 'pgsql':
+                DB::connection(self::ENV)->select("SELECT 1 FROM pg_database WHERE datname = ?", [$databaseTesting])
+                    ?: DB::connection(self::ENV)->statement("CREATE DATABASE \"$databaseTesting\"");
+                break;
+        }
     }
 }

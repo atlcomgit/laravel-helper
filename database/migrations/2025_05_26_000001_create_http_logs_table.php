@@ -10,9 +10,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public const TABLE = 'http_logs';
-
-
     public function up(): void
     {
         $connection = config('laravel-helper.http_log.connection');
@@ -39,10 +36,13 @@ return new class extends Migration {
 
             $table->string('name')->nullable(true)->index();
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()
+                ->default(HttpLogTypeEnum::getDefault())
                 ->comment('Тип запроса');
             $table->enum('method', HttpLogMethodEnum::enumValues())->nullable(false)->index()
+                ->default(HttpLogMethodEnum::getDefault())
                 ->comment('Метод запроса');
             $table->enum('status', HttpLogStatusEnum::enumValues())->nullable(false)->index()
+                ->default(HttpLogStatusEnum::getDefault())
                 ->comment('Статус запроса');
             $table->longText('url')->nullable(false)
                 ->comment('Url запроса');
@@ -67,6 +67,8 @@ return new class extends Migration {
 
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
+
+            $table->comment('Лог http запросов');
         });
     }
 

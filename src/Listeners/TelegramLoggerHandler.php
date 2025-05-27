@@ -98,7 +98,7 @@ class TelegramLoggerHandler extends AbstractProcessingHandler
                     uuid: $record->context['uuid'] ?? null,
                     debugData: $record->context['debugData'] ?? null,
                 ),
-                'telegram-log',
+                config('laravel-helper.telegram_log.queue'),
             );
         }
     }

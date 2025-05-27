@@ -7,13 +7,17 @@ namespace Atlcom\LaravelHelper\Enums;
 use Atlcom\Traits\HelperEnumTrait;
 use BackedEnum;
 
-enum HttpLogTypeEnum: string
+enum ModelLogTypeEnum: string
 {
     use HelperEnumTrait;
 
 
-    case In = 'in';
-    case Out = 'out';
+    case Create = 'create';
+    case Update = 'update';
+    case Delete = 'delete';
+    case SoftDelete = 'soft_delete';
+    case ForceDelete = 'force_delete';
+    case Restore = 'restore';
 
 
     /**
@@ -36,8 +40,12 @@ enum HttpLogTypeEnum: string
     public static function getLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
-            self::In => 'Входящий',
-            self::Out => 'Исходящий',
+            self::Create => 'Создано',
+            self::Update => 'Обновлено',
+            self::Delete => 'Удалено',
+            self::SoftDelete => 'Мягко удалено',
+            self::ForceDelete => 'Удалено безвозвратно',
+            self::Restore => 'Восстановлено',
 
             default => null,
         };

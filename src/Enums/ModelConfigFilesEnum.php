@@ -2,10 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Enums;
 
-use App\Domains\General\Interfaces\EnumInterface;
-use App\Domains\General\Traits\EnumTrait;
 use Atlcom\Traits\HelperEnumTrait;
-use BackedEnum;
 
 /**
  * Файловые настройки для конфигураций моделей
@@ -52,4 +49,5 @@ enum ModelConfigFilesEnum: string
     case ModelConfigFilesModifyUploadOnFront = 'modify_upload_on_front'; // модификация формата на фронте перед загрузкой
     case ModelConfigFilesModifyUploadLzw = 'modify_upload_lzw'; // сжатие файла на фронте перед загрузкой
     case ModelConfigResources = 'resources'; // ресурс модели
+
 }

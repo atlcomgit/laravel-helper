@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Providers;
 
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
@@ -83,6 +84,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
             // Очистка http_logs
             $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:00');
+
+            // Очистка model_logs
+            $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
         });
     }
 }

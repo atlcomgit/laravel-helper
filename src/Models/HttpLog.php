@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogMethodEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
+use Database\Factories\HttpLogFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;
 
@@ -39,6 +40,7 @@ use Illuminate\Foundation\Auth\User;
  * @property ?\Carbon\Carbon $updated_at
  * @property-read ?User $user
  * @method static \Illuminate\Database\Eloquent\Builder|HttpLog query()
+ * @method static \Illuminate\Database\Eloquent\Factories\Factory|HttpLogFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class HttpLog extends DefaultModel
@@ -46,6 +48,7 @@ class HttpLog extends DefaultModel
     use DynamicTableModelTrait;
 
     
+    public bool $logEnabled = false;
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
     protected $casts = [
@@ -69,7 +72,19 @@ class HttpLog extends DefaultModel
 
 
     /**
-     * Отношение к пользователям
+     * @static
+     * Возвращает экземпляр класса фабрики модели
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory|HttpLogFactory
+     */
+    protected static function newFactory(): HttpLogFactory
+    {
+        return HttpLogFactory::new();
+    }
+
+
+    /**
+     * Отношение к пользователю
      *
      * @return Relation
      */

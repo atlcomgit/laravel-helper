@@ -23,6 +23,17 @@ enum HttpLogHeaderEnum: string
 
 
     /**
+     * Возвращает вариант enum по умолчанию.
+     *
+     * @return mixed
+     */
+    public static function getDefault(): mixed
+    {
+        return self::Unknown->value;
+    }
+
+
+    /**
      * Возвращает описание ключей.
      *
      * @param BackedEnum|null $enum

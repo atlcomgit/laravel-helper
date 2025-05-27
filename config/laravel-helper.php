@@ -1,6 +1,9 @@
 <?php
 
+use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
+use Atlcom\LaravelHelper\Models\ModelLog;
 use Illuminate\Foundation\Auth\User;
+
 
 /**
  * laravel-helper config
@@ -16,6 +19,15 @@ return [
         'debug_trace_vendor' => (bool)env('APP_DEBUG_TRACE_VENDOR', false),
     ],
 
+
+    /**
+     * Testing. Авто-тестирование
+     */
+    'testing' => [
+        'email' => 'test@test.ru',
+    ],
+
+
     /**
      * Macro. Включение макросов хелпера
      */
@@ -27,6 +39,7 @@ return [
             'enabled' => env('HTTP_MACROS_ENABLED', true),
         ],
     ],
+
 
     /**
      * HttpLog. Логирование http запросов
@@ -43,7 +56,7 @@ return [
                 'string', 'uuid' => 'uuid',
 
                 default => 'text',
-            }, 
+            },
         ],
         'only_response' => env('HTTP_LOG_ONLY_RESPONSE', true),
         'in' => [
@@ -52,7 +65,34 @@ return [
         'out' => [
             'enabled' => env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
         ],
+        'cleanup_days' => env('HTTP_LOG_CLEANUP_DAYS', 7),
     ],
+
+
+    /**
+     * ModelLog. Логирование моделей
+     */
+    'model_log' => [
+        'enabled' => env('MODEL_LOG_ENABLED', false),
+        'queue' => env('MODEL_LOG_QUEUE', 'default'),
+        'connection' => env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => env('MODEL_LOG_TABLE', 'model_logs'),
+        'user' => [
+            'table_name' => (new User())->getTable(), // Название таблицы модели User
+            'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
+            'primary_type' => match ((new User())->getKeyType()) { // Тип первичного ключа модели User
+                'int', 'integer' => 'bigInteger',
+                'string', 'uuid' => 'uuid',
+
+                default => 'text',
+            },
+        ],
+        'drivers' => explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value)),
+        'model' => ModelLog::class,
+        'file' => env('MODEL_LOG_FILE', storage_path('logs/model.log')),
+        'cleanup_days' => env('MODEL_LOG_CLEANUP_DAYS', 7),
+    ],
+
 
     /**
      * TelegramLog. Логирование в телеграм
@@ -60,6 +100,7 @@ return [
     'telegram_log' => [
         // Вкл/Выкл отправки в телеграм
         'enabled' => (bool)env('TELEGRAM_LOG_ENABLED', true),
+        'queue' => env('TELEGRAM_LOG_QUEUE', 'default'),
 
         // Токен бота
         'token' => env('TELEGRAM_LOG_TOKEN'),
@@ -112,6 +153,7 @@ return [
             'cache_ttl' => env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
         ],
     ],
+
 
     'http' => [
         'smsRu' => [

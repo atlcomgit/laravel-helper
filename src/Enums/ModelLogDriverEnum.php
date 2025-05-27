@@ -7,13 +7,14 @@ namespace Atlcom\LaravelHelper\Enums;
 use Atlcom\Traits\HelperEnumTrait;
 use BackedEnum;
 
-enum HttpLogTypeEnum: string
+enum ModelLogDriverEnum: string
 {
     use HelperEnumTrait;
 
 
-    case In = 'in';
-    case Out = 'out';
+    case Database = 'database';
+    case File = 'file';
+    case Telegram = 'telegram';
 
 
     /**
@@ -23,7 +24,7 @@ enum HttpLogTypeEnum: string
      */
     public static function getDefault(): mixed
     {
-        return null;
+        return self::Database->value;
     }
 
 
@@ -36,8 +37,9 @@ enum HttpLogTypeEnum: string
     public static function getLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
-            self::In => 'Входящий',
-            self::Out => 'Исходящий',
+            self::Database => 'База данных',
+            self::File => 'Файл',
+            self::Telegram => 'Телеграм',
 
             default => null,
         };
