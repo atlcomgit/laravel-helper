@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 
 /**
+ * Фабрика логов моделей
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<ModelLog>
  */
 class ModelLogFactory extends Factory

@@ -8,10 +8,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public const TABLE = 'model_logs';
-    public const COMMENT = 'Лог моделей';
-
-
     public function up(): void
     {
         $connection = config('laravel-helper.model_log.connection');
@@ -20,8 +16,6 @@ return new class extends Migration {
         Schema::connection($connection)->dropIfExists($table);
 
         Schema::connection($connection)->create($table, function (Blueprint $table) {
-            $table->comment(self::COMMENT);
-
             $table->id();
 
             $userTableName = config('laravel-helper.http_log.user.table_name');

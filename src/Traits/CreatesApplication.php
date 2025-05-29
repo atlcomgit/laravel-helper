@@ -5,6 +5,9 @@ namespace Atlcom\LaravelHelper\Traits;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Console\Kernel;
 
+/**
+ * Трейт для создания laravel приложения в тестах
+ */
 trait CreatesApplication
 {
     /**

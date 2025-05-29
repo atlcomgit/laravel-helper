@@ -8,8 +8,10 @@ use Exception;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-// use Override;
 
+/**
+ * Dto отладочной информации исключений
+ */
 class ExceptionDebugDto extends Dto
 {
     /**

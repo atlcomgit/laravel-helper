@@ -6,13 +6,22 @@ namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
-use Atlcom\LaravelHelper\Models\HttpLog;
+use Atlcom\LaravelHelper\Services\HttpLogService;
 
+/**
+ * Консольная команда очистки логов http запросов
+ */
 class HttpLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'cleanup:http_logs';
     protected $description = 'Очистка логов http запросов';
     protected $isolated = true;
+
+
+    public function __construct(protected HttpLogService $httpLogService)
+    {
+        parent::__construct();
+    }
 
 
     /**
@@ -26,12 +35,10 @@ class HttpLogCleanupCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        $deleted = HttpLog::query()
-            ->whereDate('created_at', '<', now()->subDays(config('laravel-helper.http_log.cleanup_days')))
-            ->delete();
+        $cleanup = $this->httpLogService->cleanup(config('laravel-helper.http_log.cleanup_days'));
 
-        $this->telegramEnabled = (isLocal() || isProd()) && $deleted > 0;
-        $this->telegramComment = 'Удалено ' . Helper::stringPlural($deleted, ['запись', 'записи', 'записей']);
+        $this->telegramEnabled = (isLocal() || isProd()) && $cleanup > 0;
+        $this->telegramComment = 'Удалено ' . Helper::stringPlural($cleanup, ['записей', 'запись', 'записи']);
 
         $this->outputEol($this->telegramComment, 'fg=green');
 

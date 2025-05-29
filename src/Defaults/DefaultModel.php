@@ -9,11 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Exception;
-// use Override;
 
 /**
  * Абстрактный класс модели по умолчанию
- * @version 1.03
  *
  * @property int $id
  * @property array $config

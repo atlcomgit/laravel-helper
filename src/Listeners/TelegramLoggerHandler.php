@@ -14,6 +14,9 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Psr\Log\LogLevel;
 
+/**
+ * Обработчик логирования сообщений в телеграм
+ */
 class TelegramLoggerHandler extends AbstractProcessingHandler
 {
     public function write(LogRecord $record): void

@@ -6,8 +6,10 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Carbon\Carbon;
-// use Override;
 
+/**
+ * Dto лога модели
+ */
 class ModelLogDto extends DefaultDto
 {
     public ?string $userId;

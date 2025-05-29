@@ -19,6 +19,7 @@ abstract class DefaultCommand extends Command
     protected bool $isTest;
     protected bool $telegramEnabled = true;
     protected mixed $telegramComment = null;
+    protected ?string $outputBuffer = null;
 
 
     public function __construct()
@@ -74,6 +75,7 @@ abstract class DefaultCommand extends Command
 
         } catch (Throwable $e) {
             // app(DefaultExceptionHandler::class)->report($e);
+            //?!? сохранить в ConsoleLog через ConsoleLogJob ($this->outputBuffer)
 
             throw $e;
         }
@@ -89,6 +91,7 @@ abstract class DefaultCommand extends Command
     {
         if (!$this->isTest) {
             echo "\033\143";
+            $this->outputBuffer = '';
         }
     }
 
@@ -110,7 +113,9 @@ abstract class DefaultCommand extends Command
         );
         $message = implode(PHP_EOL, $lines);
 
-        $this->isTest ?: $this->output->write(($style ? "<$style>" : '') . $message . ($style ? '</>' : ''));
+        $this->isTest ?: $this->output->write(
+            $this->outputBuffer .= ($style ? "<$style>" : '') . $message . ($style ? '</>' : '')
+        );
     }
 
 
@@ -124,7 +129,7 @@ abstract class DefaultCommand extends Command
     {
         $this->output($message, $style);
 
-        $this->isTest ?: $this->newLine();
+        $this->isTest ?: $this->output($this->outputBuffer .= PHP_EOL);
     }
 
 

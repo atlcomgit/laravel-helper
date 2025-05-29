@@ -17,6 +17,9 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response as ResponseIn;
 use Illuminate\Http\Client\Response as ResponseOut;
 
+/**
+ * Dto лога http запроса
+ */
 class HttpLogDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;
@@ -76,8 +79,8 @@ class HttpLogDto extends Dto
             ...match (true) {
                 $request instanceof RequestIn => [
                     'name' => // $request->route()->getName() ?:
-                        class_basename($request->route()->getControllerClass())
-                        . '::' . $request->route()->getActionMethod(),
+                        class_basename($request->route()?->getControllerClass())
+                        . '::' . $request->route()?->getActionMethod(),
                     'type' => HttpLogTypeEnum::In,
                     'method' => Str::lower($request->getMethod()),
                     'url' => $request->getUri(),

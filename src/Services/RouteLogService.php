@@ -1,0 +1,94 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Atlcom\LaravelHelper\Services;
+
+use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Repositories\RouteLogRepository;
+use Illuminate\Http\Request;
+use Illuminate\Routing\RouteCollectionInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+
+/**
+ * Сервис логирования роутов
+ */
+class RouteLogService
+{
+    public function __construct(private RouteLogRepository $routeLogRepository) {}
+
+
+    /**
+     * Возвращает список зарегистрированных роутов
+     *
+     * @return RouteCollectionInterface
+     */
+    public function getRoutes(): RouteCollectionInterface
+    {
+        return Route::getRoutes();
+    }
+
+
+    /**
+     * Возвращает роут по запросу
+     *
+     * @param Request $request
+     * @return string|null
+     */
+    public function getRouteByRequest(Request $request): ?\Illuminate\Routing\Route
+    {
+        return $this->getRoutes()->match($request);
+    }
+
+
+    /**
+     * Логирование роута
+     *
+     * @param RouteLogDto $dto
+     * @return void
+     */
+    public function log(RouteLogDto $dto): void
+    {
+        $this->routeLogRepository->incrementCount($dto);
+    }
+
+
+    /**
+     * Очищает логи роутов
+     *
+     * @return int
+     */
+    public function cleanup(): int
+    {
+        if (!config('laravel-helper.route_log.enabled')) {
+            return 0;
+        }
+
+        return DB::transaction(function () {
+            /** @var \Illuminate\Routing\Route[] $routes */
+            $routes = $this->getRoutes();
+            $count = 0;
+
+            $this->routeLogRepository->setExistAll(false);
+
+            foreach ($routes as $route) {
+                foreach ($route->methods as $method) {
+                    if (!in_array($method, ['HEAD'])) {
+                        $dto = RouteLogDto::create(
+                            method: $method,
+                            uri: $route->uri,
+                            controller: class_basename($route->getControllerClass()) . '::' . $route->getActionMethod(),
+                        );
+                        $this->routeLogRepository->setExistOrCreate($dto);
+                        $count++;
+                    }
+                }
+            }
+
+            $this->routeLogRepository->deleteNotExist();
+
+            return $count;
+        });
+    }
+}

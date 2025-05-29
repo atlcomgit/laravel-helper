@@ -5,26 +5,33 @@ namespace Atlcom\LaravelHelper\Providers;
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
+use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Подключение пакета
+ * Сервис провайдер для подключения пакета laravel-helper
  */
 class LaravelHelperServiceProvider extends ServiceProvider
 {
@@ -36,6 +43,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // Миграции
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+
+        // Фабрики
+        $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
 
         // Регистрация обработчика исключений
         $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
@@ -78,15 +88,63 @@ class LaravelHelperServiceProvider extends ServiceProvider
             ],
         ]);
 
-        // Запуск команд по расписанию
-        $this->app->booted(function () {
-            $schedule = app(Schedule::class);
+        // Регистрация консольных команд
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                HttpLogCleanupCommand::class,
+                ModelLogCleanupCommand::class,
+                RouteLogCleanupCommand::class,
+            ]);
 
-            // Очистка http_logs
-            $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:00');
+            // Запуск команд по расписанию
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
 
-            // Очистка model_logs
-            $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
+                // Очистка http_logs
+                $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:00');
+
+                // Очистка model_logs
+                $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
+
+                // Очистка route_logs
+                $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
+            });
+        }
+
+
+        // Добавить middleware глобально
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(RouteLogMiddleware::class);
+
+        // Логирование очередей
+        Queue::before(function (JobProcessing $event) {
+            //?!? сохранить лог через QueueLogJob
+            // Log::channel('jobs')->info('Старт Job', [
+            //     'job' => $event->job->resolveName(),
+            //     'uuid' => $event->job->uuid(),
+            //     'queue' => $event->job->getQueue(),
+            //     'attempts' => $event->job->attempts(),
+            // ]);
+        });
+
+        Queue::after(function (JobProcessed $event) {
+            // Log::channel('jobs')->info('Завершение Job', [
+            //     'job' => $event->job->resolveName(),
+            //     'uuid' => $event->job->uuid(),
+            //     'queue' => $event->job->getQueue(),
+            //     'attempts' => $event->job->attempts(),
+            // ]);
+        });
+
+        Queue::failing(function (JobFailed $event) {
+            // Log::channel('jobs')->error('Ошибка Job', [
+            //     'job' => $event->job->resolveName(),
+            //     'uuid' => $event->job->uuid(),
+            //     'queue' => $event->job->getQueue(),
+            //     'attempts' => $event->job->attempts(),
+            //     'exception' => $event->exception->getMessage(),
+            // ]);
         });
     }
 }

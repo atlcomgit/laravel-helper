@@ -13,7 +13,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Отправка лога в телеграм через очередь
+ * Задача отправки сообщений в телеграм через очередь
  */
 class TelegramLoggerJob implements ShouldQueue
 {
@@ -37,7 +37,7 @@ class TelegramLoggerJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function __invoke()
     {
         $sendResult = $this->telegramService->sendMessage($this->dto);
 

@@ -2,9 +2,9 @@
 
 namespace Atlcom\LaravelHelper\Jobs;
 
-use Atlcom\LaravelHelper\Dto\ModelLogDto;
-use Atlcom\LaravelHelper\Events\ModelLogEvent;
-use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Events\RouteLogEvent;
+use Atlcom\LaravelHelper\Services\RouteLogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,9 +12,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Задача сохранения логирования моделей через очередь
+ * Задача сохранения логирования роутов через очередь
  */
-class ModelLogJob implements ShouldQueue
+class RouteLogJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -22,9 +22,9 @@ class ModelLogJob implements ShouldQueue
     public $tries = 1;
 
 
-    public function __construct(protected ModelLogDto $dto)
+    public function __construct(protected RouteLogDto $dto)
     {
-        $this->onQueue(config('laravel-helper.model_log.queue'));
+        $this->onQueue(config('laravel-helper.route_log.queue'));
     }
 
 
@@ -35,8 +35,8 @@ class ModelLogJob implements ShouldQueue
      */
     public function __invoke()
     {
-        app(ModelLogService::class)->log($this->dto);
+        app(RouteLogService::class)->log($this->dto);
 
-        event(new ModelLogEvent($this->dto));
+        event(new RouteLogEvent($this->dto));
     }
 }

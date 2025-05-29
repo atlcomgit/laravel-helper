@@ -6,8 +6,9 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 
-// use Override;
-
+/**
+ * Трейт для подключения динамических таблиц к модели
+ */
 trait DynamicTableModelTrait
 {
     protected $connection = null;
@@ -46,7 +47,7 @@ trait DynamicTableModelTrait
 
 
     /**
-     * Возвращает контруктор запроса с указанием соединения
+     * Возвращает конструктор запроса с указанием соединения
      *
      * @param string $connection
      * @param string $table

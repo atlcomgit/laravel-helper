@@ -5,6 +5,7 @@ namespace Atlcom\LaravelHelper\Dto;
 use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
+use Atlcom\LaravelHelper\Events\ExceptionEvent;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
@@ -25,6 +26,9 @@ use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
+/**
+ * Dto исключений
+ */
 class ExceptionDto extends Dto
 {
     /**
@@ -109,7 +113,7 @@ class ExceptionDto extends Dto
                     'debugData' => [
                         'uri' => TelegramLogDto::getMethod() . ' ' . TelegramLogDto::getUri(),
                         'controller' => $route
-                            ? class_basename($route->getControllerClass()) . '::' . $route->getActionMethod() . '()'
+                            ? class_basename($route?->getControllerClass()) . '::' . $route?->getActionMethod() . '()'
                             : null,
                         'project' => config('app.name'),
                         'env' => config('app.env'),
@@ -136,6 +140,8 @@ class ExceptionDto extends Dto
                 ],
             );
         }
+
+        event(new ExceptionEvent($thisDto));
 
         return $thisDto;
     }

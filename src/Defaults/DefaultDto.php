@@ -8,8 +8,6 @@ use Atlcom\Dto;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 
-// use Override;
-
 /**
  * Абстрактный класс для Dto
  * @abstract

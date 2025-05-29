@@ -10,12 +10,14 @@ use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-// use Override;
 
+/**
+ * Dto обновления лога http запроса
+ */
 class HttpLogUpdateDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;
-    
+
     public string $uuid;
 
     public ?HttpLogStatusEnum $status;

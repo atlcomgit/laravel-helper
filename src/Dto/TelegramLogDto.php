@@ -4,9 +4,11 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Carbon\Carbon;
-// use Override;
 use Throwable;
 
+/**
+ * Dto сообщения в телеграм
+ */
 class TelegramLogDto extends Dto
 {
     public string $chatId;
@@ -134,17 +136,17 @@ class TelegramLogDto extends Dto
                 'app.debug_trace_vendor' => config('app.debug_trace_vendor'),
             ],
             ...(
-            app()->runningInConsole()
+                app()->runningInConsole()
                 ? [
-                'arguments' => request()->server()['argv'] ?? null,
-            ]
+                    'arguments' => request()->server()['argv'] ?? null,
+                ]
                 : [
-                'server' => request()->server(),
-                'cookies' => request()->cookies?->all(),
-                'headers' => request()->headers?->all(),
-                'params' => request()->all(),
-                'files' => request()?->files->all(),
-            ]
+                    'server' => request()->server(),
+                    'cookies' => request()->cookies?->all(),
+                    'headers' => request()->headers?->all(),
+                    'params' => request()->all(),
+                    'files' => request()?->files->all(),
+                ]
             ),
             'time' => Carbon::now()->format('d.m.Y в H:i:s'),
         ];

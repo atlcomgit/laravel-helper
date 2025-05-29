@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Jobs;
 
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
+use Atlcom\LaravelHelper\Events\HttpLogEvent;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Отправка лога в телеграм через очередь
+ * Задача сохранения логирования http запросов через очередь
  */
 class HttpLogJob implements ShouldQueue
 {
@@ -23,10 +24,10 @@ class HttpLogJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $tries = 2;
+    public $tries = 1;
 
 
-    public function __construct(protected HttpLogDto $httpLogDto)
+    public function __construct(protected HttpLogDto $dto)
     {
         $this->onQueue(config('laravel-helper.http_log.queue'));
     }
@@ -37,12 +38,14 @@ class HttpLogJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(HttpLogService $httpLogService): void
+    public function __invoke(HttpLogService $httpLogService): void
     {
-        match ($this->httpLogDto->status) {
-            HttpLogStatusEnum::Process => $httpLogService->create($this->httpLogDto),
-            HttpLogStatusEnum::Success => $httpLogService->update($this->httpLogDto),
-            HttpLogStatusEnum::Failed => $httpLogService->failed($this->httpLogDto),
+        match ($this->dto->status) {
+            HttpLogStatusEnum::Process => $httpLogService->create($this->dto),
+            HttpLogStatusEnum::Success => $httpLogService->update($this->dto),
+            HttpLogStatusEnum::Failed => $httpLogService->failed($this->dto),
         };
+
+        event(new HttpLogEvent($this->dto));
     }
 }

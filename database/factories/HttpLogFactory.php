@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Str;
 
 /**
+ * Фабрика логов http запросов
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<HttpLog>
  */
 class HttpLogFactory extends Factory

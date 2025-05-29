@@ -8,6 +8,9 @@ use Atlcom\Helper;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
+/**
+ * Сервис регистрации str макросов
+ */
 class StrMacrosService
 {
     public static function setMacros(): void

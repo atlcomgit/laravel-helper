@@ -12,12 +12,11 @@ use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
-use Atlcom\LaravelHelper\Models\HttpLog;
+use Atlcom\LaravelHelper\Repositories\HttpLogRepository;
 use Illuminate\Support\Str;
 
 /**
  * Сервис логирования исходящих http запросов
- * @covers EUS
  */
 class HttpLogService
 {
@@ -54,102 +53,108 @@ class HttpLogService
     /**
      * Возвращает uuid из запроса
      *
-     * @param HttpLogDto $httpLogDto
+     * @param HttpLogDto $dto
      * @return string
      */
-    public function getUuid(HttpLogDto $httpLogDto): string
+    public function getUuid(HttpLogDto $dto): string
     {
-        return $httpLogDto->uuid ?? ($httpLogDto->request?->header(self::HTTP_HEADER_UUID) ?? [])[0] ?? null;
+        return $httpLogDto->uuid ?? ($dto->request?->header(self::HTTP_HEADER_UUID) ?? [])[0] ?? null;
     }
 
 
     /**
      * Сохраняет http запрос в таблицу лога
      *
-     * @param HttpLogDto $httpLogDto
+     * @param HttpLogDto $dto
      * @return void
      */
-    public function create(HttpLogDto $httpLogDto): void
+    public function create(HttpLogDto $dto): void
     {
-        !$this->getUuid($httpLogDto)
-            ?: HttpLog::make()
-                ->setConnection(config('laravel-helper.http_log.connection'))
-                ->setTable(config('laravel-helper.http_log.table'))
-                ->create(HttpLogCreateDto::create($httpLogDto)->toArray());
+        !$this->getUuid($dto) ?: app(HttpLogRepository::class)->create(HttpLogCreateDto::create($dto));
     }
 
 
     /**
      * Сохраняет ответ на http запрос в таблицу лога
      *
-     * @param HttpLogDto $httpLogDto
+     * @param HttpLogDto $dto
      * @return void
      */
-    public function update(HttpLogDto $httpLogDto): void
+    public function update(HttpLogDto $dto): void
     {
         config('laravel-helper.http_log.only_response')
-            ? $this->create($httpLogDto)
-            : (!($uuid = $this->getUuid($httpLogDto))
-                ?: HttpLog::make()
-                    ->setConnection(config('laravel-helper.http_log.connection'))
-                    ->setTable(config('laravel-helper.http_log.table'))
-                    ->where('uuid', $uuid)
-                    ->update(HttpLogUpdateDto::create($httpLogDto)->toArray())
+            ? $this->create($dto)
+            : (
+                !($dto->uuid = $this->getUuid($dto))
+                ?: app(HttpLogRepository::class)->update(HttpLogUpdateDto::create($dto))
             );
 
-        $this->telegram($httpLogDto);
+        $this->telegram($dto);
     }
 
 
     /**
      * Сохраняет ошибку на http запрос в таблицу лога
      *
-     * @param HttpLogDto $httpLogDto
+     * @param HttpLogDto $dto
      * @return void
      */
-    public function failed(HttpLogDto $httpLogDto): void
+    public function failed(HttpLogDto $dto): void
     {
         config('laravel-helper.http_log.only_response')
-            ? $this->create($httpLogDto->merge([
-                'responseCode' => $httpLogDto->responseCode ?? 0,
-                'responseMessage' => $httpLogDto->responseMessage ?? 'Connection error',
+            ? $this->create($dto->merge([
+                'responseCode' => $dto->responseCode ?? 0,
+                'responseMessage' => $dto->responseMessage ?? 'Connection error',
             ]))
-            : (!($uuid = $this->getUuid($httpLogDto))
-                ?: HttpLog::make()
-                    ->setConnection(config('laravel-helper.http_log.connection'))
-                    ->setTable(config('laravel-helper.http_log.table'))
-                    ->where('uuid', $uuid)
-                    ->update(HttpLogFailedDto::create($httpLogDto)->toArray())
+            : (
+                !($dto->uuid = $this->getUuid($dto))
+                ?: app(HttpLogRepository::class)->update(HttpLogFailedDto::create($dto))
             );
 
-        $this->telegram($httpLogDto);
+        $this->telegram($dto);
     }
 
 
     /**
      * Отправка сообщения в телеграм
      *
-     * @param HttpLogDto $httpLogDto
+     * @param HttpLogDto $dto
      * @return void
      */
-    public function telegram(HttpLogDto $httpLogDto): void
+    public function telegram(HttpLogDto $dto): void
     {
         !(
-            $httpLogDto->type === HttpLogTypeEnum::Out
-            && $httpLogDto->status === HttpLogStatusEnum::Failed
-            && !in_array($httpLogDto->name, [HttpLogHeaderEnum::Unknown->value])
+            $dto->type === HttpLogTypeEnum::Out
+            && $dto->status === HttpLogStatusEnum::Failed
+            && !in_array($dto->name, [HttpLogHeaderEnum::Unknown->value])
         ) ?: telegram(
             [
                 'Warning' => 'Проблема в исходящем запросе',
-                'Macro' => $httpLogDto->name,
-                'Url' => $httpLogDto->url,
-                'Code' => $httpLogDto->responseCode,
-                'Message' => $httpLogDto->responseMessage,
-                'Response' => json_decode($httpLogDto->responseData ?? '', true) ?? $httpLogDto->responseData,
-                'Info' => $httpLogDto->info,
-                'uuid' => $httpLogDto->uuid,
+                'Macro' => $dto->name,
+                'Url' => $dto->url,
+                'Code' => $dto->responseCode,
+                'Message' => $dto->responseMessage,
+                'Response' => json_decode($dto->responseData ?? '', true) ?? $dto->responseData,
+                'Info' => $dto->info,
+                'uuid' => $dto->uuid,
             ],
             TelegramTypeEnum::Warning,
         );
+    }
+
+
+    /**
+     * Очищает логи http запросов
+     *
+     * @param int $days
+     * @return int
+     */
+    public function cleanup(int $days): int
+    {
+        if (!config('laravel-helper.http_log.in.enabled') && !config('laravel-helper.http_log.out.enabled')) {
+            return 0;
+        }
+
+        return app(HttpLogRepository::class)->cleanup($days);
     }
 }

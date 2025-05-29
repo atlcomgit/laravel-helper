@@ -7,6 +7,9 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Сервис регистрации http макросов
+ */
 class HttpMacrosService
 {
     public static function setMacros(): void

@@ -2,33 +2,40 @@
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
+use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\ModelLogJob;
+use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Repositories\ModelLogRepository;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Throwable;
 
+/**
+ * Сервис логирования моделей
+ */
 class ModelLogService
 {
     public const HIDDEN_VALUE = '••••••';
 
 
-    public function __construct(protected Model $model) {}
-
-
     /**
      * Сохраняет лог модели при создании записи
      *
+     * @param Model $model
      * @return void
      */
-    public function created(): void
+    public function created(Model $model): void
     {
         $type = ModelLogTypeEnum::Create;
 
         $dto = ModelLogDto::create([
-            'modelType' => $this->model::class,
-            'modelId' => $this->model->id ?? null,
+            'modelType' => $model::class,
+            'modelId' => $model->id ?? null,
             'type' => $type,
-            'attributes' => $this->getAttributes(),
+            'attributes' => $this->getAttributes($model),
             'changes' => null,
         ]);
 
@@ -39,25 +46,26 @@ class ModelLogService
     /**
      * Сохраняет лог модели при обновлении записи
      *
+     * @param Model $model
      * @return void
      */
-    public function updated(): void
+    public function updated(Model $model): void
     {
         $type = (
-            method_exists($this->model, 'softDeleted')
-            && $this->model->deleted_at
-            && $this->model->deleted_at !== $this->model->getOriginal('deleted_at')
+            method_exists($model, 'softDeleted')
+            && $model->deleted_at
+            && $model->deleted_at !== $model->getOriginal('deleted_at')
         )
             ? ModelLogTypeEnum::SoftDelete
             : ModelLogTypeEnum::Update;
         $isSoftDelete = $type == ModelLogTypeEnum::SoftDelete;
 
         $dto = ModelLogDto::fill([
-            'modelType' => $this->model::class,
-            'modelId' => $this->model->id ?? null,
+            'modelType' => $model::class,
+            'modelId' => $model->id ?? null,
             'type' => $type,
-            'attributes' => $this->getAttributes(),
-            'changes' => $this->getChanges(),
+            'attributes' => $this->getAttributes($model),
+            'changes' => $this->getChanges($model),
         ]);
 
         !($dto->changes || $isSoftDelete) ?: $this->dispatch($dto);
@@ -67,28 +75,29 @@ class ModelLogService
     /**
      * Сохраняет лог модели при удалении записи
      *
+     * @param Model $model
      * @return void
      */
-    public function deleted(): void
+    public function deleted(Model $model): void
     {
         $type = match (true) {
-            (method_exists($this->model, 'isForceDeleting') && $this->model->isForceDeleting())
+            (method_exists($model, 'isForceDeleting') && $model->isForceDeleting())
             => ModelLogTypeEnum::ForceDelete,
 
-            method_exists($this->model, 'softDeleted')
-            && $this->model->deleted_at
-            && $this->model->deleted_at !== $this->model->getOriginal('deleted_at')
+            method_exists($model, 'softDeleted')
+            && $model->deleted_at
+            && $model->deleted_at !== $model->getOriginal('deleted_at')
             => ModelLogTypeEnum::SoftDelete,
 
             default => ModelLogTypeEnum::Delete,
         };
 
         $dto = ModelLogDto::fill([
-            'modelType' => $this->model::class,
-            'modelId' => $this->model->id ?? null,
+            'modelType' => $model::class,
+            'modelId' => $model->id ?? null,
             'type' => $type,
-            'attributes' => $this->getAttributes(),
-            'changes' => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges() : null,
+            'attributes' => $this->getAttributes($model),
+            'changes' => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges($model) : null,
         ]);
 
         $this->dispatch($dto);
@@ -98,17 +107,18 @@ class ModelLogService
     /**
      * Сохраняет лог модели при восстановлении записи
      *
+     * @param Model $model
      * @return void
      */
-    public function restored(): void
+    public function restored(Model $model): void
     {
         $type = ModelLogTypeEnum::Restore;
 
         $dto = ModelLogDto::fill([
-            'modelType' => $this->model::class,
-            'modelId' => $this->model->id ?? null,
+            'modelType' => $model::class,
+            'modelId' => $model->id ?? null,
             'type' => $type,
-            'attributes' => $this->getAttributes(),
+            'attributes' => $this->getAttributes($model),
             'changes' => null,
         ]);
 
@@ -119,19 +129,20 @@ class ModelLogService
     /**
      * Возвращает изменённые аттрибуты в модели
      *
+     * @param Model $model
      * @return array|null
      */
-    protected function getAttributes(): ?array
+    protected function getAttributes(Model $model): ?array
     {
         $result = null;
-        $excludeAttributes = property_exists($this->model, 'logExcludeAttributes')
-            ? ($this->model->logExcludeAttributes ?: [])
+        $excludeAttributes = property_exists($model, 'logExcludeAttributes')
+            ? ($model->logExcludeAttributes ?: [])
             : [];
-        $hideAttributes = property_exists($this->model, 'logHideAttributes')
-            ? ($this->model->logHideAttributes ?: [])
+        $hideAttributes = property_exists($model, 'logHideAttributes')
+            ? ($model->logHideAttributes ?: [])
             : [];
 
-        foreach ($this->model->getAttributes() as $attribute => $newValue) {
+        foreach ($model->getAttributes() as $attribute => $newValue) {
             if (!in_array($attribute, $excludeAttributes)) {
                 if (in_array($attribute, $hideAttributes)) {
                     $newValue = static::HIDDEN_VALUE;
@@ -148,21 +159,22 @@ class ModelLogService
     /**
      * Возвращает изменённые аттрибуты в модели
      *
+     * @param Model $model
      * @return array|null
      */
-    protected function getChanges(): ?array
+    protected function getChanges(Model $model): ?array
     {
         $result = null;
-        $excludeAttributes = property_exists($this->model, 'logExcludeAttributes')
-            ? ($this->model->logExcludeAttributes ?: [])
+        $excludeAttributes = property_exists($model, 'logExcludeAttributes')
+            ? ($model->logExcludeAttributes ?: [])
             : [];
-        $hideAttributes = property_exists($this->model, 'logHideAttributes')
-            ? ($this->model->logHideAttributes ?: [])
+        $hideAttributes = property_exists($model, 'logHideAttributes')
+            ? ($model->logHideAttributes ?: [])
             : [];
 
-        foreach ($this->model->getAttributes() as $attribute => $newValue) {
-            $oldValue = $this->model->getOriginal($attribute);
-            $newValue = $this->model->$attribute;
+        foreach ($model->getAttributes() as $attribute => $newValue) {
+            $oldValue = $model->getOriginal($attribute);
+            $newValue = $model->$attribute;
 
             if (!in_array($attribute, $excludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
                 if (in_array($attribute, $hideAttributes)) {
@@ -235,5 +247,72 @@ class ModelLogService
         isTesting()
             ? ModelLogJob::dispatchSync($dto)
             : ModelLogJob::dispatch($dto);
+    }
+
+
+    /**
+     * Логирование модели
+     *
+     * @param ModelLogDto $dto
+     * @return void
+     */
+    public function log(ModelLogDto $dto): void
+    {
+        $drivers = config('laravel-helper.model_log.drivers', []);
+
+        foreach ($drivers as $driver) {
+            try {
+                !is_string($driver) ?: $driver = trim($driver);
+
+                switch (ModelLogDriverEnum::enumFrom($driver)) {
+                    case ModelLogDriverEnum::File:
+                        if ($file = config('laravel-helper.model_log.file')) {
+                            file_put_contents(
+                                $file,
+                                now()->format('d-m-Y H:i:s') . ' '
+                                . json_encode($dto, Helper::jsonFlags())
+                                . PHP_EOL,
+                                FILE_APPEND,
+                            );
+                        }
+                        break;
+
+                    case ModelLogDriverEnum::Database:
+                        app(ModelLogRepository::class)->create($dto);
+                        break;
+
+                    case ModelLogDriverEnum::Telegram:
+                        throw new Exception('Драйвер не реализован');
+
+                    default:
+                        !$driver ?: throw new Exception('Драйвер лога не найден');
+                }
+
+            } catch (Throwable $e) {
+            }
+        }
+    }
+
+
+    /**
+     * Очищает логи моделей
+     *
+     * @param int $days
+     * @return int
+     */
+    public function cleanup(int $days): int
+    {
+        if (!config('laravel-helper.model_log.enabled')) {
+            return 0;
+        }
+
+        $modelLogClass = config('laravel-helper.model_log.model') ?? ModelLog::class;
+
+        return $modelLogClass::queryFrom(
+            connection: config('laravel-helper.model_log.connection'),
+            table: config('laravel-helper.model_log.table'),
+        )
+            ->whereDate('created_at', '<', now()->subDays($days))
+            ->delete();
     }
 }

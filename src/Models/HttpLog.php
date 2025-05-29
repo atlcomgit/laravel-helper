@@ -16,9 +16,12 @@ use Illuminate\Foundation\Auth\User;
 /**
  * Модель: Лог http запроса
  *
+ * @see \Atlcom\LaravelHelper\Dto\HttpLogDto
  * @see \Atlcom\LaravelHelper\Dto\HttpLogCreateDto
  * @see \Atlcom\LaravelHelper\Dto\HttpLogUpdateDto
+ * @see \Atlcom\LaravelHelper\Dto\HttpLogFailedDto
  * @see ./database/migrations/2025_05_26_000001_create_http_logs_table.php
+ * 
  * @property int $id
  * @property string $uuid
  * @property ?string $user_id
@@ -38,6 +41,7 @@ use Illuminate\Foundation\Auth\User;
  * @property array|null $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
+ * 
  * @property-read ?User $user
  * @method static \Illuminate\Database\Eloquent\Builder|HttpLog query()
  * @method static \Illuminate\Database\Eloquent\Factories\Factory|HttpLogFactory factory($count = null, $state = [])
@@ -47,7 +51,7 @@ class HttpLog extends DefaultModel
 {
     use DynamicTableModelTrait;
 
-    
+
     public bool $logEnabled = false;
     protected $primaryKey = 'id';
     protected $guarded = ['id'];

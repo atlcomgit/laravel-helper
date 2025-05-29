@@ -13,8 +13,10 @@ use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Str;
-// use Override;
 
+/**
+ * Dto создания лога http запроса
+ */
 class HttpLogCreateDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;

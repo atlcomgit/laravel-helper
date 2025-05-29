@@ -12,7 +12,7 @@ use Psr\Log\LogLevel;
 use Throwable;
 
 /**
- * Сервис обработки telegram
+ * Сервис отправки сообщений в telegram
  */
 final class TelegramService
 {

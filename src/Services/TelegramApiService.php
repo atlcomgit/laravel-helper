@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
-use CURLFile;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Сервис api telegram
+ */
 class TelegramApiService
 {
     /**
@@ -92,7 +94,6 @@ class TelegramApiService
             ->post("bot{$botToken}/sendDocument", [
                 'chat_id' => $chatId,
                 'caption' => $message,
-                // 'document' => new CURLFile($filePath),
                 'parse_mode' => 'HTML',
                 ...$options,
             ]);

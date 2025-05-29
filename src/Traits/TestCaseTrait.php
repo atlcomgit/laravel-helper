@@ -10,8 +10,10 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
+/**
+ * Трейт для подключения настройки тестов
+ */
 trait TestCaseTrait
 {
     use CreatesApplication;
@@ -96,6 +98,16 @@ trait TestCaseTrait
             case 'pgsql':
                 DB::connection(self::ENV)->select("SELECT 1 FROM pg_database WHERE datname = ?", [$databaseTesting])
                     ?: DB::connection(self::ENV)->statement("CREATE DATABASE \"$databaseTesting\"");
+                break;
+
+            case 'mysql':
+                DB::connection(self::ENV)->select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", [$databaseTesting])
+                    ?: DB::connection(self::ENV)->statement("CREATE DATABASE `$databaseTesting`");
+                break;
+
+            case 'sqlite':
+                file_exists(storage_path("{$databaseTesting}.sqlite"))
+                    ?: touch(storage_path("{$databaseTesting}.sqlite"));
                 break;
         }
     }

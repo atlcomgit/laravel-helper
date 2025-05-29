@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Логирование входящих запросов
+ * Посредник логирования входящих http запросов
  */
 class HttpLogMiddleware
 {

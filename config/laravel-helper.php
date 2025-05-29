@@ -1,7 +1,9 @@
 <?php
 
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
+use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Foundation\Auth\User;
 
 
@@ -48,6 +50,7 @@ return [
         'queue' => env('HTTP_LOG_QUEUE', 'default'),
         'connection' => env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('HTTP_LOG_TABLE', 'http_logs'),
+        'model' => HttpLog::class,
         'user' => [
             'table_name' => (new User())->getTable(), // Название таблицы модели User
             'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
@@ -77,6 +80,7 @@ return [
         'queue' => env('MODEL_LOG_QUEUE', 'default'),
         'connection' => env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('MODEL_LOG_TABLE', 'model_logs'),
+        'model' => ModelLog::class,
         'user' => [
             'table_name' => (new User())->getTable(), // Название таблицы модели User
             'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
@@ -88,9 +92,20 @@ return [
             },
         ],
         'drivers' => explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value)),
-        'model' => ModelLog::class,
         'file' => env('MODEL_LOG_FILE', storage_path('logs/model.log')),
         'cleanup_days' => env('MODEL_LOG_CLEANUP_DAYS', 7),
+    ],
+
+
+    /**
+     * RouteLog. Логирование роутов
+     */
+    'route_log' => [
+        'enabled' => env('ROUTE_LOG_ENABLED', false),
+        'queue' => env('ROUTE_LOG_QUEUE', 'default'),
+        'connection' => env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => env('ROUTE_LOG_TABLE', 'route_logs'),
+        'model' => RouteLog::class,
     ],
 
 

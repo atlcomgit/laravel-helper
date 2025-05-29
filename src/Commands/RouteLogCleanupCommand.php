@@ -6,19 +6,19 @@ namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
-use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Services\RouteLogService;
 
 /**
- * Консольная команда очистки логов моделей
+ * Консольная команда очистки логов роутов
  */
-class ModelLogCleanupCommand extends DefaultCommand
+class RouteLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'cleanup:model_logs';
-    protected $description = 'Очистка логов моделей';
+    protected $signature = 'cleanup:route_logs';
+    protected $description = 'Очистка логов роутов';
     protected $isolated = true;
 
 
-    public function __construct(protected ModelLogService $modelLogService)
+    public function __construct(protected RouteLogService $routeLogService)
     {
         parent::__construct();
     }
@@ -35,10 +35,10 @@ class ModelLogCleanupCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        $cleanup = $this->modelLogService->cleanup(config('laravel-helper.model_log.cleanup_days'));
+        $cleanup = $this->routeLogService->cleanup();
 
         $this->telegramEnabled = (isLocal() || isProd()) && $cleanup > 0;
-        $this->telegramComment = 'Удалено ' . Helper::stringPlural($cleanup, ['записей', 'запись', 'записи']);
+        $this->telegramComment = 'Зарегистрировано ' . Helper::stringPlural($cleanup, ['роутов', 'роут', 'роута']);
 
         $this->outputEol($this->telegramComment, 'fg=green');
 

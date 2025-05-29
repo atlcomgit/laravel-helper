@@ -6,8 +6,10 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Exception;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-// use Override;
 
+/**
+ * Трейт для подключения к модели только для чтения
+ */
 trait ReadonlyModelTrait
 {
     // protected $connection = 'pgsql_readonly';

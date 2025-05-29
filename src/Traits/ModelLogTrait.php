@@ -6,7 +6,7 @@ use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 
 /**
- * Трейт для логирования модели
+ * Трейт для подключения логирования модели
  * 
  * @property bool $logEnabled
  * @property array $logExcludeAttributes
@@ -29,20 +29,20 @@ trait ModelLogTrait
 
         if ($logEnabled && config('laravel-helper.model_log.enabled') && static::class !== ModelLog::class) {
             static::created(static function ($model) {
-                (new ModelLogService($model))->created();
+                (new ModelLogService())->created($model);
             });
 
             static::updated(static function ($model) {
-                (new ModelLogService($model))->updated();
+                (new ModelLogService())->updated($model);
             });
 
             static::deleted(static function ($model) {
-                (new ModelLogService($model))->deleted();
+                (new ModelLogService())->deleted($model);
             });
 
             if (method_exists(static::class, 'restored')) {
                 static::restored(static function ($model) {
-                    (new ModelLogService($model))->restored();
+                    (new ModelLogService())->restored($model);
                 });
             }
         }

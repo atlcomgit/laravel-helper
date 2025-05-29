@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\User;
  * 
  * @see \Atlcom\LaravelHelper\Dto\ModelLogDto
  * @see ./database/migrations/2025_05_27_000001_create_model_logs_table.php
+ * 
  * @property int $id
  * @property ?string $user_id
  * @property string $model_type
@@ -24,6 +25,7 @@ use Illuminate\Foundation\Auth\User;
  * @property array $attributes
  * @property ?array $changes
  * @property \Carbon\Carbon $created_at
+ * 
  * @property-read User $user
  * @method Relation|User user()
  * @property-read \Illuminate\Database\Eloquent\Model $model

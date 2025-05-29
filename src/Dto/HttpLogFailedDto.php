@@ -10,8 +10,10 @@ use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-// use Override;
 
+/**
+ * Dto ошибочного лога http запроса
+ */
 class HttpLogFailedDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;
