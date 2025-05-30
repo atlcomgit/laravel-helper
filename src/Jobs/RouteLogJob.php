@@ -2,23 +2,16 @@
 
 namespace Atlcom\LaravelHelper\Jobs;
 
+use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Events\RouteLogEvent;
 use Atlcom\LaravelHelper\Services\RouteLogService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 /**
  * Задача сохранения логирования роутов через очередь
  */
-class RouteLogJob implements ShouldQueue
+class RouteLogJob extends DefaultJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-
     public $tries = 1;
 
 

@@ -53,11 +53,11 @@ class HttpLogService
      * Возвращает uuid из запроса
      *
      * @param HttpLogDto $dto
-     * @return string
+     * @return string|null
      */
-    public function getUuid(HttpLogDto $dto): string
+    public function getUuid(HttpLogDto $dto): ?string
     {
-        return $httpLogDto->uuid ?? ($dto->request?->header(self::HTTP_HEADER_UUID) ?? [])[0] ?? null;
+        return $dto->uuid ?? (request()?->header(self::HTTP_HEADER_UUID) ?? [])[0] ?? null;
     }
 
 

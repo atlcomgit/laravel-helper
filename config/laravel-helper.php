@@ -4,6 +4,7 @@ use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Foundation\Auth\User;
 
@@ -122,6 +123,20 @@ return [
         'connection' => env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('ROUTE_LOG_TABLE', 'route_logs'),
         'model' => RouteLog::class,
+    ],
+
+
+    /**
+     * QueueLog. Логирование задач
+     */
+    'queue_log' => [
+        'enabled' => (bool)env('QUEUE_LOG_ENABLED', false),
+        'queue' => env('QUEUE_LOG_QUEUE', 'default'),
+        'connection' => env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => env('QUEUE_LOG_TABLE', 'route_logs'),
+        'model' => QueueLog::class,
+        'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
+        'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', true),
     ],
 
 

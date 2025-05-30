@@ -52,7 +52,7 @@ abstract class DefaultCommand extends Command
             $this->isTesting = isTesting();
 
             $this->consoleLogDto = ConsoleLogDto::create(
-                class: Helper::pathClassName($this::class),
+                command: Helper::pathClassName($this::class),
                 name: $this->name,
             );
 
@@ -76,6 +76,7 @@ abstract class DefaultCommand extends Command
 
         } finally {
             $info = [
+                'class' => $this::class,
                 'duration' => $duration = $this->consoleLogDto->getDuration(),
                 'memory' => $memory = $this->consoleLogDto->getMemory(),
                 'hidden' => $this->hidden,
@@ -113,7 +114,7 @@ abstract class DefaultCommand extends Command
      *
      * @return void
      */
-    public function consoleClear()
+    public function outputClear()
     {
         if (!$this->isTesting) {
             echo "\033\143";

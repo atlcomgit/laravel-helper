@@ -23,25 +23,29 @@ class ConsoleLogFactory extends Factory
     public function definition(): array
     {
         return [
+            'uuid' => uuid(),
+            'command' => fake()->word(),
             'name' => fake()->word(),
-            'command' => fake()->sentence(),
+            'cli' => fake()->sentence(),
             'output' => fake()->text(),
-            'exception' => null,
+            'result' => 0,
             'status' => fake()->randomElement(ConsoleLogStatusEnum::enumValues()),
+            'exception' => null,
+            'info' => null,
         ];
     }
 
 
     /**
-     * Задает название консольной команды
+     * Задает uuid консольной команды
      *
-     * @param string $name
+     * @param string $uuid
      * @return static
      */
-    public function withName(string $name): static
+    public function withUuid(string $uuid): static
     {
         return $this->state(fn (array $attributes): array => [
-            'name' => $name,
+            'uuid' => $uuid,
         ]);
     }
 
@@ -56,6 +60,20 @@ class ConsoleLogFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'command' => $command,
+        ]);
+    }
+
+
+    /**
+     * Задает название консольной команды
+     *
+     * @param string $name
+     * @return static
+     */
+    public function withName(string $name): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => $name,
         ]);
     }
 

@@ -19,9 +19,9 @@ use Carbon\Carbon;
 class ConsoleLogDto extends Dto
 {
     public ?string $uuid;
-    public string $class;
-    public string $name;
     public string $command;
+    public string $name;
+    public string $cli;
     public ?string $output;
     public ?int $result;
     public ConsoleLogStatusEnum $status;
@@ -45,7 +45,7 @@ class ConsoleLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'command' => implode(' ', $_SERVER['argv']),
+            'cli' => implode(' ', $_SERVER['argv']),
             'status' => ConsoleLogStatusEnum::getDefault(),
 
             'storeInterval' => config('laravel-helper.console_log.store_interval_seconds', 10),
@@ -116,7 +116,7 @@ class ConsoleLogDto extends Dto
      */
     public function store(bool $isForce = true): void
     {
-        if ($isForce || ($a = $this->storedAt->diffInSeconds()) >= $this->storeInterval) {
+        if ($isForce || $this->storedAt->diffInSeconds() >= $this->storeInterval) {
             $this->isUpdated = (bool)$this->uuid;
             $this->uuid ??= uuid();
             $this->storedAt = now();
@@ -125,7 +125,7 @@ class ConsoleLogDto extends Dto
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
 
-                
+
             is_null($this->output) ?: $this->output = '';
         }
     }

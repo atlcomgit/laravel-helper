@@ -4,26 +4,17 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Jobs;
 
+use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Events\HttpLogEvent;
 use Atlcom\LaravelHelper\Services\HttpLogService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 /**
  * Задача сохранения логирования http запросов через очередь
  */
-class HttpLogJob implements ShouldQueue
+class HttpLogJob extends DefaultJob
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
     public $tries = 1;
 
 

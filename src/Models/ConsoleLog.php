@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $uuid
- * @property string $class
- * @property string $name
  * @property string $command
+ * @property string $name
+ * @property string $cli
  * @property ?string $output
  * @property ?int $result
  * @property ConsoleLogStatusEnum $status
@@ -31,7 +31,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @method static Builder ofClass(string $class)
  * @method static Builder ofName(string $name)
- * @method static Builder ofResult(string $result)
+ * @method static Builder ofResult(int $result)
  * @method static Builder ofStatus(ConsoleLogStatusEnum $status)
  * @mixin \Eloquent
  */
@@ -44,12 +44,12 @@ class ConsoleLog extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
-        'class' => 'string',
-        'name' => 'string',
         'command' => 'string',
+        'name' => 'string',
+        'cli' => 'string',
         'output' => 'string',
-        'status' => ConsoleLogStatusEnum::class,
         'result' => 'integer',
+        'status' => ConsoleLogStatusEnum::class,
         'exception' => 'string',
         'info' => 'array',
     ];
@@ -101,15 +101,15 @@ class ConsoleLog extends DefaultModel
 
 
     /**
-     * Фильтр по class
+     * Фильтр по command
      *
      * @param Builder $query
-     * @param string $class
+     * @param string $command
      * @return Builder
      */
-    public function scopeOfClass(Builder $query, string $class): Builder
+    public function scopeOfCommand(Builder $query, string $command): Builder
     {
-        return $query->where('class', $class);
+        return $query->where('command', $command);
     }
 
 

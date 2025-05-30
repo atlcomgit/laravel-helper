@@ -2,23 +2,16 @@
 
 namespace Atlcom\LaravelHelper\Jobs;
 
+use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Events\ModelLogEvent;
 use Atlcom\LaravelHelper\Services\ModelLogService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
 /**
  * Задача сохранения логирования моделей через очередь
  */
-class ModelLogJob implements ShouldQueue
+class ModelLogJob extends DefaultJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-
     public $tries = 1;
 
 

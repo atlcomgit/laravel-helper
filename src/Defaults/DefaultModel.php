@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Exception;
 
 /**
- * Абстрактный класс модели по умолчанию
+ * Абстрактный класс моделей
  *
  * @property int $id
  * @property array $config

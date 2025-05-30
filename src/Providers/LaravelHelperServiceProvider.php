@@ -6,6 +6,7 @@ use Atlcom\Dto;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
@@ -17,6 +18,7 @@ use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
@@ -97,27 +99,27 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация консольных команд
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
                 RouteLogCleanupCommand::class,
-                ConsoleLogCleanupCommand::class,
+                QueueLogCleanupCommand::class,
             ]);
 
             // Запуск команд по расписанию
             $this->app->booted(function () {
                 $schedule = $this->app->make(Schedule::class);
 
-                // Очистка http_logs
-                $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:00');
-
-                // Очистка model_logs
-                $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
-
-                // Очистка route_logs
-                $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
-
                 // Очистка console_logs
-                $schedule->command(ConsoleLogCleanupCommand::class, ['--telegram'])->dailyAt('03:03');
+                $schedule->command(ConsoleLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
+                // Очистка http_logs
+                $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
+                // Очистка model_logs
+                $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:03');
+                // Очистка route_logs
+                $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:04');
+                // Очистка queue_logs
+                $schedule->command(QueueLogCleanupCommand::class, ['--telegram'])->dailyAt('03:05');
             });
         }
 
@@ -128,34 +130,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $kernel->prependMiddleware(HttpLogMiddleware::class);
         $kernel->prependMiddleware(RouteLogMiddleware::class);
 
-        // Логирование очередей
-        Queue::before(function (JobProcessing $event) {
-            //?!? сохранить лог через QueueLogJob
-            // Log::channel('jobs')->info('Старт Job', [
-            //     'job' => $event->job->resolveName(),
-            //     'uuid' => $event->job->uuid(),
-            //     'queue' => $event->job->getQueue(),
-            //     'attempts' => $event->job->attempts(),
-            // ]);
-        });
-
-        Queue::after(function (JobProcessed $event) {
-            // Log::channel('jobs')->info('Завершение Job', [
-            //     'job' => $event->job->resolveName(),
-            //     'uuid' => $event->job->uuid(),
-            //     'queue' => $event->job->getQueue(),
-            //     'attempts' => $event->job->attempts(),
-            // ]);
-        });
-
-        Queue::failing(function (JobFailed $event) {
-            // Log::channel('jobs')->error('Ошибка Job', [
-            //     'job' => $event->job->resolveName(),
-            //     'uuid' => $event->job->uuid(),
-            //     'queue' => $event->job->getQueue(),
-            //     'attempts' => $event->job->attempts(),
-            //     'exception' => $event->exception->getMessage(),
-            // ]);
-        });
+        // Логирование задач
+        Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
+        Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
+        Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
     }
 }

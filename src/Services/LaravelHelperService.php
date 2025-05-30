@@ -46,6 +46,12 @@ class LaravelHelperService
             && ($config[$param = 'route_log.table'] ?? null)
             && ($config[$param = 'route_log.model'] ?? null)
 
+            && ($config[$param = 'queue_log.queue'] ?? null)
+            && ($config[$param = 'queue_log.connection'] ?? null)
+            && ($config[$param = 'queue_log.table'] ?? null)
+            && ($config[$param = 'queue_log.model'] ?? null)
+            && ($config[$param = 'queue_log.cleanup_days'] ?? null)
+
             && ($config[$param = 'telegram_log.queue'] ?? null)
 
         ) ?? throw new WithoutTelegramException("Не указан параметр в конфиге: laravel-helper.{$param}");

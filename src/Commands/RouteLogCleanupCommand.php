@@ -31,7 +31,7 @@ class RouteLogCleanupCommand extends DefaultCommand
      */
     public function handle(): int
     {
-        $this->consoleClear();
+        $this->outputClear();
         $this->outputBold($this->description);
         $this->outputEol();
 

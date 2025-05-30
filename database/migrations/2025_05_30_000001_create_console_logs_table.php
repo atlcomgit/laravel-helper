@@ -23,11 +23,11 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid консольной команды');
 
-            $table->string('class')->nullable(false)->index()
-                ->comment('Класс консольной команды');
+            $table->string('command')->nullable(false)->index()
+                ->comment('Название класса консольной команды');
             $table->string('name')->nullable(false)->index()
                 ->comment('Название консольной команды');
-            $table->text('command')->nullable(false)
+            $table->text('cli')->nullable(false)
                 ->comment('Консольная команда');
             $table->longText('output')->nullable(true)
                 ->comment('Вывод консольной команды');
