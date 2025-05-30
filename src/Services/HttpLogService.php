@@ -13,7 +13,6 @@ use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Repositories\HttpLogRepository;
-use Illuminate\Support\Str;
 
 /**
  * Сервис логирования исходящих http запросов
@@ -41,7 +40,7 @@ class HttpLogService
                     self::HTTP_HEADER_TIME => '',
                 ]
                 : [
-                    self::HTTP_HEADER_UUID => Str::uuid()->toString(),
+                    self::HTTP_HEADER_UUID => uuid(),
                     self::HTTP_HEADER_NAME => $headerName->value,
                     self::HTTP_HEADER_TIME => (string)now()->getTimestampMs(),
                 ]

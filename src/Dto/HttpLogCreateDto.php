@@ -49,7 +49,7 @@ class HttpLogCreateDto extends Dto
     protected function defaults(): array
     {
         return [
-            'uuid' => Str::uuid()->toString(),
+            'uuid' => uuid(),
             'status' => HttpLogStatusEnum::getDefault(),
         ];
     }

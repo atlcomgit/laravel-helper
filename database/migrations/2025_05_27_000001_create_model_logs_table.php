@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        $connection = config('laravel-helper.model_log.connection');
-        $table = config('laravel-helper.model_log.table');
+        $connection = config($config = 'laravel-helper.model_log.connection')
+            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
+        $table = config($config = 'laravel-helper.model_log.table')
+            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);
 
@@ -50,8 +52,10 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $connection = config('laravel-helper.model_log.connection');
-        $table = config('laravel-helper.model_log.table');
+        $connection = config($config = 'laravel-helper.model_log.connection')
+            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
+        $table = config($config = 'laravel-helper.model_log.table')
+            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);
     }

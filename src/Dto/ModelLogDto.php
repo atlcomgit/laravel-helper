@@ -92,6 +92,7 @@ class ModelLogDto extends DefaultDto
     // #[Override()]
     protected function onSerializing(array &$array): void
     {
-        $this->for(ModelLog::class);
+        $this->onlyKeys(ModelLog::getModelKeys())
+            ->onlyNotNull();
     }
 }

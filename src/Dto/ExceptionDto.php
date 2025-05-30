@@ -16,9 +16,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Queue\MaxAttemptsExceededException;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-// use Override;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -175,7 +173,7 @@ class ExceptionDto extends Dto
             'status' => false,
             'message' => 'Undefined message',
             'isDebug' => isDebug(),
-            'uuid' => Str::uuid()->toString(),
+            'uuid' => uuid(),
             'isTelegram' => false,
         ];
     }

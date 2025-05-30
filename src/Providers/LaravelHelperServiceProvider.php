@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Providers;
 
 use Atlcom\Dto;
+use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
@@ -11,9 +12,11 @@ use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
+use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
@@ -63,6 +66,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Проверка параметров конфига laravel-helper
+        app(LaravelHelperService::class)->checkConfig();
+
         // HttpLog events
         if (config('laravel-helper.http_log.out.enabled')) {
             Event::listen(RequestSending::class, HttpRequestSendingListener::class);
@@ -94,6 +100,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
                 RouteLogCleanupCommand::class,
+                ConsoleLogCleanupCommand::class,
             ]);
 
             // Запуск команд по расписанию
@@ -108,6 +115,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
                 // Очистка route_logs
                 $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
+
+                // Очистка console_logs
+                $schedule->command(ConsoleLogCleanupCommand::class, ['--telegram'])->dailyAt('03:03');
             });
         }
 
@@ -115,6 +125,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Добавить middleware глобально
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(HttpLogMiddleware::class);
         $kernel->prependMiddleware(RouteLogMiddleware::class);
 
         // Логирование очередей

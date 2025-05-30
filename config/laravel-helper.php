@@ -1,6 +1,7 @@
 <?php
 
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
+use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
@@ -35,11 +36,26 @@ return [
      */
     'macros' => [
         'str' => [
-            'enabled' => env('STR_MACROS_ENABLED', true),
+            'enabled' => (bool)env('STR_MACROS_ENABLED', true),
         ],
         'http' => [
-            'enabled' => env('HTTP_MACROS_ENABLED', true),
+            'enabled' => (bool)env('HTTP_MACROS_ENABLED', true),
         ],
+    ],
+
+
+    /**
+     * ConsoleLog. Логирование консольных команд
+     */
+    'console_log' => [
+        'enabled' => (bool)env('CONSOLE_LOG_ENABLED', false),
+        'queue' => env('CONSOLE_LOG_QUEUE', 'default'),
+        'connection' => env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => env('CONSOLE_LOG_TABLE', 'route_logs'),
+        'model' => ConsoleLog::class,
+        'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
+        'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', true),
+        'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
     ],
 
 
@@ -61,14 +77,14 @@ return [
                 default => 'text',
             },
         ],
-        'only_response' => env('HTTP_LOG_ONLY_RESPONSE', true),
+        'only_response' => (bool)env('HTTP_LOG_ONLY_RESPONSE', true),
         'in' => [
-            'enabled' => env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
         ],
         'out' => [
-            'enabled' => env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
         ],
-        'cleanup_days' => env('HTTP_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HTTP_LOG_CLEANUP_DAYS', 7),
     ],
 
 
@@ -76,7 +92,7 @@ return [
      * ModelLog. Логирование моделей
      */
     'model_log' => [
-        'enabled' => env('MODEL_LOG_ENABLED', false),
+        'enabled' => (bool)env('MODEL_LOG_ENABLED', false),
         'queue' => env('MODEL_LOG_QUEUE', 'default'),
         'connection' => env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('MODEL_LOG_TABLE', 'model_logs'),
@@ -93,7 +109,7 @@ return [
         ],
         'drivers' => explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value)),
         'file' => env('MODEL_LOG_FILE', storage_path('logs/model.log')),
-        'cleanup_days' => env('MODEL_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('MODEL_LOG_CLEANUP_DAYS', 7),
     ],
 
 
@@ -101,7 +117,7 @@ return [
      * RouteLog. Логирование роутов
      */
     'route_log' => [
-        'enabled' => env('ROUTE_LOG_ENABLED', false),
+        'enabled' => (bool)env('ROUTE_LOG_ENABLED', false),
         'queue' => env('ROUTE_LOG_QUEUE', 'default'),
         'connection' => env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('ROUTE_LOG_TABLE', 'route_logs'),

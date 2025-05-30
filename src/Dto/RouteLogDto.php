@@ -56,6 +56,7 @@ class RouteLogDto extends Dto
     // #[Override()]
     protected function onSerializing(array &$array): void
     {
-        $this->for(RouteLog::class);
+        $this->onlyKeys(RouteLog::getModelKeys())
+            ->onlyNotNull();
     }
 }

@@ -7,7 +7,6 @@ use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Psr\Log\LogLevel;
 use Throwable;
 
@@ -199,7 +198,7 @@ final class TelegramService
     public function attachDebugData(TelegramLogDto $dto): string
     {
         $filePath = 'debug';
-        $fileName = "debug_data_" . ($dto->uuid ?? Str::uuid()->toString()) . ".json";
+        $fileName = "debug_data_" . ($dto->uuid ?? uuid()) . ".json";
         // mkdir($filePath, 0777, true);
         Storage::disk('local')->makeDirectory($filePath);
         $filePathFull = Storage::disk('local')->path($filePath);

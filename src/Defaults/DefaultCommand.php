@@ -3,10 +3,12 @@
 namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\Helper;
+use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-// use Override;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
@@ -16,15 +18,16 @@ use Throwable;
  */
 abstract class DefaultCommand extends Command
 {
-    protected bool $isTest;
+    protected bool $isTesting;
     protected bool $telegramEnabled = true;
     protected mixed $telegramComment = null;
     protected ?string $outputBuffer = null;
+    protected ConsoleLogDto $consoleLogDto;
 
 
     public function __construct()
     {
-        // Добавляем флаг отправки в телеграм
+        // Добавляем в команду флаг отправки в телеграм
         if (!Str::contains($this->signature, '--telegram')) {
             $this->signature .= '
                 { --telegram : Флаг отправки события в телеграм }
@@ -46,12 +49,41 @@ abstract class DefaultCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $startTime = microtime(true);
-            $startMemory = memory_get_usage();
-            $this->isTest = isTesting();
+            $this->isTesting = isTesting();
+
+            $this->consoleLogDto = ConsoleLogDto::create(
+                class: Helper::pathClassName($this::class),
+                name: $this->name,
+            );
+
+            !config('laravel-helper.console_log.store_on_start', true) ?: $this->consoleLogDto->store(true);
 
             // Запускаем команду
-            $result = parent::execute($input, $output) ?? self::SUCCESS;
+            $this->consoleLogDto->result = parent::execute($input, $output) ?? self::SUCCESS;
+            $this->consoleLogDto->status = $this->consoleLogDto->result === self::SUCCESS
+                ? ConsoleLogStatusEnum::Success
+                : ConsoleLogStatusEnum::Failed;
+
+            return $this->consoleLogDto->result;
+
+        } catch (Throwable $exception) {
+            $this->consoleLogDto->status = ConsoleLogStatusEnum::Exception;
+            $this->consoleLogDto->exception = Hlp::exceptionToString($exception);
+
+            // app(DefaultExceptionHandler::class)->report($exception);
+
+            throw $exception;
+
+        } finally {
+            $info = [
+                'duration' => $duration = $this->consoleLogDto->getDuration(),
+                'memory' => $memory = $this->consoleLogDto->getMemory(),
+                'hidden' => $this->hidden,
+                'isolated' => $this->isolated,
+                'isolated_exit_code' => $this->isolatedExitCode,
+                'aliases' => $this->aliases,
+                ...(!is_null($this->telegramComment) ? ['comment' => $this->telegramComment] : []),
+            ];
 
             // Отправляем результат в телеграм
             if (
@@ -62,22 +94,16 @@ abstract class DefaultCommand extends Command
 
                 telegram([
                     'Событие' => 'Консольная команда',
-                    'Название' => Helper::pathClassName($this::class),
+                    'Название' => $this->consoleLogDto->class,
                     'Описание' => $this->description,
-                    'Результат' => $result === self::SUCCESS ? 'Успешно' : $result,
-                    'Время' => Helper::timeSecondsToString(microtime(true) - $startTime),
-                    'Память' => Helper::sizeBytesToString(memory_get_usage() - $startMemory),
+                    'Результат' => $this->consoleLogDto->status->label(),
+                    'Время' => $duration,
+                    'Память' => $memory,
                     ...(!is_null($this->telegramComment) ? ['Комментарий' => $this->telegramComment] : []),
                 ], TelegramTypeEnum::Info);
             }
 
-            return $result;
-
-        } catch (Throwable $e) {
-            // app(DefaultExceptionHandler::class)->report($e);
-            //?!? сохранить в ConsoleLog через ConsoleLogJob ($this->outputBuffer)
-
-            throw $e;
+            $this->consoleLogDto->info($info)->store(true);
         }
     }
 
@@ -89,9 +115,9 @@ abstract class DefaultCommand extends Command
      */
     public function consoleClear()
     {
-        if (!$this->isTest) {
+        if (!$this->isTesting) {
             echo "\033\143";
-            $this->outputBuffer = '';
+            $this->consoleLogDto->output('')->store(false);
         }
     }
 
@@ -102,20 +128,27 @@ abstract class DefaultCommand extends Command
      * @param string $message
      * @return void
      */
-    public function output(string $message = '', ?string $style = ''): void
+    public function output(string $message = '', ?string $style = '', bool $withEol = false): void
     {
         $message = __($message);
 
-        $lines = explode(PHP_EOL, $message);
-        $lines = array_map(
-            fn ($line) => trim($line) . ' ',
-            $lines,
-        );
-        $message = implode(PHP_EOL, $lines);
+        // $lines = explode(PHP_EOL, $message);
+        // $lines = array_map(
+        //     fn ($line) => trim($line) . ' ',
+        //     $lines,
+        // );
+        // $message = implode(PHP_EOL, $lines);
 
-        $this->isTest ?: $this->output->write(
-            $this->outputBuffer .= ($style ? "<$style>" : '') . $message . ($style ? '</>' : '')
-        );
+        if (!$this->isTesting) {
+            $this->output->write(
+                ($style ? "<$style>" : '') . $message . ($style ? '</>' : '')
+                . ($withEol ? PHP_EOL : '')
+            );
+
+            $this->consoleLogDto->output ??= '';
+            $this->consoleLogDto->output($this->consoleLogDto->output .= $message . ($withEol ? PHP_EOL : ''))
+                ->store(false);
+        }
     }
 
 
@@ -127,9 +160,7 @@ abstract class DefaultCommand extends Command
      */
     public function outputEol(string $message = '', ?string $style = ''): void
     {
-        $this->output($message, $style);
-
-        $this->isTest ?: $this->output($this->outputBuffer .= PHP_EOL);
+        $this->output($message, $style, true);
     }
 
 
@@ -142,6 +173,6 @@ abstract class DefaultCommand extends Command
     public function outputBold(?string $message = ''): void
     {
         $message = __($message);
-        $this->output("<options=bold>{$message}</>");
+        $this->output($message, 'options=bold');
     }
 }

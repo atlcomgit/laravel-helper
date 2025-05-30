@@ -37,7 +37,7 @@ class HttpLogFailedDto extends Dto
     protected function defaults(): array
     {
         return [
-            'uuid' => Str::uuid()->toString(),
+            'uuid' => uuid(),
             'status' => HttpLogStatusEnum::Failed,
             'responseCode' => 0,
             'responseMessage' => 'Connection error',

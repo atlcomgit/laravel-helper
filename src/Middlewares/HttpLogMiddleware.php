@@ -10,7 +10,6 @@ use Atlcom\LaravelHelper\Jobs\HttpLogJob;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -24,7 +23,7 @@ class HttpLogMiddleware
 
     public function handle(Request $request, Closure $next)
     {
-        static::$uuid = config('laravel-helper.http_log.in.enabled') ? Str::uuid()->toString() : null;
+        static::$uuid = config('laravel-helper.http_log.in.enabled') ? uuid() : null;
         static::$startAt = (string)now()->getTimestampMs();
 
         !(static::$uuid && !config('laravel-helper.http_log.only_response')) ?: HttpLogJob::dispatch(

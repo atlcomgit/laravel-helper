@@ -7,7 +7,6 @@ use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\ModelLogJob;
-use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Repositories\ModelLogRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -306,13 +305,6 @@ class ModelLogService
             return 0;
         }
 
-        $modelLogClass = config('laravel-helper.model_log.model') ?? ModelLog::class;
-
-        return $modelLogClass::queryFrom(
-            connection: config('laravel-helper.model_log.connection'),
-            table: config('laravel-helper.model_log.table'),
-        )
-            ->whereDate('created_at', '<', now()->subDays($days))
-            ->delete();
+        return app(ModelLogRepository::class)->cleanup($days);
     }
 }

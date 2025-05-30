@@ -22,6 +22,9 @@ class HttpLogRepository
 
     /**
      * Создает запись лога http запроса
+     *
+     * @param HttpLogCreateDto $dto
+     * @return void
      */
     public function create(HttpLogCreateDto $dto): void
     {

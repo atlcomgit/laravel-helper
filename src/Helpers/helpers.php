@@ -232,3 +232,16 @@ if (!function_exists('ip')) {
             ?: request()->getClientIp();
     }
 }
+
+
+if (!function_exists('uuid')) {
+    /**
+     * Возвращает uuid
+     * 
+     * @return string
+     */
+    function uuid(): string
+    {
+        return (method_exists(Str::class, 'uuid7') ? Str::uuid7() : Str::uuid())->toString();
+    }
+}
