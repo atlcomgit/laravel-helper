@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 
 /**
@@ -18,7 +19,7 @@ trait ModelLogTrait
 
 
     /**
-     * Автозагрузка статических методов у модели
+     * Автозагрузка трейта
      *
      * @return void
      */
@@ -28,23 +29,7 @@ trait ModelLogTrait
         $logEnabled = property_exists($model, 'logEnabled') ? $model->logEnabled : false;
 
         if ($logEnabled && config('laravel-helper.model_log.enabled') && static::class !== ModelLog::class) {
-            static::created(static function ($model) {
-                (new ModelLogService())->created($model);
-            });
-
-            static::updated(static function ($model) {
-                (new ModelLogService())->updated($model);
-            });
-
-            static::deleted(static function ($model) {
-                (new ModelLogService())->deleted($model);
-            });
-
-            if (method_exists(static::class, 'restored')) {
-                static::restored(static function ($model) {
-                    (new ModelLogService())->restored($model);
-                });
-            }
+            static::observe(ModelLogObserver::class);
         }
     }
 }

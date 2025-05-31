@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
+use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
@@ -15,11 +16,18 @@ use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
+use Atlcom\LaravelHelper\Services\BuilderMacrosService;
+use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
+use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
+use Atlcom\LaravelHelper\Services\TelegramApiService;
+use Atlcom\LaravelHelper\Services\TelegramService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -62,7 +70,16 @@ class LaravelHelperServiceProvider extends ServiceProvider
         });
 
         // Регистрация сервисов
-        // $this->app->bind(Service::class, Service::class);
+        $this->app->singleton(LaravelHelperService::class);
+        $this->app->singleton(ModelLogService::class);
+        $this->app->singleton(ConsoleLogService::class);
+        $this->app->singleton(HttpLogService::class);
+        $this->app->singleton(QueueLogService::class);
+        $this->app->singleton(RouteLogService::class);
+        $this->app->singleton(TelegramApiService::class);
+        $this->app->singleton(TelegramService::class);
+        $this->app->singleton(QueryCacheService::class);
+        $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app));
     }
 
 
@@ -78,15 +95,12 @@ class LaravelHelperServiceProvider extends ServiceProvider
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
 
+        // Builder макросы
+        !config('laravel-helper.macros.builder.enabled') ?: BuilderMacrosService::setMacros();
         // Строковые макросы
-        if (config('laravel-helper.macros.str.enabled')) {
-            StrMacrosService::setMacros();
-        }
-
+        !config('laravel-helper.macros.str.enabled') ?: StrMacrosService::setMacros();
         // Http макросы
-        if (config('laravel-helper.macros.http.enabled')) {
-            HttpMacrosService::setMacros();
-        }
+        !config('laravel-helper.macros.http.enabled') ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
         Http::globalOptions([

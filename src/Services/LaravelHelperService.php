@@ -56,4 +56,29 @@ class LaravelHelperService
 
         ) ?? throw new WithoutTelegramException("Не указан параметр в конфиге: laravel-helper.{$param}");
     }
+
+
+    /**
+     * Проверяет массив dto на совпадение с массивом исключения laravel-helper.*.exclude
+     * Возвращает true, если совпадения найдены
+     *
+     * @param string $configKey
+     * @param array $data
+     * @return bool
+     */
+    public function checkExclude(string $configKey, array $data): bool
+    {
+        if ($exclude = config($configKey)) {
+            $data = Helper::arrayDot($data);
+            $dataCheck = [];
+
+            foreach ($data as $key => $val) {
+                $dataCheck[] = "{$key}={$val}";
+            }
+
+            return !empty(Helper::arraySearchValues($dataCheck, $exclude));
+        }
+
+        return false;
+    }
 }

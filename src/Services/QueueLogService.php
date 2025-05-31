@@ -19,7 +19,10 @@ use Illuminate\Queue\Events\JobProcessing;
  */
 class QueueLogService
 {
-    public function __construct(private QueueLogRepository $queueLogRepository) {}
+    public function __construct(
+        private QueueLogRepository $queueLogRepository,
+        private LaravelHelperService $laravelHelperService,
+    ) {}
 
 
     /**
@@ -83,6 +86,10 @@ class QueueLogService
                 'failed' => $event->job->hasFailed(),
             ],
         ]);
+
+        if ($this->laravelHelperService->checkExclude('laravel-helper.queue_log.exclude', $dto->toArray())) {
+            return;
+        }
 
         isTesting()
             ? QueueLogJob::dispatchSync($dto)

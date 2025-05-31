@@ -13,6 +13,11 @@ use Illuminate\Support\Stringable;
  */
 class StrMacrosService
 {
+    /**
+     * Добавляет макросы в строковый помощник
+     *
+     * @return void
+     */
     public static function setMacros(): void
     {
         if (method_exists(Helper::class, 'intervalBetween')) {

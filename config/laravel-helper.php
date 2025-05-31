@@ -1,5 +1,6 @@
 <?php
 
+use Atlcom\Helper;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
@@ -36,6 +37,9 @@ return [
      * Macro. Включение макросов хелпера
      */
     'macros' => [
+        'builder' => [
+            'enabled' => (bool)env('BUILDER_MACROS_ENABLED', true),
+        ],
         'str' => [
             'enabled' => (bool)env('STR_MACROS_ENABLED', true),
         ],
@@ -57,6 +61,7 @@ return [
         'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', true),
         'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
+        'exclude' => Helper::envGet('CONSOLE_LOG_EXCLUDE') ?? [],
     ],
 
 
@@ -81,11 +86,14 @@ return [
         'only_response' => (bool)env('HTTP_LOG_ONLY_RESPONSE', true),
         'in' => [
             'enabled' => (bool)env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'exclude' => Helper::envGet('HTTP_LOG_IN_EXCLUDE') ?? [],
         ],
         'out' => [
             'enabled' => (bool)env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'exclude' => Helper::envGet('HTTP_LOG_OUT_EXCLUDE') ?? [],
         ],
         'cleanup_days' => (int)env('HTTP_LOG_CLEANUP_DAYS', 7),
+        
     ],
 
 
@@ -111,6 +119,7 @@ return [
         'drivers' => explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value)),
         'file' => env('MODEL_LOG_FILE', storage_path('logs/model.log')),
         'cleanup_days' => (int)env('MODEL_LOG_CLEANUP_DAYS', 7),
+        'exclude' => Helper::envGet('MODEL_LOG_EXCLUDE') ?? [],
     ],
 
 
@@ -123,6 +132,7 @@ return [
         'connection' => env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => env('ROUTE_LOG_TABLE', 'route_logs'),
         'model' => RouteLog::class,
+        'exclude' => Helper::envGet('ROUTE_LOG_EXCLUDE') ?? [],
     ],
 
 
@@ -137,6 +147,7 @@ return [
         'model' => QueueLog::class,
         'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', true),
+        'exclude' => Helper::envGet('QUEUE_LOG_EXCLUDE') ?? [],
     ],
 
 
@@ -161,6 +172,7 @@ return [
             'token' => env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
+            'exclude' => Helper::envGet('TELEGRAM_INFO_EXCLUDE') ?? [],
         ],
 
         // Настройка отправки логов ошибок
@@ -173,6 +185,7 @@ return [
             'token' => env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
+            'exclude' => Helper::envGet('TELEGRAM_ERROR_EXCLUDE') ?? [],
         ],
 
         // Настройка отправки логов предупреждений
@@ -185,6 +198,7 @@ return [
             'token' => env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
+            'exclude' => Helper::envGet('TELEGRAM_WARNING_EXCLUDE') ?? [],
         ],
 
         // Настройка отправки логов отладки
@@ -197,6 +211,7 @@ return [
             'token' => env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
+            'exclude' => Helper::envGet('TELEGRAM_DEBUG_EXCLUDE') ?? [],
         ],
     ],
 
@@ -253,5 +268,10 @@ return [
             'url' => env('HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
             'timeout' => env('HTTP_TELEGRAMORG_TIMEOUT', 10),
         ],
+    ],
+
+    'query_cache' => [
+        'enabled' => (bool)env('QUERY_CACHE_ENABLED', false),
+        'exclude' => Helper::envGet('QUERY_CACHE_EXCLUDE') ?? [],
     ],
 ];

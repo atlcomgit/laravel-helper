@@ -46,7 +46,7 @@ class ModelLog extends DefaultModel
     public $forceDeleting = true;
     protected $casts = [
         'user_id' => 'string',
-        'model_class' => 'string',
+        'model_type' => 'string',
         'model_id' => 'string',
         'type' => ModelLogTypeEnum::class,
         'attributes' => 'array',

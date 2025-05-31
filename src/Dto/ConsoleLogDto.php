@@ -9,6 +9,7 @@ use Atlcom\Helper;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 
 /**
@@ -116,6 +117,13 @@ class ConsoleLogDto extends Dto
      */
     public function store(bool $isForce = true): void
     {
+        if (
+            !config('laravel-helper.console_log.enabled')
+            || app(LaravelHelperService::class)->checkExclude('laravel-helper.console_log.exclude', $this->toArray())
+        ) {
+            return;
+        }
+
         if ($isForce || $this->storedAt->diffInSeconds() >= $this->storeInterval) {
             $this->isUpdated = (bool)$this->uuid;
             $this->uuid ??= uuid();

@@ -243,6 +243,10 @@ class ModelLogService
      */
     public function dispatch(ModelLogDto $dto): void
     {
+        if (app(LaravelHelperService::class)->checkExclude('laravel-helper.model_log.exclude', $dto->toArray())) {
+            return;
+        }
+
         isTesting()
             ? ModelLogJob::dispatchSync($dto)
             : ModelLogJob::dispatch($dto);
@@ -287,7 +291,8 @@ class ModelLogService
                         !$driver ?: throw new Exception('Драйвер лога не найден');
                 }
 
-            } catch (Throwable $e) {
+            } catch (Throwable $exception) {
+                $this->telegram($dto, $exception);
             }
         }
     }
@@ -306,5 +311,18 @@ class ModelLogService
         }
 
         return app(ModelLogRepository::class)->cleanup($days);
+    }
+
+
+    /**
+     * Отправка сообщения в телеграм
+     *
+     * @param ModelLogDto $dto
+     * @param Throwable $exception
+     * @return void
+     */
+    public function telegram(ModelLogDto $dto, Throwable $exception): void
+    {
+        telegram($exception);
     }
 }

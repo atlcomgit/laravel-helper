@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\LaravelHelper\Enums\ModelConfigFilesEnum;
+use Atlcom\LaravelHelper\Traits\ModelCacheTrait;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ use Exception;
 abstract class DefaultModel extends Model
 {
     use ModelLogTrait;
+    use ModelCacheTrait;
     // use ModelHasFilesTrait;
 
 

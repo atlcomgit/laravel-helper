@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Middlewares;
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Jobs\HttpLogJob;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,12 +24,18 @@ class HttpLogMiddleware
 
     public function handle(Request $request, Closure $next)
     {
-        static::$uuid = config('laravel-helper.http_log.in.enabled') ? uuid() : null;
-        static::$startAt = (string)now()->getTimestampMs();
+        $dto = null;
+        if (config('laravel-helper.http_log.in.enabled')) {
+            static::$startAt = (string)now()->getTimestampMs();
+            $dto = HttpLogDto::createByRequest(static::$uuid, $request);
+            static::$uuid = app(LaravelHelperService::class)
+                ->checkExclude('laravel-helper.http_log.in.exclude', $dto->toArray())
+                ? null
+                : uuid();
+        }
 
-        !(static::$uuid && !config('laravel-helper.http_log.only_response')) ?: HttpLogJob::dispatch(
-            HttpLogDto::createByRequest(static::$uuid, $request),
-        );
+        !(static::$uuid && $dto && !config('laravel-helper.http_log.only_response'))
+            ?: HttpLogJob::dispatch($dto);
 
         return $next($request);
     }

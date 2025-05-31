@@ -4,7 +4,8 @@ namespace Atlcom\LaravelHelper\Listeners;
 
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
-use Atlcom\LaravelHelper\Jobs\TelegramLoggerJob;
+use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use DateInterval;
 use Illuminate\Support\Facades\Cache;
@@ -91,18 +92,23 @@ class TelegramLoggerHandler extends AbstractProcessingHandler
                 );
             }
 
-            !$type ?: queue(
-                TelegramLoggerJob::class,
-                TelegramLogDto::create(
-                    chatId: $chatId,
-                    title: $title,
-                    message: $message,
-                    type: $type,
-                    uuid: $record->context['uuid'] ?? null,
-                    debugData: $record->context['debugData'] ?? null,
-                ),
-                config('laravel-helper.telegram_log.queue'),
+            $dto = TelegramLogDto::create(
+                chatId: $chatId,
+                title: $title,
+                message: $message,
+                type: $type,
+                uuid: $record->context['uuid'] ?? null,
+                debugData: $record->context['debugData'] ?? null,
             );
+
+            if (
+                app(LaravelHelperService::class)
+                    ->checkExclude("laravel-helper.telegram_log.{$type}.exclude", $dto->toArray())
+            ) {
+                return;
+            }
+
+            !$type ?: queue(TelegramLogJob::class, $dto, config('laravel-helper.telegram_log.queue'));
         }
     }
 }

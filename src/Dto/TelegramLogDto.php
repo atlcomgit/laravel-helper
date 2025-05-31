@@ -51,7 +51,7 @@ class TelegramLogDto extends Dto
     protected function defaults(): array
     {
         try {
-            $user = auth()->user();
+            $user = user();
         } catch (Throwable $exception) {
             $user = null;
         }

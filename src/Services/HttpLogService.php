@@ -128,13 +128,13 @@ class HttpLogService
             && !in_array($dto->name, [HttpLogHeaderEnum::Unknown->value])
         ) ?: telegram(
             [
-                'Warning' => 'Проблема в исходящем запросе',
-                'Macro' => $dto->name,
-                'Url' => $dto->url,
-                'Code' => $dto->responseCode,
-                'Message' => $dto->responseMessage,
-                'Response' => json_decode($dto->responseData ?? '', true) ?? $dto->responseData,
-                'Info' => $dto->info,
+                'Описание' => 'Проблема в исходящем запросе',
+                'Макрос' => $dto->name,
+                'Адрес' => $dto->url,
+                'Код' => $dto->responseCode,
+                'Сообщение' => $dto->responseMessage,
+                'Ответ' => json_decode($dto->responseData ?? '', true) ?? $dto->responseData,
+                'Инфо' => $dto->info,
                 'uuid' => $dto->uuid,
             ],
             TelegramTypeEnum::Warning,

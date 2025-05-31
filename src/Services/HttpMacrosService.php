@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Http;
  */
 class HttpMacrosService
 {
+    /**
+     * Добавляет макросы в http запросы
+     *
+     * @return void
+     */
     public static function setMacros(): void
     {
         // Регистрация макроса запроса в sms.ru

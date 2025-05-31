@@ -49,7 +49,7 @@ class ModelLogDto extends DefaultDto
         static $now = now();
 
         return [
-            'userId' => auth()->user()?->id ?? null,
+            'userId' => user()?->id ?? null,
             'createdAt' => $now,
         ];
     }
@@ -93,6 +93,7 @@ class ModelLogDto extends DefaultDto
     protected function onSerializing(array &$array): void
     {
         $this->onlyKeys(ModelLog::getModelKeys())
+            ->mappingKeys($this->mappings())
             ->onlyNotNull();
     }
 }

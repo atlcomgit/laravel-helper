@@ -4,12 +4,13 @@ namespace Atlcom\LaravelHelper\Jobs;
 
 use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
+use Atlcom\LaravelHelper\Events\TelegramLogEvent;
 use Atlcom\LaravelHelper\Services\TelegramService;
 
 /**
  * Задача отправки сообщений в телеграм через очередь
  */
-class TelegramLoggerJob extends DefaultJob
+class TelegramLogJob extends DefaultJob
 {
     public const FAILED_REPEAT_COUNT = 1;
     public const FAILED_REPEAT_DELAY = 60;
@@ -35,6 +36,8 @@ class TelegramLoggerJob extends DefaultJob
         // Повторная попытка задачи
         if (isProd() && !$sendResult && $this->attempts() <= static::FAILED_REPEAT_COUNT) {
             $this->release(static::FAILED_REPEAT_DELAY);
+        } else {
+            event(new TelegramLogEvent($this->dto));
         }
     }
 

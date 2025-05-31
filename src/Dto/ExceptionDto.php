@@ -2,6 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Dto;
 
+use ArgumentCountError;
 use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
@@ -17,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\ErrorHandler\Error\FatalError;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -72,6 +74,9 @@ class ExceptionDto extends Dto
             ValidationException::class => (isDebug() || isLocal() || isTesting())
             ? Hlp::stringConcat(': ', Hlp::cacheRuntimeGet('ValidationRequest'), $exception->getMessage())
             : $exception->getMessage(),
+
+            FatalError::class,
+            ArgumentCountError::class => Hlp::stringSplit($exception->getMessage(), 'Stack trace:', 0),
 
             default => '',
         } ?: $exception->getMessage();
