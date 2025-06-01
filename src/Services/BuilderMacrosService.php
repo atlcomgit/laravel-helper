@@ -22,23 +22,23 @@ class BuilderMacrosService
         EloquentBuilder::macro('withCache', function (int|bool|null $seconds = null) {
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             /** @var int|null $seconds */
-            return $this->setWithCache($seconds);
+            return $this->setUseWithCache($seconds);
         });
 
         EloquentBuilder::macro('withoutCache', function () {
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-            return $this->setWithCache(false);
+            return $this->setUseWithCache(false);
         });
 
         QueryBuilder::macro('withCache', function (int|bool|null $seconds = null) {
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             /** @var int|null $seconds */
-            return $this->setWithCache($seconds);
+            return $this->setUseWithCache($seconds);
         });
 
         QueryBuilder::macro('withoutCache', function () {
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-            return $this->setWithCache(false);
+            return $this->setUseWithCache(false);
         });
     }
 }

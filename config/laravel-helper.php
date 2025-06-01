@@ -8,7 +8,6 @@ use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -272,7 +271,8 @@ return [
     ],
 
     'query_cache' => [
-        'enabled' => (bool)env('QUERY_CACHE_ENABLED', false),
+        'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
+        'ttl' => Helper::castToInt(env('QUERY_CACHE_TTL', 3600)),
         'exclude' => (array)(Helper::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 ];

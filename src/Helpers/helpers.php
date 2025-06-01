@@ -6,7 +6,8 @@ use Atlcom\LaravelHelper\Dto\ExceptionDto;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Listeners\TelegramLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 
 if (!function_exists('isDebug')) {
@@ -129,28 +130,30 @@ if (!function_exists('sql')) {
     /**
      * Ставит job в очередь и запускает её
      *
-     * @param Builder $queryBuilder
+     * @param EloquentBuilder|QueryBuilder $builder
      * @return string
      */
-    function sql(Builder $queryBuilder): string
+    function sql(EloquentBuilder|QueryBuilder $builder): string
     {
-        return str_replace(
-            ['"', "\'"],
-            ['', "'"],
-            vsprintf(
-                str_replace('?', '%s', $queryBuilder->toSql()),
-                collect($queryBuilder->getBindings())->map(
-                    fn ($binding) => match (true) {
-                        is_null($binding) => 'null',
-                        is_bool($binding) => $binding ? '1' : '0',
-                        is_numeric($binding) => $binding,
-                        is_string($binding) => addslashes("'{$binding}'"),
+        return method_exists($builder, 'toRawSql')
+            ? $builder->toRawSql()
+            : Helper::stringReplace(
+                vsprintf(
+                    Helper::stringReplace($builder->toSql(), ['?' => '%s']),
+                    collect($builder->getBindings())->map(
+                        fn ($binding) => match (true) {
+                            is_null($binding) => 'null',
+                            is_bool($binding) => $binding ? '1' : '0',
+                            is_numeric($binding) => $binding,
+                            is_string($binding) => addslashes("'{$binding}'"),
 
-                        default => $binding,
-                    }
-                )->toArray(),
-            ),
-        );
+                            default => $binding,
+                        }
+                    )->toArray(),
+                ),
+                ['"' => '', "\'" => "'"],
+
+            );
     }
 }
 

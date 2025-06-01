@@ -62,11 +62,9 @@ trait ConnectionTrait
     // #[Override()]
     public function update($query, $bindings = [])
     {
-        //?!? проверить кеш
-
         $result = parent::update($query, $bindings);
 
-        //?!? сохранить кеш
+        //?!? сбросить кеш
 
         return $result;
     }
@@ -84,11 +82,9 @@ trait ConnectionTrait
     // #[Override()]
     public function delete($query, $bindings = [])
     {
-        //?!? проверить кеш
-
         $result = parent::delete($query, $bindings);
 
-        //?!? сохранить кеш
+        //?!? сбросить кеш
 
         return $result;
     }
@@ -106,11 +102,11 @@ trait ConnectionTrait
     // #[Override()]
     public function statement($query, $bindings = [])
     {
-        //?!? проверить кеш
+        //?!? если есть SELECT то проверить кеш
 
         $result = parent::statement($query, $bindings);
 
-        //?!? сохранить кеш
+        //?!? если есть INSERT, UPDATE, DELETE то сбросить кеш
 
         return $result;
     }

@@ -4,7 +4,6 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
-use Atlcom\LaravelHelper\Services\ModelLogService;
 
 /**
  * Трейт для подключения логирования модели

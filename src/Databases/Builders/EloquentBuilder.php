@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Databases\Builders;
 
-use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Traits\BuilderCacheTrait;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Переопределенный конструктор запросов Query Builder
@@ -19,23 +20,50 @@ class EloquentBuilder extends Builder
 {
     use BuilderCacheTrait;
 
-    
+
     /**
      * @override
-     * Выполняет запрос как оператор «select»
+     * Выполняет запрос как оператор «select» с использованием кеша
      * @see parent::get()
      *
      * @param  array|string  $columns
-     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
+     * @return Collection<int, TModel>
      */
     // #[Override()]
-    public function get($columns = ['*'])
+    public function get($columns = ['*']): Collection
     {
-        //?!? проверить кеш
+        return $this->getWithCache($columns);
+    }
 
-        $result = parent::get($columns);
 
-        //?!? сохранить кеш
+    //?!? delete
+    /**
+     * @override
+     * Выполняет запрос и возвращает первую запись с использованием кеша
+     * @see parent::first()
+     *
+     * @param  array|string  $columns
+     * @return TValue|null
+     */
+    // #[Override()]
+    // public function first($columns = ['*']): ?Model
+    // {
+    //     return $this->firstWithCache($columns);
+    // }
+
+
+    /**
+     * @override
+     * Вставляет новые записи в базу данных
+     * @see parent::insert()
+     *
+     * @return bool
+     */
+    public function insert(array $values)
+    {
+        $result = parent::insert($values);
+
+        $this->flushCache();
 
         return $result;
     }
@@ -43,20 +71,34 @@ class EloquentBuilder extends Builder
 
     /**
      * @override
-     * Выполняет запрос и возвращает первую запись
-     * @see parent::first()
+     * Обновляет записи в базе данных
+     * @see parent::update()
      *
-     * @param  array|string  $columns
-     * @return TValue|null
+     * @param  array  $values
+     * @return int
      */
-    // #[Override()]
-    public function first($columns = ['*'])
+    public function update(array $values)
     {
-        //?!? проверить кеш
-        // dd($this->getModels());
-        $result = parent::first($columns);
+        $result = parent::update($values);
 
-        //?!? сохранить кеш
+        $this->flushCache();
+
+        return $result;
+    }
+
+
+    /**
+     * @override
+     * Удаляет записи из базы данных
+     * @see parent::delete()
+     *
+     * @return mixed
+     */
+    public function delete()
+    {
+        $result = parent::delete();
+
+        $this->flushCache();
 
         return $result;
     }
