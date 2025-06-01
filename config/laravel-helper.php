@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -54,14 +55,14 @@ return [
      */
     'console_log' => [
         'enabled' => (bool)env('CONSOLE_LOG_ENABLED', false),
-        'queue' => env('CONSOLE_LOG_QUEUE', 'default'),
-        'connection' => env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
-        'table' => env('CONSOLE_LOG_TABLE', 'route_logs'),
+        'queue' => (string)env('CONSOLE_LOG_QUEUE', 'default'),
+        'connection' => (string)env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('CONSOLE_LOG_TABLE', 'helper_route_logs'),
         'model' => ConsoleLog::class,
         'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', true),
         'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
-        'exclude' => Helper::envGet('CONSOLE_LOG_EXCLUDE') ?? [],
+        'exclude' => (array)(Helper::envGet('CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -69,14 +70,14 @@ return [
      * HttpLog. Логирование http запросов
      */
     'http_log' => [
-        'queue' => env('HTTP_LOG_QUEUE', 'default'),
-        'connection' => env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
-        'table' => env('HTTP_LOG_TABLE', 'http_logs'),
+        'queue' => (string)env('HTTP_LOG_QUEUE', 'default'),
+        'connection' => (string)env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('HTTP_LOG_TABLE', 'helper_http_logs'),
         'model' => HttpLog::class,
         'user' => [
-            'table_name' => (new User())->getTable(), // Название таблицы модели User
-            'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
-            'primary_type' => match ((new User())->getKeyType()) { // Тип первичного ключа модели User
+            'table_name' => (string)(new User())->getTable(), // Название таблицы модели User
+            'primary_key' => (string)(new User())->getKeyName(), // Название первичного ключа модели User
+            'primary_type' => (string)match ((new User())->getKeyType()) { // Тип первичного ключа модели User
                 'int', 'integer' => 'bigInteger',
                 'string', 'uuid' => 'uuid',
 
@@ -86,14 +87,14 @@ return [
         'only_response' => (bool)env('HTTP_LOG_ONLY_RESPONSE', true),
         'in' => [
             'enabled' => (bool)env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
-            'exclude' => Helper::envGet('HTTP_LOG_IN_EXCLUDE') ?? [],
+            'exclude' => (array)(Helper::envGet('HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
         ],
         'out' => [
             'enabled' => (bool)env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
-            'exclude' => Helper::envGet('HTTP_LOG_OUT_EXCLUDE') ?? [],
+            'exclude' => (array)(Helper::envGet('HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
         ],
         'cleanup_days' => (int)env('HTTP_LOG_CLEANUP_DAYS', 7),
-        
+
     ],
 
 
@@ -102,24 +103,24 @@ return [
      */
     'model_log' => [
         'enabled' => (bool)env('MODEL_LOG_ENABLED', false),
-        'queue' => env('MODEL_LOG_QUEUE', 'default'),
-        'connection' => env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
-        'table' => env('MODEL_LOG_TABLE', 'model_logs'),
+        'queue' => (string)env('MODEL_LOG_QUEUE', 'default'),
+        'connection' => (string)env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('MODEL_LOG_TABLE', 'helper_model_logs'),
         'model' => ModelLog::class,
         'user' => [
-            'table_name' => (new User())->getTable(), // Название таблицы модели User
-            'primary_key' => (new User())->getKeyName(), // Название первичного ключа модели User
-            'primary_type' => match ((new User())->getKeyType()) { // Тип первичного ключа модели User
+            'table_name' => (string)(new User())->getTable(), // Название таблицы модели User
+            'primary_key' => (string)(new User())->getKeyName(), // Название первичного ключа модели User
+            'primary_type' => (string)match ((new User())->getKeyType()) { // Тип первичного ключа модели User
                 'int', 'integer' => 'bigInteger',
                 'string', 'uuid' => 'uuid',
 
                 default => 'text',
             },
         ],
-        'drivers' => explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value)),
-        'file' => env('MODEL_LOG_FILE', storage_path('logs/model.log')),
+        'drivers' => (array)(explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value))),
+        'file' => (string)env('MODEL_LOG_FILE', storage_path('logs/model.log')),
         'cleanup_days' => (int)env('MODEL_LOG_CLEANUP_DAYS', 7),
-        'exclude' => Helper::envGet('MODEL_LOG_EXCLUDE') ?? [],
+        'exclude' => (array)(Helper::envGet('MODEL_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -128,11 +129,11 @@ return [
      */
     'route_log' => [
         'enabled' => (bool)env('ROUTE_LOG_ENABLED', false),
-        'queue' => env('ROUTE_LOG_QUEUE', 'default'),
-        'connection' => env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
-        'table' => env('ROUTE_LOG_TABLE', 'route_logs'),
+        'queue' => (string)env('ROUTE_LOG_QUEUE', 'default'),
+        'connection' => (string)env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('ROUTE_LOG_TABLE', 'helper_route_logs'),
         'model' => RouteLog::class,
-        'exclude' => Helper::envGet('ROUTE_LOG_EXCLUDE') ?? [],
+        'exclude' => (array)(Helper::envGet('ROUTE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -141,13 +142,13 @@ return [
      */
     'queue_log' => [
         'enabled' => (bool)env('QUEUE_LOG_ENABLED', false),
-        'queue' => env('QUEUE_LOG_QUEUE', 'default'),
-        'connection' => env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
-        'table' => env('QUEUE_LOG_TABLE', 'route_logs'),
+        'queue' => (string)env('QUEUE_LOG_QUEUE', 'default'),
+        'connection' => (string)env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('QUEUE_LOG_TABLE', 'helper_route_logs'),
         'model' => QueueLog::class,
         'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', true),
-        'exclude' => Helper::envGet('QUEUE_LOG_EXCLUDE') ?? [],
+        'exclude' => (array)(Helper::envGet('QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -157,22 +158,22 @@ return [
     'telegram_log' => [
         // Вкл/Выкл отправки в телеграм
         'enabled' => (bool)env('TELEGRAM_LOG_ENABLED', true),
-        'queue' => env('TELEGRAM_LOG_QUEUE', 'default'),
+        'queue' => (string)env('TELEGRAM_LOG_QUEUE', 'default'),
 
         // Токен бота
-        'token' => env('TELEGRAM_LOG_TOKEN'),
+        'token' => (string)env('TELEGRAM_LOG_TOKEN'),
 
         // Настройка отправки логов информации
         'info' => [
             // Вкл/Выкл отправки информации
             'enabled' => (bool)env('TELEGRAM_INFO_ENABLED', true),
             // Telegram chat id для информации
-            'chat_id' => env('TELEGRAM_INFO_CHAT_ID'),
+            'chat_id' => (string)env('TELEGRAM_INFO_CHAT_ID'),
             // Токен бота для информации
-            'token' => env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
-            'exclude' => Helper::envGet('TELEGRAM_INFO_EXCLUDE') ?? [],
+            'cache_ttl' => (string)env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
+            'exclude' => (array)(Helper::envGet('TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов ошибок
@@ -180,12 +181,12 @@ return [
             // Вкл/Выкл отправки ошибок
             'enabled' => (bool)env('TELEGRAM_ERROR_ENABLED', true),
             // Telegram chat id для ошибок
-            'chat_id' => env('TELEGRAM_ERROR_CHAT_ID'),
+            'chat_id' => (string)env('TELEGRAM_ERROR_CHAT_ID'),
             // Токен бота для ошибок
-            'token' => env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
-            'exclude' => Helper::envGet('TELEGRAM_ERROR_EXCLUDE') ?? [],
+            'cache_ttl' => (string)env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
+            'exclude' => (array)(Helper::envGet('TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов предупреждений
@@ -193,12 +194,12 @@ return [
             // Вкл/Выкл отправки предупреждений
             'enabled' => (bool)env('TELEGRAM_WARNING_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => env('TELEGRAM_WARNING_CHAT_ID'),
+            'chat_id' => (string)env('TELEGRAM_WARNING_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
-            'exclude' => Helper::envGet('TELEGRAM_WARNING_EXCLUDE') ?? [],
+            'cache_ttl' => (string)env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Helper::envGet('TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов отладки
@@ -206,12 +207,12 @@ return [
             // Вкл/Выкл отправки предупреждений
             'enabled' => (bool)env('TELEGRAM_DEBUG_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => env('TELEGRAM_DEBUG_CHAT_ID'),
+            'chat_id' => (string)env('TELEGRAM_DEBUG_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
-            'exclude' => Helper::envGet('TELEGRAM_DEBUG_EXCLUDE') ?? [],
+            'cache_ttl' => (string)env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Helper::envGet('TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
     ],
 
@@ -219,59 +220,59 @@ return [
     'http' => [
         'smsRu' => [
             'enabled' => (bool)env('HTTP_SMSRU_ENABLED', false),
-            'url' => env('HTTP_SMSRU_URL', 'https://sms.ru'),
-            'api_key' => env('HTTP_SMSRU_API_KEY'),
-            'from' => env('HTTP_SMSRU_FROM'),
-            'to' => env('HTTP_SMSRU_TO'),
+            'url' => (string)env('HTTP_SMSRU_URL', 'https://sms.ru'),
+            'api_key' => (string)env('HTTP_SMSRU_API_KEY'),
+            'from' => (string)env('HTTP_SMSRU_FROM'),
+            'to' => (string)env('HTTP_SMSRU_TO'),
             'send_ip_address' => (bool)env('HTTP_SMSRU_SEND_IP_ADDRESS', false),
         ],
 
         'mangoOfficeRu' => [
             'enabled' => (bool)env('HTTP_MANGOOFFICERU_ENABLED', false),
-            'url' => env('HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
-            'api_key' => env('HTTP_MANGOOFFICERU_API_KEY', ''),
-            'api_salt' => env('HTTP_MANGOOFFICERU_API_SALT', ''),
-            'webhook_token' => env('HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
+            'url' => (string)env('HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
+            'api_key' => (string)env('HTTP_MANGOOFFICERU_API_KEY', ''),
+            'api_salt' => (string)env('HTTP_MANGOOFFICERU_API_SALT', ''),
+            'webhook_token' => (string)env('HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
         ],
 
         'devlineRu' => [
             'enabled' => (bool)env('HTTP_DEVLINERU_ENABLED', false),
             'url' => [
-                'http' => env('HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
-                'rtsp' => env('HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
+                'http' => (string)env('HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
+                'rtsp' => (string)env('HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
             ],
-            'timeout' => env('HTTP_DEVLINERU_TIMEOUT', 10),
-            'authorization' => env('HTTP_DEVLINERU_AUTHORIZATION', ''),
+            'timeout' => (int)env('HTTP_DEVLINERU_TIMEOUT', 10),
+            'authorization' => (string)env('HTTP_DEVLINERU_AUTHORIZATION', ''),
         ],
 
         'rtspMe' => [
             'enabled' => (bool)env('HTTP_RTSPME_ENABLED', false),
-            'url' => env('HTTP_RTSPME_URL', 'https://rtsp.me'),
-            'timeout' => env('HTTP_RTSPME_TIMEOUT', 10),
+            'url' => (string)env('HTTP_RTSPME_URL', 'https://rtsp.me'),
+            'timeout' => (int)env('HTTP_RTSPME_TIMEOUT', 10),
             'auth' => [
-                'email' => env('HTTP_RTSPME_EMAIL'),
-                'password' => env('HTTP_RTSPME_PASSWORD'),
+                'email' => (string)env('HTTP_RTSPME_EMAIL'),
+                'password' => (string)env('HTTP_RTSPME_PASSWORD'),
             ],
             'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
         ],
 
         'fcmGoogleApisCom' => [
             'enabled' => (bool)env('HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
-            'url' => env('HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
-            'firebase_credentials' => env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
-            'project_id' => env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
-            'timeout' => env('HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
+            'url' => (string)env('HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
+            'firebase_credentials' => (string)env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
+            'project_id' => (string)env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
+            'timeout' => (int)env('HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
         ],
 
         'telegramOrg' => [
             'enabled' => (bool)env('HTTP_TELEGRAMORG_ENABLED', true),
-            'url' => env('HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
-            'timeout' => env('HTTP_TELEGRAMORG_TIMEOUT', 10),
+            'url' => (string)env('HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
+            'timeout' => (int)env('HTTP_TELEGRAMORG_TIMEOUT', 10),
         ],
     ],
 
     'query_cache' => [
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', false),
-        'exclude' => Helper::envGet('QUERY_CACHE_EXCLUDE') ?? [],
+        'exclude' => (array)(Helper::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 ];

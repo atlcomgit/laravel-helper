@@ -50,6 +50,7 @@ class RouteLogRepository
             ->ofUri($dto->uri)
             ->first()
             ?? $this->new($dto);
+        $routeLog->controller = $dto->controller;
         $routeLog->exist = true;
         $routeLog->save();
     }
@@ -95,6 +96,7 @@ class RouteLogRepository
                 ->ofUri($dto->uri)
                 ->first()
                 ?? $this->new($dto);
+            $routeLog->controller = $dto->controller;
             $routeLog->count++;
             $routeLog->save();
         } catch (Throwable $exception) {

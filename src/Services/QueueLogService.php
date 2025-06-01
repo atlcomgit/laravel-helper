@@ -87,13 +87,7 @@ class QueueLogService
             ],
         ]);
 
-        if ($this->laravelHelperService->checkExclude('laravel-helper.queue_log.exclude', $dto->toArray())) {
-            return;
-        }
-
-        isTesting()
-            ? QueueLogJob::dispatchSync($dto)
-            : QueueLogJob::dispatch($dto);
+        $dto->dispatch();
     }
 
 

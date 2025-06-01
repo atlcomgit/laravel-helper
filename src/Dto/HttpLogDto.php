@@ -8,7 +8,9 @@ use Atlcom\Dto;
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
+use Atlcom\LaravelHelper\Jobs\HttpLogJob;
 use Atlcom\LaravelHelper\Services\HttpLogService;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request as RequestIn;
@@ -181,5 +183,28 @@ class HttpLogDto extends Dto
                     ),
                 ],
             ]);
+    }
+
+
+    /**
+     * Отправляет dto в очередь для сохранения лога
+     *
+     * @return void
+     */
+    public function dispatch()
+    {
+        $type = $this->type->value;
+
+        if (
+            !config("laravel-helper.http_log.{$type}.enabled")
+            || app(LaravelHelperService::class)
+                ->checkExclude("laravel-helper.http_log.{$type}.exclude", $this->serializeKeys(true)->toArray())
+        ) {
+            return;
+        }
+
+        isTesting()
+            ? HttpLogJob::dispatchSync($this)
+            : HttpLogJob::dispatch($this);
     }
 }

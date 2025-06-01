@@ -110,31 +110,41 @@ class ConsoleLogDto extends Dto
 
 
     /**
-     * Отправляет данные в очередь для сохранения лога
+     * Подготавливает dto для сохранения лога
      *
      * @param bool $isForce
      * @return void
      */
     public function store(bool $isForce = true): void
     {
-        if (
-            !config('laravel-helper.console_log.enabled')
-            || app(LaravelHelperService::class)->checkExclude('laravel-helper.console_log.exclude', $this->toArray())
-        ) {
-            return;
-        }
-
         if ($isForce || $this->storedAt->diffInSeconds() >= $this->storeInterval) {
             $this->isUpdated = (bool)$this->uuid;
             $this->uuid ??= uuid();
             $this->storedAt = now();
-
-            isTesting()
-                ? ConsoleLogJob::dispatchSync($this)
-                : ConsoleLogJob::dispatch($this);
-
+            $this->dispatch();
 
             is_null($this->output) ?: $this->output = '';
         }
+    }
+
+
+    /**
+     * Отправляет dto в очередь для сохранения лога
+     *
+     * @return void
+     */
+    public function dispatch()
+    {
+        if (
+            !config('laravel-helper.console_log.enabled')
+            || app(LaravelHelperService::class)
+                ->checkExclude('laravel-helper.console_log.exclude', $this->serializeKeys(true)->toArray())
+        ) {
+            return;
+        }
+
+        isTesting()
+            ? ConsoleLogJob::dispatchSync($this)
+            : ConsoleLogJob::dispatch($this);
     }
 }

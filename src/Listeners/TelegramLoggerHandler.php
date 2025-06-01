@@ -103,7 +103,7 @@ class TelegramLoggerHandler extends AbstractProcessingHandler
 
             if (
                 app(LaravelHelperService::class)
-                    ->checkExclude("laravel-helper.telegram_log.{$type}.exclude", $dto->toArray())
+                    ->checkExclude("laravel-helper.telegram_log.{$type}.exclude", $dto->serializeKeys()->toArray())
             ) {
                 return;
             }

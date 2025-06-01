@@ -4,7 +4,9 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
+use Atlcom\LaravelHelper\Jobs\ModelLogJob;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 
 /**
@@ -95,5 +97,27 @@ class ModelLogDto extends DefaultDto
         $this->onlyKeys(ModelLog::getModelKeys())
             ->mappingKeys($this->mappings())
             ->onlyNotNull();
+    }
+
+
+    /**
+     * Отправляет dto в очередь для сохранения лога
+     *
+     * @return void
+     */
+    public function dispatch()
+    {
+        if (
+            !config('laravel-helper.model_log.enabled')
+            || app(LaravelHelperService::class)
+                ->checkExclude('laravel-helper.model_log.exclude', $this->serializeKeys(true)->toArray())
+        ) {
+            return;
+        }
+
+
+        isTesting()
+            ? ModelLogJob::dispatchSync($this)
+            : ModelLogJob::dispatch($this);
     }
 }

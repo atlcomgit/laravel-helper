@@ -6,7 +6,9 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
+use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\QueueLog;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use DateInterval;
 use DateTimeInterface;
@@ -98,5 +100,26 @@ class QueueLogDto extends Dto
             ->mappingKeys($this->mappings())
             ->onlyNotNull()
             ->excludeKeys(['isUpdated']);
+    }
+
+
+    /**
+     * Отправляет dto в очередь для сохранения лога
+     *
+     * @return void
+     */
+    public function dispatch()
+    {
+        if (
+            !config('laravel-helper.queue_log.enabled')
+            || app(LaravelHelperService::class)
+                ->checkExclude('laravel-helper.queue_log.exclude', $this->serializeKeys(true)->toArray())
+        ) {
+            return;
+        }
+
+        isTesting()
+            ? QueueLogJob::dispatchSync($this)
+            : QueueLogJob::dispatch($this);
     }
 }

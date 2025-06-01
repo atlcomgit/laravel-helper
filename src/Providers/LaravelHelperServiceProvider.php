@@ -141,8 +141,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Добавить middleware глобально
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddleware(HttpLogMiddleware::class);
-        $kernel->prependMiddleware(RouteLogMiddleware::class);
+        $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
+        $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
+        $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
+        $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
 
         // Логирование задач
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));

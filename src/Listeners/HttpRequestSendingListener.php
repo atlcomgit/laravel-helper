@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Listeners;
 
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
-use Atlcom\LaravelHelper\Jobs\HttpLogJob;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 
@@ -28,7 +27,6 @@ class HttpRequestSendingListener
                 uuid: ($event->request?->header(HttpLogService::HTTP_HEADER_UUID) ?? [])[0] ?? null,
                 request: $event->request,
             ))->uuid
-            && $this->laravelHelperService->checkExclude('laravel-helper.http_log.out.exclude', $dto->toArray())
-        ) ?: HttpLogJob::dispatch($dto);
+        ) ?: $dto->dispatch();
     }
 }

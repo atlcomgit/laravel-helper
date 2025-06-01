@@ -6,7 +6,6 @@ use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
-use Atlcom\LaravelHelper\Jobs\ModelLogJob;
 use Atlcom\LaravelHelper\Repositories\ModelLogRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +37,7 @@ class ModelLogService
             'changes' => null,
         ]);
 
-        $this->dispatch($dto);
+        $dto->dispatch();
     }
 
 
@@ -67,7 +66,7 @@ class ModelLogService
             'changes' => $this->getChanges($model),
         ]);
 
-        !($dto->changes || $isSoftDelete) ?: $this->dispatch($dto);
+        !($dto->changes || $isSoftDelete) ?: $dto->dispatch();
     }
 
 
@@ -99,7 +98,7 @@ class ModelLogService
             'changes' => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges($model) : null,
         ]);
 
-        $this->dispatch($dto);
+        $dto->dispatch();
     }
 
 
@@ -121,7 +120,7 @@ class ModelLogService
             'changes' => null,
         ]);
 
-        $this->dispatch($dto);
+        $dto->dispatch();
     }
 
 
@@ -232,24 +231,6 @@ class ModelLogService
 
             default => json_encode($oldValue) === json_encode($newValue),
         };
-    }
-
-
-    /**
-     * Отправляет данные в очередь
-     *
-     * @param ModelLogDto $dto
-     * @return void
-     */
-    public function dispatch(ModelLogDto $dto): void
-    {
-        if (app(LaravelHelperService::class)->checkExclude('laravel-helper.model_log.exclude', $dto->toArray())) {
-            return;
-        }
-
-        isTesting()
-            ? ModelLogJob::dispatchSync($dto)
-            : ModelLogJob::dispatch($dto);
     }
 
 

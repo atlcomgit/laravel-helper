@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Middlewares;
 
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
-use Atlcom\LaravelHelper\Jobs\RouteLogJob;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 use Closure;
@@ -38,27 +37,9 @@ final class RouteLogMiddleware
                 . '::' . $request->route()?->getActionMethod()
             );
 
-            $this->dispatch($dto);
+            $dto->dispatch();
         }
 
         return $next($request);
-    }
-
-
-    /**
-     * Отправляет данные в очередь
-     *
-     * @param RouteLogDto $dto
-     * @return void
-     */
-    public function dispatch(RouteLogDto $dto): void
-    {
-        if ($this->laravelHelperService->checkExclude('laravel-helper.route_log.exclude', $dto->toArray())) {
-            return;
-        }
-
-        isTesting()
-            ? RouteLogJob::dispatchSync($dto)
-            : RouteLogJob::dispatch($dto);
     }
 }
