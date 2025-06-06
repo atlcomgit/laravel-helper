@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Helper;
-use Exception;
 use FilesystemIterator;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,44 +23,68 @@ use RecursiveIteratorIterator;
  */
 class QueryCacheService
 {
+    protected string $driver = '';
+    protected array $exclude = [];
+
+
+    public function __construct()
+    {
+        $this->driver = config('laravel-helper.query_cache.driver') ?: config('cache.default');
+        $this->exclude = config('laravel-helper.query_cache.exclude') ?? [];
+    }
+
+
     /**
      * Возвращает сырой sql запрос из конструктора query запроса
      *
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string
      */
-    public function getSqlFromBuilder(EloquentBuilder|QueryBuilder $builder): string
+    public function getSqlFromBuilder(EloquentBuilder|QueryBuilder|string $builder): string
     {
         return sql($builder);
     }
 
 
     /**
-     * Возвращает название таблицы из 
+     * Возвращает массив названий таблиц из sql
      *
      * @param string $sql
      * @return array<string>
      */
     public function getTablesFromSql(string $sql): array
     {
+        $tableCache = config('cache.stores.database.table', 'cache');
+
+        return Helper::arrayDeleteValues(Helper::sqlTables($sql), [$tableCache]);
+    }
+
+
+    /**
+     * Возвращает массив названий таблиц из массива моделей
+     *
+     * @param array<int, Model> $models
+     * @return array
+     */
+    public function getTablesFromModels(array $models): array
+    {
         $tables = [];
 
-        // Удаляем лишние пробелы и нормализуем SQL
-        $normalizedSql = preg_replace('/\s+/', ' ', $sql);
+        foreach ($models as $model) {
+            match (true) {
+                $model instanceof Model => $tables[] = $model->getTable(),
+                $model instanceof EloquentBuilder => $tables[] = $model->from,
+                $model instanceof QueryBuilder => $tables = [
+                    ...$tables,
+                    ...$this->getTablesFromSql($this->getSqlFromBuilder($model)),
+                    $model->from,
+                ],
 
-        // Ищем после ключевых слов FROM, JOIN, UPDATE, INTO, DELETE FROM, TRUNCATE (TABLE — необязателен)
-        $pattern = '/\b(FROM|JOIN|UPDATE|INTO|DELETE FROM|TRUNCATE(?: TABLE)?)\s+((?:[`"\[]?[a-zA-Z0-9_.]+[`"\]]?))/i';
-
-        if (preg_match_all($pattern, $normalizedSql, $matches)) {
-            foreach ($matches[2] as $rawTable) {
-                // Удаляем кавычки и квадратные скобки вокруг имени таблицы
-                $table = preg_replace('/^[`\["]?|[`"\]]?$/', '', $rawTable);
-
-                $tables[] = $table;
-            }
+                default => $tables[] = $model,
+            };
         }
 
-        return array_values(array_unique($tables));
+        return $tables;
     }
 
 
@@ -73,7 +96,7 @@ class QueryCacheService
      */
     public function getQueryTags(mixed ...$tags): array
     {
-        $result = [Helper::pathClassName($this::class)];
+        $result = [];
 
         foreach ($tags as $tag) {
             match (true) {
@@ -87,20 +110,19 @@ class QueryCacheService
 
                 default => $result[] = Helper::castToString($tag),
             };
-
         }
 
-        return array_unique($result);
+        return array_unique(array_filter([Helper::pathClassName($this::class), ...$result]));
     }
 
 
     /**
      * Возвращает имя ключа кеша
      *
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string
      */
-    public function getQueryKey(EloquentBuilder|QueryBuilder $builder, ?array $tags = null): string
+    public function getQueryKey(EloquentBuilder|QueryBuilder|string $builder, ?array $tags = null): string
     {
         $hash = Helper::hashXxh128($this->getSqlFromBuilder($builder));
 
@@ -125,14 +147,19 @@ class QueryCacheService
      * Возвращает результат query запроса из кеша
      *
      * @param array $tags
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @return mixed
      */
-    public function hasQueryCache(array $tags, EloquentBuilder|QueryBuilder $builder): mixed
+    public function hasQueryCache(array $tags, EloquentBuilder|QueryBuilder|string $builder): mixed
     {
-        return (Cache::getStore() instanceof TaggableStore)
-            ? Cache::tags($tags)->has($this->getQueryKey($builder))
-            : Cache::has($this->getQueryKey($builder, $tags));
+        // Если есть в тегах таблица из исключения, то кеш не сохранялся
+        if (Helper::arraySearchValues($tags, $this->exclude)) {
+            return false;
+        }
+
+        return (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+            ? Cache::driver($this->driver)->tags($tags)->has($this->getQueryKey($builder))
+            : Cache::driver($this->driver)->has($this->getQueryKey($builder, $tags));
     }
 
 
@@ -140,15 +167,15 @@ class QueryCacheService
      * Возвращает результат query запроса из кеша
      *
      * @param array $tags
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @param mixed|null $default
      * @return mixed
      */
-    public function getQueryCache(array $tags, EloquentBuilder|QueryBuilder $builder, mixed $default = null): mixed
+    public function getQueryCache(array $tags, EloquentBuilder|QueryBuilder|string $builder, mixed $default = null): mixed
     {
-        return (Cache::getStore() instanceof TaggableStore)
-            ? Cache::tags($tags)->get($this->getQueryKey($builder), $default)
-            : Cache::get($this->getQueryKey($builder, $tags), $default);
+        return (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+            ? Cache::driver($this->driver)->tags($tags)->get($this->getQueryKey($builder), $default)
+            : Cache::driver($this->driver)->get($this->getQueryKey($builder, $tags), $default);
     }
 
 
@@ -156,17 +183,22 @@ class QueryCacheService
      * Сохраняет результат query запроса в кеш
      *
      * @param array $tags
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @param mixed $value
      * @param int|bool|null|null $ttl - (int в секундах, null/true по умолчанию, false не сохранять)
      * @return void
      */
     public function setQueryCache(
         array $tags,
-        EloquentBuilder|QueryBuilder $builder,
+        EloquentBuilder|QueryBuilder|string $builder,
         mixed $value,
         int|bool|null $ttl = null,
     ): void {
+        // Если есть в тегах таблица из исключения, то кеш не сохраняем
+        if (Helper::arraySearchValues($tags, $this->exclude)) {
+            return;
+        }
+
         $ttl = match (true) {
             is_integer($ttl) => $ttl,
             is_null($ttl), $ttl === true => config('laravel-helper.query_cache.ttl'),
@@ -175,9 +207,9 @@ class QueryCacheService
         };
 
         ($ttl === false) ?: (
-            (Cache::getStore() instanceof TaggableStore)
-            ? Cache::tags($tags)->put($this->getQueryKey($builder), $value, $ttl)
-            : Cache::put($this->getQueryKey($builder, $tags), $value, $ttl)
+            (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+            ? Cache::driver($this->driver)->tags($tags)->put($this->getQueryKey($builder), $value, $ttl)
+            : Cache::driver($this->driver)->put($this->getQueryKey($builder, $tags), $value, $ttl)
         );
     }
 
@@ -190,13 +222,17 @@ class QueryCacheService
      * @param Collection|null $pivotedModels
      * @return void
      */
-    //?!? 
-    public function flush(Model $model, ?string $relation = null, ?Collection $pivotedModels = null): void
+    public function flush(Model|string $model, ?string $relation = null, ?Collection $pivotedModels = null): void
     {
-        $tags = $this->getQueryTags($model);
+        $tags = $this->getQueryTags($model, $relation, ...$pivotedModels?->all() ?? []);
 
-        (Cache::getStore() instanceof TaggableStore)
-            ? Cache::tags($tags)->flush()
+        // Если есть в тегах таблица из исключения, то кеш не сохранялся
+        if (Helper::arraySearchValues($tags, $this->exclude)) {
+            return;
+        }
+
+        (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+            ? Cache::driver($this->driver)->tags($tags)->flush()
             : $this->forgetCacheByPattern($tags);
     }
 
@@ -211,7 +247,10 @@ class QueryCacheService
     {
         $tag = '__' . Helper::stringConcat('__', $tags) . '__';
 
-        switch ($driver = Cache::getStore()::class) {
+        switch ($driver = Cache::driver($this->driver)->getStore()::class) {
+
+            //?!? redis
+            // CACHE_STORE=redis
             case \Illuminate\Cache\RedisStore::class:
                 $cursor = null;
 
@@ -226,6 +265,8 @@ class QueryCacheService
                 } while ($cursor != 0);
                 break;
 
+            //?!? file
+            // CACHE_STORE=file
             case \Illuminate\Cache\FileStore::class:
                 $path = storage_path('framework/cache/data');
                 $files = new RecursiveIteratorIterator(
@@ -242,22 +283,25 @@ class QueryCacheService
                 }
                 break;
 
+            // CACHE_STORE=database
             case \Illuminate\Cache\DatabaseStore::class:
-                // проверить кеш в файлах
-                $table = config('cache.stores.database.table', 'cache');
-                DB::table($table)->where('key', 'like', "%$tag%")->delete();
+                $tableCache = config('cache.stores.database.table', 'cache');
+                DB::table($tableCache)->where('key', 'like', "%{$tag}%")->delete();
                 break;
 
+            // CACHE_STORE=array
             case \Illuminate\Cache\ArrayStore::class:
                 // ArrayStore не поддерживает хранение между запросами
                 break;
 
+            //?!? memcached
+            // CACHE_STORE=memcached
             case \Illuminate\Cache\MemcachedStore::class:
                 // Нет wildcard, нужно логировать ключи отдельно
                 break;
 
             default:
-                // Сброс кеша по шаблону не поддерживается для драйвера: {$driver}
+            // Сброс кеша по шаблону не поддерживается для драйвера: {$driver}
         }
     }
 }

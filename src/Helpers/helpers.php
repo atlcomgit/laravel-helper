@@ -130,29 +130,16 @@ if (!function_exists('sql')) {
     /**
      * Ставит job в очередь и запускает её
      *
-     * @param EloquentBuilder|QueryBuilder $builder
+     * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string
      */
-    function sql(EloquentBuilder|QueryBuilder $builder): string
+    function sql(EloquentBuilder|QueryBuilder|string $builder, array $bindings = []): string
     {
-        return method_exists($builder, 'toRawSql')
+        return (is_object($builder) && method_exists($builder, 'toRawSql'))
             ? $builder->toRawSql()
-            : Helper::stringReplace(
-                vsprintf(
-                    Helper::stringReplace($builder->toSql(), ['?' => '%s']),
-                    collect($builder->getBindings())->map(
-                        fn ($binding) => match (true) {
-                            is_null($binding) => 'null',
-                            is_bool($binding) => $binding ? '1' : '0',
-                            is_numeric($binding) => $binding,
-                            is_string($binding) => addslashes("'{$binding}'"),
-
-                            default => $binding,
-                        }
-                    )->toArray(),
-                ),
-                ['"' => '', "\'" => "'"],
-
+            : Helper::sqlBindings(
+                is_string($builder) ? $builder : $builder->toSql(),
+                is_string($builder) ? $bindings : $builder->getBindings()
             );
     }
 }

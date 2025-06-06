@@ -33,6 +33,7 @@ class HttpLogDto extends Dto
     public ?HttpLogTypeEnum $type;
     public ?HttpLogStatusEnum $status;
     public ?string $method;
+    public ?string $ip;
     public string $url;
     public ?array $requestHeaders;
     public ?string $requestData;
@@ -85,6 +86,7 @@ class HttpLogDto extends Dto
                         . '::' . $request->route()?->getActionMethod(),
                     'type' => HttpLogTypeEnum::In,
                     'method' => Str::lower($request->getMethod()),
+                    'ip' => ip(),
                     'url' => $request->getUri(),
                     'requestHeaders' => $request->headers->all(),
                     'requestData' => $request->getContent(),
@@ -93,6 +95,7 @@ class HttpLogDto extends Dto
                     'name' => ($request->header(HttpLogService::HTTP_HEADER_NAME) ?? [])[0] ?? null,
                     'type' => HttpLogTypeEnum::Out,
                     'method' => Str::lower($request->method()),
+                    'ip' => ip(),
                     'url' => $request->url(),
                     'requestHeaders' => $request->headers(),
                     'requestData' => $request->body(),

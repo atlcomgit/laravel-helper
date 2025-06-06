@@ -272,7 +272,15 @@ return [
 
     'query_cache' => [
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
+        'driver' => (string)env('QUERY_CACHE_DRIVER'),
         'ttl' => Helper::castToInt(env('QUERY_CACHE_TTL', 3600)),
         'exclude' => (array)(Helper::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
+    ],
+
+    'view_cache' => [
+        'enabled' => (bool)env('VIEW_CACHE_ENABLED', true),
+        'driver' => (string)env('VIEW_CACHE_DRIVER'),
+        'ttl' => Helper::castToInt(env('VIEW_CACHE_TTL', 3600)),
+        'exclude' => (array)(Helper::envGet('VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 ];

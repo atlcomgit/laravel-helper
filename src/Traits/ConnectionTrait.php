@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\Helper;
 use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
 
 /**
@@ -13,6 +14,9 @@ use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
  */
 trait ConnectionTrait
 {
+    use BuilderCacheTrait;
+
+
     /**
      * @override
      * Возвращает новый экземпляр QueryBuilder
@@ -40,13 +44,7 @@ trait ConnectionTrait
     // #[Override()]
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        //?!? проверить кеш
-
-        $result = parent::select($query, $bindings, $useReadPdo);
-
-        //?!? сохранить кеш
-
-        return $result;
+        return $this->selectWithCache($query, $bindings, $useReadPdo);
     }
 
 
@@ -64,7 +62,7 @@ trait ConnectionTrait
     {
         $result = parent::update($query, $bindings);
 
-        //?!? сбросить кеш
+        $this->flushCache($query, $bindings);
 
         return $result;
     }
@@ -84,7 +82,7 @@ trait ConnectionTrait
     {
         $result = parent::delete($query, $bindings);
 
-        //?!? сбросить кеш
+        $this->flushCache($query, $bindings);
 
         return $result;
     }
@@ -102,11 +100,11 @@ trait ConnectionTrait
     // #[Override()]
     public function statement($query, $bindings = [])
     {
-        //?!? если есть SELECT то проверить кеш
-
         $result = parent::statement($query, $bindings);
 
-        //?!? если есть INSERT, UPDATE, DELETE то сбросить кеш
+        if ($result && Helper::sqlHasWrite($query)) {
+            $this->flushCache($query, $bindings);
+        }
 
         return $result;
     }

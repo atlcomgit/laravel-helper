@@ -28,6 +28,7 @@ class HttpLogCreateDto extends Dto
     public HttpLogTypeEnum $type;
     public HttpLogMethodEnum $method;
     public HttpLogStatusEnum $status;
+    public ?string $ip;
     public string $url;
     public ?array $requestHeaders;
     public ?string $requestData;
@@ -91,6 +92,7 @@ class HttpLogCreateDto extends Dto
     // #[Override()]
     protected function onFilled(array $array): void
     {
+        $this->ip = $this->ip ? Str::substr($this->ip, 0, 255) : $this->ip;
         $this->url = Str::substr($this->url, 0, 2048);
         $this->requestHash ??= $this->onlyKeys('userId', 'url', 'requestData')->getHash();
         !$this->responseMessage ?: $this->responseMessage = Str::substr($this->responseMessage, 0, 255);

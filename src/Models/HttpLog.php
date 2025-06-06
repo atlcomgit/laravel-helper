@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Database\Factories\HttpLogFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;
 
@@ -29,6 +30,7 @@ use Illuminate\Foundation\Auth\User;
  * @property HttpLogTypeEnum $type
  * @property HttpLogMethodEnum $method
  * @property HttpLogStatusEnum $status
+ * @property ?string $ip
  * @property string $url
  * @property ?array $request_headers
  * @property ?string $request_data
@@ -45,6 +47,8 @@ use Illuminate\Foundation\Auth\User;
  * @property-read ?User $user
  * @method static \Illuminate\Database\Eloquent\Builder|HttpLog query()
  * @method static \Illuminate\Database\Eloquent\Factories\Factory|HttpLogFactory factory($count = null, $state = [])
+ * @method static Builder|static ofIp($ip)
+ * @method static Builder|static ofResponseCode($code)
  * @mixin \Eloquent
  */
 class HttpLog extends DefaultModel
@@ -62,6 +66,7 @@ class HttpLog extends DefaultModel
         'type' => HttpLogTypeEnum::class,
         'method' => HttpLogMethodEnum::class,
         'status' => HttpLogStatusEnum::class,
+        'ip' => 'string',
         'url' => 'string',
         'request_headers' => 'array',
         'request_data' => 'string',
@@ -95,5 +100,31 @@ class HttpLog extends DefaultModel
     public function user(): Relation
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+
+    /**
+     * Фильтр по ip
+     *
+     * @param Builder $query
+     * @param string|null $ip
+     * @return Builder
+     */
+    public function scopeOfIp(Builder $query, ?string $ip): Builder
+    {
+        return $query->where('ip', $ip);
+    }
+
+
+    /**
+     * Фильтр по ip
+     *
+     * @param Builder $query
+     * @param string|null $ip
+     * @return Builder
+     */
+    public function scopeOfResponseCode(Builder $query, ?string $code): Builder
+    {
+        return $query->where('response_code', $code);
     }
 }

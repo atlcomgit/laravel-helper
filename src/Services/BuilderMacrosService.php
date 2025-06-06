@@ -19,26 +19,32 @@ class BuilderMacrosService
      */
     public static function setMacros(): void
     {
-        EloquentBuilder::macro('withCache', function (int|bool|null $seconds = null) {
-            /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-            /** @var int|null $seconds */
-            return $this->setUseWithCache($seconds);
-        });
+        if (config('laravel-helper.query_cache.enabled')) {
+            EloquentBuilder::macro('withCache', function (int|bool|null $seconds = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                /** @var int|null $seconds */
+                return $this->setUseWithCache($seconds);
+            });
 
-        EloquentBuilder::macro('withoutCache', function () {
-            /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-            return $this->setUseWithCache(false);
-        });
+            EloquentBuilder::macro('withoutCache', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                return $this->setUseWithCache(false);
+            });
 
-        QueryBuilder::macro('withCache', function (int|bool|null $seconds = null) {
-            /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-            /** @var int|null $seconds */
-            return $this->setUseWithCache($seconds);
-        });
+            QueryBuilder::macro('withCache', function (int|bool|null $seconds = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                /** @var int|null $seconds */
+                return $this->setUseWithCache($seconds);
+            });
 
-        QueryBuilder::macro('withoutCache', function () {
-            /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-            return $this->setUseWithCache(false);
-        });
+            QueryBuilder::macro('withoutCache', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                return $this->setUseWithCache(false);
+            });
+        }
+
+        if (config('laravel-helper.macros.builder.enabled')) {
+            // ...
+        }
     }
 }

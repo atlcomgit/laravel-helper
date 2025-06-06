@@ -28,6 +28,7 @@ use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
 use Atlcom\LaravelHelper\Services\TelegramService;
+use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -79,6 +80,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(TelegramApiService::class);
         $this->app->singleton(TelegramService::class);
         $this->app->singleton(QueryCacheService::class);
+        $this->app->singleton(ViewCacheService::class);
         $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app));
     }
 
@@ -96,7 +98,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         }
 
         // Builder макросы
-        !config('laravel-helper.macros.builder.enabled') ?: BuilderMacrosService::setMacros();
+        !(config('laravel-helper.macros.builder.enabled') || config('laravel-helper.query_cache.enabled'))
+            ?: BuilderMacrosService::setMacros();
         // Строковые макросы
         !config('laravel-helper.macros.str.enabled') ?: StrMacrosService::setMacros();
         // Http макросы

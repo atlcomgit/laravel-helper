@@ -5,14 +5,21 @@ namespace Atlcom\LaravelHelper\Traits;
 use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
 use Atlcom\LaravelHelper\Observers\QueryCacheObserver;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * Трейт для подключения кеширования модели
  * 
  * @property-read bool $isCached
+ * @property-read bool $isFromCache
  * 
  * @method static|EloquentBuilder withCache(?int $seconds = null)
+ * @method static|EloquentBuilder setCached(bool $value)
+ * @method static|EloquentBuilder setFromCached(bool $value)
+ * @method static|EloquentBuilder flushCache()
+ * @method bool isCached()
+ * @method bool isFromCached()
+ * 
+ * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
  */
 trait ModelCacheTrait
 {
@@ -43,6 +50,18 @@ trait ModelCacheTrait
     public function newEloquentBuilder($query)
     {
         return new EloquentBuilder($query);
+    }
+
+
+    /**
+     * Вызывает макрос подключения кеша
+     *
+     * @param int|bool|null|null $seconds
+     * @return EloquentBuilder<static>
+     */
+    public static function withCache(int|bool|null $seconds = null): EloquentBuilder
+    {
+        return static::query()->withCache($seconds);
     }
 
 

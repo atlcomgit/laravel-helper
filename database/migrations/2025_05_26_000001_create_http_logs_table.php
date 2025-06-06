@@ -46,6 +46,8 @@ return new class extends Migration {
             $table->enum('status', HttpLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(HttpLogStatusEnum::getDefault())
                 ->comment('Статус запроса');
+            $table->string('ip')->nullable(true)->index()
+                ->comment('Ip адрес запроса');
             $table->longText('url')->nullable(false)
                 ->comment('Url запроса');
             $table->jsonb('request_headers')->nullable(true)
@@ -54,7 +56,7 @@ return new class extends Migration {
                 ->comment('Тело запроса');
             $table->string('request_hash')->nullable(false)->index()
                 ->comment('Хеш запроса');
-            $table->integer('response_code')->nullable(true)
+            $table->integer('response_code')->nullable(true)->index()
                 ->comment('Код ответа на запрос');
             $table->string('response_message')->nullable(true)
                 ->comment('Сообщение ответа на запрос');

@@ -30,13 +30,8 @@ class QueryBuilder extends Builder
     // #[Override()]
     public function get($columns = ['*'])
     {
-        //?!? проверить кеш
-
-        $result = parent::get($columns);
-
-        //?!? сохранить кеш
-
-        return $result;
+        return $this->getWithCache($columns);
+        // $result = parent::get($columns);
     }
 
 
@@ -49,15 +44,10 @@ class QueryBuilder extends Builder
      * @return TValue|null
      */
     // #[Override()]
-    public function first($columns = ['*'])
-    {
-        //?!? проверить кеш
+    // public function first($columns = ['*'])
+    // {
+    //     $result = parent::first($columns);
 
-        dd($this);
-        $result = parent::first($columns);
-
-        //?!? сохранить кеш
-
-        return $result;
-    }
+    //     return $result;
+    // }
 }

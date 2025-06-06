@@ -93,7 +93,7 @@ class ModelLog extends DefaultModel
      * Фильтр по названию ветки
      *
      * @param Builder $query
-     * @param string|null $value
+     * @param Model|null $model
      * @return Builder
      */
     public function scopeOfModel(Builder $query, ?Model $model = null): Builder

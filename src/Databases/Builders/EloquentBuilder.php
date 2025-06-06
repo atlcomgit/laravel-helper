@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Переопределенный конструктор запросов Query Builder
  * 
- * @template TModel of \Illuminate\Database\Eloquent\Model
+ * @template TModel of Model
  * @template TValue
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
@@ -36,7 +36,6 @@ class EloquentBuilder extends Builder
     }
 
 
-    //?!? delete
     /**
      * @override
      * Выполняет запрос и возвращает первую запись с использованием кеша
