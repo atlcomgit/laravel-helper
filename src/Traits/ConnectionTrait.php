@@ -6,15 +6,17 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
+use Throwable;
+use Atlcom\LaravelHelper\Traits\QueryTrait;
 
 /**
  * Трейт для подключения соединений к базе данных
  * 
- * @mixin \Illuminate\Database\Connection
+ * @mixin \Illuminate\Database\Connection|QueryTrait
  */
 trait ConnectionTrait
 {
-    use BuilderCacheTrait;
+    use QueryTrait;
 
 
     /**
@@ -44,7 +46,7 @@ trait ConnectionTrait
     // #[Override()]
     public function select($query, $bindings = [], $useReadPdo = true)
     {
-        return $this->selectWithCache($query, $bindings, $useReadPdo);
+        return $this->querySelect($query, $bindings, $useReadPdo);
     }
 
 
@@ -60,9 +62,18 @@ trait ConnectionTrait
     // #[Override()]
     public function update($query, $bindings = [])
     {
-        $result = parent::update($query, $bindings);
+        try {
+            $status = false;
+            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
+            $result = parent::update($query, $bindings);
+            $this->flushCache($query, $bindings);
+            $status = true;
 
-        $this->flushCache($query, $bindings);
+        } catch (Throwable $exception) {
+            throw $exception;
+        }
+
+        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
 
         return $result;
     }
@@ -80,9 +91,19 @@ trait ConnectionTrait
     // #[Override()]
     public function delete($query, $bindings = [])
     {
-        $result = parent::delete($query, $bindings);
+        try {
+            $status = false;
+            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
+            $result = parent::delete($query, $bindings);
+            $this->flushCache($query, $bindings);
+            $status = true;
 
-        $this->flushCache($query, $bindings);
+        } catch (Throwable $exception) {
+            throw $exception;
+
+        }
+
+        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
 
         return $result;
     }
@@ -100,11 +121,18 @@ trait ConnectionTrait
     // #[Override()]
     public function statement($query, $bindings = [])
     {
-        $result = parent::statement($query, $bindings);
+        try {
+            $status = false;
+            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
+            $result = parent::statement($query, $bindings);
+            !($result && Helper::sqlHasWrite($query)) ?: $this->flushCache($query, $bindings);
+            $status = true;
 
-        if ($result && Helper::sqlHasWrite($query)) {
-            $this->flushCache($query, $bindings);
+        } catch (Throwable $exception) {
+            throw $exception;
         }
+
+        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
 
         return $result;
     }

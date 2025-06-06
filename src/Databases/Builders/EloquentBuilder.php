@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Databases\Builders;
 
-use Atlcom\LaravelHelper\Traits\BuilderCacheTrait;
+use Atlcom\LaravelHelper\Traits\QueryTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class EloquentBuilder extends Builder
 {
-    use BuilderCacheTrait;
+    use QueryTrait;
 
 
     /**
@@ -32,23 +32,8 @@ class EloquentBuilder extends Builder
     // #[Override()]
     public function get($columns = ['*']): Collection
     {
-        return $this->getWithCache($columns);
+        return $this->queryGet($columns);
     }
-
-
-    /**
-     * @override
-     * Выполняет запрос и возвращает первую запись с использованием кеша
-     * @see parent::first()
-     *
-     * @param  array|string  $columns
-     * @return TValue|null
-     */
-    // #[Override()]
-    // public function first($columns = ['*']): ?Model
-    // {
-    //     return $this->firstWithCache($columns);
-    // }
 
 
     /**

@@ -50,7 +50,7 @@ class HttpLogRepository
             connection: config('laravel-helper.http_log.connection'),
             table: config('laravel-helper.http_log.table'),
         )
-            ->where('uuid', $dto->uuid)
+            ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
 

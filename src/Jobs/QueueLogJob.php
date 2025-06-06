@@ -22,7 +22,7 @@ class QueueLogJob extends DefaultJob
 
 
     /**
-     * Обработка задачи логирования консольных команд
+     * Обработка задачи логирования задач
      *
      * @return void
      */

@@ -29,10 +29,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  *
- * @method static Builder ofClass(string $class)
- * @method static Builder ofName(string $name)
- * @method static Builder ofResult(int $result)
- * @method static Builder ofStatus(ConsoleLogStatusEnum $status)
+ * @method static|Builder ofUuid(string $uuid)
+ * @method static|Builder ofCommand(string $command)
+ * @method static|Builder ofName(string $name)
+ * @method static|Builder ofResult(int $result)
+ * @method static|Builder ofStatus(ConsoleLogStatusEnum $status)
  * @mixin \Eloquent
  */
 class ConsoleLog extends DefaultModel
@@ -94,7 +95,7 @@ class ConsoleLog extends DefaultModel
      * @param string $uuid
      * @return Builder
      */
-    public function scopeOfUUid(Builder $query, string $uuid): Builder
+    public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
     }

@@ -5,8 +5,10 @@ use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Foundation\Auth\User;
 
 
@@ -270,6 +272,25 @@ return [
         ],
     ],
 
+
+    /**
+     * QueryLog. Логирование query запросов
+     */
+    'query_log' => [
+        'enabled' => (bool)env('QUERY_LOG_ENABLED', false),
+        'queue' => (string)env('QUERY_LOG_QUEUE', 'default'),
+        'connection' => (string)env('QUERY_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('QUERY_LOG_TABLE', 'helper_query_logs'),
+        'model' => QueryLog::class,
+        'cleanup_days' => (int)env('QUERY_LOG_CLEANUP_DAYS', 7),
+        'store_on_start' => (bool)env('QUERY_LOG_STORE_ON_START', true),
+        'exclude' => (array)(Helper::envGet('QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
+    ],
+
+
+    /**
+     * QueryCache. Кеширование query запросов
+     */
     'query_cache' => [
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
         'driver' => (string)env('QUERY_CACHE_DRIVER'),
@@ -277,6 +298,25 @@ return [
         'exclude' => (array)(Helper::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 
+
+    /**
+     * ViewLog. Логирование рендеринга blade шаблонов
+     */
+    'view_log' => [
+        'enabled' => (bool)env('VIEW_LOG_ENABLED', false),
+        'queue' => (string)env('VIEW_LOG_QUEUE', 'default'),
+        'connection' => (string)env('VIEW_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'table' => (string)env('VIEW_LOG_TABLE', 'helper_view_logs'),
+        'model' => ViewLog::class,
+        'cleanup_days' => (int)env('VIEW_LOG_CLEANUP_DAYS', 7),
+        'store_on_start' => (bool)env('VIEW_LOG_STORE_ON_START', true),
+        'exclude' => (array)(Helper::envGet('VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
+    ],
+
+
+    /**
+     * ViewCache. Кеширование рендеринга blade шаблонов
+     */
     'view_cache' => [
         'enabled' => (bool)env('VIEW_CACHE_ENABLED', true),
         'driver' => (string)env('VIEW_CACHE_DRIVER'),

@@ -24,9 +24,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  *
- * @method static Builder ofMethod(string $method)
- * @method static Builder ofUri(string $uri)
- * @method static Builder ofExist(bool $exist)
+ * @method static|Builder ofMethod(string $method)
+ * @method static|Builder ofUri(string $uri)
+ * @method static|Builder ofExist(bool $exist)
  * @mixin \Eloquent
  */
 class RouteLog extends DefaultModel

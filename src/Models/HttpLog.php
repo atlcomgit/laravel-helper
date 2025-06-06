@@ -45,10 +45,11 @@ use Illuminate\Foundation\Auth\User;
  * @property ?\Carbon\Carbon $updated_at
  * 
  * @property-read ?User $user
+ * 
  * @method static \Illuminate\Database\Eloquent\Builder|HttpLog query()
  * @method static \Illuminate\Database\Eloquent\Factories\Factory|HttpLogFactory factory($count = null, $state = [])
- * @method static Builder|static ofIp($ip)
- * @method static Builder|static ofResponseCode($code)
+ * @method static|Builder|static ofIp($ip)
+ * @method static|Builder|static ofResponseCode($code)
  * @mixin \Eloquent
  */
 class HttpLog extends DefaultModel

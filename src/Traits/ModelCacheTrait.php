@@ -12,7 +12,8 @@ use Atlcom\LaravelHelper\Services\QueryCacheService;
  * @property-read bool $isCached
  * @property-read bool $isFromCache
  * 
- * @method static|EloquentBuilder withCache(?int $seconds = null)
+ * @method static|EloquentBuilder withCache(int|bool|null $seconds = null)
+ * @method static|EloquentBuilder withLog(?bool $enabled = null)
  * @method static|EloquentBuilder setCached(bool $value)
  * @method static|EloquentBuilder setFromCached(bool $value)
  * @method static|EloquentBuilder flushCache()
@@ -20,6 +21,7 @@ use Atlcom\LaravelHelper\Services\QueryCacheService;
  * @method bool isFromCached()
  * 
  * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
+ * @mixin QueryTrait
  */
 trait ModelCacheTrait
 {
@@ -62,6 +64,18 @@ trait ModelCacheTrait
     public static function withCache(int|bool|null $seconds = null): EloquentBuilder
     {
         return static::query()->withCache($seconds);
+    }
+
+
+    /**
+     * Вызывает макрос подключения кеша
+     *
+     * @param bool|null|null $enabled
+     * @return EloquentBuilder<static>
+     */
+    public static function withLog(bool|null $enabled = null): EloquentBuilder
+    {
+        return static::query()->withLog($enabled);
     }
 
 

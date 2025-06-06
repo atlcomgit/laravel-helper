@@ -48,7 +48,7 @@ class QueueLogRepository
             connection: config('laravel-helper.queue_log.connection'),
             table: config('laravel-helper.queue_log.table'),
         )
-            ->where('uuid', $dto->uuid)
+            ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
 

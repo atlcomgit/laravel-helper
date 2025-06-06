@@ -22,7 +22,7 @@ class BuilderMacrosService
         if (config('laravel-helper.query_cache.enabled')) {
             EloquentBuilder::macro('withCache', function (int|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-                /** @var int|null $seconds */
+                /** @var int|bool|null $seconds */
                 return $this->setUseWithCache($seconds);
             });
 
@@ -33,13 +33,37 @@ class BuilderMacrosService
 
             QueryBuilder::macro('withCache', function (int|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-                /** @var int|null $seconds */
+                /** @var int|bool|null $seconds */
                 return $this->setUseWithCache($seconds);
             });
 
             QueryBuilder::macro('withoutCache', function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
                 return $this->setUseWithCache(false);
+            });
+        }
+
+        if (config('laravel-helper.query_log.enabled')) {
+            EloquentBuilder::macro('withLog', function (bool|null $enabled = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                /** @var bool|null $enabled */
+                return $this->setUseWithLog($enabled);
+            });
+
+            EloquentBuilder::macro('withoutLog', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                return $this->setUseWithLog(false);
+            });
+
+            QueryBuilder::macro('withLog', function (bool|null $enabled = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                /** @var bool|null $enabled */
+                return $this->setUseWithLog($enabled);
+            });
+
+            QueryBuilder::macro('withoutLog', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                return $this->setUseWithLog(false);
             });
         }
 

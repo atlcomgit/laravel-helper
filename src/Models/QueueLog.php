@@ -34,10 +34,12 @@ use Illuminate\Database\Eloquent\Builder;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  *
- * @method static Builder ofClass(string $class)
- * @method static Builder ofName(string $name)
- * @method static Builder ofAttempts(int $attempts)
- * @method static Builder ofStatus(QueueLogStatusEnum $status)
+ * @method static|Builder ofUuid(string $uuid)
+ * @method static|Builder ofJobId(string $jobId)
+ * @method static|Builder ofJobName(Builder $query, string $jobName)
+ * @method static|Builder ofName(string $name)
+ * @method static|Builder ofAttempts(int $attempts)
+ * @method static|Builder ofStatus(QueueLogStatusEnum $status)
  * @mixin \Eloquent
  */
 class QueueLog extends DefaultModel
@@ -102,7 +104,7 @@ class QueueLog extends DefaultModel
      * @param string $uuid
      * @return Builder
      */
-    public function scopeOfUUid(Builder $query, string $uuid): Builder
+    public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
     }

@@ -119,11 +119,17 @@ class QueryCacheService
     /**
      * Возвращает имя ключа кеша
      *
+     * @param array|null $tags
      * @param EloquentBuilder|QueryBuilder|string $builder
-     * @return string
+     * @return string|null
      */
-    public function getQueryKey(EloquentBuilder|QueryBuilder|string $builder, ?array $tags = null): string
+    public function getQueryKey(?array $tags = null, EloquentBuilder|QueryBuilder|string $builder): ?string
     {
+        // Если есть в тегах таблица из исключения, то кеш не используется
+        if (Helper::arraySearchValues($tags, $this->exclude)) {
+            return null;
+        }
+
         $hash = Helper::hashXxh128($this->getSqlFromBuilder($builder));
 
         switch (true) {
@@ -137,7 +143,9 @@ class QueryCacheService
                 $id = '';
         }
 
-        $tag = ($tags !== null) ? Helper::stringConcat('__', $tags) : '';
+        $tag = (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+            ? ''
+            : Helper::stringConcat('__', $tags);
 
         return '__' . Helper::stringConcat('__', $tag, $hash, $id);
     }
@@ -146,56 +154,54 @@ class QueryCacheService
     /**
      * Возвращает результат query запроса из кеша
      *
-     * @param array $tags
-     * @param EloquentBuilder|QueryBuilder|string $builder
-     * @return mixed
+     * @param array|null $tags
+     * @param string|null $key
+     * @return bool
      */
-    public function hasQueryCache(array $tags, EloquentBuilder|QueryBuilder|string $builder): mixed
+    public function hasQueryCache(?array $tags = null, ?string $key): bool
     {
-        // Если есть в тегах таблица из исключения, то кеш не сохранялся
-        if (Helper::arraySearchValues($tags, $this->exclude)) {
+        if (!$key) {
             return false;
         }
 
         return (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
-            ? Cache::driver($this->driver)->tags($tags)->has($this->getQueryKey($builder))
-            : Cache::driver($this->driver)->has($this->getQueryKey($builder, $tags));
+            ? Cache::driver($this->driver)->tags($tags)->has($key)
+            : Cache::driver($this->driver)->has($key);
     }
 
 
     /**
      * Возвращает результат query запроса из кеша
      *
-     * @param array $tags
-     * @param EloquentBuilder|QueryBuilder|string $builder
+     * @param array|null $tags
+     * @param string|null $key
      * @param mixed|null $default
      * @return mixed
      */
-    public function getQueryCache(array $tags, EloquentBuilder|QueryBuilder|string $builder, mixed $default = null): mixed
+    public function getQueryCache(?array $tags = null, ?string $key, mixed $default = null): mixed
     {
+        if (!$key) {
+            return null;
+        }
+
         return (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
-            ? Cache::driver($this->driver)->tags($tags)->get($this->getQueryKey($builder), $default)
-            : Cache::driver($this->driver)->get($this->getQueryKey($builder, $tags), $default);
+            ? Cache::driver($this->driver)->tags($tags)->get($key, $default)
+            : Cache::driver($this->driver)->get($key, $default);
     }
 
 
     /**
      * Сохраняет результат query запроса в кеш
      *
-     * @param array $tags
-     * @param EloquentBuilder|QueryBuilder|string $builder
+     * @param array|null $tags
+     * @param string|null $key
      * @param mixed $value
      * @param int|bool|null|null $ttl - (int в секундах, null/true по умолчанию, false не сохранять)
      * @return void
      */
-    public function setQueryCache(
-        array $tags,
-        EloquentBuilder|QueryBuilder|string $builder,
-        mixed $value,
-        int|bool|null $ttl = null,
-    ): void {
-        // Если есть в тегах таблица из исключения, то кеш не сохраняем
-        if (Helper::arraySearchValues($tags, $this->exclude)) {
+    public function setQueryCache(?array $tags = null, ?string $key, mixed $value, int|bool|null $ttl = null): void
+    {
+        if (!$key) {
             return;
         }
 
@@ -208,8 +214,8 @@ class QueryCacheService
 
         ($ttl === false) ?: (
             (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
-            ? Cache::driver($this->driver)->tags($tags)->put($this->getQueryKey($builder), $value, $ttl)
-            : Cache::driver($this->driver)->put($this->getQueryKey($builder, $tags), $value, $ttl)
+            ? Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl)
+            : Cache::driver($this->driver)->put($key, $value, $ttl)
         );
     }
 

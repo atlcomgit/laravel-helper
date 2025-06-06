@@ -27,19 +27,20 @@ use Illuminate\Foundation\Auth\User;
  * @property \Carbon\Carbon $created_at
  * 
  * @property-read User $user
- * @method Relation|User user()
  * @property-read \Illuminate\Database\Eloquent\Model $model
+ * 
+ * @method Relation|User user()
  * @method Relation|\Illuminate\Database\Eloquent\Model model()
- * @method static \Illuminate\Database\Eloquent\Builder|ModelLog query()
+ * @method static|Builder|ModelLog query()
  * @method static \Illuminate\Database\Eloquent\Factories\Factory|ModelLogFactory factory($count = null, $state = [])
- * @method static Builder|static ofModel($model)
+ * @method static|Builder|static ofModel($model)
  * @mixin \Eloquent
  */
 class ModelLog extends DefaultModel
 {
     use DynamicTableModelTrait;
 
-    
+
     public bool $logEnabled = false;
     public $guarded = ['id'];
     public $timestamps = false;

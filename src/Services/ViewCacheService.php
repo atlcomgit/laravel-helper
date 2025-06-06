@@ -7,6 +7,9 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Helper;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Сервис кеширования рендеринга blade шаблонов
+ */
 class ViewCacheService
 {
     protected string $driver = '';

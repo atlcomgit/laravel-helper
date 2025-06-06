@@ -49,7 +49,7 @@ class ConsoleLogRepository
             connection: config('laravel-helper.console_log.connection'),
             table: config('laravel-helper.console_log.table'),
         )
-            ->where('uuid', $dto->uuid)
+            ->ofUuid($dto->uuid)
             ->update(
                 $dto->includeArray(
                     is_null($dto->output)

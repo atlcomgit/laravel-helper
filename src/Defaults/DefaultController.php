@@ -28,6 +28,9 @@ class DefaultController extends Controller
     }
 
 
+    //?!? withLog
+
+
     /**
      * Возвращает рендеринг шаблона с использованием кеша
      *

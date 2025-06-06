@@ -23,12 +23,14 @@ use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
+use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
+use Atlcom\LaravelHelper\Services\ViewLogService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -80,7 +82,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(TelegramApiService::class);
         $this->app->singleton(TelegramService::class);
         $this->app->singleton(QueryCacheService::class);
+        $this->app->singleton(QueryLogService::class);
         $this->app->singleton(ViewCacheService::class);
+        $this->app->singleton(ViewLogService::class);
         $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app));
     }
 

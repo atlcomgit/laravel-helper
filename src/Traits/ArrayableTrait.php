@@ -7,6 +7,9 @@ namespace Atlcom\LaravelHelper\Traits;
 use Atlcom\Helper;
 use BackedEnum;
 
+/**
+ * Трейт преобразования объекта в массив
+ */
 trait ArrayableTrait
 {
     /**
