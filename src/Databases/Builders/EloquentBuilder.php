@@ -36,6 +36,7 @@ class EloquentBuilder extends Builder
     }
 
 
+    //?!? 
     /**
      * @override
      * Вставляет новые записи в базу данных
@@ -43,13 +44,10 @@ class EloquentBuilder extends Builder
      *
      * @return bool
      */
+    // #[Override()]
     public function insert(array $values)
     {
-        $result = parent::insert($values);
-
-        $this->flushCache();
-
-        return $result;
+        return $this->queryInsert($values);
     }
 
 
@@ -61,13 +59,10 @@ class EloquentBuilder extends Builder
      * @param  array  $values
      * @return int
      */
+    // #[Override()]
     public function update(array $values)
     {
-        $result = parent::update($values);
-
-        $this->flushCache();
-
-        return $result;
+        return $this->queryUpdate($values);
     }
 
 
@@ -78,12 +73,9 @@ class EloquentBuilder extends Builder
      *
      * @return mixed
      */
+    // #[Override()]
     public function delete()
     {
-        $result = parent::delete();
-
-        $this->flushCache();
-
-        return $result;
+        return $this->queryDelete();
     }
 }

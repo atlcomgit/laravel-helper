@@ -92,6 +92,7 @@ class ViewLogDto extends Dto
     {
         if (
             !config('laravel-helper.view_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([ViewLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.view_log.exclude', $this->serializeKeys(true)->toArray())
         ) {

@@ -81,4 +81,30 @@ class LaravelHelperService
 
         return false;
     }
+
+
+    /**
+     * Проверяет массив $tables на совпадение с массивом игнорируемых таблиц
+     *
+     * @param array $tables
+     * @return bool
+     */
+    public function checkIgnoreTables(array $tables): bool
+    {
+        static $ignoreTables = null;
+
+        $ignoreTables ??= [
+            config('laravel-helper.console_log.table'),
+            config('laravel-helper.http_log.table'),
+            config('laravel-helper.model_log.table'),
+            config('laravel-helper.queue_log.table'),
+            config('laravel-helper.query_log.table'),
+            config('laravel-helper.view_log.table'),
+            config('cache.stores.database.table', 'cache'),
+            'pg_catalog.pg_collation',
+            'pg_attrdef',
+        ];
+
+        return !empty(Helper::arraySearchValues($tables, $ignoreTables));
+    }
 }

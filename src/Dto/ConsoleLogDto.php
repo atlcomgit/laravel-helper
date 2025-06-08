@@ -137,6 +137,7 @@ class ConsoleLogDto extends Dto
     {
         if (
             !config('laravel-helper.console_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([ConsoleLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.console_log.exclude', $this->serializeKeys(true)->toArray())
         ) {

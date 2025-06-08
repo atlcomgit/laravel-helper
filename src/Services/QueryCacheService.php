@@ -49,14 +49,14 @@ class QueryCacheService
     /**
      * Возвращает массив названий таблиц из sql
      *
-     * @param string $sql
+     * @param string|null $sql
      * @return array<string>
      */
-    public function getTablesFromSql(string $sql): array
+    public function getTablesFromSql(?string $sql): array
     {
         $tableCache = config('cache.stores.database.table', 'cache');
 
-        return Helper::arrayDeleteValues(Helper::sqlTables($sql), [$tableCache]);
+        return Helper::arrayDeleteValues(Helper::sqlTables($sql ?? ''), [$tableCache]);
     }
 
 
@@ -228,12 +228,15 @@ class QueryCacheService
      * @param Collection|null $pivotedModels
      * @return void
      */
-    public function flush(Model|string $model, ?string $relation = null, ?Collection $pivotedModels = null): void
+    public function flush(Model|string $table, ?string $relation = null, ?Collection $pivotedModels = null): void
     {
-        $tags = $this->getQueryTags($model, $relation, ...$pivotedModels?->all() ?? []);
+        $tags = $this->getQueryTags($table, $relation, ...$pivotedModels?->all() ?? []);
 
         // Если есть в тегах таблица из исключения, то кеш не сохранялся
-        if (Helper::arraySearchValues($tags, $this->exclude)) {
+        if (
+            app(LaravelHelperService::class)->checkIgnoreTables($tags)
+            || Helper::arraySearchValues($tags, $this->exclude)
+        ) {
             return;
         }
 

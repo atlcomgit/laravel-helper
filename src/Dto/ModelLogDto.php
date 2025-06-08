@@ -109,6 +109,7 @@ class ModelLogDto extends DefaultDto
     {
         if (
             !config('laravel-helper.model_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([ModelLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.model_log.exclude', $this->serializeKeys(true)->toArray())
         ) {

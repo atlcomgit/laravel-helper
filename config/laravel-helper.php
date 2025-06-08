@@ -61,7 +61,7 @@ return [
         'table' => (string)env('CONSOLE_LOG_TABLE', 'helper_route_logs'),
         'model' => ConsoleLog::class,
         'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
-        'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', true),
+        'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', false),
         'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
         'exclude' => (array)(Helper::envGet('CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
@@ -148,7 +148,7 @@ return [
         'table' => (string)env('QUEUE_LOG_TABLE', 'helper_route_logs'),
         'model' => QueueLog::class,
         'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
-        'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', true),
+        'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', false),
         'exclude' => (array)(Helper::envGet('QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
@@ -283,7 +283,7 @@ return [
         'table' => (string)env('QUERY_LOG_TABLE', 'helper_query_logs'),
         'model' => QueryLog::class,
         'cleanup_days' => (int)env('QUERY_LOG_CLEANUP_DAYS', 7),
-        'store_on_start' => (bool)env('QUERY_LOG_STORE_ON_START', true),
+        'store_on_start' => (bool)env('QUERY_LOG_STORE_ON_START', false),
         'exclude' => (array)(Helper::envGet('QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
@@ -309,7 +309,7 @@ return [
         'table' => (string)env('VIEW_LOG_TABLE', 'helper_view_logs'),
         'model' => ViewLog::class,
         'cleanup_days' => (int)env('VIEW_LOG_CLEANUP_DAYS', 7),
-        'store_on_start' => (bool)env('VIEW_LOG_STORE_ON_START', true),
+        'store_on_start' => (bool)env('VIEW_LOG_STORE_ON_START', false),
         'exclude' => (array)(Helper::envGet('VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 

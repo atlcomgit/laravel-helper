@@ -52,6 +52,23 @@ trait ConnectionTrait
 
     /**
      * @override
+     * Выполняет оператор INSERT в базе данных
+     * @see parent::insert()
+     *
+     * @param  string  $query
+     * @param  array  $bindings
+     * @param  string|null  $sequence
+     * @return int|bool
+     */
+    // #[Override()]
+    public function insert($query, $bindings = [])
+    {
+        return $this->queryInsert($query, $bindings);
+    }
+
+
+    /**
+     * @override
      * Выполняет оператор UPDATE в базе данных
      * @see parent::update()
      *
@@ -62,20 +79,7 @@ trait ConnectionTrait
     // #[Override()]
     public function update($query, $bindings = [])
     {
-        try {
-            $status = false;
-            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
-            $result = parent::update($query, $bindings);
-            $this->flushCache($query, $bindings);
-            $status = true;
-
-        } catch (Throwable $exception) {
-            throw $exception;
-        }
-
-        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
-
-        return $result;
+        return $this->queryUpdate($query, $bindings);
     }
 
 
@@ -91,21 +95,7 @@ trait ConnectionTrait
     // #[Override()]
     public function delete($query, $bindings = [])
     {
-        try {
-            $status = false;
-            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
-            $result = parent::delete($query, $bindings);
-            $this->flushCache($query, $bindings);
-            $status = true;
-
-        } catch (Throwable $exception) {
-            throw $exception;
-
-        }
-
-        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
-
-        return $result;
+        return $this->queryDelete($query, $bindings);
     }
 
 
@@ -119,6 +109,7 @@ trait ConnectionTrait
      * @return bool
      */
     // #[Override()]
+    //?!? 
     public function statement($query, $bindings = [])
     {
         try {

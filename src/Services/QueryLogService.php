@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
-use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Repositories\QueryLogRepository;
 
 /**
@@ -17,12 +16,6 @@ class QueryLogService
         private QueryLogRepository $queryLogRepository,
         private LaravelHelperService $laravelHelperService,
     ) {}
-
-
-    public function create(): QueryLog
-    {
-        
-    }
 
 
     /**

@@ -72,6 +72,7 @@ class RouteLogDto extends Dto
     {
         if (
             !config('laravel-helper.route_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([RouteLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.route_log.exclude', $this->toArray())
         ) {

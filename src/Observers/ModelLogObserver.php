@@ -20,7 +20,7 @@ class ModelLogObserver
      */
     public function created(Model $model)
     {
-        $this->modelLogService->created($model);
+        !$model->logEnabled ?: $this->modelLogService->created($model);
     }
 
 
@@ -32,7 +32,7 @@ class ModelLogObserver
      */
     public function updated(Model $model)
     {
-        $this->modelLogService->updated($model);
+        !$model->logEnabled ?: $this->modelLogService->updated($model);
     }
 
 
@@ -44,7 +44,7 @@ class ModelLogObserver
      */
     public function deleted(Model $model)
     {
-        $this->modelLogService->deleted($model);
+        !$model->logEnabled ?: $this->modelLogService->deleted($model);
     }
 
 
@@ -54,9 +54,10 @@ class ModelLogObserver
      * @param  Model  $model
      * @return void
      */
+    //?!? 
     public function forceDeleted(Model $model)
     {
-        // $this->modelLogService->forceDeleted($model);
+        // !$model->logEnabled ?: $this->modelLogService->forceDeleted($model);
     }
 
 
@@ -68,7 +69,7 @@ class ModelLogObserver
      */
     public function restored(Model $model)
     {
-        $this->modelLogService->restored($model);
+        !$model->logEnabled ?: $this->modelLogService->restored($model);
     }
 
 
@@ -80,9 +81,10 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function belongsToManyAttached($relation, Model $model, $ids)
     {
-        // $this->modelLogService->belongsToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->belongsToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -94,9 +96,10 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function belongsToManyDetached($relation, Model $model, $ids)
     {
-        // $this->modelLogService->belongsToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->belongsToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -108,9 +111,10 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function belongsToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
-        // $this->modelLogService->belongsToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->belongsToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -122,9 +126,10 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function morphToManyAttached($relation, Model $model, $ids)
     {
-        // $this->modelLogService->morphToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->morphToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -136,9 +141,10 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function morphToManyDetached($relation, Model $model, $ids)
     {
-        // $this->modelLogService->morphToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->morphToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -150,8 +156,9 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
+    //?!? 
     public function morphToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
-        // $this->modelLogService->morphToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));
+        // !$model->logEnabled ?: $this->modelLogService->morphToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));
     }
 }

@@ -129,6 +129,7 @@ class QueryLogDto extends Dto
     {
         if (
             !config('laravel-helper.query_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([QueryLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.query_log.exclude', $this->serializeKeys(true)->toArray())
         ) {

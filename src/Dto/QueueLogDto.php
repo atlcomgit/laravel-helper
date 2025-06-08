@@ -112,6 +112,7 @@ class QueueLogDto extends Dto
     {
         if (
             !config('laravel-helper.queue_log.enabled')
+            || app(LaravelHelperService::class)->checkIgnoreTables([QueueLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude('laravel-helper.queue_log.exclude', $this->serializeKeys(true)->toArray())
         ) {

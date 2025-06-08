@@ -9,6 +9,7 @@ use Atlcom\Helper;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\HttpLogJob;
+use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
@@ -200,6 +201,7 @@ class HttpLogDto extends Dto
 
         if (
             !config("laravel-helper.http_log.{$type}.enabled")
+            || app(LaravelHelperService::class)->checkIgnoreTables([ModelLog::getTableName()])
             || app(LaravelHelperService::class)
                 ->checkExclude("laravel-helper.http_log.{$type}.exclude", $this->serializeKeys(true)->toArray())
         ) {
