@@ -6,6 +6,7 @@ use Atlcom\Dto;
 use Error;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -25,7 +26,7 @@ class ExceptionDebugDto extends Dto
      * Скрытые свойства для сериализации
      */
     public ?array $trace;
-    public Exception|ClientException|Error|null $throw;
+    public Exception|ClientException|Error|ModelNotFoundException|null $throw;
     public ?Request $request;
     public ?array $data = [];
 

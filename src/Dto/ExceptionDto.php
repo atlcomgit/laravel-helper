@@ -12,6 +12,7 @@ use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -79,9 +80,14 @@ class ExceptionDto extends Dto
             ArgumentCountError::class => Hlp::stringSplit($exception->getMessage(), 'Stack trace:', 0),
 
             default => '',
-        } ?: $exception->getMessage();
+        } ?: match (true) {
+            $exception->getPrevious() instanceof ModelNotFoundException
+            => ($exception = $exception->getPrevious())->getMessage(),
 
-        $thisDto = self::create(
+            default => $exception->getMessage(),
+        };
+
+        $thisDto = static::create(
             exception: $exception::class,
             code: $code,
             message: $message,
@@ -214,9 +220,10 @@ class ExceptionDto extends Dto
             AuthenticationException::class => 401,
 
             RouteNotFoundException::class,
-            NotFoundHttpException::class,
+            ModelNotFoundException::class,
             MethodNotAllowedException::class,
-            MethodNotAllowedHttpException::class
+            MethodNotAllowedHttpException::class,
+            NotFoundHttpException::class
             => 404,
 
             QueryException::class => 500,
@@ -234,6 +241,7 @@ class ExceptionDto extends Dto
                     $this->debugInfo?->throw?->getResponse()->getBody()->getContents(),
                 ),
                 MethodNotAllowedHttpException::class => $this->getMessage('Маршрут :route не поддерживает :method'),
+                ModelNotFoundException::class => $this->getMessage('Запись :model не найдена'),
                 NotFoundHttpException::class => $this->getMessage('Маршрут :route не найден'),
                 AuthenticationException::class => $this->getMessage('Маршрут :route требует аутентификацию'),
                 // HttpResponseException::class => $this->getMessage('Маршрут :route требует аутентификацию'),
@@ -260,6 +268,7 @@ class ExceptionDto extends Dto
     protected function getMessage(string $localeKey): string
     {
         $replaces = [
+            'model' => class_basename(($this->debugInfo->throw ?? null)?->getModel() ?? ''),
             'route' => ($this->debugInfo->request ?? null)?->getRequestUri(),
             'method' => ($this->debugInfo->request ?? null)?->getMethod(),
             'class' => $this->toBasename($this::class),
