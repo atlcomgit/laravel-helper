@@ -203,7 +203,6 @@ class LaravelHelperService
 
             case ViewLogDto::class:
                 /** @var ViewLogDto $dto */
-                $type = $dto->type;
                 $can = config('laravel-helper.view_log.enabled')
                     && $this->notFoundConfigExclude('laravel-helper.view_log.exclude', $dto)
                 ;

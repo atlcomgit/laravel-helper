@@ -231,7 +231,7 @@ trait QueryTrait
             $dto->status = $status ? QueryLogStatusEnum::Success : QueryLogStatusEnum::Failed;
             $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
             $dto->info = [
-                ...$dto->info,
+                ...($dto->info ?? []),
                 'duration' => $dto->getDuration(),
                 'memory' => $dto->getMemory(),
                 'size_result' => Helper::stringLength(json_encode($result, Helper::jsonFlags())),
@@ -267,7 +267,7 @@ trait QueryTrait
             $dto->status = QueryLogStatusEnum::Failed;
             $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
             $dto->info = [
-                ...$dto->info,
+                ...($dto->info ?? []),
                 'duration' => $dto->getDuration(),
                 'memory' => $dto->getMemory(),
                 'exception' => Helper::exceptionToArray($exception),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Helper;
+use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -73,23 +74,44 @@ class ViewCacheService
      * @return string
      */
     public function remember(
+        ViewLogDto $dto,
         string $view,
         array $data = [],
         array $mergeData = [],
         array $ignoreData = [],
         int|bool|null $ttl = null,
     ): string {
-        $cacheKey = $this->getTagTtl($ttl) . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
         $render = static fn () => view($view, $data, $mergeData)->render();
 
-        return match (true) {
-            $ttl === false => $render(),
-            in_array($view, $this->exclude) => $render(),
-            $ttl === true || is_null($ttl) => Cache::driver($this->driver)
-                ->remember($cacheKey, config('laravel-helper.query_cache.ttl'), $render),
-            $ttl === 0 => Cache::driver($this->driver)->rememberForever($cacheKey, $render),
+        switch (true) {
+            case $ttl === false:
+            case in_array($view, $this->exclude):
+                $result = $render();
+                break;
 
-            default => Cache::driver($this->driver)->remember($cacheKey, $ttl, $render),
-        };
+            default:
+                $dto->cacheKey = $this->getTagTtl($ttl) . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
+
+                if ($dto->isFromCache = Cache::driver($this->driver)->has($dto->cacheKey)) {
+                    $result = Cache::driver($this->driver)->get($dto->cacheKey, '');
+
+                } else {
+                    $result = $render();
+
+                    match (true) {
+                        $ttl === 0 => Cache::driver($this->driver)->forever($dto->cacheKey, $result),
+                        $ttl === true, is_null($ttl) => Cache::driver($this->driver)
+                            ->set($dto->cacheKey, $result, config('laravel-helper.view_cache.ttl')),
+                        default => Cache::driver($this->driver)->set($dto->cacheKey, $result, $ttl),
+                    };
+
+                    $dto->isCached = true;
+                }
+
+                $dto->cacheKey = Helper::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
+                break;
+        }
+
+        return $result;
     }
 }

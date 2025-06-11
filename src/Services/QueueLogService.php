@@ -7,7 +7,14 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Helper;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
+use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
+use Atlcom\LaravelHelper\Jobs\HttpLogJob;
+use Atlcom\LaravelHelper\Jobs\ModelLogJob;
+use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
+use Atlcom\LaravelHelper\Jobs\RouteLogJob;
+use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
+use Atlcom\LaravelHelper\Jobs\ViewLogJob;
 use Atlcom\LaravelHelper\Repositories\QueueLogRepository;
 use Carbon\Carbon;
 use Illuminate\Queue\Events\JobFailed;
@@ -39,6 +46,15 @@ class QueueLogService
             !config('laravel-helper.queue_log.enabled')
             || (($event instanceof JobProcessing) && !config('laravel-helper.queue_log.store_on_start'))
             || ($name === QueueLogJob::class)
+            || in_array($name, [
+                ConsoleLogJob::class,
+                HttpLogJob::class,
+                ModelLogJob::class,
+                QueryLogJob::class,
+                RouteLogJob::class,
+                TelegramLogJob::class,
+                ViewLogJob::class,
+            ])
         ) {
             return;
         }

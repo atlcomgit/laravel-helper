@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\Helper;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\ViewLogJob;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Carbon\Carbon;
 
 /**
  * Dto лога рендеринга blade шаблонов
@@ -26,6 +28,10 @@ class ViewLogDto extends Dto
     public ViewLogStatusEnum $status;
     public ?array $info;
 
+    public string $startTime;
+    public int $startMemory;
+    public bool $isUpdated;
+
 
     /**
      * @override
@@ -37,7 +43,13 @@ class ViewLogDto extends Dto
     protected function defaults(): array
     {
         return [
+            'uuid' => uuid(),
+            'isCached' => false,
+            'isFromCache' => false,
             'status' => ViewLogStatusEnum::getDefault(),
+            'startTime' => (string)now()->getTimestampMs(),
+            'startMemory' => memory_get_usage(),
+            'isUpdated' => false,
         ];
     }
 
@@ -79,7 +91,33 @@ class ViewLogDto extends Dto
     {
         $this->onlyKeys(ViewLog::getModelKeys())
             ->mappingKeys($this->mappings())
-            ->onlyNotNull();
+            ->onlyNotNull()
+            ->excludeKeys(['startTime', 'startMemory', 'isUpdated']);
+    }
+
+
+    /**
+     * Возвращает длительность работы скрипта
+     *
+     * @return string
+     */
+    public function getDuration(): string
+    {
+        return Helper::timeSecondsToString(
+            value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
+            withMilliseconds: false,
+        );
+    }
+
+
+    /**
+     * Возвращает потребляемую память скрипта
+     *
+     * @return string
+     */
+    public function getMemory(): string
+    {
+        return Helper::sizeBytesToString(memory_get_usage() - $this->startMemory);
     }
 
 

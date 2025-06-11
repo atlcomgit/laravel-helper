@@ -147,6 +147,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 $schedule->command(ViewLogCleanupCommand::class, ['--telegram'])->dailyAt('03:07');
             });
 
+            // Запуск команд при выполнении artisan optimize
             !config('laravel-helper.optimize.cleanup') ?: $this->optimizes(
                 optimize: AllCleanupCommand::class,
             );
