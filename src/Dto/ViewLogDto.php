@@ -90,17 +90,10 @@ class ViewLogDto extends Dto
      */
     public function dispatch()
     {
-        if (
-            !config('laravel-helper.view_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([ViewLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.view_log.exclude', $this->serializeKeys(true)->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? ViewLogJob::dispatchSync($this)
+                : ViewLogJob::dispatch($this);
         }
-
-        isTesting()
-            ? ViewLogJob::dispatchSync($this)
-            : ViewLogJob::dispatch($this);
     }
 }

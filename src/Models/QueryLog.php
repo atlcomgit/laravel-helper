@@ -18,8 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $uuid
- * @property ?string $model_type
- * @property ?string $model_id
+ * @property ?string $name
  * @property string $query
  * @property ?string $cache_key
  * @property bool $is_cached
@@ -42,8 +41,7 @@ class QueryLog extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
-        'model_type' => 'string',
-        'model_id' => 'string',
+        'name' => 'string',
         'query' => 'string',
         'cache_key' => 'string',
         'is_cached' => 'bool',

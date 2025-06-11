@@ -52,7 +52,7 @@ class ModelLogRepository
             connection: config('laravel-helper.model_log.connection'),
             table: config('laravel-helper.model_log.table'),
         )
-            ->whereDate('created_at', '<', now()->subDays($days))
+            ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }
 }

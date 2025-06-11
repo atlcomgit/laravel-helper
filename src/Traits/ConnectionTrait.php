@@ -109,7 +109,7 @@ trait ConnectionTrait
      * @return bool
      */
     // #[Override()]
-    //?!? 
+    //?!? проверить
     public function statement($query, $bindings = [])
     {
         try {

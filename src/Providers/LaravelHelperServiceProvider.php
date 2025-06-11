@@ -3,11 +3,14 @@
 namespace Atlcom\LaravelHelper\Providers;
 
 use Atlcom\Dto;
+use Atlcom\LaravelHelper\Commands\AllCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\ViewLogCleanupCommand;
 use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
@@ -31,10 +34,12 @@ use Atlcom\LaravelHelper\Services\TelegramApiService;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
@@ -120,28 +125,31 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация консольных команд
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AllCleanupCommand::class,
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
                 RouteLogCleanupCommand::class,
                 QueueLogCleanupCommand::class,
+                QueryLogCleanupCommand::class,
+                ViewLogCleanupCommand::class,
             ]);
 
             // Запуск команд по расписанию
             $this->app->booted(function () {
                 $schedule = $this->app->make(Schedule::class);
-
-                // Очистка console_logs
                 $schedule->command(ConsoleLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
-                // Очистка http_logs
                 $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
-                // Очистка model_logs
                 $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:03');
-                // Очистка route_logs
                 $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:04');
-                // Очистка queue_logs
                 $schedule->command(QueueLogCleanupCommand::class, ['--telegram'])->dailyAt('03:05');
+                $schedule->command(QueryLogCleanupCommand::class, ['--telegram'])->dailyAt('03:06');
+                $schedule->command(ViewLogCleanupCommand::class, ['--telegram'])->dailyAt('03:07');
             });
+
+            !config('laravel-helper.optimize.cleanup') ?: $this->optimizes(
+                optimize: AllCleanupCommand::class,
+            );
         }
 
 
@@ -157,5 +165,16 @@ class LaravelHelperServiceProvider extends ServiceProvider
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
         Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
         Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
+
+        // Event::listen(CommandStarting::class, function (CommandStarting $event) {
+        //     match ($event->command) {
+        //         ConfigCacheCommand::class => '',
+        //         // 'config:cache'
+        //     };
+        //     if (in_array($event->command, ['config:cache', 'route:cache', 'view:cache'])) {
+        //         // Выполнить действия
+        //         logger()->info("Выполняется {$event->command} — действия пакета.");
+        //     }
+        // });
     }
 }

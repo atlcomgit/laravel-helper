@@ -68,7 +68,7 @@ class HttpLogRepository
             connection: config('laravel-helper.http_log.connection'),
             table: config('laravel-helper.http_log.table'),
         )
-            ->whereDate('created_at', '<', now()->subDays($days))
+            ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }
 }

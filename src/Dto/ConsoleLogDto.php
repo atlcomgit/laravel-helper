@@ -93,7 +93,8 @@ class ConsoleLogDto extends Dto
     public function getDuration(): string
     {
         return Helper::timeSecondsToString(
-            (int)Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000
+            value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
+            withMilliseconds: true,
         );
     }
 
@@ -135,17 +136,10 @@ class ConsoleLogDto extends Dto
      */
     public function dispatch()
     {
-        if (
-            !config('laravel-helper.console_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([ConsoleLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.console_log.exclude', $this->serializeKeys(true)->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? ConsoleLogJob::dispatchSync($this)
+                : ConsoleLogJob::dispatch($this);
         }
-
-        isTesting()
-            ? ConsoleLogJob::dispatchSync($this)
-            : ConsoleLogJob::dispatch($this);
     }
 }

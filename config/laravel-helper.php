@@ -35,6 +35,11 @@ return [
     ],
 
 
+    'optimize' => [
+        'cleanup' => (bool)env('OPTIMIZE_CLEANUP_ALL_ENABLED', true),
+    ],
+
+
     /**
      * Macro. Включение макросов хелпера
      */

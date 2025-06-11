@@ -43,7 +43,8 @@ class HttpLogMiddleware
                 ...(static::$startAt
                     ? [
                         'duration' => Helper::timeSecondsToString(
-                            (int)Carbon::createFromTimestampMs(static::$startAt)->diffInMilliseconds() / 1000
+                            value: Carbon::createFromTimestampMs(static::$startAt)->diffInMilliseconds() / 1000,
+                            withMilliseconds: true,
                         ),
                     ]
                     : []

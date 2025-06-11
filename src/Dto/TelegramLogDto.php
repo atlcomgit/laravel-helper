@@ -3,6 +3,8 @@
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Throwable;
 
@@ -150,5 +152,20 @@ class TelegramLogDto extends Dto
             ),
             'time' => Carbon::now()->format('d.m.Y в H:i:s'),
         ];
+    }
+
+
+    /**
+     * Отправляет dto в очередь для сохранения лога
+     *
+     * @return void
+     */
+    public function dispatch()
+    {
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? TelegramLogJob::dispatchSync($this)
+                : TelegramLogJob::dispatch($this);
+        }
     }
 }

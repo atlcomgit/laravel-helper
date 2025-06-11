@@ -20,6 +20,7 @@ class TelegramLogJob extends DefaultJob
         protected TelegramLogDto $dto,
         protected ?TelegramService $telegramService = null,
     ) {
+        $this->onQueue(config('laravel-helper.telegram_log.queue'));
         $this->telegramService ??= app(TelegramService::class);
     }
 

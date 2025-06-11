@@ -23,10 +23,8 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid query запроса');
 
-            $table->string('model_type')->nullable(true)->index()
-                ->comment('Класс модели query запроса');
-            $table->string('model_id')->nullable(true)->index()
-                ->comment('id записи query запроса');
+            $table->string('name')->nullable(true)->index()
+                ->comment('Название query запроса');
             $table->longText('query')->nullable(false)
                 ->comment('Сырой query запрос');
             $table->string('cache_key')->nullable(true)->index()

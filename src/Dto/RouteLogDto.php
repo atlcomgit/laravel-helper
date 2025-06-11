@@ -70,17 +70,10 @@ class RouteLogDto extends Dto
      */
     public function dispatch()
     {
-        if (
-            !config('laravel-helper.route_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([RouteLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.route_log.exclude', $this->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? RouteLogJob::dispatchSync($this)
+                : RouteLogJob::dispatch($this);
         }
-
-        isTesting()
-            ? RouteLogJob::dispatchSync($this)
-            : RouteLogJob::dispatch($this);
     }
 }

@@ -66,7 +66,7 @@ class QueueLogRepository
             connection: config('laravel-helper.queue_log.connection'),
             table: config('laravel-helper.queue_log.table'),
         )
-            ->whereDate('created_at', '<', now()->subDays($days))
+            ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }
 }

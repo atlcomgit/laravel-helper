@@ -107,18 +107,10 @@ class ModelLogDto extends DefaultDto
      */
     public function dispatch()
     {
-        if (
-            !config('laravel-helper.model_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([ModelLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.model_log.exclude', $this->serializeKeys(true)->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? ModelLogJob::dispatchSync($this)
+                : ModelLogJob::dispatch($this);
         }
-
-
-        isTesting()
-            ? ModelLogJob::dispatchSync($this)
-            : ModelLogJob::dispatch($this);
     }
 }

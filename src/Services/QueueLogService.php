@@ -64,7 +64,8 @@ class QueueLogService
             payload: $payload, // $event->job->getRawBody(),
             attempts: $event->job->attempts(),
             exception: $event instanceof JobFailed ? Helper::exceptionToString($event->exception) : null,
-            isUpdated: $event instanceof JobProcessed || $event instanceof JobFailed,
+            isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
+            && config('laravel-helper.queue_log.store_on_start'),
             status: match (true) {
                 $event instanceof JobProcessing => QueueLogStatusEnum::Process,
                 $event instanceof JobProcessed => QueueLogStatusEnum::Success,
@@ -72,20 +73,22 @@ class QueueLogService
             },
         );
 
-        !$dto->isUpdated ?: $dto->merge([
-            'info' => [
-                'class' => $name,
-                'duration' => Helper::timeSecondsToString(
-                    (int)Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000
-                ),
-                'memory' => Helper::sizeBytesToString(
-                    memory_get_usage() - Helper::cacheRuntimeGet($memoryCacheKey, memory_get_usage())
-                ),
-                'deleted' => $event->job->isDeleted(),
-                'released' => $event->job->isReleased(),
-                'failed' => $event->job->hasFailed(),
-            ],
-        ]);
+        !($dto->isUpdated || !config('laravel-helper.queue_log.store_on_start'))
+            ?: $dto->merge([
+                'info' => [
+                    'class' => $name,
+                    'duration' => Helper::timeSecondsToString(
+                        value: Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
+                        withMilliseconds: true,
+                    ),
+                    'memory' => Helper::sizeBytesToString(
+                        memory_get_usage() - Helper::cacheRuntimeGet($memoryCacheKey, memory_get_usage())
+                    ),
+                    'deleted' => $event->job->isDeleted(),
+                    'released' => $event->job->isReleased(),
+                    'failed' => $event->job->hasFailed(),
+                ],
+            ]);
 
         $dto->dispatch();
     }

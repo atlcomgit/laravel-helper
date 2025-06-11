@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Helper;
+use Atlcom\LaravelHelper\Models\QueryLog;
 use FilesystemIterator;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Database\Eloquent\Collection;
@@ -232,17 +233,15 @@ class QueryCacheService
     {
         $tags = $this->getQueryTags($table, $relation, ...$pivotedModels?->all() ?? []);
 
-        // Если есть в тегах таблица из исключения, то кеш не сохранялся
+        // Если таблица не в игноре и теги не в исключении, то чистим кеш (иначе кеш не сохранялся)
         if (
-            app(LaravelHelperService::class)->checkIgnoreTables($tags)
-            || Helper::arraySearchValues($tags, $this->exclude)
+            app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
+            && !Helper::arraySearchValues($tags, $this->exclude)
         ) {
-            return;
+            (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+                ? Cache::driver($this->driver)->tags($tags)->flush()
+                : $this->forgetCacheByPattern($tags);
         }
-
-        (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
-            ? Cache::driver($this->driver)->tags($tags)->flush()
-            : $this->forgetCacheByPattern($tags);
     }
 
 
@@ -258,7 +257,7 @@ class QueryCacheService
 
         switch ($driver = Cache::driver($this->driver)->getStore()::class) {
 
-            //?!? redis
+            //?!? проверить redis
             // CACHE_STORE=redis
             case \Illuminate\Cache\RedisStore::class:
                 $cursor = null;
@@ -274,7 +273,7 @@ class QueryCacheService
                 } while ($cursor != 0);
                 break;
 
-            //?!? file
+            //?!? проверить file
             // CACHE_STORE=file
             case \Illuminate\Cache\FileStore::class:
                 $path = storage_path('framework/cache/data');
@@ -303,7 +302,7 @@ class QueryCacheService
                 // ArrayStore не поддерживает хранение между запросами
                 break;
 
-            //?!? memcached
+            //?!? проверить memcached
             // CACHE_STORE=memcached
             case \Illuminate\Cache\MemcachedStore::class:
                 // Нет wildcard, нужно логировать ключи отдельно

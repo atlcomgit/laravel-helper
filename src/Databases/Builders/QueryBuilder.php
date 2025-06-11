@@ -33,7 +33,7 @@ class QueryBuilder extends Builder
         return $this->queryGet($columns);
     }
 
-    //?!? 
+    //?!? +
     /**
      * @override
      * Выполняет оператор SELECT в базе данных

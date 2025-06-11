@@ -138,7 +138,7 @@ class ExceptionDto extends Dto
                         ...($exception instanceof QueryException
                             ? [
                                 'sql' => Hlp::stringDeleteMultiples(
-                                    Hlp::stringReplace($exception->getRawSql(), ['"' => '']),
+                                    sql($exception->getSql(), $exception->getBindings()),
                                     ' ',
                                 ),
                             ]
@@ -268,9 +268,15 @@ class ExceptionDto extends Dto
     protected function getMessage(string $localeKey): string
     {
         $replaces = [
-            'model' => class_basename(($this->debugInfo->throw ?? null)?->getModel() ?? ''),
-            'route' => ($this->debugInfo->request ?? null)?->getRequestUri(),
-            'method' => ($this->debugInfo->request ?? null)?->getMethod(),
+            'model' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
+                ? Hlp::pathClassName($this->debugInfo->throw->getModel() ?? '')
+                : '',
+            'route' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getRequestUri'))
+                ? ($this->debugInfo->request->getRequestUri() ?? '')
+                : '',
+            'method' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getMethod'))
+                ? ($this->debugInfo->request->getMethod() ?? '')
+                : '',
             'class' => $this->toBasename($this::class),
             'property' => ':attribute',
         ];

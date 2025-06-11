@@ -126,12 +126,12 @@ abstract class DefaultCommand extends Command
     /**
      * Вывод в консоль
      *
-     * @param string $message
+     * @param mixed $message
      * @return void
      */
-    public function output(string $message = '', ?string $style = '', bool $withEol = false): void
+    public function output(mixed $message = '', ?string $style = '', bool $withEol = false): void
     {
-        $message = __($message);
+        $message = __(Helper::castToString($message));
 
         // $lines = explode(PHP_EOL, $message);
         // $lines = array_map(
@@ -156,24 +156,24 @@ abstract class DefaultCommand extends Command
     /**
      * Вывод в консоль
      *
-     * @param string $message
+     * @param mixed $message
      * @return void
      */
-    public function outputEol(string $message = '', ?string $style = ''): void
+    public function outputEol(mixed $message = '', ?string $style = ''): void
     {
-        $this->output($message, $style, true);
+        $this->output(Helper::castToString($message), $style, true);
     }
 
 
     /**
      * Возвращает сообщение в жирном стиле
      *
-     * @param string $message
+     * @param mixed $message
      * @return void
      */
-    public function outputBold(?string $message = ''): void
+    public function outputBold(mixed $message = ''): void
     {
-        $message = __($message);
+        $message = __(Helper::castToString($message));
         $this->output($message, 'options=bold');
     }
 }

@@ -108,19 +108,12 @@ class QueueLogDto extends Dto
      *
      * @return void
      */
-    public function dispatch()
+    public function dispatch(): void
     {
-        if (
-            !config('laravel-helper.queue_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([QueueLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.queue_log.exclude', $this->serializeKeys(true)->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? QueueLogJob::dispatchSync($this)
+                : QueueLogJob::dispatch($this);
         }
-
-        isTesting()
-            ? QueueLogJob::dispatchSync($this)
-            : QueueLogJob::dispatch($this);
     }
 }

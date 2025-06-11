@@ -54,7 +54,7 @@ class ModelLogObserver
      * @param  Model  $model
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function forceDeleted(Model $model)
     {
         // !$model->logEnabled ?: $this->modelLogService->forceDeleted($model);
@@ -81,7 +81,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function belongsToManyAttached($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->belongsToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
@@ -96,7 +96,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function belongsToManyDetached($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->belongsToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
@@ -111,7 +111,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function belongsToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->belongsToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));
@@ -126,7 +126,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function morphToManyAttached($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->morphToManyAttached($model, $relation, $model->{$relation}()->findMany($ids));
@@ -141,7 +141,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function morphToManyDetached($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->morphToManyDetached($model, $relation, $model->{$relation}()->findMany($ids));
@@ -156,7 +156,7 @@ class ModelLogObserver
      * @param  array  $ids
      * @return void
      */
-    //?!? 
+    //?!? дополнить
     public function morphToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
         // !$model->logEnabled ?: $this->modelLogService->morphToManyUpdatedExistingPivot($model, $relation, $model->{$relation}()->findMany($ids));

@@ -4,8 +4,26 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\Dto;
 use Atlcom\Helper;
+use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Dto\HttpLogDto;
+use Atlcom\LaravelHelper\Dto\ModelLogDto;
+use Atlcom\LaravelHelper\Dto\QueryLogDto;
+use Atlcom\LaravelHelper\Dto\QueueLogDto;
+use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Dto\TelegramLogDto;
+use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
+use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
+use Atlcom\LaravelHelper\Jobs\HttpLogJob;
+use Atlcom\LaravelHelper\Jobs\ModelLogJob;
+use Atlcom\LaravelHelper\Jobs\QueryLogJob;
+use Atlcom\LaravelHelper\Jobs\QueueLogJob;
+use Atlcom\LaravelHelper\Jobs\RouteLogJob;
+use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
+use Atlcom\LaravelHelper\Jobs\ViewLogJob;
+use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
  * Сервис пакета laravel-helper
@@ -66,8 +84,10 @@ class LaravelHelperService
      * @param array $data
      * @return bool
      */
-    public function checkExclude(string $configKey, array $data): bool
+    public function notFoundConfigExclude(string $configKey, Dto $dto): bool
     {
+        $data = $dto->serializeKeys(true)->toArray();
+
         if ($exclude = config($configKey)) {
             $data = Helper::arrayDot($data);
             $dataCheck = [];
@@ -76,10 +96,10 @@ class LaravelHelperService
                 $dataCheck[] = "{$key}={$val}";
             }
 
-            return !empty(Helper::arraySearchValues($dataCheck, $exclude));
+            return empty(Helper::arraySearchValues($dataCheck, $exclude));
         }
 
-        return false;
+        return true;
     }
 
 
@@ -89,7 +109,7 @@ class LaravelHelperService
      * @param array $tables
      * @return bool
      */
-    public function checkIgnoreTables(array $tables): bool
+    public function notFoundIgnoreTables(array $tables = []): bool
     {
         static $ignoreTables = null;
 
@@ -105,6 +125,94 @@ class LaravelHelperService
             'pg_attrdef',
         ];
 
-        return !empty(Helper::arraySearchValues($tables, $ignoreTables));
+        return empty(Helper::arraySearchValues($tables, $ignoreTables));
+    }
+
+
+    /**
+     * Проверяет на возможность отправки Dto в очередь для обработки в job
+     *
+     * @return bool
+     */
+    public function canDispatch(Dto $dto): bool
+    {
+        switch ($dto::class) {
+
+            case ConsoleLogDto::class:
+                /** @var ConsoleLogDto $dto */
+                $can = config('laravel-helper.console_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.console_log.exclude', $dto)
+                ;
+                break;
+
+            case HttpLogDto::class:
+                /** @var HttpLogDto $dto */
+                $type = $dto->type->value;
+                $can = config("laravel-helper.http_log.{$type}.enabled")
+                    && $this->notFoundConfigExclude("laravel-helper.http_log.{$type}.exclude", $dto)
+                ;
+                break;
+
+            case ModelLogDto::class:
+                /** @var ModelLogDto $dto */
+                $can = config('laravel-helper.model_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.model_log.exclude', $dto)
+                ;
+                break;
+
+            case QueryLogDto::class:
+                /** @var QueryLogDto $dto */
+                $can = config('laravel-helper.query_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.query_log.exclude', $dto)
+                    && !Helper::arraySearchValues($dto->info['tables'], [config('laravel-helper.query_log.table')])
+                    // && $this->notFoundIgnoreTables($dto->info['tables'])
+                ;
+                break;
+
+            case QueueLogDto::class:
+                /** @var QueueLogDto $dto */
+                $can = config('laravel-helper.queue_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.queue_log.exclude', $dto)
+                    // && !in_array($dto->info['class'] ?? null, [
+                    //     ConsoleLogJob::class,
+                    //     HttpLogJob::class,
+                    //     ModelLogJob::class,
+                    //     QueryLogJob::class,
+                    //     QueueLogJob::class,
+                    //     RouteLogJob::class,
+                    //     TelegramLogJob::class,
+                    //     ViewLogJob::class,
+                    // ])
+                ;
+                break;
+
+            case RouteLogDto::class:
+                /** @var RouteLogDto $dto */
+                $can = config('laravel-helper.route_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.route_log.exclude', $dto)
+                ;
+                break;
+
+            case TelegramLogDto::class:
+                /** @var TelegramLogDto $dto */
+                $type = $dto->type;
+                $can = config('laravel-helper.telegram_log.enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.telegram_log.{$type}.exclude", $dto)
+                ;
+                break;
+
+            case ViewLogDto::class:
+                /** @var ViewLogDto $dto */
+                $type = $dto->type;
+                $can = config('laravel-helper.view_log.enabled')
+                    && $this->notFoundConfigExclude('laravel-helper.view_log.exclude', $dto)
+                ;
+                break;
+
+            default:
+                $can = true;
+        }
+
+        return $can;
     }
 }

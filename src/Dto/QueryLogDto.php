@@ -18,8 +18,7 @@ use Carbon\Carbon;
 class QueryLogDto extends Dto
 {
     public ?string $uuid;
-    public ?string $modelType;
-    public ?string $modelId;
+    public ?string $name;
     public string $query;
     public ?string $cacheKey;
     public bool $isCached;
@@ -71,8 +70,6 @@ class QueryLogDto extends Dto
     protected function mappings(): array
     {
         return [
-            'modelType' => 'model_type',
-            'modelId' => 'model_id',
             'cacheKey' => 'cache_key',
             'isCached' => 'is_cached',
             'isFromCache' => 'is_from_cache',
@@ -104,7 +101,8 @@ class QueryLogDto extends Dto
     public function getDuration(): string
     {
         return Helper::timeSecondsToString(
-            (int)Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000
+            value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
+            withMilliseconds: false,
         );
     }
 
@@ -127,17 +125,10 @@ class QueryLogDto extends Dto
      */
     public function dispatch()
     {
-        if (
-            !config('laravel-helper.query_log.enabled')
-            || app(LaravelHelperService::class)->checkIgnoreTables([QueryLog::getTableName()])
-            || app(LaravelHelperService::class)
-                ->checkExclude('laravel-helper.query_log.exclude', $this->serializeKeys(true)->toArray())
-        ) {
-            return;
+        if (app(LaravelHelperService::class)->canDispatch($this)) {
+            isTesting()
+                ? QueryLogJob::dispatchSync($this)
+                : QueryLogJob::dispatch($this);
         }
-
-        isTesting()
-            ? QueryLogJob::dispatchSync($this)
-            : QueryLogJob::dispatch($this);
     }
 }

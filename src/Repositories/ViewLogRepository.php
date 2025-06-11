@@ -66,7 +66,7 @@ class ViewLogRepository
             connection: config('laravel-helper.view_log.connection'),
             table: config('laravel-helper.view_log.table'),
         )
-            ->whereDate('created_at', '<', now()->subDays($days))
+            ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }
 }

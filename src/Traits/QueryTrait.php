@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
 use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
+use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Exception;
@@ -172,32 +173,32 @@ trait QueryTrait
 
         $sql = app(QueryCacheService::class)->getSqlFromBuilder($builder);
         $models = $this instanceof EloquentBuilder ? $this->getModels() : [$this];
-        $exclude = config('laravel-helper.query_log.exclude') ?? [];
+        $classes = [];
 
         foreach ($models as $model) {
-            /** @var Model|QueryBuilder $model */
-            $tables = $model instanceof Model ? [$model->getTable()] : Helper::sqlTables($sql);
-            if (
-                in_array($model::class, $exclude)
-                || app(LaravelHelperService::class)->checkIgnoreTables($tables)
-                || Helper::arraySearchValues($tables, $exclude)
-            ) {
-                continue;
-            }
+            $classes[$model::class] = true;
+            !($model instanceof Model) ?: $ids[$model::class][] = $model->{$model->getKeyName()};
+        }
 
+        foreach (array_keys($classes) as $class) {
+            /** @var Model|QueryBuilder $model */
             $dto = QueryLogDto::create(
-                modelType: $model::class,
-                modelId: $model instanceof Model ? $model->{$model->getKeyName()} : null,
+                name: Helper::pathClassName($class),
+                // modelId: $model instanceof Model ? $model->{$model->getKeyName()} : null,
                 query: $sql,
                 info: [
+                    'class' => $class,
+                    'tables' => Helper::sqlTables($sql),
                     'fields' => Helper::sqlFields($sql),
+                    'ids' => $ids[$class] ?? null,
                     'size_query' => Helper::stringLength($sql),
                 ],
             );
 
-            !config('laravel-helper.query_log.store_on_start') ?: $dto->dispatch();
-
-            $result[] = $dto;
+            if (app(LaravelHelperService::class)->canDispatch($dto)) {
+                !config('laravel-helper.query_log.store_on_start') ?: $dto->dispatch();
+                $result[] = $dto;
+            }
         }
 
         return $result;
@@ -228,7 +229,7 @@ trait QueryTrait
             $dto->isCached = is_null($isCached) ? false : $isCached;
             $dto->isFromCache = is_null($isFromCache) ? false : $isFromCache;
             $dto->status = $status ? QueryLogStatusEnum::Success : QueryLogStatusEnum::Failed;
-            $dto->isUpdated = config('laravel-helper.query_log.store_on_start') ;
+            $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
             $dto->info = [
                 ...$dto->info,
                 'duration' => $dto->getDuration(),
@@ -264,7 +265,7 @@ trait QueryTrait
         foreach ($arrayQueryLogDto as $dto) {
             /** @var QueryLogDto $dto */
             $dto->status = QueryLogStatusEnum::Failed;
-            $dto->isUpdated = config('laravel-helper.query_log.store_on_start') ;
+            $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
             $dto->info = [
                 ...$dto->info,
                 'duration' => $dto->getDuration(),
@@ -300,7 +301,7 @@ trait QueryTrait
 
             if (
                 $tables
-                && !app(LaravelHelperService::class)->checkIgnoreTables($tables)
+                && !app(LaravelHelperService::class)->notFoundIgnoreTables($tables)
                 && ($withCache === true || is_integer($withCache))
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($withCache)]);
@@ -365,7 +366,7 @@ trait QueryTrait
 
             if (
                 $tables
-                && !app(LaravelHelperService::class)->checkIgnoreTables($tables)
+                && !app(LaravelHelperService::class)->notFoundIgnoreTables($tables)
                 && ($withCache === true || is_integer($withCache))
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($withCache)]);
@@ -589,7 +590,7 @@ trait QueryTrait
             default => $queryCacheService->getTablesFromSql($query),
         };
 
-        if (app(LaravelHelperService::class)->checkIgnoreTables($tables)) {
+        if (app(LaravelHelperService::class)->notFoundIgnoreTables($tables)) {
             return;
         }
 

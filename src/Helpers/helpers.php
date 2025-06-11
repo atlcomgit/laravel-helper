@@ -128,19 +128,22 @@ if (!function_exists('queue')) {
 
 if (!function_exists('sql')) {
     /**
-     * Ставит job в очередь и запускает её
+     * Возвращает сырой sql запрос c заменой плейсхолдеров
      *
      * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string
      */
     function sql(EloquentBuilder|QueryBuilder|string $builder, array $bindings = []): string
     {
-        return (is_object($builder) && method_exists($builder, 'toRawSql'))
-            ? $builder->toRawSql()
-            : Helper::sqlBindings(
+        return match (true) {
+            $builder instanceof EloquentBuilder => $builder->toRawSql(),
+            $builder instanceof QueryBuilder => $builder->toRawSql(),
+
+            default => Helper::sqlBindings(
                 is_string($builder) ? $builder : $builder->toSql(),
                 is_string($builder) ? $bindings : $builder->getBindings()
-            );
+            ),
+        };
     }
 }
 
