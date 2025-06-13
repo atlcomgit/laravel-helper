@@ -49,7 +49,7 @@ class QueryLogFactory extends Factory
 
 
     /**
-     * Задает статус выполнения задачи
+     * Задает статус выполнения очереди
      *
      * @param QueryLogStatusEnum $status
      * @return static

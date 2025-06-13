@@ -2,7 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Defaults;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ExceptionDto;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -102,7 +102,7 @@ class DefaultExceptionHandler extends Handler
                 'code' => 500,
                 'message' => __($e->getMessage()),
                 ...($debugInfo ?: $debugInfo),
-            ], 500, [], Helper::jsonFlags());
+            ], 500, [], Hlp::jsonFlags());
         }
 
         return (true || $request->wantsJson())

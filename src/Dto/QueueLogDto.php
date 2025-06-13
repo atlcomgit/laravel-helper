@@ -14,7 +14,7 @@ use DateInterval;
 use DateTimeInterface;
 
 /**
- * Dto лога задач
+ * Dto лога очереди
  */
 class QueueLogDto extends Dto
 {

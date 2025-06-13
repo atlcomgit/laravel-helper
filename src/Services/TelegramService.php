@@ -2,7 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
@@ -65,7 +65,7 @@ final class TelegramService
                     && in_array($dto->type, [LogLevel::ERROR, LogLevel::WARNING, LogLevel::DEBUG]);
 
                 // Разбиваем большое сообщение на части
-                $messages = Helper::telegramBreakMessage(
+                $messages = Hlp::telegramBreakMessage(
                     $dtoMessage,
                     $hasAttachFile ? self::TELEGRAM_CAPTION_MAX_LENGTH : self::TELEGRAM_MESSAGE_MAX_LENGTH,
                     self::TELEGRAM_MESSAGE_MAX_LENGTH,
@@ -210,7 +210,7 @@ final class TelegramService
 
         Storage::disk('local')->put(
             "{$filePath}/{$fileName}",
-            json_encode($dto->debugData, Helper::jsonFlags() | JSON_PRETTY_PRINT),
+            json_encode($dto->debugData, Hlp::jsonFlags() | JSON_PRETTY_PRINT),
         );
 
         return "{$filePathFull}/{$fileName}";

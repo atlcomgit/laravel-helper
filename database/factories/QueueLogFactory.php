@@ -7,7 +7,7 @@ use Atlcom\LaravelHelper\Models\QueueLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * Фабрика логов задач
+ * Фабрика логов очередей
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<QueueLog>
  */
 class QueueLogFactory extends Factory
@@ -40,7 +40,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает uuid задачи
+     * Задает uuid очереди
      *
      * @param string $uuid
      * @return static
@@ -54,7 +54,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает job_id задачи
+     * Задает job_id очереди
      *
      * @param string $jobId
      * @return static
@@ -68,7 +68,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает job_name задачи
+     * Задает job_name очереди
      *
      * @param string $jobName
      * @return static
@@ -82,7 +82,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает название задачи
+     * Задает название очереди
      *
      * @param string $name
      * @return static
@@ -96,7 +96,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает очередь задачи
+     * Задает очередь очереди
      *
      * @param string $connection
      * @return static
@@ -110,7 +110,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает очередь задачи
+     * Задает очередь очереди
      *
      * @param string $queue
      * @return static
@@ -124,7 +124,7 @@ class QueueLogFactory extends Factory
 
 
     /**
-     * Задает статус выполнения задачи
+     * Задает статус выполнения очереди
      *
      * @param QueueLogStatusEnum $status
      * @return static

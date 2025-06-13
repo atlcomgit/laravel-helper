@@ -2,7 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Listeners;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use DateInterval;
@@ -27,7 +27,7 @@ class TelegramLoggerHandler extends AbstractProcessingHandler
             $message = json_decode($record->message, true) ?? [];
             !is_string($message) ?: $message = json_decode($message, true) ?? [];
             $message = $message
-                ? json_encode($message, Helper::jsonFlags() | JSON_PRETTY_PRINT)
+                ? json_encode($message, Hlp::jsonFlags() | JSON_PRETTY_PRINT)
                 : $record->message;
 
             $maxSize = TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH * TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH;

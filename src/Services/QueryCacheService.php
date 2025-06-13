@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
-use Atlcom\LaravelHelper\Models\QueryLog;
+use Atlcom\Hlp;
 use FilesystemIterator;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,7 +56,7 @@ class QueryCacheService
     {
         $tableCache = config('cache.stores.database.table', 'cache');
 
-        return Helper::arrayDeleteValues(Helper::sqlTables($sql ?? ''), [$tableCache]);
+        return Hlp::arrayDeleteValues(Hlp::sqlTables($sql ?? ''), [$tableCache]);
     }
 
 
@@ -109,11 +108,11 @@ class QueryCacheService
                 ],
                 is_object($tag) => $result[] = $tag::class,
 
-                default => $result[] = Helper::castToString($tag),
+                default => $result[] = Hlp::castToString($tag),
             };
         }
 
-        return array_unique(array_filter([Helper::pathClassName($this::class), ...$result]));
+        return array_unique(array_filter([Hlp::pathClassName($this::class), ...$result]));
     }
 
 
@@ -127,17 +126,17 @@ class QueryCacheService
     public function getQueryKey(?array $tags = null, EloquentBuilder|QueryBuilder|string $builder): ?string
     {
         // Если есть в тегах таблица из исключения, то кеш не используется
-        if (Helper::arraySearchValues($tags, $this->exclude)) {
+        if (Hlp::arraySearchValues($tags, $this->exclude)) {
             return null;
         }
 
-        $hash = Helper::hashXxh128($this->getSqlFromBuilder($builder));
+        $hash = Hlp::hashXxh128($this->getSqlFromBuilder($builder));
 
         switch (true) {
             case $builder instanceof EloquentBuilder:
                 /** @var Model $model */
                 $model = $builder->getModel();
-                $id = $model ? Helper::stringConcat('__', '', $model->{$model->getKeyName()}) : '';
+                $id = $model ? Hlp::stringConcat('__', '', $model->{$model->getKeyName()}) : '';
                 break;
 
             default:
@@ -146,9 +145,9 @@ class QueryCacheService
 
         $tag = (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
             ? ''
-            : Helper::stringConcat('__', $tags);
+            : Hlp::stringConcat('__', $tags);
 
-        return '__' . Helper::stringConcat('__', $tag, $hash, $id);
+        return '__' . Hlp::stringConcat('__', $tag, $hash, $id);
     }
 
 
@@ -236,7 +235,7 @@ class QueryCacheService
         // Если таблица не в игноре и теги не в исключении, то чистим кеш (иначе кеш не сохранялся)
         if (
             app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
-            && !Helper::arraySearchValues($tags, $this->exclude)
+            && !Hlp::arraySearchValues($tags, $this->exclude)
         ) {
             (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
                 ? Cache::driver($this->driver)->tags($tags)->flush()
@@ -253,7 +252,7 @@ class QueryCacheService
      */
     public function forgetCacheByPattern(array $tags): void
     {
-        $tag = '__' . Helper::stringConcat('__', $tags) . '__';
+        $tag = '__' . Hlp::stringConcat('__', $tags) . '__';
 
         switch ($driver = Cache::driver($this->driver)->getStore()::class) {
 

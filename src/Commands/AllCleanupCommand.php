@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Commands;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
@@ -22,6 +22,7 @@ class AllCleanupCommand extends DefaultCommand
     protected $signature = 'cleanup:all';
     protected $description = 'Очистка всех логов';
     protected $isolated = true;
+    protected bool $logEnabled = true;
 
 
     public function __construct(
@@ -66,13 +67,13 @@ class AllCleanupCommand extends DefaultCommand
                 || $cleanupViewLog > 0
             );
         $this->telegramComment = [
-            'ConsoleLog' => Helper::stringPlural($cleanupConsoleLog, ['записей', 'запись', 'записи']),
-            'HttpLog' => Helper::stringPlural($cleanupHttpLog, ['записей', 'запись', 'записи']),
-            'ModelLog' => Helper::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
-            'QueryLog' => Helper::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
-            'QueueLog' => Helper::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
-            'RouteLog' => Helper::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
-            'ViewLog' => Helper::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
+            'ConsoleLog' => Hlp::stringPlural($cleanupConsoleLog, ['записей', 'запись', 'записи']),
+            'HttpLog' => Hlp::stringPlural($cleanupHttpLog, ['записей', 'запись', 'записи']),
+            'ModelLog' => Hlp::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
+            'QueryLog' => Hlp::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
+            'QueueLog' => Hlp::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
+            'RouteLog' => Hlp::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
+            'ViewLog' => Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
         ];
 
         $this->outputEol($this->telegramComment, 'fg=green');

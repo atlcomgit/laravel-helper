@@ -32,8 +32,17 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class DefaultDto extends Dto implements Arrayable
 {
-    /** Включает опцию авто приведения объектов при заполнении dto */
-    public const AUTO_CASTS_OBJECTS_ENABLED = true;
+    /**
+     * @inheritDoc
+     * Включает опцию авто приведения объектов при заполнении dto
+     */
+    const AUTO_CASTS_OBJECTS_ENABLED = true;
+
+    /**
+     * @inheritDoc
+     * Включает реализацию интерфейса ArrayAccess для работы с dto как с массивом
+     */
+    const INTERFACE_ARRAY_ACCESS_ENABLED = true;
 
 
     /**

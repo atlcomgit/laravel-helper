@@ -8,7 +8,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Событие логирования задач
+ * Событие логирования очередей
  */
 class QueueLogEvent
 {

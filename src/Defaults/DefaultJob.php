@@ -13,9 +13,27 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Абстрактный класс для задач
+ * Абстрактный класс для очередей
  */
 abstract class DefaultJob implements ShouldQueue, Arrayable
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, ArrayableTrait;
+
+
+    /** Флаг включения логирования очереди */
+    public bool $logEnabled = false;
+
+
+    /**
+     * Устанавливает флаг логирования очереди
+     *
+     * @param bool|null $enabled
+     * @return static
+     */
+    public function withLog(?bool $enabled = null): static
+    {
+        $this->logEnabled = $enabled ?? true;
+
+        return $this;
+    }
 }

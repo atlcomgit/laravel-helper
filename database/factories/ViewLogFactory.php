@@ -52,7 +52,7 @@ class ViewLogFactory extends Factory
 
 
     /**
-     * Задает статус выполнения задачи
+     * Задает статус выполнения рендеринга
      *
      * @param ViewLogStatusEnum $status
      * @return static

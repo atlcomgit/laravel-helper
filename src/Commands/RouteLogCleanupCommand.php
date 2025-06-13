@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Commands;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 
@@ -38,7 +38,7 @@ class RouteLogCleanupCommand extends DefaultCommand
         $cleanup = $this->routeLogService->cleanup();
 
         $this->telegramEnabled = (isLocal() || isProd()) && $cleanup > 0;
-        $this->telegramComment = 'Зарегистрировано ' . Helper::stringPlural($cleanup, ['роутов', 'роут', 'роута']);
+        $this->telegramComment = 'Зарегистрировано ' . Hlp::stringPlural($cleanup, ['роутов', 'роут', 'роута']);
 
         $this->outputEol($this->telegramComment, 'fg=green');
 

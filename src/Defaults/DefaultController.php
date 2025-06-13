@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Defaults;
 
-use Atlcom\Helper;
-use Atlcom\LaravelHelper\Dto\ViewLogDto;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
-use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller;
 use Throwable;
 
@@ -70,13 +68,10 @@ class DefaultController extends Controller
             $dto = app(ViewLogService::class)->createViewLog(name: $view);
 
 
-            if (config('laravel-helper.view_cache.enabled') && $this->useWithCache !== false) {
-                $render = app(ViewCacheService::class)
-                    ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->useWithCache);
-
-            } else {
-                $render = view($view, $data, $mergeData)->render();
-            }
+            $render = (config('laravel-helper.view_cache.enabled') && $this->useWithCache !== false)
+                ? app(ViewCacheService::class)
+                    ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->useWithCache)
+                : view($view, $data, $mergeData)->render();
 
             $dto->status = ViewLogStatusEnum::Success;
 
@@ -84,7 +79,7 @@ class DefaultController extends Controller
             $dto->status = ViewLogStatusEnum::Failed;
             $dto->info = [
                 ...($dto->info ?? []),
-                'exception' => Helper::exceptionToArray($exception),
+                'exception' => Hlp::exceptionToArray($exception),
             ];
 
             throw $exception;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use BackedEnum;
 
 /**
@@ -33,7 +33,7 @@ trait ArrayableTrait
     {
         return array_map(fn ($item) => match (true) {
             $item instanceof BackedEnum => $item->value,
-            is_string($item) && Helper::regexpValidateJson($item) => $this->toArrayRecursive(json_decode($item, true)),
+            is_string($item) && Hlp::regexpValidateJson($item) => $this->toArrayRecursive(json_decode($item, true)),
             is_object($item) && method_exists($item, 'toArray') => $this->toArrayRecursive($item->toArray()),
             is_object($item) && method_exists($item, 'all') => $this->toArrayRecursive($item->all()),
             is_object($item) => (array)$item,

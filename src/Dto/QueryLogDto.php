@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Models\QueryLog;
@@ -100,7 +100,7 @@ class QueryLogDto extends Dto
      */
     public function getDuration(): string
     {
-        return Helper::timeSecondsToString(
+        return Hlp::timeSecondsToString(
             value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
             withMilliseconds: false,
         );
@@ -114,7 +114,7 @@ class QueryLogDto extends Dto
      */
     public function getMemory(): string
     {
-        return Helper::sizeBytesToString(memory_get_usage() - $this->startMemory);
+        return Hlp::sizeBytesToString(memory_get_usage() - $this->startMemory);
     }
 
 

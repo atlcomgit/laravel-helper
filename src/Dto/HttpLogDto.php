@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\HttpLogJob;
@@ -106,7 +106,7 @@ class HttpLogDto extends Dto
 
             'info' => [
                 ...($info ?? []),
-                'request_data_size' => Helper::sizeBytesToString(
+                'request_data_size' => Hlp::sizeBytesToString(
                     Str::length(
                         match (true) {
                             $request instanceof RequestIn => $request->getContent(),
@@ -168,14 +168,14 @@ class HttpLogDto extends Dto
                     ...($info ?? []),
                     ...(($startAt = ($request->header(HttpLogService::HTTP_HEADER_TIME) ?? [])[0] ?? null)
                         ? [
-                            'duration' => Helper::timeSecondsToString(
+                            'duration' => Hlp::timeSecondsToString(
                                 value: Carbon::createFromTimestampMs($startAt)->diffInMilliseconds() / 1000,
                                 withMilliseconds: true,
                             ),
                         ]
                         : []
                     ),
-                    'response_data_size' => Helper::sizeBytesToString(
+                    'response_data_size' => Hlp::sizeBytesToString(
                         Str::length(
                             match (true) {
                                 $response instanceof ResponseIn => $response->getContent(),

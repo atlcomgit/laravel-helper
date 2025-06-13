@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Dto;
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
@@ -15,15 +15,7 @@ use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
-use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
-use Atlcom\LaravelHelper\Jobs\HttpLogJob;
-use Atlcom\LaravelHelper\Jobs\ModelLogJob;
-use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
-use Atlcom\LaravelHelper\Jobs\RouteLogJob;
-use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
-use Atlcom\LaravelHelper\Jobs\ViewLogJob;
-use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
  * Сервис пакета laravel-helper
@@ -37,7 +29,7 @@ class LaravelHelperService
      */
     public function checkConfig(): void
     {
-        $config = Helper::arrayDot((array)config('laravel-helper') ?? []);
+        $config = Hlp::arrayDot((array)config('laravel-helper') ?? []);
 
         !(
             ($config[$param = 'console_log.queue'] ?? null)
@@ -89,14 +81,14 @@ class LaravelHelperService
         $data = $dto->serializeKeys(true)->toArray();
 
         if ($exclude = config($configKey)) {
-            $data = Helper::arrayDot($data);
+            $data = Hlp::arrayDot($data);
             $dataCheck = [];
 
             foreach ($data as $key => $val) {
                 $dataCheck[] = "{$key}={$val}";
             }
 
-            return empty(Helper::arraySearchValues($dataCheck, $exclude));
+            return empty(Hlp::arraySearchValues($dataCheck, $exclude));
         }
 
         return true;
@@ -125,12 +117,12 @@ class LaravelHelperService
             'pg_attrdef',
         ];
 
-        return empty(Helper::arraySearchValues($tables, $ignoreTables));
+        return empty(Hlp::arraySearchValues($tables, $ignoreTables));
     }
 
 
     /**
-     * Проверяет на возможность отправки Dto в очередь для обработки в job
+     * Проверяет на возможность отправки Dto в очередь для обработки
      *
      * @return bool
      */
@@ -164,8 +156,10 @@ class LaravelHelperService
                 /** @var QueryLogDto $dto */
                 $can = config('laravel-helper.query_log.enabled')
                     && $this->notFoundConfigExclude('laravel-helper.query_log.exclude', $dto)
-                    && !Helper::arraySearchValues($dto->info['tables'], [config('laravel-helper.query_log.table')])
-                    // && $this->notFoundIgnoreTables($dto->info['tables'])
+                    && !Hlp::arraySearchValues(
+                        $dto->info['tables'] ?? [],
+                        [config('laravel-helper.query_log.table')],
+                    )
                 ;
                 break;
 
@@ -173,16 +167,7 @@ class LaravelHelperService
                 /** @var QueueLogDto $dto */
                 $can = config('laravel-helper.queue_log.enabled')
                     && $this->notFoundConfigExclude('laravel-helper.queue_log.exclude', $dto)
-                    // && !in_array($dto->info['class'] ?? null, [
-                    //     ConsoleLogJob::class,
-                    //     HttpLogJob::class,
-                    //     ModelLogJob::class,
-                    //     QueryLogJob::class,
-                    //     QueueLogJob::class,
-                    //     RouteLogJob::class,
-                    //     TelegramLogJob::class,
-                    //     ViewLogJob::class,
-                    // ])
+                    && (($dto->info['class'] ?? null) !== QueueLogJob::class)
                 ;
                 break;
 

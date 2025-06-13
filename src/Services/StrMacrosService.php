@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -20,7 +20,7 @@ class StrMacrosService
      */
     public static function setMacros(): void
     {
-        if (method_exists(Helper::class, 'intervalBetween')) {
+        if (method_exists(Hlp::class, 'intervalBetween')) {
             /**
              * @see \Tests\Unit\Helpers\StrMacrosTest::inInterval()
              * @example Str::intervalBetween('2025.01.02', ['2025.01.01', '2025.01.03'])
@@ -28,7 +28,7 @@ class StrMacrosService
             Str::macro(
                 'intervalBetween',
                 fn (mixed $value, mixed ...$intervals): array
-                => Helper::intervalBetween($value, ...$intervals)
+                => Hlp::intervalBetween($value, ...$intervals)
             );
 
             /** 
@@ -39,16 +39,16 @@ class StrMacrosService
                 'intervalBetween',
                 function (mixed ...$intervals): array {
                     /** @var Stringable $this */
-                    return Helper::intervalBetween($this->value, ...$intervals);
+                    return Hlp::intervalBetween($this->value, ...$intervals);
                 }
             );
         }
 
         // Stringable::macro(
-        //     'xxx',
+        //     'example',
         //     function (mixed $param): Stringable {
         //         /** @var Stringable $this */
-        //         return new Stringable((string)Helper::xxx($this->value, $param));
+        //         return new Stringable((string)Hlp::example($this->value, $param));
         //     }
         // );
     }

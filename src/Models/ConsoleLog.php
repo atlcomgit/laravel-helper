@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $uuid
- * @property string $command
  * @property string $name
+ * @property string $command
  * @property string $cli
  * @property ?string $output
  * @property ?int $result
@@ -45,8 +45,8 @@ class ConsoleLog extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
-        'command' => 'string',
         'name' => 'string',
+        'command' => 'string',
         'cli' => 'string',
         'output' => 'string',
         'result' => 'integer',

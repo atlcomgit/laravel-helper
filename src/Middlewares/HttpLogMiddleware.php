@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Middlewares;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Carbon\Carbon;
 use Closure;
@@ -42,7 +42,7 @@ class HttpLogMiddleware
             ?: HttpLogDto::createByResponse(static::$uuid, $request, $response, [
                 ...(static::$startAt
                     ? [
-                        'duration' => Helper::timeSecondsToString(
+                        'duration' => Hlp::timeSecondsToString(
                             value: Carbon::createFromTimestampMs(static::$startAt)->diffInMilliseconds() / 1000,
                             withMilliseconds: true,
                         ),

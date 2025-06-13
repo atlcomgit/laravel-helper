@@ -21,36 +21,36 @@ return new class extends Migration {
             $table->id();
 
             $table->uuid('uuid')->nullable(false)->index()
-                ->comment('Uuid задачи');
+                ->comment('Uuid очереди');
 
             $table->string('job_id')->nullable(false)->index()
-                ->comment('Идентификатор задачи');
+                ->comment('Идентификатор очереди');
             $table->string('job_name')->nullable(false)
-                ->comment('Название класса задачи');
+                ->comment('Название класса очереди');
             $table->string('name')->nullable(false)->index()
-                ->comment('Название задачи');
+                ->comment('Название очереди');
             $table->string('connection')->nullable(false)
-                ->comment('Подключение задачи');
+                ->comment('Подключение очереди');
             $table->string('queue')->nullable(false)
                 ->comment('Название очереди');
             $table->longText('payload')->nullable(true)
-                ->comment('Полезная нагрузка задачи');
+                ->comment('Полезная нагрузка очереди');
             $table->datetime('delay')->nullable(true)
-                ->comment('Задержка выполнения задачи');
+                ->comment('Задержка выполнения очереди');
             $table->integer('attempts')->nullable(true)
-                ->comment('Попытка запуска задачи');
+                ->comment('Попытка запуска очереди');
             $table->enum('status', QueueLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(QueueLogStatusEnum::getDefault())
-                ->comment('Статус выполнения задачи');
+                ->comment('Статус выполнения очереди');
             $table->longText('exception')->nullable(true)
-                ->comment('Исключение задачи');
+                ->comment('Исключение очереди');
             $table->jsonb('info')->nullable(true)
-                ->comment('Информация о выполнении задачи');
+                ->comment('Информация о выполнении очереди');
 
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
 
-            $table->comment('Лог задач');
+            $table->comment('Лог очередей');
         });
     }
 

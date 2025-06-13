@@ -2,7 +2,7 @@
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
@@ -254,7 +254,7 @@ class ModelLogService
                             file_put_contents(
                                 $file,
                                 now()->format('d-m-Y H:i:s') . ' '
-                                . json_encode($dto, Helper::jsonFlags())
+                                . json_encode($dto, Hlp::jsonFlags())
                                 . PHP_EOL,
                                 FILE_APPEND,
                             );

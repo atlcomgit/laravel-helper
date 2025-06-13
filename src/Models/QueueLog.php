@@ -13,7 +13,7 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Модель: Лог задач
+ * Модель: Лог очереди
  * 
  * @see \Atlcom\LaravelHelper\Dto\QueueLogDto
  * @see ./database/migrations/2025_05_30_000002_create_queue_logs_table.php

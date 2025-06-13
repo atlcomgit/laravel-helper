@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Illuminate\Support\Facades\Cache;
 
@@ -55,10 +55,10 @@ class ViewCacheService
      */
     public function getCacheKey(string $view, array $data = [], array $mergeData = [], array $ignoreData = []): string
     {
-        $data = Helper::arrayDeleteKeys($data, $ignoreData);
+        $data = Hlp::arrayDeleteKeys($data, $ignoreData);
 
-        return Helper::hashXxh128(
-            $view . json_encode($data, Helper::jsonFlags()) . json_encode($mergeData, Helper::jsonFlags())
+        return Hlp::hashXxh128(
+            $view . json_encode($data, Hlp::jsonFlags()) . json_encode($mergeData, Hlp::jsonFlags())
         );
     }
 
@@ -108,7 +108,7 @@ class ViewCacheService
                     $dto->isCached = true;
                 }
 
-                $dto->cacheKey = Helper::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
+                $dto->cacheKey = Hlp::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
                 break;
         }
 

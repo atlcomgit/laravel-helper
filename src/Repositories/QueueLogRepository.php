@@ -8,7 +8,7 @@ use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
- * Репозиторий логирования задач
+ * Репозиторий логирования очередей
  */
 class QueueLogRepository
 {
@@ -19,7 +19,7 @@ class QueueLogRepository
 
 
     /**
-     * Создает запись лога задачи
+     * Создает запись лога очереди
      *
      * @param QueueLogDto $dto
      * @return void
@@ -36,7 +36,7 @@ class QueueLogRepository
 
 
     /**
-     * Обновляет запись лога задачи
+     * Обновляет запись лога очереди
      *
      * @param QueueLogDto $dto
      * @return void
@@ -54,7 +54,7 @@ class QueueLogRepository
 
 
     /**
-     * Удаляет записи логов задач старше указанного количества дней
+     * Удаляет записи логов очередей старше указанного количества дней
      *
      * @param int $days
      * @return int

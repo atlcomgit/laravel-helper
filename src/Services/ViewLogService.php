@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Repositories\ViewLogRepository;
 
@@ -76,7 +76,7 @@ class ViewLogService
             ...($dto->info ?? []),
             'duration' => $dto->getDuration(),
             'memory' => $dto->getMemory(),
-            'size_render' => Helper::stringLength($render),
+            'size_render' => Hlp::stringLength($render),
         ];
 
         $dto->dispatch();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -20,8 +20,8 @@ use Carbon\Carbon;
 class ConsoleLogDto extends Dto
 {
     public ?string $uuid;
-    public string $command;
     public string $name;
+    public string $command;
     public string $cli;
     public ?string $output;
     public ?int $result;
@@ -29,6 +29,7 @@ class ConsoleLogDto extends Dto
     public ?string $exception;
     public ?array $info;
 
+    public ?bool $withLog;
     public int $storeInterval;
     public string $startTime;
     public int $startMemory;
@@ -49,6 +50,7 @@ class ConsoleLogDto extends Dto
             'cli' => implode(' ', $_SERVER['argv']),
             'status' => ConsoleLogStatusEnum::getDefault(),
 
+            'withLog' => false,
             'storeInterval' => config('laravel-helper.console_log.store_interval_seconds', 10),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
@@ -81,7 +83,7 @@ class ConsoleLogDto extends Dto
     {
         $this->onlyKeys(ConsoleLog::getModelKeys())
             ->onlyNotNull()
-            ->excludeKeys(['storeInterval', 'startTime', 'startMemory', 'storedAt', 'isUpdated']);
+            ->excludeKeys(['withLog', 'storeInterval', 'startTime', 'startMemory', 'storedAt', 'isUpdated']);
     }
 
 
@@ -92,7 +94,7 @@ class ConsoleLogDto extends Dto
      */
     public function getDuration(): string
     {
-        return Helper::timeSecondsToString(
+        return Hlp::timeSecondsToString(
             value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
             withMilliseconds: true,
         );
@@ -106,7 +108,7 @@ class ConsoleLogDto extends Dto
      */
     public function getMemory(): string
     {
-        return Helper::sizeBytesToString(memory_get_usage() - $this->startMemory);
+        return Hlp::sizeBytesToString(memory_get_usage() - $this->startMemory);
     }
 
 
@@ -136,7 +138,7 @@ class ConsoleLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
+        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withLog) {
             isTesting()
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);

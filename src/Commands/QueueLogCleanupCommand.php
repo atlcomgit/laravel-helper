@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Commands;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 
 /**
- * Консольная команда очистки логов задач
+ * Консольная команда очистки логов очередей
  */
 class QueueLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'cleanup:queue_logs';
-    protected $description = 'Очистка логов задач';
+    protected $description = 'Очистка логов очередей';
     protected $isolated = true;
 
 
@@ -38,7 +38,7 @@ class QueueLogCleanupCommand extends DefaultCommand
         $cleanup = $this->queueLogService->cleanup(config('laravel-helper.queue_log.cleanup_days'));
 
         $this->telegramEnabled = (isLocal() || isProd()) && $cleanup > 0;
-        $this->telegramComment = 'Удалено ' . Helper::stringPlural($cleanup, ['записей', 'запись', 'записи']);
+        $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);
 
         $this->outputEol($this->telegramComment, 'fg=green');
 

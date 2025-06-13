@@ -2,7 +2,6 @@
 
 namespace Atlcom\LaravelHelper\Defaults;
 
-use Atlcom\Helper;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
@@ -19,9 +18,15 @@ use Throwable;
 abstract class DefaultCommand extends Command
 {
     protected bool $isTesting;
+    /** Флаг включения отправки сообщения в телеграм */
     protected bool $telegramEnabled = true;
+    /** Комментарий для отправки сообщения в телеграм */
     protected mixed $telegramComment = null;
+    /** Флаг включения логирования консольной команды */
+    protected bool $logEnabled = false;
+    /** Буфер вывода stdout для логирования */
     protected ?string $outputBuffer = null;
+    /** Dto логирования консольной команды */
     protected ConsoleLogDto $consoleLogDto;
 
 
@@ -31,6 +36,7 @@ abstract class DefaultCommand extends Command
         if (!Str::contains($this->signature, '--telegram')) {
             $this->signature .= '
                 { --telegram : Флаг отправки события в телеграм }
+                { --with-log : Флаг включения логирования команды }
             ';
         }
 
@@ -52,8 +58,9 @@ abstract class DefaultCommand extends Command
             $this->isTesting = isTesting();
 
             $this->consoleLogDto = ConsoleLogDto::create(
-                command: Helper::pathClassName($this::class),
-                name: $this->name,
+                name: Hlp::pathClassName($this::class),
+                command: $this->name,
+                withLog: ($this->hasOption('with-log') && $this->option('with-log')) || $this->logEnabled,
             );
 
             !config('laravel-helper.console_log.store_on_start', true) ?: $this->consoleLogDto->store(true);
@@ -90,7 +97,7 @@ abstract class DefaultCommand extends Command
             if (
                 $this->telegramEnabled
                 && $this->hasOption('telegram')
-                && Helper::castToBool($this->option('telegram'))
+                && Hlp::castToBool($this->option('telegram'))
             ) {
 
                 telegram([
@@ -131,7 +138,7 @@ abstract class DefaultCommand extends Command
      */
     public function output(mixed $message = '', ?string $style = '', bool $withEol = false): void
     {
-        $message = __(Helper::castToString($message));
+        $message = __(Hlp::castToString($message));
 
         // $lines = explode(PHP_EOL, $message);
         // $lines = array_map(
@@ -161,7 +168,7 @@ abstract class DefaultCommand extends Command
      */
     public function outputEol(mixed $message = '', ?string $style = ''): void
     {
-        $this->output(Helper::castToString($message), $style, true);
+        $this->output(Hlp::castToString($message), $style, true);
     }
 
 
@@ -173,7 +180,7 @@ abstract class DefaultCommand extends Command
      */
     public function outputBold(mixed $message = ''): void
     {
-        $message = __(Helper::castToString($message));
+        $message = __(Hlp::castToString($message));
         $this->output($message, 'options=bold');
     }
 }

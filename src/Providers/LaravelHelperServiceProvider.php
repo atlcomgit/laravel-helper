@@ -162,7 +162,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
         $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
 
-        // Логирование задач
+        // Логирование очередей
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
         Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
         Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));

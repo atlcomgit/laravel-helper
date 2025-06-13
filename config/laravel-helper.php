@@ -1,6 +1,6 @@
 <?php
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
@@ -68,7 +68,7 @@ return [
         'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', false),
         'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
-        'exclude' => (array)(Helper::envGet('CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -93,11 +93,11 @@ return [
         'only_response' => (bool)env('HTTP_LOG_ONLY_RESPONSE', true),
         'in' => [
             'enabled' => (bool)env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
-            'exclude' => (array)(Helper::envGet('HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
         ],
         'out' => [
             'enabled' => (bool)env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
-            'exclude' => (array)(Helper::envGet('HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
         ],
         'cleanup_days' => (int)env('HTTP_LOG_CLEANUP_DAYS', 7),
 
@@ -126,7 +126,7 @@ return [
         'drivers' => (array)(explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value))),
         'file' => (string)env('MODEL_LOG_FILE', storage_path('logs/model.log')),
         'cleanup_days' => (int)env('MODEL_LOG_CLEANUP_DAYS', 7),
-        'exclude' => (array)(Helper::envGet('MODEL_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('MODEL_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -139,12 +139,12 @@ return [
         'connection' => (string)env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         'table' => (string)env('ROUTE_LOG_TABLE', 'helper_route_logs'),
         'model' => RouteLog::class,
-        'exclude' => (array)(Helper::envGet('ROUTE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('ROUTE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
     /**
-     * QueueLog. Логирование задач
+     * QueueLog. Логирование очередей
      */
     'queue_log' => [
         'enabled' => (bool)env('QUEUE_LOG_ENABLED', false),
@@ -154,7 +154,7 @@ return [
         'model' => QueueLog::class,
         'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', false),
-        'exclude' => (array)(Helper::envGet('QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -179,7 +179,7 @@ return [
             'token' => (string)env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
-            'exclude' => (array)(Helper::envGet('TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов ошибок
@@ -192,7 +192,7 @@ return [
             'token' => (string)env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
-            'exclude' => (array)(Helper::envGet('TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов предупреждений
@@ -205,7 +205,7 @@ return [
             'token' => (string)env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Helper::envGet('TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
 
         // Настройка отправки логов отладки
@@ -218,7 +218,7 @@ return [
             'token' => (string)env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Helper::envGet('TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
     ],
 
@@ -289,7 +289,7 @@ return [
         'model' => QueryLog::class,
         'cleanup_days' => (int)env('QUERY_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('QUERY_LOG_STORE_ON_START', false),
-        'exclude' => (array)(Helper::envGet('QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -299,8 +299,8 @@ return [
     'query_cache' => [
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
         'driver' => (string)env('QUERY_CACHE_DRIVER'),
-        'ttl' => Helper::castToInt(env('QUERY_CACHE_TTL', 3600)),
-        'exclude' => (array)(Helper::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        'ttl' => Hlp::castToInt(env('QUERY_CACHE_TTL', 3600)),
+        'exclude' => (array)(Hlp::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -315,7 +315,7 @@ return [
         'model' => ViewLog::class,
         'cleanup_days' => (int)env('VIEW_LOG_CLEANUP_DAYS', 7),
         'store_on_start' => (bool)env('VIEW_LOG_STORE_ON_START', false),
-        'exclude' => (array)(Helper::envGet('VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -325,7 +325,7 @@ return [
     'view_cache' => [
         'enabled' => (bool)env('VIEW_CACHE_ENABLED', true),
         'driver' => (string)env('VIEW_CACHE_DRIVER'),
-        'ttl' => Helper::castToInt(env('VIEW_CACHE_TTL', 3600)),
-        'exclude' => (array)(Helper::envGet('VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        'ttl' => Hlp::castToInt(env('VIEW_CACHE_TTL', 3600)),
+        'exclude' => (array)(Hlp::envGet('VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
     ],
 ];

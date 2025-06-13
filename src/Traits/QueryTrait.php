@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
 use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
-use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Exception;
@@ -183,15 +182,15 @@ trait QueryTrait
         foreach (array_keys($classes) as $class) {
             /** @var Model|QueryBuilder $model */
             $dto = QueryLogDto::create(
-                name: Helper::pathClassName($class),
+                name: Hlp::pathClassName($class),
                 // modelId: $model instanceof Model ? $model->{$model->getKeyName()} : null,
                 query: $sql,
                 info: [
                     'class' => $class,
-                    'tables' => Helper::sqlTables($sql),
-                    'fields' => Helper::sqlFields($sql),
+                    'tables' => Hlp::sqlTables($sql),
+                    'fields' => Hlp::sqlFields($sql),
                     'ids' => $ids[$class] ?? null,
-                    'size_query' => Helper::stringLength($sql),
+                    'size_query' => Hlp::stringLength($sql),
                 ],
             );
 
@@ -234,7 +233,7 @@ trait QueryTrait
                 ...($dto->info ?? []),
                 'duration' => $dto->getDuration(),
                 'memory' => $dto->getMemory(),
-                'size_result' => Helper::stringLength(json_encode($result, Helper::jsonFlags())),
+                'size_result' => Hlp::stringLength(json_encode($result, Hlp::jsonFlags())),
                 'count' => match (true) {
                     $result instanceof Collection => $result->count(),
                     is_array($result) => count($result),
@@ -270,7 +269,7 @@ trait QueryTrait
                 ...($dto->info ?? []),
                 'duration' => $dto->getDuration(),
                 'memory' => $dto->getMemory(),
-                'exception' => Helper::exceptionToArray($exception),
+                'exception' => Hlp::exceptionToArray($exception),
             ];
 
             $dto->dispatch();
@@ -422,16 +421,16 @@ trait QueryTrait
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileInsert($this->getQuery(), $query),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof QueryBuilder => sql(
                     $this->getGrammar()->compileInsert($this, $query),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof Connection => sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
-                default => Helper::castToString($query),
+                default => Hlp::castToString($query),
             };
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
@@ -476,16 +475,16 @@ trait QueryTrait
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileUpdate($this->getQuery(), $query),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof QueryBuilder => sql(
                     $this->getGrammar()->compileUpdate($this, $query),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof Connection => sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
-                default => Helper::castToString($query),
+                default => Hlp::castToString($query),
             };
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
@@ -530,16 +529,16 @@ trait QueryTrait
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileDelete($this->getQuery()),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof QueryBuilder => sql(
                     $this->getGrammar()->compileDelete($this),
-                    [...(Helper::castToArray($query) ?? []), ...$this->getBindings()],
+                    [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
                 $this instanceof Connection => sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
-                default => Helper::castToString($query),
+                default => Hlp::castToString($query),
             };
 
             $arrayQueryLogDto = $this->createQueryLog($sql);

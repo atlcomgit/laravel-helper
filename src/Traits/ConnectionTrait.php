@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Databases\Builders\QueryBuilder;
 use Throwable;
 use Atlcom\LaravelHelper\Traits\QueryTrait;
@@ -116,7 +116,7 @@ trait ConnectionTrait
             $status = false;
             $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
             $result = parent::statement($query, $bindings);
-            !($result && Helper::sqlHasWrite($query)) ?: $this->flushCache($query, $bindings);
+            !($result && Hlp::sqlHasWrite($query)) ?: $this->flushCache($query, $bindings);
             $status = true;
 
         } catch (Throwable $exception) {

@@ -1,7 +1,7 @@
 <?php
 
 use Atlcom\Dto;
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ExceptionDto;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Listeners\TelegramLogger;
@@ -139,7 +139,7 @@ if (!function_exists('sql')) {
             $builder instanceof EloquentBuilder => $builder->toRawSql(),
             $builder instanceof QueryBuilder => $builder->toRawSql(),
 
-            default => Helper::sqlBindings(
+            default => Hlp::sqlBindings(
                 is_string($builder) ? $builder : $builder->toSql(),
                 is_string($builder) ? $bindings : $builder->getBindings()
             ),
@@ -157,7 +157,7 @@ if (!function_exists('json')) {
      */
     function json(mixed $data): string
     {
-        return json_encode($data, Helper::jsonFlags()) ?? '{}';
+        return json_encode($data, Hlp::jsonFlags()) ?? '{}';
     }
 }
 

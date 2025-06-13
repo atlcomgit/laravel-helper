@@ -4,17 +4,10 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
-use Atlcom\Helper;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
-use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
-use Atlcom\LaravelHelper\Jobs\HttpLogJob;
-use Atlcom\LaravelHelper\Jobs\ModelLogJob;
-use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
-use Atlcom\LaravelHelper\Jobs\RouteLogJob;
-use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
-use Atlcom\LaravelHelper\Jobs\ViewLogJob;
 use Atlcom\LaravelHelper\Repositories\QueueLogRepository;
 use Carbon\Carbon;
 use Illuminate\Queue\Events\JobFailed;
@@ -22,7 +15,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 
 /**
- * Сервис логирования задач
+ * Сервис логирования очередей
  */
 class QueueLogService
 {
@@ -33,7 +26,7 @@ class QueueLogService
 
 
     /**
-     * Ставит логирование задачи в очередь
+     * Ставит логирование очереди в очередь
      *
      * @param JobProcessing|JobProcessed|JobFailed $event
      * @return void
@@ -46,40 +39,35 @@ class QueueLogService
             !config('laravel-helper.queue_log.enabled')
             || (($event instanceof JobProcessing) && !config('laravel-helper.queue_log.store_on_start'))
             || ($name === QueueLogJob::class)
-            || in_array($name, [
-                ConsoleLogJob::class,
-                HttpLogJob::class,
-                ModelLogJob::class,
-                QueryLogJob::class,
-                RouteLogJob::class,
-                TelegramLogJob::class,
-                ViewLogJob::class,
-            ])
         ) {
             return;
         }
 
         $uuid = $event->job->uuid();
         $memoryCacheKey = "job_memory_{$uuid}";
-        !($event instanceof JobProcessing) ?: Helper::cacheRuntimeSet($memoryCacheKey, memory_get_usage());
+        !($event instanceof JobProcessing) ?: Hlp::cacheRuntimeSet($memoryCacheKey, memory_get_usage());
         $payload = json_decode($event->job->getRawBody(), true);
 
-        $command = unserialize($payload['data']['command']);
+        $command = unserialize($payload['data']['command'] ?? '');
         $command = (is_object($command) && method_exists($command, 'toArray'))
             ? $command->toArray()
-            : json_decode(json_encode($command, Helper::jsonFlags()), true);
+            : json_decode(json_encode($command, Hlp::jsonFlags()), true);
         $payload['data']['command'] = $command;
+
+        if (!(is_array($command) && ($command['logEnabled'] ?? false))) {
+            return;
+        }
 
         $dto = QueueLogDto::create(
             uuid: $uuid,
             jobId: $event->job->getJobId(),
-            jobName: Helper::pathClassName($event->job::class),
-            name: Helper::pathClassName($name),
+            jobName: Hlp::pathClassName($event->job::class),
+            name: Hlp::pathClassName($name),
             connection: $event->job->getConnectionName(),
             queue: $event->job->getQueue(),
             payload: $payload, // $event->job->getRawBody(),
             attempts: $event->job->attempts(),
-            exception: $event instanceof JobFailed ? Helper::exceptionToString($event->exception) : null,
+            exception: $event instanceof JobFailed ? Hlp::exceptionToString($event->exception) : null,
             isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
             && config('laravel-helper.queue_log.store_on_start'),
             status: match (true) {
@@ -93,12 +81,12 @@ class QueueLogService
             ?: $dto->merge([
                 'info' => [
                     'class' => $name,
-                    'duration' => Helper::timeSecondsToString(
+                    'duration' => Hlp::timeSecondsToString(
                         value: Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
                         withMilliseconds: true,
                     ),
-                    'memory' => Helper::sizeBytesToString(
-                        memory_get_usage() - Helper::cacheRuntimeGet($memoryCacheKey, memory_get_usage())
+                    'memory' => Hlp::sizeBytesToString(
+                        memory_get_usage() - Hlp::cacheRuntimeGet($memoryCacheKey, memory_get_usage())
                     ),
                     'deleted' => $event->job->isDeleted(),
                     'released' => $event->job->isReleased(),
@@ -111,7 +99,7 @@ class QueueLogService
 
 
     /**
-     * Сохраняет запись лога задачи
+     * Сохраняет запись лога очереди
      *
      * @param QueueLogDto $dto
      * @return void
@@ -125,7 +113,7 @@ class QueueLogService
 
 
     /**
-     * Очищает логи задач
+     * Очищает логи очередей
      *
      * @param int $days
      * @return int
