@@ -20,50 +20,74 @@ class BuilderMacrosService
     public static function setMacros(): void
     {
         if (config('laravel-helper.query_cache.enabled')) {
-            EloquentBuilder::macro('withCache', function (int|bool|null $seconds = null) {
+            EloquentBuilder::macro('withQueryCache', function (int|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var int|bool|null $seconds */
-                return $this->setUseWithCache($seconds);
+                return $this->withQueryCache($seconds);
             });
 
-            EloquentBuilder::macro('withoutCache', function () {
+            EloquentBuilder::macro('withoutQueryCache', function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-                return $this->setUseWithCache(false);
+                return $this->withQueryCache(false);
             });
 
-            QueryBuilder::macro('withCache', function (int|bool|null $seconds = null) {
+            QueryBuilder::macro('withQueryCache', function (int|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
                 /** @var int|bool|null $seconds */
-                return $this->setUseWithCache($seconds);
+                return $this->withQueryCache($seconds);
             });
 
-            QueryBuilder::macro('withoutCache', function () {
+            QueryBuilder::macro('withoutQueryCache', function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-                return $this->setUseWithCache(false);
+                return $this->withQueryCache(false);
             });
         }
 
         if (config('laravel-helper.query_log.enabled')) {
-            EloquentBuilder::macro('withLog', function (bool|null $enabled = null) {
+            EloquentBuilder::macro('withQueryLog', function (bool|null $enabled = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var bool|null $enabled */
-                return $this->setUseWithLog($enabled);
+                return $this->withQueryLog($enabled);
             });
 
-            EloquentBuilder::macro('withoutLog', function () {
+            EloquentBuilder::macro('withoutQueryLog', function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
-                return $this->setUseWithLog(false);
+                return $this->withQueryLog(false);
             });
 
-            QueryBuilder::macro('withLog', function (bool|null $enabled = null) {
+            QueryBuilder::macro('withQueryLog', function (bool|null $enabled = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
                 /** @var bool|null $enabled */
-                return $this->setUseWithLog($enabled);
+                return $this->withQueryLog($enabled);
             });
 
-            QueryBuilder::macro('withoutLog', function () {
+            QueryBuilder::macro('withoutQueryLog', function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
-                return $this->setUseWithLog(false);
+                return $this->withQueryLog(false);
+            });
+        }
+
+        if (config('laravel-helper.model_log.enabled')) {
+            EloquentBuilder::macro('withModelLog', function (bool|null $enabled = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                /** @var bool|null $enabled */
+                return $this->withModelLog($enabled);
+            });
+
+            EloquentBuilder::macro('withoutModelLog', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
+                return $this->withModelLog(false);
+            });
+
+            QueryBuilder::macro('withModelLog', function (bool|null $enabled = null) {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                /** @var bool|null $enabled */
+                return $this->withModelLog($enabled);
+            });
+
+            QueryBuilder::macro('withoutModelLog', function () {
+                /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
+                return $this->withModelLog(false);
             });
         }
 

@@ -19,7 +19,7 @@ enum ConsoleLogStatusEnum: string
 
 
     /**
-     * Возвращает вариант enum по умолчанию.
+     * Возвращает вариант enum по умолчанию
      *
      * @return mixed
      */
@@ -30,7 +30,7 @@ enum ConsoleLogStatusEnum: string
 
 
     /**
-     * Возвращает описание ключей.
+     * Возвращает описание ключей
      *
      * @param BackedEnum|null $enum
      * @return string|null
@@ -45,5 +45,16 @@ enum ConsoleLogStatusEnum: string
 
             default => null,
         };
+    }
+
+
+    /**
+     * Возвращает описание ключа
+     *
+     * @return string|null
+     */
+    public function label(): ?string
+    {
+        return self::getLabel($this);
     }
 }

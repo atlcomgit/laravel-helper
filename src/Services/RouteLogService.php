@@ -78,7 +78,10 @@ class RouteLogService
                         $dto = RouteLogDto::create(
                             method: $method,
                             uri: $route->uri,
-                            controller: class_basename($route->getControllerClass()) . '::' . $route->getActionMethod(),
+                            controller: trim(
+                                class_basename($route->getControllerClass()) . '::' . $route->getActionMethod(),
+                                ':',
+                            ),
                         );
                         $this->routeLogRepository->setExistOrCreate($dto);
                         $count++;

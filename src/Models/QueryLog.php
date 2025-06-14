@@ -9,6 +9,8 @@ use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Database\Factories\QueryLogFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Auth\User;
 
 /**
  * Модель: Лог query запроса
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $uuid
+ * @property ?string $user_id
  * @property ?string $name
  * @property string $query
  * @property ?string $cache_key
@@ -37,10 +40,11 @@ class QueryLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
-    public bool $logEnabled = false;
+    protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
+        'user_id' => 'string',
         'name' => 'string',
         'query' => 'string',
         'cache_key' => 'string',
@@ -93,6 +97,17 @@ class QueryLog extends DefaultModel
     public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
+    }
+
+
+    /**
+     * Отношение к пользователю
+     *
+     * @return Relation
+     */
+    public function user(): Relation
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 

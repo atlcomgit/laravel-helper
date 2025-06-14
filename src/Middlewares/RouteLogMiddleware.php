@@ -33,8 +33,11 @@ final class RouteLogMiddleware
             $dto = RouteLogDto::create(
                 method: $request->method(),
                 uri: $this->routeLogService->getRouteByRequest($request)?->uri ?? $request->getPathInfo(),
-                controller: class_basename($request->route()?->getControllerClass())
-                . '::' . $request->route()?->getActionMethod()
+                controller: trim(
+                    class_basename($request->route()?->getControllerClass())
+                    . '::' . $request->route()?->getActionMethod(),
+                    ':',
+                ),
             );
 
             $dto->dispatch();

@@ -28,7 +28,7 @@ class HttpLogDto extends Dto
 
     public ?string $uuid;
 
-    public ?int $userId;
+    public int|string|null $userId;
     public ?string $name;
     public ?HttpLogTypeEnum $type;
     public ?HttpLogStatusEnum $status;
@@ -57,7 +57,7 @@ class HttpLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'userId' => user()?->id,
+            'userId' => user(returnOnlyId: true),
         ];
     }
 

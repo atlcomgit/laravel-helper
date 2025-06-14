@@ -18,6 +18,7 @@ use Carbon\Carbon;
 class ViewLogDto extends Dto
 {
     public ?string $uuid;
+    public int|string|null $userId;
     public string $name;
     public ?array $data;
     public ?array $mergeData;
@@ -28,6 +29,7 @@ class ViewLogDto extends Dto
     public ViewLogStatusEnum $status;
     public ?array $info;
 
+    public ?bool $withViewLog;
     public string $startTime;
     public int $startMemory;
     public bool $isUpdated;
@@ -44,9 +46,12 @@ class ViewLogDto extends Dto
     {
         return [
             'uuid' => uuid(),
+            'userId' => user(returnOnlyId: true),
             'isCached' => false,
             'isFromCache' => false,
             'status' => ViewLogStatusEnum::getDefault(),
+
+            'withViewLog' => false,
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
             'isUpdated' => false,
@@ -72,6 +77,7 @@ class ViewLogDto extends Dto
     protected function mappings(): array
     {
         return [
+            'userId' => 'user_id',
             'mergeData' => 'merge_data',
             'cacheKey' => 'cache_key',
             'isCached' => 'is_cached',
@@ -92,7 +98,7 @@ class ViewLogDto extends Dto
         $this->onlyKeys(ViewLog::getModelKeys())
             ->mappingKeys($this->mappings())
             ->onlyNotNull()
-            ->excludeKeys(['startTime', 'startMemory', 'isUpdated']);
+            ->excludeKeys(['withViewLog', 'startTime', 'startMemory', 'isUpdated']);
     }
 
 
@@ -128,7 +134,7 @@ class ViewLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
+        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withViewLog) {
             isTesting()
                 ? ViewLogJob::dispatchSync($this)
                 : ViewLogJob::dispatch($this);

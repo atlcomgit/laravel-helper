@@ -52,12 +52,14 @@ class ViewLogService
     /**
      * Создает dto для логирования рендеринга blade шаблона
      *
+     * @param string $name
+     * @param bool $withViewLog
      * @return ViewLogDto
      */
-    public function createViewLog(string $name): ViewLogDto
+    public function createViewLog(string $name, bool $withViewLog): ViewLogDto
     {
-        $dto = ViewLogDto::create(name: $name);
-        config('laravel-helper.view_log.store_on_start') ?: $dto->dispatch();
+        $dto = ViewLogDto::create(name: $name, withViewLog: $withViewLog);
+        !config('laravel-helper.view_log.store_on_start') ?: $dto->dispatch();
 
         return $dto;
     }

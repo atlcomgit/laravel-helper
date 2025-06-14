@@ -7,6 +7,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * @see \Atlcom\LaravelHelper\Models\ViewLog
+ */
 return new class extends Migration {
     public function up(): void
     {
@@ -22,6 +25,17 @@ return new class extends Migration {
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid рендеринга blade шаблона');
+
+            $userTableName = config('laravel-helper.view_log.user.table_name');
+            $userPrimaryKeyName = config('laravel-helper.view_log.user.primary_key');
+            $userPrimaryKeyType = config('laravel-helper.view_log.user.primary_type');
+
+            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
+                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                    ->references($userPrimaryKeyName)->on($userTableName)
+                    ->onUpdate('cascade')->onDelete('restrict')
+                    ->comment('Id пользователя');
+            }
 
             $table->string('name')->nullable(false)->index()
                 ->comment('Название blade шаблона');
@@ -53,9 +67,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $connection = config($config = 'laravel-helper.query_log.connection')
+        $connection = config($config = 'laravel-helper.view_log.connection')
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = 'laravel-helper.query_log.table')
+        $table = config($config = 'laravel-helper.view_log.table')
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);

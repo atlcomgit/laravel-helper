@@ -17,7 +17,7 @@ final class LaravelHelperTelegramLogTest extends TestCase
     public function exception(): void
     {
         // $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
-        
+
         $this->expectException(Exception::class);
         throw new Exception('Тест');
     }

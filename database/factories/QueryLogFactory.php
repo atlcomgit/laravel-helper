@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов query запросов
@@ -27,9 +28,12 @@ class QueryLogFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::inRandomOrder()->first() ?? User::factory()->create();
+
         return [
             'uuid' => uuid(),
-            'model_type' => fake()->randomElement([
+            'user_id' => $user?->id,
+            'name' => fake()->randomElement([
                 ConsoleLog::class,
                 HttpLog::class,
                 ModelLog::class,
@@ -37,7 +41,6 @@ class QueryLogFactory extends Factory
                 QueueLog::class,
                 RouteLog::class,
             ]),
-            'model_id' => fake()->randomNumber(),
             'query' => fake()->text(),
             'cache_key' => fake()->md5(),
             'is_cached' => fake()->boolean(),
@@ -45,6 +48,20 @@ class QueryLogFactory extends Factory
             'status' => fake()->randomElement(QueryLogStatusEnum::enumValues()),
             'info' => null,
         ];
+    }
+
+
+    /**
+     * Задает состояние свойства перед созданием модели
+     *
+     * @param User $user
+     * @return static
+     */
+    public function withUser(User $user): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
     }
 
 

@@ -19,15 +19,15 @@ abstract class DefaultCommand extends Command
 {
     protected bool $isTesting;
     /** Флаг включения отправки сообщения в телеграм */
-    protected bool $telegramEnabled = true;
+    protected bool $telegramLog = true;
     /** Комментарий для отправки сообщения в телеграм */
     protected mixed $telegramComment = null;
     /** Флаг включения логирования консольной команды */
-    protected bool $logEnabled = false;
+    protected bool $withConsoleLog = false;
     /** Буфер вывода stdout для логирования */
-    protected ?string $outputBuffer = null;
+    private ?string $outputBuffer = null;
     /** Dto логирования консольной команды */
-    protected ConsoleLogDto $consoleLogDto;
+    private ConsoleLogDto $consoleLogDto;
 
 
     public function __construct()
@@ -36,7 +36,7 @@ abstract class DefaultCommand extends Command
         if (!Str::contains($this->signature, '--telegram')) {
             $this->signature .= '
                 { --telegram : Флаг отправки события в телеграм }
-                { --with-log : Флаг включения логирования команды }
+                { --log : Флаг включения логирования команды }
             ';
         }
 
@@ -60,7 +60,7 @@ abstract class DefaultCommand extends Command
             $this->consoleLogDto = ConsoleLogDto::create(
                 name: Hlp::pathClassName($this::class),
                 command: $this->name,
-                withLog: ($this->hasOption('with-log') && $this->option('with-log')) || $this->logEnabled,
+                withConsoleLog: ($this->hasOption('log') && $this->option('log')) || $this->withConsoleLog,
             );
 
             !config('laravel-helper.console_log.store_on_start', true) ?: $this->consoleLogDto->store(true);
@@ -95,14 +95,14 @@ abstract class DefaultCommand extends Command
 
             // Отправляем результат в телеграм
             if (
-                $this->telegramEnabled
+                $this->telegramLog
                 && $this->hasOption('telegram')
                 && Hlp::castToBool($this->option('telegram'))
             ) {
 
                 telegram([
                     'Событие' => 'Консольная команда',
-                    'Название' => $this->consoleLogDto->class,
+                    'Название' => $this->consoleLogDto->name,
                     'Описание' => $this->description,
                     'Результат' => $this->consoleLogDto->status->label(),
                     'Время' => $duration,

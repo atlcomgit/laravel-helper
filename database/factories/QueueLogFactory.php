@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов очередей
@@ -22,8 +23,11 @@ class QueueLogFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::inRandomOrder()->first() ?? User::factory()->create();
+
         return [
             'uuid' => uuid(),
+            'user_id' => $user?->id,
             'job_id' => uuid(),
             'job_name' => fake()->word(),
             'name' => fake()->word(),
@@ -49,6 +53,20 @@ class QueueLogFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'uuid' => $uuid,
+        ]);
+    }
+
+
+    /**
+     * Задает состояние свойства перед созданием модели
+     *
+     * @param User $user
+     * @return static
+     */
+    public function withUser(User $user): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
         ]);
     }
 

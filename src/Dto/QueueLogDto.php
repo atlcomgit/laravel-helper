@@ -19,6 +19,7 @@ use DateTimeInterface;
 class QueueLogDto extends Dto
 {
     public ?string $uuid;
+    public int|string|null $userId;
     public string $jobId;
     public string $jobName;
     public string $name;
@@ -31,6 +32,7 @@ class QueueLogDto extends Dto
     public ?string $exception;
     public ?array $info;
 
+    public bool $withJobLog;
     public bool $isUpdated;
 
 
@@ -44,8 +46,11 @@ class QueueLogDto extends Dto
     protected function defaults(): array
     {
         return [
+            'userId' => user(returnOnlyId: true),
             'attempts' => 0,
             'status' => QueueLogStatusEnum::getDefault(),
+
+            'withJobLog' => false,
             'isUpdated' => false,
         ];
     }
@@ -81,6 +86,7 @@ class QueueLogDto extends Dto
     protected function mappings(): array
     {
         return [
+            'userId' => 'user_id',
             'jobId' => 'job_id',
             'jobName' => 'job_name',
         ];
@@ -99,7 +105,7 @@ class QueueLogDto extends Dto
         $this->onlyKeys(QueueLog::getModelKeys())
             ->mappingKeys($this->mappings())
             ->onlyNotNull()
-            ->excludeKeys(['isUpdated']);
+            ->excludeKeys(['withJobLog', 'isUpdated']);
     }
 
 
@@ -110,7 +116,7 @@ class QueueLogDto extends Dto
      */
     public function dispatch(): void
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
+        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withJobLog) {
             isTesting()
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);

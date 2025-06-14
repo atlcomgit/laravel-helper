@@ -37,7 +37,7 @@ class QueryLogCleanupCommand extends DefaultCommand
 
         $cleanup = $this->queryLogService->cleanup(config('laravel-helper.query_log.cleanup_days'));
 
-        $this->telegramEnabled = (isLocal() || isProd()) && $cleanup > 0;
+        $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);
 
         $this->outputEol($this->telegramComment, 'fg=green');

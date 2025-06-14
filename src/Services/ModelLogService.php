@@ -23,17 +23,24 @@ class ModelLogService
      * Сохраняет лог модели при создании записи
      *
      * @param Model $model
+     * @param array|null $attributes
      * @return void
      */
-    public function created(Model $model): void
+    public function created(Model $model, ?array $attributes = null): void
     {
         $type = ModelLogTypeEnum::Create;
 
         $dto = ModelLogDto::create([
             'modelType' => $model::class,
-            'modelId' => $model->id ?? null,
+            'modelId' => $model->id
+                ?? (
+                    is_null($attributes)
+                    ? null
+                    : $model::query()->where($attributes)->latest()->first()?->{$model->getKeyName()}
+                )
+                ?? null,
             'type' => $type,
-            'attributes' => $this->getAttributes($model),
+            'attributes' => $attributes ?? $this->getAttributes($model),
             'changes' => null,
         ]);
 
@@ -45,16 +52,22 @@ class ModelLogService
      * Сохраняет лог модели при обновлении записи
      *
      * @param Model $model
+     * @param array|null $attributes
      * @return void
      */
-    public function updated(Model $model): void
+    public function updated(Model $model, ?array $attributes = null): void
     {
-        $type = (
-            method_exists($model, 'softDeleted')
-            && $model->deleted_at
-            && $model->deleted_at !== $model->getOriginal('deleted_at')
-        )
-            ? ModelLogTypeEnum::SoftDelete
+        $type = method_exists($model, 'softDeleted')
+            ? match (true) {
+                !is_null($attributes) && isset($attributes['deleted_at']) => match (true) {
+                        is_null($attributes['deleted_at']) => ModelLogTypeEnum::Restore,
+
+                        default => ModelLogTypeEnum::SoftDelete,
+                    },
+                $model?->deleted_at !== $model->getOriginal('deleted_at') => ModelLogTypeEnum::SoftDelete,
+
+                default => ModelLogTypeEnum::Update,
+            }
             : ModelLogTypeEnum::Update;
         $isSoftDelete = $type == ModelLogTypeEnum::SoftDelete;
 
@@ -63,7 +76,7 @@ class ModelLogService
             'modelId' => $model->id ?? null,
             'type' => $type,
             'attributes' => $this->getAttributes($model),
-            'changes' => $this->getChanges($model),
+            'changes' => $this->getChanges($model, $attributes),
         ]);
 
         !($dto->changes || $isSoftDelete) ?: $dto->dispatch();
@@ -74,9 +87,10 @@ class ModelLogService
      * Сохраняет лог модели при удалении записи
      *
      * @param Model $model
+     * @param array|null $attributes
      * @return void
      */
-    public function deleted(Model $model): void
+    public function deleted(Model $model, ?array $attributes = null): void
     {
         $type = match (true) {
             (method_exists($model, 'isForceDeleting') && $model->isForceDeleting())
@@ -158,9 +172,10 @@ class ModelLogService
      * Возвращает изменённые аттрибуты в модели
      *
      * @param Model $model
+     * @param array|null $attributes
      * @return array|null
      */
-    protected function getChanges(Model $model): ?array
+    protected function getChanges(Model $model, ?array $attributes = null): ?array
     {
         $result = null;
         $excludeAttributes = property_exists($model, 'logExcludeAttributes')
@@ -171,7 +186,9 @@ class ModelLogService
             : [];
 
         foreach ($model->getAttributes() as $attribute => $newValue) {
-            $oldValue = $model->getOriginal($attribute);
+            $oldValue = is_null($attributes)
+                ? $model->getOriginal($attribute)
+                : $attributes[$attribute] ?? $model->getOriginal($attribute);
             $newValue = $model->$attribute;
 
             if (!in_array($attribute, $excludeAttributes) && $this->hasDifference($oldValue, $newValue)) {

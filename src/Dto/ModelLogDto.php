@@ -14,7 +14,7 @@ use Carbon\Carbon;
  */
 class ModelLogDto extends DefaultDto
 {
-    public ?string $userId;
+    public int|string|null $userId;
     public string $modelType;
     public ?string $modelId;
     public ModelLogTypeEnum $type;
@@ -51,7 +51,7 @@ class ModelLogDto extends DefaultDto
         static $now = now();
 
         return [
-            'userId' => user()?->id ?? null,
+            'userId' => user(returnOnlyId: true),
             'createdAt' => $now,
         ];
     }

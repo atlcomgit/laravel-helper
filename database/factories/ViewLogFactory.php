@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов рендеринга blade шаблонов
@@ -22,8 +23,11 @@ class ViewLogFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::inRandomOrder()->first() ?? User::factory()->create();
+
         return [
             'uuid' => uuid(),
+            'user_id' => $user?->id,
             'name' => fake()->name(),
             'data' => [],
             'merge_data' => null,
@@ -34,6 +38,34 @@ class ViewLogFactory extends Factory
             'status' => fake()->randomElement(ViewLogStatusEnum::enumValues()),
             'info' => null,
         ];
+    }
+
+
+    /**
+     * Задает uuid очереди
+     *
+     * @param string $uuid
+     * @return static
+     */
+    public function withUuid(string $uuid): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'uuid' => $uuid,
+        ]);
+    }
+
+
+    /**
+     * Задает состояние свойства перед созданием модели
+     *
+     * @param User $user
+     * @return static
+     */
+    public function withUser(User $user): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
     }
 
 

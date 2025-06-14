@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Консольная команда очистки логов консольных команд
@@ -22,7 +23,7 @@ class AllCleanupCommand extends DefaultCommand
     protected $signature = 'cleanup:all';
     protected $description = 'Очистка всех логов';
     protected $isolated = true;
-    protected bool $logEnabled = true;
+    protected bool $withConsoleLog = true;
 
 
     public function __construct(
@@ -48,15 +49,38 @@ class AllCleanupCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        $cleanupConsoleLog = $this->consoleLogService->cleanup(0);
-        $cleanupHttpLog = $this->httpLogService->cleanup(0);
-        $cleanupModelLog = $this->modelLogService->cleanup(0);
-        $cleanupQueryLog = $this->queryLogService->cleanup(0);
-        $cleanupQueueLog = $this->queueLogService->cleanup(0);
-        $cleanupRouteLog = $this->routeLogService->cleanup();
-        $cleanupViewLog = $this->viewLogService->cleanup(0);
+        $connection = config('laravel-helper.console_log.connection');
 
-        $this->telegramEnabled = (isLocal() || isProd())
+        $cleanupConsoleLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.console_log.table'))
+            ? $this->consoleLogService->cleanup(0)
+            : 0;
+        $cleanupHttpLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.http_log.table'))
+            ? $this->httpLogService->cleanup(0)
+            : 0;
+        $cleanupModelLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.model_log.table'))
+            ? $this->modelLogService->cleanup(0)
+            : 0;
+        $cleanupQueryLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.query_log.table'))
+            ? $this->queryLogService->cleanup(0)
+            : 0;
+        $cleanupQueueLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.queue_log.table'))
+            ? $this->queueLogService->cleanup(0)
+            : 0;
+        $cleanupRouteLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.route_log.table'))
+            ? $this->routeLogService->cleanup()
+            : 0;
+        $cleanupViewLog = Schema::connection($connection)
+            ->hasTable(config('laravel-helper.view_log.table'))
+            ? $this->viewLogService->cleanup(0)
+            : 0;
+
+        $this->telegramLog = (isLocal() || isProd())
             && (
                 $cleanupConsoleLog > 0
                 || $cleanupHttpLog > 0

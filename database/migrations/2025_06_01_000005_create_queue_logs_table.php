@@ -7,6 +7,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * @see \Atlcom\LaravelHelper\Models\QueueLog
+ */
 return new class extends Migration {
     public function up(): void
     {
@@ -22,6 +25,17 @@ return new class extends Migration {
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid очереди');
+
+            $userTableName = config('laravel-helper.queue_log.user.table_name');
+            $userPrimaryKeyName = config('laravel-helper.queue_log.user.primary_key');
+            $userPrimaryKeyType = config('laravel-helper.queue_log.user.primary_type');
+
+            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
+                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                    ->references($userPrimaryKeyName)->on($userTableName)
+                    ->onUpdate('cascade')->onDelete('restrict')
+                    ->comment('Id пользователя');
+            }
 
             $table->string('job_id')->nullable(false)->index()
                 ->comment('Идентификатор очереди');

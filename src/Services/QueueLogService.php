@@ -54,10 +54,6 @@ class QueueLogService
             : json_decode(json_encode($command, Hlp::jsonFlags()), true);
         $payload['data']['command'] = $command;
 
-        if (!(is_array($command) && ($command['logEnabled'] ?? false))) {
-            return;
-        }
-
         $dto = QueueLogDto::create(
             uuid: $uuid,
             jobId: $event->job->getJobId(),
@@ -68,6 +64,7 @@ class QueueLogService
             payload: $payload, // $event->job->getRawBody(),
             attempts: $event->job->attempts(),
             exception: $event instanceof JobFailed ? Hlp::exceptionToString($event->exception) : null,
+            withJobLog: is_array($command) && ($command['withJobLog'] ?? false),
             isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
             && config('laravel-helper.queue_log.store_on_start'),
             status: match (true) {

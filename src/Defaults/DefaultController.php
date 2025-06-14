@@ -14,10 +14,10 @@ use Throwable;
 class DefaultController extends Controller
 {
     /** Флаг кеширования рендеринга blade шаблонов */
-    protected int|bool|null $useWithCache = false;
+    protected int|bool|null $withViewCache = false;
 
     /** Флаг логирования рендеринга blade шаблонов */
-    protected bool|null $useWithLog = false;
+    protected bool|null $withViewLog = false;
 
 
     /**
@@ -26,9 +26,9 @@ class DefaultController extends Controller
      * @param int|bool|null $seconds
      * @return static
      */
-    public function withCache(int|bool|null $seconds = null): static
+    public function withViewCache(int|bool|null $seconds = null): static
     {
-        $this->useWithCache = $seconds;
+        $this->withViewCache = $seconds;
 
         return $this;
     }
@@ -40,9 +40,9 @@ class DefaultController extends Controller
      * @param bool|null $enabled
      * @return static
      */
-    public function withLog(bool|null $enabled = null): static
+    public function withViewLog(bool|null $enabled = null): static
     {
-        $this->useWithCache = $enabled ?? true;
+        $this->withViewLog = $enabled ?? true;
 
         return $this;
     }
@@ -65,12 +65,12 @@ class DefaultController extends Controller
     ): string {
         try {
             $render = '';
-            $dto = app(ViewLogService::class)->createViewLog(name: $view);
+            $dto = app(ViewLogService::class)->createViewLog(name: $view, withViewLog: $this->withViewLog);
 
 
-            $render = (config('laravel-helper.view_cache.enabled') && $this->useWithCache !== false)
+            $render = (config('laravel-helper.view_cache.enabled') && $this->withViewCache !== false)
                 ? app(ViewCacheService::class)
-                    ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->useWithCache)
+                    ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->withViewCache)
                 : view($view, $data, $mergeData)->render();
 
             $dto->status = ViewLogStatusEnum::Success;

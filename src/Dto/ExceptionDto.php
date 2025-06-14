@@ -144,7 +144,7 @@ class ExceptionDto extends Dto
                             ]
                             : []
                         ),
-                        'user_id' => user()?->id,
+                        'user_id' => (string)user(returnOnlyId: true),
                     ],
                 ],
             );

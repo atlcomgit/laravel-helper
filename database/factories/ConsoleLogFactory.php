@@ -24,8 +24,8 @@ class ConsoleLogFactory extends Factory
     {
         return [
             'uuid' => uuid(),
-            'command' => fake()->word(),
             'name' => fake()->word(),
+            'command' => fake()->word(),
             'cli' => fake()->sentence(),
             'output' => fake()->text(),
             'result' => 0,

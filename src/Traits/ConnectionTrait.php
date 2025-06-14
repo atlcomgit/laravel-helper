@@ -57,11 +57,11 @@ trait ConnectionTrait
      *
      * @param  string  $query
      * @param  array  $bindings
-     * @param  string|null  $sequence
+     * @param  string|null $sequence
      * @return int|bool
      */
     // #[Override()]
-    public function insert($query, $bindings = [])
+    public function insert($query, $bindings = [], $sequence = null)
     {
         return $this->queryInsert($query, $bindings);
     }
@@ -95,7 +95,7 @@ trait ConnectionTrait
     // #[Override()]
     public function delete($query, $bindings = [])
     {
-        return $this->queryDelete($query, $bindings);
+        return $this->queryDelete(query: $query, bindings: $bindings, isSoftDelete: false);
     }
 
 
@@ -109,7 +109,6 @@ trait ConnectionTrait
      * @return bool
      */
     // #[Override()]
-    //?!? проверить
     public function statement($query, $bindings = [])
     {
         try {

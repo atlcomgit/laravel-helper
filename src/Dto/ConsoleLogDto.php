@@ -29,7 +29,7 @@ class ConsoleLogDto extends Dto
     public ?string $exception;
     public ?array $info;
 
-    public ?bool $withLog;
+    public ?bool $withConsoleLog;
     public int $storeInterval;
     public string $startTime;
     public int $startMemory;
@@ -50,7 +50,7 @@ class ConsoleLogDto extends Dto
             'cli' => implode(' ', $_SERVER['argv']),
             'status' => ConsoleLogStatusEnum::getDefault(),
 
-            'withLog' => false,
+            'withConsoleLog' => false,
             'storeInterval' => config('laravel-helper.console_log.store_interval_seconds', 10),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
@@ -83,7 +83,7 @@ class ConsoleLogDto extends Dto
     {
         $this->onlyKeys(ConsoleLog::getModelKeys())
             ->onlyNotNull()
-            ->excludeKeys(['withLog', 'storeInterval', 'startTime', 'startMemory', 'storedAt', 'isUpdated']);
+            ->excludeKeys(['withConsoleLog', 'storeInterval', 'startTime', 'startMemory', 'storedAt', 'isUpdated']);
     }
 
 
@@ -138,7 +138,7 @@ class ConsoleLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withLog) {
+        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withConsoleLog) {
             isTesting()
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);

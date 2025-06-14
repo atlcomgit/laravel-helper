@@ -44,6 +44,7 @@ class StrMacrosService
             );
         }
 
+        // example
         // Stringable::macro(
         //     'example',
         //     function (mixed $param): Stringable {

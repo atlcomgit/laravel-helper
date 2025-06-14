@@ -19,6 +19,7 @@ use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
+use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 use Atlcom\LaravelHelper\Services\BuilderMacrosService;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
@@ -60,6 +61,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
     {
         // Конфигурация
         $this->mergeConfigFrom(__DIR__ . '/../../config/laravel-helper.php', 'laravel-helper');
+
         $this->publishes([__DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php')]);
 
         // Миграции
@@ -90,6 +92,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(QueryLogService::class);
         $this->app->singleton(ViewCacheService::class);
         $this->app->singleton(ViewLogService::class);
+        $this->app->singleton(ModelLogObserver::class);
         $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app));
     }
 
@@ -148,25 +151,27 @@ class LaravelHelperServiceProvider extends ServiceProvider
             });
 
             // Запуск команд при выполнении artisan optimize
-            !config('laravel-helper.optimize.cleanup') ?: $this->optimizes(
+            !config('laravel-helper.optimize.cleanup.enabled') ?: $this->optimizes(
                 optimize: AllCleanupCommand::class,
             );
         }
 
-
         // Добавить middleware глобально
-        /** @var Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
-        $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
-        $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
-        $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
+        if (config('laravel-helper.http_log.in.global')) {
+            /** @var Kernel $kernel */
+            $kernel = $this->app->make(Kernel::class);
+            $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
+            $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
+            $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
+            $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
+        }
 
         // Логирование очередей
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
         Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
         Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
 
+        // not need
         // Event::listen(CommandStarting::class, function (CommandStarting $event) {
         //     match ($event->command) {
         //         ConfigCacheCommand::class => '',

@@ -23,7 +23,7 @@ class HttpLogCreateDto extends Dto
 
     public string $uuid;
 
-    public ?int $userId;
+    public int|string|null $userId;
     public ?string $name;
     public HttpLogTypeEnum $type;
     public HttpLogMethodEnum $method;

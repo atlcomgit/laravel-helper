@@ -41,7 +41,7 @@ class ConsoleLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
-    public bool $logEnabled = false;
+    protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',

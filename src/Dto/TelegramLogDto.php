@@ -17,7 +17,7 @@ class TelegramLogDto extends Dto
     public ?string $title;
     public ?string $message;
     public ?string $type;
-    public ?int $userId;
+    public int|string|null $userId;
     public ?string $ip;
     public ?string $uri;
     public ?string $method;
@@ -52,15 +52,9 @@ class TelegramLogDto extends Dto
     // #[Override()]
     protected function defaults(): array
     {
-        try {
-            $user = user();
-        } catch (Throwable $exception) {
-            $user = null;
-        }
-
         return [
             'ip' => ip(),
-            'userId' => $user?->id,
+            'userId' => user(returnOnlyId: true),
             'method' => static::getMethod(),
             'uri' => static::getUri(),
             'timeStamp' => Carbon::now()->format('Y-m-d H'),

@@ -36,7 +36,6 @@ class EloquentBuilder extends Builder
     }
 
 
-    //?!? +
     /**
      * @override
      * Вставляет новые записи в базу данных
@@ -68,14 +67,26 @@ class EloquentBuilder extends Builder
 
     /**
      * @override
-     * Удаляет записи из базы данных
+     * Мягко удаляет записи из базы данных
      * @see parent::delete()
      *
-     * @return mixed
+     * @return int
      */
     // #[Override()]
     public function delete()
     {
-        return $this->queryDelete();
+        return $this->queryDelete(isSoftDelete: true);
+    }
+
+
+    /**
+     * @override
+     * Удаляет записи из базы данных
+     *
+     * @return int
+     */
+    public function forceDelete()
+    {
+        return $this->queryDelete(isSoftDelete: false);
     }
 }

@@ -7,6 +7,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * @see \Atlcom\LaravelHelper\Models\QueryLog
+ */
 return new class extends Migration {
     public function up(): void
     {
@@ -22,6 +25,17 @@ return new class extends Migration {
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid query запроса');
+
+            $userTableName = config('laravel-helper.query_log.user.table_name');
+            $userPrimaryKeyName = config('laravel-helper.query_log.user.primary_key');
+            $userPrimaryKeyType = config('laravel-helper.query_log.user.primary_type');
+
+            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
+                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                    ->references($userPrimaryKeyName)->on($userTableName)
+                    ->onUpdate('cascade')->onDelete('restrict')
+                    ->comment('Id пользователя');
+            }
 
             $table->string('name')->nullable(true)->index()
                 ->comment('Название query запроса');

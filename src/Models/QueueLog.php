@@ -11,6 +11,8 @@ use Database\Factories\QueueLogFactory;
 use DateInterval;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Auth\User;
 
 /**
  * Модель: Лог очереди
@@ -20,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string $uuid
+ * @property ?string $user_id
  * @property string $job_id
  * @property string $job_name
  * @property string $name
@@ -47,10 +50,11 @@ class QueueLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
-    public bool $logEnabled = false;
+    protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
+        'user_id' => 'string',
         'job_id' => 'string',
         'job_name' => 'string',
         'name' => 'string',
@@ -107,6 +111,17 @@ class QueueLog extends DefaultModel
     public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
+    }
+
+
+    /**
+     * Отношение к пользователю
+     *
+     * @return Relation
+     */
+    public function user(): Relation
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 

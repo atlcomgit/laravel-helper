@@ -96,7 +96,19 @@ class LaravelHelperService
 
 
     /**
-     * Проверяет массив $tables на совпадение с массивом игнорируемых таблиц
+     * Проверяет массив с названиями таблиц на совпадение с массивом игнорируемых таблиц
+     *
+     * @param array $tables
+     * @return bool
+     */
+    public function isFoundIgnoreTables(array $tables = []): bool
+    {
+        return !$this->notFoundIgnoreTables($tables);
+    }
+
+
+    /**
+     * Проверяет массив с названиями таблиц на не совпадение с массивом игнорируемых таблиц
      *
      * @param array $tables
      * @return bool
@@ -114,6 +126,8 @@ class LaravelHelperService
             config('laravel-helper.view_log.table'),
             config('cache.stores.database.table', 'cache'),
             'pg_catalog.pg_collation',
+            'pg_catalog.pg_attrdef',
+            'pg_catalog.pg_attribute',
             'pg_attrdef',
         ];
 
@@ -156,10 +170,8 @@ class LaravelHelperService
                 /** @var QueryLogDto $dto */
                 $can = config('laravel-helper.query_log.enabled')
                     && $this->notFoundConfigExclude('laravel-helper.query_log.exclude', $dto)
-                    && !Hlp::arraySearchValues(
-                        $dto->info['tables'] ?? [],
-                        [config('laravel-helper.query_log.table')],
-                    )
+                    && $this->notFoundIgnoreTables($dto->info['tables'] ?? [])
+                    && !Hlp::arraySearchValues($dto->info['tables'] ?? [], [config('laravel-helper.query_log.table')])
                 ;
                 break;
 

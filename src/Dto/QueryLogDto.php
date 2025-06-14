@@ -18,6 +18,7 @@ use Carbon\Carbon;
 class QueryLogDto extends Dto
 {
     public ?string $uuid;
+    public int|string|null $userId;
     public ?string $name;
     public string $query;
     public ?string $cacheKey;
@@ -42,6 +43,7 @@ class QueryLogDto extends Dto
     {
         return [
             'uuid' => uuid(),
+            'userId' => user(returnOnlyId: true),
             'isCached' => false,
             'isFromCache' => false,
             'status' => QueryLogStatusEnum::getDefault(),
@@ -70,6 +72,7 @@ class QueryLogDto extends Dto
     protected function mappings(): array
     {
         return [
+            'userId' => 'user_id',
             'cacheKey' => 'cache_key',
             'isCached' => 'is_cached',
             'isFromCache' => 'is_from_cache',

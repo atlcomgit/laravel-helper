@@ -57,7 +57,7 @@ class HttpLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
-    public bool $logEnabled = false;
+    protected ?bool $withModelLog = false;
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
     protected $casts = [

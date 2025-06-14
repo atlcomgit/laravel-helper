@@ -195,14 +195,15 @@ if (!function_exists('user')) {
     /**
      * Возвращает модель авторизованного пользователя или null
      * 
-     * @return Authenticatable|null
+     * @param bool $returnOnlyId
+     * @return Authenticatable|int|string|null
      */
-    function user(): ?Authenticatable
+    function user(bool $returnOnlyId = false): ?Authenticatable
     {
         try {
             $user = isTesting()
-                ? auth()->user()
-                : (request()->bearerToken() ? auth()->user() : null);
+                ? ($returnOnlyId ? auth()->id() : auth()->user())
+                : (request()->bearerToken() ? ($returnOnlyId ? auth()->id() : auth()->user()) : null);
         } catch (Throwable $e) {
             $user = null;
         }

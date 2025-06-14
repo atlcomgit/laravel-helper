@@ -41,7 +41,7 @@ class ModelLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
-    public bool $logEnabled = false;
+    protected ?bool $withModelLog = false;
     public $guarded = ['id'];
     public $timestamps = false;
     public $forceDeleting = true;

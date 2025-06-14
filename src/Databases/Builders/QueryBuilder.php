@@ -33,7 +33,7 @@ class QueryBuilder extends Builder
         return $this->queryGet($columns);
     }
 
-    //?!? +
+
     /**
      * @override
      * Выполняет оператор SELECT в базе данных
@@ -47,7 +47,7 @@ class QueryBuilder extends Builder
     // #[Override()]
     // public function select($columns = ['*'])
     // {
-    //     return $this->querySelect($query, $bindings);
+    //     not need; return $this->querySelect($query, $bindings);
     // }
 
 
@@ -86,11 +86,27 @@ class QueryBuilder extends Builder
      * @see parent::delete()
      *
      * @param  mixed $id
-     * @return mixed
+     * @return int
      */
     // #[Override()]
     public function delete($id = null)
     {
-        return $this->queryDelete($id);
+        return $this->queryDelete(query: $id, isSoftDelete: false);
+    }
+
+
+    /**
+     * @override
+     * Очищает таблицу в базе данных
+     * @see parent::truncate()
+     *
+     * @return void
+     */
+    // #[Override()]
+    //?!? truncate
+    public function truncate()
+    {
+        parent::truncate();
+        // return $this->queryTruncate();
     }
 }
