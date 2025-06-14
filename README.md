@@ -25,7 +25,7 @@ php artisan vendor:publish --tag="laravel-helper"
 
 [/config/laravel-helper.php](/config/laravel-helper.php)
 
-[.env.example](.env)
+[/.env.example](/.env)
 
 ##### 4. Оптимизация приложения
 
