@@ -7,30 +7,32 @@
 
 <hr style="border:1px solid black">
 
-### Установка пакета
+### Подключение пакета
+
+##### 1. Установка пакета
 
 ```bash
 composer require atlcom/laravel-helper
 ```
 
-### Публикация настроек
+##### 2. Публикация настроек
 
 ```bash
 php artisan vendor:publish --tag="laravel-helper"
 ```
 
-### Настройка параметров .env
+##### 3. Настройка параметров .env
 
 [/config/laravel-helper.php](/config/laravel-helper.php)
 [.env.example](.env)
 
-### Оптимизация приложения
+##### 4. Оптимизация приложения
 
 ```bash
 php artisan optimize
 ```
 
-### Миграция базы данных
+##### 5. Миграция базы данных
 
 ```bash
 php artisan migrate
