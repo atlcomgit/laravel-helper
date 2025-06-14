@@ -62,7 +62,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Конфигурация
         $this->mergeConfigFrom(__DIR__ . '/../../config/laravel-helper.php', 'laravel-helper');
 
-        $this->publishes([__DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php')]);
+        $this->publishes(
+            [__DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php')],
+            'laravel-helper',
+        );
 
         // Миграции
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');

@@ -3,7 +3,7 @@
 Класс помощник для Laravel
 
 Версия 1.00
-- 
+-
 
 <hr style="border:1px solid black">
 
@@ -24,6 +24,7 @@ php artisan vendor:publish --tag="laravel-helper"
 ##### 3. Настройка параметров .env
 
 [/config/laravel-helper.php](/config/laravel-helper.php)
+
 [.env.example](.env)
 
 ##### 4. Оптимизация приложения
