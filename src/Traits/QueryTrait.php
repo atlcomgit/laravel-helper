@@ -53,6 +53,10 @@ trait QueryTrait
     public function withQueryCache(int|bool|null $seconds = null): static
     {
         $this->withQueryCache = $seconds ?? true;
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->withQueryCache($this->withQueryCache);
+            $this->getConnection()->withQueryCache($this->withQueryCache);
+        }
 
         return $this;
     }
@@ -67,6 +71,10 @@ trait QueryTrait
     public function withQueryLog(bool|null $enabled = null): static
     {
         $this->withQueryLog = $enabled ?? true;
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->withQueryLog($this->withQueryLog);
+            $this->getConnection()->withQueryLog($this->withQueryLog);
+        }
 
         return $this;
     }
@@ -81,6 +89,10 @@ trait QueryTrait
     public function withModelLog(bool|null $enabled = null): static
     {
         $this->withModelLog = $enabled ?? true;
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->withModelLog($this->withModelLog);
+            $this->getConnection()->withModelLog($this->withModelLog);
+        }
 
         return $this;
     }
@@ -140,6 +152,15 @@ trait QueryTrait
             return $result;
         }
 
+        !method_exists($this, 'withQueryLog') ?: $this->withQueryLog(false);
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->withQueryLog(false);
+            $this->getQuery()->getConnection()->withQueryLog(false);
+        }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->withQueryLog(false);
+        }
+
         $sql = app(QueryCacheService::class)->getSqlFromBuilder($builder);
         $models = $this instanceof EloquentBuilder ? $this->getModels() : [$this];
         $classes = [];
@@ -150,7 +171,7 @@ trait QueryTrait
             !($model instanceof Model) ?: $ids[$model::class][] = $model->{$model->getKeyName()};
         }
 
-        foreach (array_keys($classes) as $class) {
+        foreach (array_keys($classes) ?: [$this::class] as $class) {
             /** @var Model|QueryBuilder $model */
             $dto = QueryLogDto::create(
                 name: Hlp::pathClassName($class),
@@ -414,7 +435,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$query, &$bindings) {
+            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
                 $result = match (true) {
                     $this instanceof EloquentBuilder => parent::insert($query),
                     $this instanceof QueryBuilder => parent::insert($query),
@@ -426,7 +447,8 @@ trait QueryTrait
 
                 $this->flushCache($query, $bindings);
 
-                $this->observeModelLog(ModelLogTypeEnum::Create, $query);
+                $ids = $this->observeModelLog(ModelLogTypeEnum::Create, $query, $bindings);
+                !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 return $result;
             });
@@ -476,8 +498,9 @@ trait QueryTrait
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$query, &$bindings) {
-                $this->observeModelLog(ModelLogTypeEnum::Update, $query);
+            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
+                $ids = $this->observeModelLog(ModelLogTypeEnum::Update, $query);
+                !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 $result = match (true) {
                     $this instanceof EloquentBuilder => parent::update($query),
@@ -539,22 +562,84 @@ trait QueryTrait
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$query, &$bindings, &$isSoftDelete) {
-                $isSoftDelete ?: $this->observeModelLog(
-                    $isSoftDelete ? ModelLogTypeEnum::SoftDelete : ModelLogTypeEnum::Delete,
-                    $query,
-                );
+            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings, &$isSoftDelete) {
+                $ids = $isSoftDelete
+                    ? null
+                    : $this->observeModelLog(
+                        $isSoftDelete ? ModelLogTypeEnum::SoftDelete : ModelLogTypeEnum::Delete,
+                        $query,
+                    );
+                !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 $result = match (true) {
                     $this instanceof EloquentBuilder => $isSoftDelete ? parent::delete() : parent::forceDelete(),
                     $this instanceof QueryBuilder => parent::delete($query),
                     $this instanceof Connection => parent::delete($query, $bindings),
-                    $this instanceof Builder => parent::delete(),
+                    $this instanceof Builder => parent::delete($query),
 
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
                 $this->flushCache($query, $bindings);
+
+                return $result;
+            });
+
+            $status = true;
+
+        } catch (Throwable $exception) {
+            $this->failQueryLog(arrayQueryLogDto: $arrayQueryLogDto, exception: $exception);
+
+            throw $exception;
+        }
+
+        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
+
+        return $result;
+    }
+
+
+    /**
+     * @override
+     * Выполняет оператор UPDATE в базе данных с использованием кеша
+     * @see parent::update()
+     *
+     * @return int
+     */
+    // #[Override()]
+    public function queryTruncate()
+    {
+        try {
+            $status = false;
+            $sql = match (true) {
+                $this instanceof EloquentBuilder => sql(
+                    array_keys($this->getGrammar()->compileTruncate($this->getQuery()))[0] ?? null,
+                    $this->getBindings(),
+                ),
+                $this instanceof QueryBuilder => sql(
+                    array_keys($this->getGrammar()->compileTruncate($this))[0] ?? null,
+                    $this->getBindings(),
+                ),
+
+                default => null,
+            } ?? "truncate table {$this->from}";
+
+            $arrayQueryLogDto = $this->createQueryLog($sql);
+
+            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$sql) {
+                $ids = $this->observeModelLog(ModelLogTypeEnum::Truncate, Hlp::sqlTables($sql));
+                !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
+
+                $result = match (true) {
+                    $this instanceof EloquentBuilder => parent::truncate(),
+                    $this instanceof QueryBuilder => parent::truncate(),
+                    $this instanceof Connection => parent::truncate(),
+                    $this instanceof Builder => parent::truncate(),
+
+                    default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
+                };
+
+                $this->flushCache();
 
                 return $result;
             });
@@ -611,10 +696,13 @@ trait QueryTrait
      *
      * @param ModelLogTypeEnum $type
      * @param array|int|null $attributes
-     * @return void
+     * @param array|null $bindings
+     * @return array
      */
-    public function observeModelLog(ModelLogTypeEnum $type, $attributes = null): void
+    public function observeModelLog(ModelLogTypeEnum $type, $attributes = null, $bindings = null): array
     {
+        $result = [];
+
         if ($this instanceof EloquentBuilder) {
             $observer = app(ModelLogObserver::class);
 
@@ -625,35 +713,97 @@ trait QueryTrait
             };
 
             foreach ($models as $model) {
-                if (
-                    $model
-                    && $model instanceof Model
-                    && method_exists($model, 'isWithModelLog')
-                    && ($model->isWithModelLog() === true || $this->withModelLog === true)
-                    && method_exists($model, 'withModelLog')
-                ) {
-                    $model->withModelLog($this->withModelLog);
+                if ($model && $model instanceof Model) {
+                    if (
+                        method_exists($model, 'isWithModelLog')
+                        && ($model->isWithModelLog() === true || $this->withModelLog === true)
+                        && method_exists($model, 'withModelLog')
+                    ) {
+                        is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
 
-                    match ($type) {
-                        ModelLogTypeEnum::Create => $observer->created($model, $attributes),
-                        ModelLogTypeEnum::Update => $observer->updated($model, $attributes),
-                        ModelLogTypeEnum::Delete => $observer->deleted($model, $attributes),
-                        ModelLogTypeEnum::SoftDelete => $observer->updated($model, $attributes),
-                        ModelLogTypeEnum::ForceDelete => $observer->forceDeleted($model),
-                        ModelLogTypeEnum::Restore => $observer->restored($model),
+                        match ($type) {
+                            ModelLogTypeEnum::Create => $observer->created($model, $attributes),
+                            ModelLogTypeEnum::Update => $observer->updated($model, $attributes),
+                            ModelLogTypeEnum::Delete => $observer->deleted($model, $attributes),
+                            ModelLogTypeEnum::SoftDelete => $observer->updated($model, $attributes),
+                            ModelLogTypeEnum::ForceDelete => $observer->forceDeleted($model),
+                            ModelLogTypeEnum::Restore => $observer->restored($model),
 
-                        default => null,
-                    };
+                            default => null,
+                        };
+
+                        $model->withModelLog = false;
+                        !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
+                    }
+
+                    $result[] = $model->{$model->getKeyName()};
                 }
-
             }
 
             is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
+        }
+
+        /* not need
+        if ($this instanceof Connection && is_string($attributes) && is_array($bindings)) {
+            $observer = app(ModelLogObserver::class);
+            $sql = sql($attributes, $bindings ?? []);
+            $table = Hlp::arrayFirst(Hlp::sqlTables($sql));
+            $fields = array_keys(Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($sql)))[$table] ?? []);
+            $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
+            $attributes = array_combine($fields, $bindings);
+            $model = (new $modelClass())->fill($attributes);
+            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+
+            match ($type) {
+                ModelLogTypeEnum::Create => $observer->created($model, $attributes),
+                ModelLogTypeEnum::Update => $observer->updated($model, $attributes),
+                ModelLogTypeEnum::Delete => $observer->deleted($model, $attributes),
+                ModelLogTypeEnum::SoftDelete => $observer->updated($model, $attributes),
+                ModelLogTypeEnum::ForceDelete => $observer->forceDeleted($model),
+                ModelLogTypeEnum::Restore => $observer->restored($model),
+
+                default => null,
+            };
+
+            $model->withModelLog = false;
+            !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
+        }
+        */
+
+        if ($type === ModelLogTypeEnum::Truncate && $attributes) {
+            $observer = app(ModelLogObserver::class);
+
+            foreach ($attributes as $table) {
+                /** @var Model $modelClass */
+                $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
+                $models = $modelClass::query()->withTrashed()->orderBy(with(new $modelClass)->getKeyName())->get();
+
+                foreach ($models as $model) {
+                    if ($model && $model instanceof Model) {
+                        if (
+                            method_exists($model, 'isWithModelLog')
+                            && method_exists($model, 'withModelLog')
+                        ) {
+                            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+
+                            $observer->truncated($model);
+
+                            $model->withModelLog = false;
+                            !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
+                        }
+
+                        $result[] = $model->{$model->getKeyName()};
+                    }
+                }
+
+            }
         }
 
         // not need for connection
         // if (!is_null($this->withModelLog) && $this instanceof QueryBuilder) {
         //     $this->getConnection()->withModelLog($this->withModelLog);
         // }
+
+        return $result;
     }
 }

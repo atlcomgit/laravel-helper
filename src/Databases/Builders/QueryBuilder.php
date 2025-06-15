@@ -103,10 +103,8 @@ class QueryBuilder extends Builder
      * @return void
      */
     // #[Override()]
-    //?!? truncate
     public function truncate()
     {
-        parent::truncate();
-        // return $this->queryTruncate();
+        $this->queryTruncate();
     }
 }

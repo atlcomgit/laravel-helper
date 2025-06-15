@@ -2,13 +2,14 @@
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 
 /**
  * Трейт для подключения логирования модели
  * 
- * @property bool $modelLog
+ * @property bool|null $withModelLog
  * @property array $logExcludeAttributes
  * @property array $logHideAttributes
  * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
@@ -20,12 +21,27 @@ trait ModelLogTrait
 
 
     /**
+     * Вызывает макрос подключения логирования модели
+     *
+     * @param bool|null $enabled
+     * @return EloquentBuilder<static>
+     */
+    public static function withModelLog(?bool $enabled = null): EloquentBuilder
+    {
+        $query = static::query()->withModelLog($enabled);
+        $query->getQuery()->withModelLog($enabled);
+
+        return $query;
+    }
+
+
+    /**
      * Устанавливает флаг включения лога модели
      *
      * @param bool|null $enabled
      * @return static
      */
-    public function withModelLog(?bool $enabled = null): static
+    public function setWithModelLogAttribute(?bool $enabled = null): static
     {
         $this->withModelLog = $enabled ?? true;
 

@@ -36,7 +36,7 @@ class ModelLogService
                 ?? (
                     is_null($attributes)
                     ? null
-                    : $model::query()->where($attributes)->latest()->first()?->{$model->getKeyName()}
+                    : ($model->id = $model::query()->where($attributes)->latest()->first()?->{$model->getKeyName()})
                 )
                 ?? null,
             'type' => $type,
@@ -139,6 +139,28 @@ class ModelLogService
 
 
     /**
+     * Сохраняет лог модели при очистке таблицы
+     *
+     * @param Model $model
+     * @return void
+     */
+    public function truncated(Model $model): void
+    {
+        $type = ModelLogTypeEnum::Truncate;
+
+        $dto = ModelLogDto::fill([
+            'modelType' => $model::class,
+            'modelId' => $model->id ?? null,
+            'type' => $type,
+            'attributes' => $this->getAttributes($model),
+            'changes' => null,
+        ]);
+
+        $dto->dispatch();
+    }
+
+
+    /**
      * Возвращает изменённые аттрибуты в модели
      *
      * @param Model $model
@@ -185,7 +207,7 @@ class ModelLogService
             ? ($model->logHideAttributes ?: [])
             : [];
 
-        foreach ($model->getAttributes() as $attribute => $newValue) {
+        foreach ($model->getAttributes() ?:$attributes ?? []  as $attribute => $newValue) {
             $oldValue = is_null($attributes)
                 ? $model->getOriginal($attribute)
                 : $attributes[$attribute] ?? $model->getOriginal($attribute);

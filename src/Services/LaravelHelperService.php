@@ -16,6 +16,9 @@ use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Сервис пакета laravel-helper
@@ -210,5 +213,60 @@ class LaravelHelperService
         }
 
         return $can;
+    }
+
+
+    /**
+     * Возвращает класс модели по названию таблицы
+     *
+     * @param string $table
+     * @return string|null
+     */
+    public function getModelClassByTable(string $table): ?string
+    {
+        $modelPath = app_path();
+
+        foreach (File::allFiles($modelPath) as $file) {
+            $class = $this->getClassFromFile($file);
+
+            if ($class && is_subclass_of($class, Model::class) && with(new $class)->getTable() === $table) {
+                return $class;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Возвращает полное имя класса с namespace из файла
+     *
+     * @param string $filePath
+     * @return string|null
+     */
+    public function getClassFromFile(SplFileInfo|string $file): ?string
+    {
+        !($file instanceof SplFileInfo) ?: $file = app_path($file->getRelativePathname());
+        $fileData = File::exists($file) ? File::get($file) : '';
+
+        if ($fileData && preg_match('/namespace\s+([^;]+);/', $fileData, $matches)) {
+            $namespace = trim($matches[1] ?? '');
+
+            if (
+                $namespace
+                && preg_match(
+                    '/class\s+(\w+)\s*(?:extends\s+\w+)?\s*(?:implements\s+[\w\\\,\s]+)?\s*{?/',
+                    $fileData,
+                    $matches,
+                )
+            ) {
+                $class = trim($matches[1] ?? '');
+                $classWithNamespace = "{$namespace}\\$class";
+
+                return ($class && class_exists($classWithNamespace)) ? $classWithNamespace : null;
+            }
+        }
+
+        return null;
     }
 }

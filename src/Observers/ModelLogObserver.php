@@ -64,7 +64,7 @@ class ModelLogObserver
 
 
     /**
-     * Handle the Model "restored" event.
+     * Обработчик события при восстановлении модели
      *
      * @param Model $model
      * @return void
@@ -72,6 +72,18 @@ class ModelLogObserver
     public function restored(Model $model)
     {
         !$model->isWithModelLog() ?: $this->modelLogService->restored($model);
+    }
+
+
+    /**
+     * Обработчик события при очистке таблицы модели
+     *
+     * @param Model $model
+     * @return void
+     */
+    public function truncated(Model $model)
+    {
+        !$model->isWithModelLog() ?: $this->modelLogService->truncated($model);
     }
 
 

@@ -18,6 +18,7 @@ enum ModelLogTypeEnum: string
     case SoftDelete = 'soft_delete';
     case ForceDelete = 'force_delete';
     case Restore = 'restore';
+    case Truncate = 'truncate';
 
 
     /**
@@ -46,6 +47,7 @@ enum ModelLogTypeEnum: string
             self::SoftDelete => 'Мягко удалено',
             self::ForceDelete => 'Удалено безвозвратно',
             self::Restore => 'Восстановлено',
+            self::Truncate => 'Очищено',
 
             default => null,
         };
