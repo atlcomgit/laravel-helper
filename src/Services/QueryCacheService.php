@@ -84,7 +84,7 @@ class QueryCacheService
             };
         }
 
-        return $tables;
+        return array_unique(array_filter($tables));
     }
 
 
@@ -130,7 +130,8 @@ class QueryCacheService
             return null;
         }
 
-        $hash = Hlp::hashXxh128($this->getSqlFromBuilder($builder));
+        $sql = $this->getSqlFromBuilder($builder);
+        $hash = Hlp::hashXxh128($sql);
 
         switch (true) {
             case $builder instanceof EloquentBuilder:

@@ -52,6 +52,21 @@ class EloquentBuilder extends Builder
 
     /**
      * @override
+     * Создает записи в базе данных
+     * @see parent::create()
+     *
+     * @param  array  $attributes
+     *@return TModel
+     */
+    // #[Override()]
+    public function create(array $attributes = [])
+    {
+        return $this->queryCreate($attributes);
+    }
+
+
+    /**
+     * @override
      * Обновляет записи в базе данных
      * @see parent::update()
      *

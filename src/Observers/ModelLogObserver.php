@@ -47,7 +47,7 @@ class ModelLogObserver
      */
     public function deleted(Model $model, ?array $attributes = null)
     {
-        !($model->isWithModelLog() && !is_null($attributes)) ?: $this->modelLogService->deleted($model);
+        !$model->isWithModelLog() ?: $this->modelLogService->deleted($model);
     }
 
 

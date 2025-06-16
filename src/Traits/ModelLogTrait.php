@@ -30,6 +30,7 @@ trait ModelLogTrait
     {
         $query = static::query()->withModelLog($enabled);
         $query->getQuery()->withModelLog($enabled);
+        $query->getModel()->setWithModelLogAttribute($enabled);
 
         return $query;
     }

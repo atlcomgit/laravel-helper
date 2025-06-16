@@ -42,6 +42,9 @@ trait QueryTrait
     /** Флаг включения лога модели */
     protected bool|null $withModelLog = null;
 
+    private string|null $withQueryCacheClass = null;
+    private string|null $withQueryLogClass = null;
+
 
     /**
      * Устанавливает флаг включения кеширования
@@ -99,6 +102,74 @@ trait QueryTrait
 
 
     /**
+     * Устанавливает класс вызвавший кеш первого query запроса
+     * Последовательность вызовов: EloquentBuilder -> QueryBuilder -> Connection
+     *
+     * @param string $class
+     * @return static
+     */
+    public function setQueryCacheClass(string $class): static
+    {
+        $this->withQueryCacheClass ??= $class;
+
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->setQueryCacheClass($this->withQueryCacheClass);
+            $this->getQuery()->getConnection()->setQueryCacheClass($this->withQueryCacheClass);
+        }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->setQueryCacheClass($this->withQueryCacheClass);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Устанавливает класс вызвавший лог первого query запроса
+     * Последовательность вызовов: EloquentBuilder -> QueryBuilder -> Connection
+     *
+     * @param string $class
+     * @return static
+     */
+    public function setQueryLogClass(string $class): static
+    {
+        $this->withQueryLogClass ??= $class;
+
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->setQueryLogClass($this->withQueryLogClass);
+            $this->getQuery()->getConnection()->setQueryLogClass($this->withQueryLogClass);
+        }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->setQueryLogClass($this->withQueryLogClass);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Возвращает кешируемый класс
+     *
+     * @return string|null
+     */
+    public function getQueryCacheClass(): ?string
+    {
+        return $this->withQueryCacheClass;
+    }
+
+
+    /**
+     * Возвращает логируемой класс
+     *
+     * @return string|null
+     */
+    public function getQueryLogClass(): ?string
+    {
+        return $this->withQueryLogClass;
+    }
+
+
+    /**
      * Возвращает название тега из ttl (дополнительно добавляется в ключ кеша)
      *
      * @param int|bool|null $ttl
@@ -147,22 +218,18 @@ trait QueryTrait
     protected function createQueryLog(EloquentBuilder|QueryBuilder|string $builder): array
     {
         $result = [];
+        $this->setQueryLogClass($this::class);
 
-        if (!config('laravel-helper.query_log.enabled') || !$this->withQueryLog) {
+        if (
+            !config('laravel-helper.query_log.enabled')
+            || !$this->withQueryLog
+            || $this->getQueryLogClass() !== $this::class
+        ) {
             return $result;
         }
 
-        !method_exists($this, 'withQueryLog') ?: $this->withQueryLog(false);
-        if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->withQueryLog(false);
-            $this->getQuery()->getConnection()->withQueryLog(false);
-        }
-        if ($this instanceof QueryBuilder) {
-            $this->getConnection()->withQueryLog(false);
-        }
-
         $sql = app(QueryCacheService::class)->getSqlFromBuilder($builder);
-        $models = $this instanceof EloquentBuilder ? $this->getModels() : [$this];
+        $models = [$this]; // $models = $this instanceof EloquentBuilder ? $this->getModels() : [$this];
         $classes = [];
         $ids = [];
 
@@ -183,6 +250,14 @@ trait QueryTrait
                     'fields' => Hlp::sqlFields($sql),
                     'ids' => $ids[$class] ?? null,
                     'size_query' => Hlp::stringLength($sql),
+                    ...(config('laravel-helper.app.debug_trace')
+                        ? [
+                            'trace' => config('laravel-helper.app.debug_trace_vendor')
+                                ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+                                : Hlp::arrayExcludeTraceVendor(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS))
+                        ]
+                        : []
+                    ),
                 ],
             );
 
@@ -283,16 +358,18 @@ trait QueryTrait
             $status = false;
             $queryCacheService = app(QueryCacheService::class);
             $tables = $queryCacheService->getTablesFromModels(
-                $this instanceof EloquentBuilder ? $this->getModels() : [$this]
+                [$this] // $this instanceof EloquentBuilder ? $this->getModels() : [$this]
             );
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($this);
+            $this->setQueryCacheClass($this::class);
 
             if (
                 $tables
-                && app(LaravelHelperService::class)->notFoundIgnoreTables($tables)
+                && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
                 && ($this->withQueryCache === true || is_integer($this->withQueryCache))
+                && ($this->getQueryCacheClass() === $this::class)
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
                 $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $this);
@@ -357,11 +434,13 @@ trait QueryTrait
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
+            $this->setQueryCacheClass($this::class);
 
             if (
                 $tables
-                && app(LaravelHelperService::class)->notFoundIgnoreTables($tables)
+                && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
                 && ($this->withQueryCache === true || is_integer($this->withQueryCache))
+                && ($this->getQueryCacheClass() === $this::class)
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
                 $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $sql);
@@ -448,6 +527,60 @@ trait QueryTrait
                 $this->flushCache($query, $bindings);
 
                 $ids = $this->observeModelLog(ModelLogTypeEnum::Create, $query, $bindings);
+                !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
+
+                return $result;
+            });
+
+            $status = true;
+
+        } catch (Throwable $exception) {
+            $this->failQueryLog(arrayQueryLogDto: $arrayQueryLogDto, exception: $exception);
+
+            throw $exception;
+        }
+
+        $this->updateQueryLog(arrayQueryLogDto: $arrayQueryLogDto, result: $result, status: $status);
+
+        return $result;
+    }
+
+
+    /**
+     * @override
+     * Выполняет оператор INSERT в базе данных с использованием кеша
+     * @see parent::update()
+     *
+     * @param array $attributes
+     * @param array $bindings
+     * @return TModel
+     */
+    // #[Override()]
+    public function queryCreate($attributes = null)
+    {
+        try {
+            $status = false;
+            $sql = match (true) {
+                $this instanceof EloquentBuilder => sql(
+                    $this->getGrammar()->compileInsert($this->getQuery(), $attributes),
+                    $attributes,
+                ),
+
+                default => Hlp::castToString($attributes),
+            };
+
+            $arrayQueryLogDto = $this->createQueryLog($sql);
+
+            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$attributes) {
+                $result = match (true) {
+                    $this instanceof EloquentBuilder => parent::create($attributes),
+
+                    default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
+                };
+
+                $this->flushCache($attributes);
+
+                $ids = $this->observeModelLog(ModelLogTypeEnum::Create, $attributes);
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 return $result;
@@ -674,8 +807,8 @@ trait QueryTrait
         $queryCacheService = app(QueryCacheService::class);
         $tables = match (true) {
             is_array($query) => $queryCacheService->getTablesFromSql(sql($this->toSql(), $this->getBindings())),
-            $this instanceof EloquentBuilder => $queryCacheService->getTablesFromModels($this->getModels()),
-            $this instanceof QueryBuilder => $queryCacheService->getTablesFromSql($query),
+            $this instanceof EloquentBuilder => $queryCacheService->getTablesFromModels([$this]), // $queryCacheService->getTablesFromModels($this->getModels()),
+            $this instanceof QueryBuilder => $queryCacheService->getTablesFromSql($query) ?: [$this->from],
             $this instanceof Connection => $queryCacheService->getTablesFromSql($query),
 
             default => $queryCacheService->getTablesFromSql($query),
@@ -733,7 +866,6 @@ trait QueryTrait
                         };
 
                         $model->withModelLog = false;
-                        !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
                     }
 
                     $result[] = $model->{$model->getKeyName()};
@@ -789,7 +921,6 @@ trait QueryTrait
                             $observer->truncated($model);
 
                             $model->withModelLog = false;
-                            !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
                         }
 
                         $result[] = $model->{$model->getKeyName()};
