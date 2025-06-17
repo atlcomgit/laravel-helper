@@ -345,7 +345,6 @@ trait QueryTrait
 
 
     /**
-     * @override
      * Выполняет запрос как оператор «select» с использованием кеша
      * @see parent::get()
      *
@@ -415,7 +414,6 @@ trait QueryTrait
 
 
     /**
-     * @override
      * Выполняет запрос как оператор «select» с использованием кеша
      * @see parent::select()
      *
@@ -484,9 +482,8 @@ trait QueryTrait
 
 
     /**
-     * @override
      * Выполняет оператор INSERT в базе данных с использованием кеша
-     * @see parent::update()
+     * @see parent::insert()
      *
      * @param string|array $query
      * @param array $bindings
@@ -549,7 +546,7 @@ trait QueryTrait
     /**
      * @override
      * Выполняет оператор INSERT в базе данных с использованием кеша
-     * @see parent::update()
+     * @see parent::create()
      *
      * @param array $attributes
      * @param array $bindings
@@ -794,7 +791,7 @@ trait QueryTrait
     /**
      * Сбрасывает кеш моделей из конструктора
      *
-     * @param string  $query
+     * @param string|array|null  $query
      * @param array  $bindings
      * @return void
      */

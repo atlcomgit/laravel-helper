@@ -32,7 +32,8 @@ class ExceptionDebugDto extends Dto
 
 
     /**
-     * Метод вызывается до заполнения dto
+     * @inheritDoc
+     * @see parent::onFilling()
      *
      * @param array $array
      * @return void
@@ -77,7 +78,8 @@ class ExceptionDebugDto extends Dto
 
 
     /**
-     * Метод вызывается после заполнения dto
+     * @inheritDoc
+     * @see parent::onFilled()
      *
      * @param array $array
      * @return void
@@ -91,7 +93,8 @@ class ExceptionDebugDto extends Dto
 
 
     /**
-     * Метод вызывается до преобразования dto в массив
+     * @inheritDoc
+     * @see parent::onSerializing()
      *
      * @param array $array
      * @return void>
@@ -125,7 +128,8 @@ class ExceptionDebugDto extends Dto
 
 
     /**
-     * Метод вызывается после преобразования dto в массив
+     * @inheritDoc
+     * @see parent::onSerialized()
      *
      * @param array $array
      * @return void

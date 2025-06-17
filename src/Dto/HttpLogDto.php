@@ -48,8 +48,8 @@ class HttpLogDto extends Dto
 
 
     /**
-     * @override
-     * Возвращает массив значений по умолчанию
+     * @inheritDoc
+     * @see parent::defaults()
      *
      * @return array
      */

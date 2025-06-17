@@ -157,7 +157,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Возвращает массив преобразований свойств
+     * @inheritDoc
+     * @see parent::mappings()
      *
      * @return array
      */
@@ -172,7 +173,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Возвращает массив значений по умолчанию
+     * @inheritDoc
+     * @see parent::defaults()
      *
      * @return array
      */
@@ -191,7 +193,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Возвращает массив преобразований типов
+     * @inheritDoc
+     * @see parent::casts()
      *
      * @return array
      */
@@ -206,7 +209,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Метод вызывается после заполнения dto
+     * @inheritDoc
+     * @see parent::onFilled()
      *
      * @param array $array
      * @return void
@@ -286,7 +290,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Метод вызывается во время исключения при заполнении dto
+     * @inheritDoc
+     * @see parent::onException()
      *
      * @param Throwable $exception
      * @return void
@@ -300,7 +305,8 @@ class ExceptionDto extends Dto
 
 
     /**
-     * Метод вызывается до преобразования dto в массив
+     * @inheritDoc
+     * @see parent::onSerializing()
      *
      * @param array $array
      * @return void

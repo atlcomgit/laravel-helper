@@ -33,8 +33,8 @@ class QueryLogDto extends Dto
 
 
     /**
-     * @override
-     * Возвращает массив значений по умолчанию
+     * @inheritDoc
+     * @see parent::defaults()
      *
      * @return array
      */
@@ -55,7 +55,8 @@ class QueryLogDto extends Dto
 
 
     /**
-     * Возвращает массив преобразований типов
+     * @inheritDoc
+     * @see parent::casts()
      *
      * @return array
      */
@@ -68,6 +69,7 @@ class QueryLogDto extends Dto
 
     /**
      * @inheritDoc
+     * @see parent::mappings()
      */
     protected function mappings(): array
     {
@@ -81,7 +83,8 @@ class QueryLogDto extends Dto
 
 
     /**
-     * Метод вызывается до преобразования dto в массив
+     * @inheritDoc
+     * @see parent::onSerializing()
      *
      * @param array $array
      * @return void

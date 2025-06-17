@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
+use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Repositories\QueueLogRepository;
@@ -44,9 +46,12 @@ class QueueLogService
         }
 
         $uuid = $event->job->uuid();
-        $memoryCacheKey = "job_memory_{$uuid}";
-        !($event instanceof JobProcessing) ?: Hlp::cacheRuntimeSet($memoryCacheKey, memory_get_usage());
         $payload = json_decode($event->job->getRawBody(), true);
+        !($event instanceof JobProcessing) ?: ApplicationDto::create(
+            uuid: $uuid,
+            type: ApplicationTypeEnum::Queue,
+            class: $event->job::class,
+        )->store();
 
         $command = unserialize($payload['data']['command'] ?? '');
         $command = (is_object($command) && method_exists($command, 'toArray'))
@@ -82,9 +87,7 @@ class QueueLogService
                         value: Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
                         withMilliseconds: true,
                     ),
-                    'memory' => Hlp::sizeBytesToString(
-                        memory_get_usage() - Hlp::cacheRuntimeGet($memoryCacheKey, memory_get_usage())
-                    ),
+                    'memory' => Hlp::sizeBytesToString(ApplicationDto::restore()->getMemory()),
                     'deleted' => $event->job->isDeleted(),
                     'released' => $event->job->isReleased(),
                     'failed' => $event->job->hasFailed(),

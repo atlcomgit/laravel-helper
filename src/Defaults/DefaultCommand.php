@@ -3,7 +3,9 @@
 namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Illuminate\Console\Command;
@@ -55,8 +57,8 @@ abstract class DefaultCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+            ApplicationDto::create(type: ApplicationTypeEnum::Command, class: $this::class);
             $this->isTesting = isTesting();
-
             $this->consoleLogDto = ConsoleLogDto::create(
                 name: Hlp::pathClassName($this::class),
                 command: $this->name,

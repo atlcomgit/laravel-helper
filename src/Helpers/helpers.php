@@ -2,8 +2,11 @@
 
 use Atlcom\Dto;
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\ExceptionDto;
+use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
+use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Listeners\TelegramLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -20,6 +23,8 @@ if (!function_exists('isDebug')) {
     {
         return (bool)config('laravel-helper.app.debug');
     }
+} else {
+    throw new LaravelHelperException('Функция isDebug() уже определена в приложении');
 }
 
 
@@ -33,6 +38,8 @@ if (!function_exists('isDebugData')) {
     {
         return (bool)config('laravel-helper.app.debug_data');
     }
+} else {
+    throw new LaravelHelperException('Функция isDebugData() уже определена в приложении');
 }
 
 
@@ -46,6 +53,8 @@ if (!function_exists('isDebugTrace')) {
     {
         return (bool)config('laravel-helper.app.debug_trace');
     }
+} else {
+    throw new LaravelHelperException('Функция isDebugTrace() уже определена в приложении');
 }
 
 
@@ -59,6 +68,8 @@ if (!function_exists('isLocal')) {
     {
         return in_array(config('app.env', null), ['local']);
     }
+} else {
+    throw new LaravelHelperException('Функция isLocal() уже определена в приложении');
 }
 
 
@@ -70,8 +81,11 @@ if (!function_exists('isTesting')) {
      */
     function isTesting(): bool
     {
-        return in_array(env('APP_ENV', null), ['test', 'testing']);
+        return in_array(env('APP_ENV', null), ['test', 'testing'])
+            || ApplicationDto::restore()?->type === ApplicationTypeEnum::Testing;
     }
+} else {
+    throw new LaravelHelperException('Функция isTesting() уже определена в приложении');
 }
 
 
@@ -85,6 +99,8 @@ if (!function_exists('isDev')) {
     {
         return in_array(config('app.env', null), ['develop', 'dev']);
     }
+} else {
+    throw new LaravelHelperException('Функция isDev() уже определена в приложении');
 }
 
 
@@ -98,6 +114,53 @@ if (!function_exists('isProd')) {
     {
         return in_array(config('app.env', null), ['production', 'prod', 'master']);
     }
+} else {
+    throw new LaravelHelperException('Функция isProd() уже определена в приложении');
+}
+
+
+if (!function_exists('isCommand')) {
+    /**
+     * Проверяет на запуск приложения из консольной команды
+     *
+     * @return bool
+     */
+    function isCommand(): bool
+    {
+        return ApplicationDto::restore()?->type === ApplicationTypeEnum::Command;
+    }
+} else {
+    throw new LaravelHelperException('Функция isCommand() уже определена в приложении');
+}
+
+
+if (!function_exists('isHttp')) {
+    /**
+     * Проверяет на запуск приложения из http запроса
+     *
+     * @return bool
+     */
+    function isHttp(): bool
+    {
+        return ApplicationDto::restore()?->type === ApplicationTypeEnum::Http;
+    }
+} else {
+    throw new LaravelHelperException('Функция isHttp() уже определена в приложении');
+}
+
+
+if (!function_exists('isQueue')) {
+    /**
+     * Проверяет на запуск приложения из очереди
+     *
+     * @return bool
+     */
+    function isQueue(): bool
+    {
+        return ApplicationDto::restore()?->type === ApplicationTypeEnum::Queue;
+    }
+} else {
+    throw new LaravelHelperException('Функция isQueue() уже определена в приложении');
 }
 
 
@@ -123,6 +186,8 @@ if (!function_exists('queue')) {
                 : (!class_exists($classJob) ?: $classJob::dispatch($dto)->onQueue($queueName));
         }
     }
+} else {
+    throw new LaravelHelperException('Функция queue() уже определена в приложении');
 }
 
 
@@ -145,6 +210,8 @@ if (!function_exists('sql')) {
             ),
         };
     }
+} else {
+    throw new LaravelHelperException('Функция sql() уже определена в приложении');
 }
 
 
@@ -159,6 +226,8 @@ if (!function_exists('json')) {
     {
         return json_encode($data, Hlp::jsonFlags()) ?? '{}';
     }
+} else {
+    throw new LaravelHelperException('Функция json() уже определена в приложении');
 }
 
 
@@ -189,6 +258,8 @@ if (!function_exists('telegram')) {
             // !isTesting() ?: throw $e;
         }
     }
+} else {
+    throw new LaravelHelperException('Функция telegram() уже определена в приложении');
 }
 
 if (!function_exists('user')) {
@@ -210,6 +281,8 @@ if (!function_exists('user')) {
 
         return $user;
     }
+} else {
+    throw new LaravelHelperException('Функция user() уже определена в приложении');
 }
 
 
@@ -225,6 +298,8 @@ if (!function_exists('ip')) {
             ?: (request()->headers->all()['x-real-ip'][0] ?? null)
             ?: request()->getClientIp();
     }
+} else {
+    throw new LaravelHelperException('Функция ip() уже определена в приложении');
 }
 
 
@@ -238,4 +313,6 @@ if (!function_exists('uuid')) {
     {
         return (method_exists(Str::class, 'uuid7') ? Str::uuid7() : Str::uuid())->toString();
     }
+} else {
+    throw new LaravelHelperException('Функция uuid() уже определена в приложении');
 }

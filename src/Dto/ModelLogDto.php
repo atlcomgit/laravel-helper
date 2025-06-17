@@ -24,7 +24,8 @@ class ModelLogDto extends DefaultDto
 
 
     /**
-     * Возвращает массив преобразований свойств
+     * @inheritDoc
+     * @see parent::mappings()
      *
      * @return array
      */
@@ -41,7 +42,8 @@ class ModelLogDto extends DefaultDto
 
 
     /**
-     * Возвращает массив значений по умолчанию
+     * @inheritDoc
+     * @see parent::defaults()
      *
      * @return array
      */
@@ -58,7 +60,8 @@ class ModelLogDto extends DefaultDto
 
 
     /**
-     * Возвращает массив преобразований типов
+     * @inheritDoc
+     * @see parent::casts()
      *
      * @return array
      */
@@ -70,7 +73,8 @@ class ModelLogDto extends DefaultDto
 
 
     /**
-     * Метод вызывается до заполнения dto
+     * @inheritDoc
+     * @see parent::onFilling()
      *
      * @param array $array
      * @return void
@@ -86,7 +90,8 @@ class ModelLogDto extends DefaultDto
 
 
     /**
-     * Метод вызывается до преобразования dto в массив
+     * @inheritDoc
+     * @see parent::onSerializing()
      *
      * @param array $array
      * @return void

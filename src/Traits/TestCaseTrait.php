@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\LaravelHelper\Dto\ApplicationDto;
+use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
@@ -65,6 +67,8 @@ trait TestCaseTrait
      */
     protected function beforeRefreshingDatabase()
     {
+        ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
+        
         Config::set('app.env', env('APP_ENV'));
         (($appEnv = env('APP_ENV')) === self::ENV)
             ?: throw new WithoutTelegramException("APP_ENV = {$appEnv}: не является тестовой");

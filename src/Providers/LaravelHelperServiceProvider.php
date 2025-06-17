@@ -59,18 +59,19 @@ class LaravelHelperServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Конфигурация
+        // Регистрация настроек пакета
         $this->mergeConfigFrom(__DIR__ . '/../../config/laravel-helper.php', 'laravel-helper');
 
+        // Публикация настроек пакета
         $this->publishes(
             [__DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php')],
             'laravel-helper',
         );
 
-        // Миграции
+        // Регистрация миграций
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
 
-        // Фабрики
+        // Регистрация фабрик
         $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
 
         // Регистрация обработчика исключений
@@ -105,19 +106,19 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Проверка параметров конфига laravel-helper
         app(LaravelHelperService::class)->checkConfig();
 
-        // HttpLog events
+        // Подключение событий HttpLog
         if (config('laravel-helper.http_log.out.enabled')) {
             Event::listen(RequestSending::class, HttpRequestSendingListener::class);
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
 
-        // Builder макросы
+        // Подключение макросов Builder
         !(config('laravel-helper.macros.builder.enabled') || config('laravel-helper.query_cache.enabled'))
             ?: BuilderMacrosService::setMacros();
-        // Строковые макросы
+        // Подключение макросов Str
         !config('laravel-helper.macros.str.enabled') ?: StrMacrosService::setMacros();
-        // Http макросы
+        // Подключение макросов Http
         !config('laravel-helper.macros.http.enabled') ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
@@ -128,7 +129,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
             ],
         ]);
 
-        // Регистрация консольных команд
+        // Подключение консольных команд
         if ($this->app->runningInConsole()) {
             $this->commands([
                 AllCleanupCommand::class,
@@ -159,17 +160,18 @@ class LaravelHelperServiceProvider extends ServiceProvider
             );
         }
 
-        // Добавить middleware глобально
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+
+        // Подключение middleware глобально
+        $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
+        $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
         if (config('laravel-helper.http_log.in.global')) {
-            /** @var Kernel $kernel */
-            $kernel = $this->app->make(Kernel::class);
             $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
             $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
-            $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
-            $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
         }
 
-        // Логирование очередей
+        // Подключение логирования очередей
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
         Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
         Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
