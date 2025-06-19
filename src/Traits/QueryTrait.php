@@ -377,13 +377,13 @@ trait QueryTrait
                     ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
                     : parent::get($columns);
 
-                $hasCache ?: $queryCacheService->setQueryCache(
+                $hasCache ?: $isCached = $queryCacheService->setQueryCache(
                     tags: $tags,
                     key: $cacheKey,
                     value: $result,
                     ttl: $this->withQueryCache,
                 );
-                $isCached = !$hasCache;
+                $isCached ??= false;
                 $isFromCache = $hasCache;
 
                 !($result instanceof Collection)
@@ -447,13 +447,13 @@ trait QueryTrait
                     ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
                     : parent::select($query, $bindings, $useReadPdo);
 
-                $hasCache ?: $queryCacheService->setQueryCache(
+                $hasCache ?: $isCached = $queryCacheService->setQueryCache(
                     tags: $tags,
                     key: $cacheKey,
                     value: $result,
                     ttl: $this->withQueryCache,
                 );
-                $isCached = !$hasCache;
+                $isCached ??= false;
                 $isFromCache = $hasCache;
 
                 !($result instanceof Collection)
@@ -816,7 +816,7 @@ trait QueryTrait
         }
 
         foreach ($tables as $table) {
-            $queryCacheService->flush($table);
+            $queryCacheService->flushQueryCache($table);
         }
     }
 

@@ -51,7 +51,7 @@ class QueueLogService
             uuid: $uuid,
             type: ApplicationTypeEnum::Queue,
             class: $event->job::class,
-        )->store();
+        );
 
         $command = unserialize($payload['data']['command'] ?? '');
         $command = (is_object($command) && method_exists($command, 'toArray'))
@@ -87,7 +87,7 @@ class QueueLogService
                         value: Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
                         withMilliseconds: true,
                     ),
-                    'memory' => Hlp::sizeBytesToString(ApplicationDto::restore()->getMemory()),
+                    'memory' => Hlp::sizeBytesToString(ApplicationDto::restore()?->getMemory()),
                     'deleted' => $event->job->isDeleted(),
                     'released' => $event->job->isReleased(),
                     'failed' => $event->job->hasFailed(),

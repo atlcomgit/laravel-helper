@@ -218,6 +218,8 @@ return [
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
         // Название драйвера кеша
         'driver' => (string)env('QUERY_CACHE_DRIVER'),
+        // Название папки кеша для драйвера file
+        'driver_file_path' => (string)env('QUERY_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/query')),
         // Срок жизни ключа кеша по умолчанию
         'ttl' => Hlp::castToInt(env('QUERY_CACHE_TTL', 3600)),
         // Исключения кеша, например ['key' => '...']

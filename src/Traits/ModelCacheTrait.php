@@ -140,7 +140,7 @@ trait ModelCacheTrait
      */
     public function flushCache(): static
     {
-        app(QueryCacheService::class)->flush($this);
+        app(QueryCacheService::class)->flushQueryCache($this);
 
         return $this;
     }

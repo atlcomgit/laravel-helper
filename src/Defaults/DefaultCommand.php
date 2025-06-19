@@ -101,6 +101,14 @@ abstract class DefaultCommand extends Command
                 && $this->hasOption('telegram')
                 && Hlp::castToBool($this->option('telegram'))
             ) {
+                $this->output->write(
+                    PHP_EOL
+                    . '<fg=green>'
+                    . '┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓' . PHP_EOL
+                    . '┃ 🕊  Отправка сообщения в телеграм ┃' . PHP_EOL
+                    . '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛' . PHP_EOL
+                    . '</>' . PHP_EOL
+                );
 
                 telegram([
                     'Событие' => 'Консольная команда',

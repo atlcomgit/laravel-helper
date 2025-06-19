@@ -36,6 +36,16 @@ class ApplicationDto extends DefaultDto
 
 
     /**
+     * @inheritDoc
+     * @see parent::onFilled()
+     */
+    protected function onFilled(array $array): void
+    {
+        $this->store();
+    }
+
+
+    /**
      * Возвращает длительность работы скрипта
      *
      * @return string
@@ -76,9 +86,9 @@ class ApplicationDto extends DefaultDto
     /**
      * Загружает из временного кеша dto
      *
-     * @return static
+     * @return static|null
      */
-    public static function restore(): static
+    public static function restore(): ?static
     {
         return Hlp::cacheRuntimeGet('LaravelHelper.Application');
     }
