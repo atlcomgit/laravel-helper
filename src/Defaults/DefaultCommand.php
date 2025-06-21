@@ -38,6 +38,12 @@ abstract class DefaultCommand extends Command
         if (!Str::contains($this->signature, '--telegram')) {
             $this->signature .= '
                 { --telegram : Флаг отправки события в телеграм }
+            ';
+        }
+
+        // Добавляем в команду флаг логирования консольной команды
+        if (!Str::contains($this->signature, '--log')) {
+            $this->signature .= '
                 { --log : Флаг включения логирования команды }
             ';
         }

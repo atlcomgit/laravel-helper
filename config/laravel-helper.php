@@ -60,7 +60,12 @@ return [
         // Очистка таблиц
         'cleanup' => [
             // Флаг включения
-            'enabled' => (bool)env('OPTIMIZE_CLEANUP_ALL_ENABLED', true),
+            'enabled' => (bool)env('OPTIMIZE_CLEANUP_ENABLED', true),
+        ],
+        // Очистка кеша
+        'cache' => [
+            // Флаг включения
+            'enabled' => (bool)env('OPTIMIZE_CACHE_ENABLED', true),
         ],
     ],
 
@@ -217,7 +222,7 @@ return [
         // Флаг включения кеша
         'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
         // Название драйвера кеша
-        'driver' => (string)env('QUERY_CACHE_DRIVER'),
+        'driver' => (string)env('QUERY_CACHE_DRIVER', env('CACHE_STORE', 'database')),
         // Название папки кеша для драйвера file
         'driver_file_path' => (string)env('QUERY_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/query')),
         // Срок жизни ключа кеша по умолчанию
@@ -355,6 +360,13 @@ return [
      * Http Macro. Макросы исходящих http запросов через фасад Http
      */
     'http' => [
+        // Сервис localhost
+        'localhost' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HTTP_LOCALHOST_ENABLED', true),
+            // Url адрес для запросов api
+            'url' => (string)env('HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
+        ],
         // Сервис sms.ru
         'smsRu' => [
             // Флаг включения макроса

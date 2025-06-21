@@ -30,11 +30,7 @@ class ModelLogRepository
         $this->modelLogClass = config('laravel-helper.model_log.model') ?? ModelLog::class;
 
         if ($dto->modelType !== $this->modelLogClass) {
-            $this->modelLogClass::queryFrom(
-                connection: config('laravel-helper.model_log.connection'),
-                table: config('laravel-helper.model_log.table'),
-            )
-                ->create($dto->toArray());
+            $this->modelLogClass::query()->create($dto->toArray());
         }
     }
 
@@ -48,10 +44,7 @@ class ModelLogRepository
     public function cleanup(int $days): int
     {
         /** @var ModelLog $this->consoleLogClass */
-        return $this->modelLogClass::queryFrom(
-            connection: config('laravel-helper.model_log.connection'),
-            table: config('laravel-helper.model_log.table'),
-        )
+        return $this->modelLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

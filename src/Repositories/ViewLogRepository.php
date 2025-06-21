@@ -27,11 +27,7 @@ class ViewLogRepository
     public function create(ViewLogDto $dto): void
     {
         /** @var ViewLog $this->viewLogClass */
-        $this->viewLogClass::queryFrom(
-            connection: config('laravel-helper.view_log.connection'),
-            table: config('laravel-helper.view_log.table'),
-        )
-            ->create($dto->toArray());
+        $this->viewLogClass::query()->create($dto->toArray());
     }
 
 
@@ -44,10 +40,7 @@ class ViewLogRepository
     public function update(ViewLogDto $dto): void
     {
         /** @var ViewLog $this->viewLogClass */
-        $this->viewLogClass::queryFrom(
-            connection: config('laravel-helper.view_log.connection'),
-            table: config('laravel-helper.view_log.table'),
-        )
+        $this->viewLogClass::query()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -62,10 +55,7 @@ class ViewLogRepository
     public function cleanup(int $days): int
     {
         /** @var ViewLog $this->viewLogClass */
-        return $this->viewLogClass::queryFrom(
-            connection: config('laravel-helper.view_log.connection'),
-            table: config('laravel-helper.view_log.table'),
-        )
+        return $this->viewLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

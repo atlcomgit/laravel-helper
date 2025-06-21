@@ -22,7 +22,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -35,6 +34,7 @@ class QueryCacheService
 {
     // Количество попыток записи кеша в файл
     public const CACHE_FILE_TRY_COUNT = 3;
+    // Разделитель ключа кеша
     public const CACHE_TAGS_DELIMITER = '__';
 
     protected string $driver = '';
@@ -158,7 +158,7 @@ class QueryCacheService
                 $id = '';
         }
 
-        $tag = (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
+        $tag = ($this->driver && Cache::driver($this->driver)->getStore() instanceof TaggableStore)
             ? ''
             : Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, $tags);
 
@@ -246,9 +246,7 @@ class QueryCacheService
             app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
             && !Hlp::arraySearchValues($tags, $this->exclude)
         ) {
-            (Cache::driver($this->driver)->getStore() instanceof TaggableStore)
-                ? Cache::driver($this->driver)->tags($tags)->flush()
-                : $this->flushCache($tags);
+            $this->flushCache($tags);
         }
     }
 
@@ -257,18 +255,22 @@ class QueryCacheService
      * Проверяет наличие query запроса в кеше
      *
      * @param array|null $tags
-     * @param string|null $key
+     * @param string $key
      * @return bool
      */
-    private function hasCache(?array $tags, ?string $key): bool
+    private function hasCache(?array $tags, string $key): bool
     {
-        if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
+        if (!$this->driver) {
+            return false;
+
+        } else if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
             return Cache::driver($this->driver)->tags($tags)->has($key);
 
         } else {
             switch (Cache::driver($this->driver)->getStore()::class) {
+
                 case RedisStore::class:
-                    return false;
+                    return Cache::driver($this->driver)->tags($tags)->has($key);
 
                 case FileStore::class:
                     $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
@@ -311,7 +313,23 @@ class QueryCacheService
                     return Cache::driver($this->driver)->has($key);
 
                 case ArrayStore::class:
-                    return false;
+                    $cache = Hlp::cacheRuntimeGet(__CLASS__) ?? [];
+                    if (!isset($cache[$key])) {
+                        return false;
+                    }
+
+                    $data = $cache[$key] ?? [];
+                    /** @var Carbon $createdAt */
+                    $createdAt = $data['created_at'] ?? null;
+                    $ttl = $data['ttl'] ?? null;
+                    if (!is_null($ttl) && $createdAt->diffInSeconds() > $ttl) {
+                        unset($cache[$key]);
+                        Hlp::cacheRuntimeSet(__CLASS__, $cache);
+
+                        return false;
+                    }
+
+                    return true;
 
                 case MemcachedStore::class:
                     return false;
@@ -326,20 +344,24 @@ class QueryCacheService
      * Сохраняет query запрос в кеш
      *
      * @param array|null $tags
-     * @param string|null $key
+     * @param string $key
      * @param mixed $value
      * @param int $ttl
      * @return bool
      */
-    private function setCache(?array $tags, ?string $key, mixed $value, int $ttl): bool
+    private function setCache(?array $tags, string $key, mixed $value, int $ttl): bool
     {
-        if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
-            return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl);
+        if (!$this->driver) {
+            return false;
+
+        } else if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
+            return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl ?: null);
 
         } else {
             switch (Cache::driver($this->driver)->getStore()::class) {
+
                 case RedisStore::class:
-                    return false;
+                    return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl ?: null);
 
                 case FileStore::class:
                     $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
@@ -363,9 +385,18 @@ class QueryCacheService
                     return false;
 
                 case DatabaseStore::class:
-                    return Cache::driver($this->driver)->put($key, $value, $ttl);
+                    return Cache::driver($this->driver)->put($key, $value, $ttl ?: null);
 
                 case ArrayStore::class:
+                    $cache = Hlp::cacheRuntimeGet(__CLASS__);
+                    $cache[$key] = [
+                        'tags' => $tags,
+                        'value' => $value,
+                        'created_at' => now(),
+                        'ttl' => $ttl ?: null,
+                    ];
+                    Hlp::cacheRuntimeSet(__CLASS__, $cache);
+
                     return false;
 
                 case MemcachedStore::class:
@@ -381,20 +412,24 @@ class QueryCacheService
      * Сохраняет query запрос в кеш
      *
      * @param array|null $tags
-     * @param string|null $key
+     * @param string $key
      * @param mixed $value
      * @param mixed|null $default
      * @return mixed
      */
-    private function getCache(?array $tags, ?string $key, mixed $value, mixed $default = null): mixed
+    private function getCache(?array $tags, string $key, mixed $value, mixed $default = null): mixed
     {
-        if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
+        if (!$this->driver) {
+            return null;
+
+        } else if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
             return Cache::driver($this->driver)->tags($tags)->get($key, $default);
 
         } else {
             switch (Cache::driver($this->driver)->getStore()::class) {
+
                 case RedisStore::class:
-                    return null;
+                    return Cache::driver($this->driver)->tags($tags)->get($key, $default);
 
                 case FileStore::class:
                     $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
@@ -423,10 +458,9 @@ class QueryCacheService
                     return Cache::driver($this->driver)->get($key, $default);
 
                 case ArrayStore::class:
-                    return null;
+                    return (Hlp::cacheRuntimeGet(__CLASS__) ?? [])[$key] ?? null;
 
                 case MemcachedStore::class:
-
                     return null;
             }
         }
@@ -443,31 +477,22 @@ class QueryCacheService
      */
     private function flushCache(array $tags): void
     {
-        $tag = '__' . Hlp::stringConcat('__', $tags) . '__';
+        $tags = Hlp::arrayDeleteValues($tags, [Hlp::pathClassName($this::class), 'ttl_*']);
 
-        if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
+        if (!$this->driver) {
+            return;
+
+        } else if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
             Cache::driver($this->driver)->tags($tags)->flush();
 
         } else {
             switch (Cache::driver($this->driver)->getStore()::class) {
 
-                //?!? проверить redis
                 // CACHE_STORE=redis
                 case RedisStore::class:
-                    $cursor = null;
-
-                    do {
-                        [$cursor, $keys] = Redis::scan($cursor, [
-                            'match' => "{$tag}",
-                            'count' => 100,
-                        ]);
-                        foreach ($keys as $key) {
-                            Redis::del($key);
-                        }
-                    } while ($cursor != 0);
+                    Cache::driver($this->driver)->tags($tags)->flush();
                     break;
 
-                //?!? проверить file
                 // CACHE_STORE=file
                 case FileStore::class:
                     $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
@@ -480,10 +505,14 @@ class QueryCacheService
                         new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
                     );
 
+                    $isFullFlush = in_array($tags, ['*']);
                     foreach ($files as $file) {
                         /** @var SplFileInfo $file */
                         $pathFile = $file->getRealPath();
-                        if (Hlp::stringSplitSearch($file->getFilename(), static::CACHE_TAGS_DELIMITER, $tags)) {
+                        if (
+                            $isFullFlush
+                            || Hlp::stringSplitSearch($file->getFilename(), static::CACHE_TAGS_DELIMITER, $tags)
+                        ) {
                             $try = 0;
                             while (++$try <= static::CACHE_FILE_TRY_COUNT) {
                                 File::delete($pathFile)
@@ -497,22 +526,29 @@ class QueryCacheService
                 // CACHE_STORE=database
                 case DatabaseStore::class:
                     $tableCache = config('cache.stores.database.table', 'cache');
+                    $tag = '__' . Hlp::stringConcat('__', $tags) . '__';
                     DB::table($tableCache)->where('key', 'like', "%{$tag}%")->delete();
                     break;
 
                 // CACHE_STORE=array
                 case ArrayStore::class:
-                    // ArrayStore не поддерживает хранение между запросами
+                    if (in_array($tags, ['*'])) {
+                        Hlp::cacheRuntimeClear();
+
+                    } else {
+                        $cache = Hlp::cacheRuntimeGet(__CLASS__);
+                        foreach ($cache as $key => $data) {
+                            if (Hlp::arraySearchValues($data['tags'] ?? [], $tags)) {
+                                unset($cache[$key]);
+                            }
+                        }
+                        Hlp::cacheRuntimeSet(__CLASS__, $cache);
+                    }
                     break;
 
-                //?!? проверить memcached
                 // CACHE_STORE=memcached
                 case MemcachedStore::class:
-                    // Нет wildcard, нужно логировать ключи отдельно
                     break;
-
-                default:
-                // Сброс кеша по шаблону не поддерживается для драйвера
             }
         }
     }

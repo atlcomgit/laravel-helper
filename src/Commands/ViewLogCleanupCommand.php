@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\ViewLogService;
  */
 class ViewLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'cleanup:view_logs';
+    protected $signature = 'lh:cleanup:view_logs';
     protected $description = 'Очистка логов рендеринга blade шаблонов';
     protected $isolated = true;
 

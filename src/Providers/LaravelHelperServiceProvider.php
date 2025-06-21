@@ -3,7 +3,8 @@
 namespace Atlcom\LaravelHelper\Providers;
 
 use Atlcom\Dto;
-use Atlcom\LaravelHelper\Commands\AllCleanupCommand;
+use Atlcom\LaravelHelper\Commands\CacheClearCommand;
+use Atlcom\LaravelHelper\Commands\OptimizeCommand;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
@@ -132,7 +133,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Подключение консольных команд
         if ($this->app->runningInConsole()) {
             $this->commands([
-                AllCleanupCommand::class,
+                OptimizeCommand::class,
+                CacheClearCommand::class,
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
@@ -156,7 +158,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
             // Запуск команд при выполнении artisan optimize
             !config('laravel-helper.optimize.cleanup.enabled') ?: $this->optimizes(
-                optimize: AllCleanupCommand::class,
+                optimize: OptimizeCommand::class,
+                clear: CacheClearCommand::class,
             );
         }
 

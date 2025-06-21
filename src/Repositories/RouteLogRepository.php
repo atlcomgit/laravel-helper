@@ -42,10 +42,7 @@ class RouteLogRepository
     public function setExistOrCreate(RouteLogDto $dto): void
     {
         /** @var RouteLog $routeLog */
-        $routeLog = $this->routeLogClass::queryFrom(
-            connection: config('laravel-helper.route_log.connection'),
-            table: config('laravel-helper.route_log.table'),
-        )
+        $routeLog = $this->routeLogClass::query()
             ->ofMethod($dto->method)
             ->ofUri($dto->uri)
             ->first()
@@ -65,10 +62,7 @@ class RouteLogRepository
     public function setCountZero(RouteLogDto $dto): void
     {
         /** @var RouteLog $routeLog */
-        $routeLog = $this->routeLogClass::queryFrom(
-            connection: config('laravel-helper.route_log.connection'),
-            table: config('laravel-helper.route_log.table'),
-        )
+        $routeLog = $this->routeLogClass::query()
             ->ofMethod($dto->method)
             ->ofUri($dto->uri)
             ->first()
@@ -88,10 +82,7 @@ class RouteLogRepository
     {
         try {
             /** @var RouteLog $routeLog */
-            $routeLog = $this->routeLogClass::queryFrom(
-                connection: config('laravel-helper.route_log.connection'),
-                table: config('laravel-helper.route_log.table'),
-            )
+            $routeLog = $this->routeLogClass::query()
                 ->ofMethod($dto->method)
                 ->ofUri($dto->uri)
                 ->first()
@@ -112,11 +103,7 @@ class RouteLogRepository
      */
     public function setExistAll(bool $value): void
     {
-        $this->routeLogClass::queryFrom(
-            connection: config('laravel-helper.route_log.connection'),
-            table: config('laravel-helper.route_log.table'),
-        )
-            ->update(['exist' => $value]);
+        $this->routeLogClass::query()->update(['exist' => $value]);
     }
 
 
@@ -127,10 +114,7 @@ class RouteLogRepository
      */
     public function deleteNotExist(): void
     {
-        $this->routeLogClass::queryFrom(
-            connection: config('laravel-helper.route_log.connection'),
-            table: config('laravel-helper.route_log.table'),
-        )
+        $this->routeLogClass::query()
             ->ofExist(false)
             ->delete();
     }

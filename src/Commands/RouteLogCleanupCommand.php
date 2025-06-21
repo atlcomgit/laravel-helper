@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\RouteLogService;
  */
 class RouteLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'cleanup:route_logs';
+    protected $signature = 'lh:cleanup:route_logs';
     protected $description = 'Очистка логов роутов';
     protected $isolated = true;
 

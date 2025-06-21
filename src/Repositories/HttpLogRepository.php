@@ -29,11 +29,7 @@ class HttpLogRepository
     public function create(HttpLogCreateDto $dto): void
     {
         /** @var HttpLog $this->httpLogClass */
-        $this->httpLogClass::queryFrom(
-            connection: config('laravel-helper.http_log.connection'),
-            table: config('laravel-helper.http_log.table'),
-        )
-            ->create($dto->toArray());
+        $this->httpLogClass::query()->create($dto->toArray());
     }
 
 
@@ -46,10 +42,7 @@ class HttpLogRepository
     public function update(HttpLogUpdateDto|HttpLogFailedDto $dto): void
     {
         /** @var HttpLog $this->httpLogClass */
-        $this->httpLogClass::queryFrom(
-            connection: config('laravel-helper.http_log.connection'),
-            table: config('laravel-helper.http_log.table'),
-        )
+        $this->httpLogClass::query()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -64,10 +57,7 @@ class HttpLogRepository
     public function cleanup(int $days): int
     {
         /** @var HttpLog $this->httpLogClass */
-        return $this->httpLogClass::queryFrom(
-            connection: config('laravel-helper.http_log.connection'),
-            table: config('laravel-helper.http_log.table'),
-        )
+        return $this->httpLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

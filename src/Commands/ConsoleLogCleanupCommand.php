@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\ConsoleLogService;
  */
 class ConsoleLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'cleanup:console_logs';
+    protected $signature = 'lh:cleanup:console_logs';
     protected $description = 'Очистка логов консольных команд';
     protected $isolated = true;
 

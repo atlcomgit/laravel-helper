@@ -47,7 +47,7 @@ class ConsoleLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'cli' => implode(' ', $_SERVER['argv']),
+            'cli' => implode(' ', $_SERVER['argv'] ?? []),
             'status' => ConsoleLogStatusEnum::getDefault(),
 
             'withConsoleLog' => false,

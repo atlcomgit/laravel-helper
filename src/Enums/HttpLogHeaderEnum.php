@@ -14,6 +14,7 @@ enum HttpLogHeaderEnum: string
 
     case None = 'none';
     case Unknown = 'unknown';
+    case Localhost = 'localhost';
     case SmsRu = 'sms.ru';
     case MangoOfficeRu = 'mango-office.ru';
     case DevlineRu = 'devline.ru';
@@ -44,7 +45,8 @@ enum HttpLogHeaderEnum: string
         return match ($enum) {
             self::None => 'Отключение лога ',
             self::Unknown => 'Неизвестный запрос',
-            self::SmsRu => 'Запрос на отправку смс сообщений',
+            self::Localhost => 'Сервис localhost',
+            self::SmsRu => 'Сервис отправки смс сообщений',
             self::MangoOfficeRu => 'Сервис звонков',
             self::DevlineRu => 'Сервис видео-камер',
             self::RtspMe => 'Сервис rtsp потока',

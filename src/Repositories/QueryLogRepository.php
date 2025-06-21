@@ -27,11 +27,7 @@ class QueryLogRepository
     public function create(QueryLogDto $dto): void
     {
         /** @var QueryLog $this->queryLogClass */
-        $this->queryLogClass::queryFrom(
-            connection: config('laravel-helper.query_log.connection'),
-            table: config('laravel-helper.query_log.table'),
-        )
-            ->create($dto->toArray());
+        $this->queryLogClass::query()->create($dto->toArray());
     }
 
 
@@ -44,10 +40,7 @@ class QueryLogRepository
     public function update(QueryLogDto $dto): void
     {
         /** @var QueryLog $this->queryLogClass */
-        $this->queryLogClass::queryFrom(
-            connection: config('laravel-helper.query_log.connection'),
-            table: config('laravel-helper.query_log.table'),
-        )
+        $this->queryLogClass::query()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -62,10 +55,7 @@ class QueryLogRepository
     public function cleanup(int $days): int
     {
         /** @var QueryLog $this->queryLogClass */
-        return $this->queryLogClass::queryFrom(
-            connection: config('laravel-helper.query_log.connection'),
-            table: config('laravel-helper.query_log.table'),
-        )
+        return $this->queryLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Модель: Лог модели
@@ -91,7 +92,7 @@ class ModelLog extends DefaultModel
 
 
     /**
-     * Фильтр по названию ветки
+     * Фильтр по модели
      *
      * @param Builder $query
      * @param Model|null $model
@@ -102,5 +103,31 @@ class ModelLog extends DefaultModel
         return $query
             ->where('model_type', $model::class)
             ->where('model_id', $model->{$model->getKeyName()});
+    }
+
+
+    /**
+     * Фильтр по классу модели
+     *
+     * @param Builder $query
+     * @param class-string|null $modelType
+     * @return Builder
+     */
+    public function scopeOfModelType(Builder $query, ?string $modelType = null): Builder
+    {
+        return $query->where('model_type', $modelType);
+    }
+
+
+    /**
+     * Фильтр по типу лога
+     *
+     * @param Builder $query
+     * @param ModelLogTypeEnum $type
+     * @return Builder
+     */
+    public function scopeOfType(Builder $query, ModelLogTypeEnum $type): Builder
+    {
+        return $query->where('type', $type);
     }
 }

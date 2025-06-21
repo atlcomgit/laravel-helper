@@ -27,11 +27,7 @@ class QueueLogRepository
     public function create(QueueLogDto $dto): void
     {
         /** @var QueueLog $this->queueLogClass */
-        $this->queueLogClass::queryFrom(
-            connection: config('laravel-helper.queue_log.connection'),
-            table: config('laravel-helper.queue_log.table'),
-        )
-            ->create($dto->toArray());
+        $this->queueLogClass::query()->create($dto->toArray());
     }
 
 
@@ -44,10 +40,7 @@ class QueueLogRepository
     public function update(QueueLogDto $dto): void
     {
         /** @var QueueLog $this->queueLogClass */
-        $this->queueLogClass::queryFrom(
-            connection: config('laravel-helper.queue_log.connection'),
-            table: config('laravel-helper.queue_log.table'),
-        )
+        $this->queueLogClass::query()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -62,10 +55,7 @@ class QueueLogRepository
     public function cleanup(int $days): int
     {
         /** @var QueueLog $this->queueLogClass */
-        return $this->queueLogClass::queryFrom(
-            connection: config('laravel-helper.queue_log.connection'),
-            table: config('laravel-helper.queue_log.table'),
-        )
+        return $this->queueLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

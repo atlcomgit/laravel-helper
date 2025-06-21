@@ -28,11 +28,7 @@ class ConsoleLogRepository
     public function create(ConsoleLogDto $dto): void
     {
         /** @var ConsoleLog $this->consoleLogClass */
-        $this->consoleLogClass::queryFrom(
-            connection: config('laravel-helper.console_log.connection'),
-            table: config('laravel-helper.console_log.table'),
-        )
-            ->create($dto->toArray());
+        $this->consoleLogClass::query()->create($dto->toArray());
     }
 
 
@@ -45,10 +41,7 @@ class ConsoleLogRepository
     public function update(ConsoleLogDto $dto): void
     {
         /** @var ConsoleLog $this->consoleLogClass */
-        $this->consoleLogClass::queryFrom(
-            connection: config('laravel-helper.console_log.connection'),
-            table: config('laravel-helper.console_log.table'),
-        )
+        $this->consoleLogClass::query()
             ->ofUuid($dto->uuid)
             ->update(
                 $dto->includeArray(
@@ -70,10 +63,7 @@ class ConsoleLogRepository
     public function cleanup(int $days): int
     {
         /** @var ConsoleLog $this->consoleLogClass */
-        return $this->consoleLogClass::queryFrom(
-            connection: config('laravel-helper.console_log.connection'),
-            table: config('laravel-helper.console_log.table'),
-        )
+        return $this->consoleLogClass::query()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

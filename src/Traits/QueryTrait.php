@@ -427,8 +427,8 @@ trait QueryTrait
         try {
             $status = false;
             $queryCacheService = app(QueryCacheService::class);
-            $tables = $queryCacheService->getTablesFromSql($query);
             $sql = sql($query, $bindings);
+            $tables = $queryCacheService->getTablesFromSql($sql);
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($sql);

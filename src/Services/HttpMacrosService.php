@@ -19,7 +19,15 @@ class HttpMacrosService
      */
     public static function setMacros(): void
     {
-        // Регистрация макроса запроса в sms.ru
+        // Регистрация макроса запроса к localhost
+        !config('laravel-helper.http.localhost.enabled')
+            ?: Http::macro(
+                'localhost',
+                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.localhost.url'), '/'))
+                    ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::Localhost))
+            );
+
+        // Регистрация макроса запроса к sms.ru
         !config('laravel-helper.http.smsRu.enabled')
             ?: Http::macro(
                 'smsRu',
@@ -27,7 +35,7 @@ class HttpMacrosService
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::SmsRu))
             );
 
-        // Регистрация макроса запроса в mango-office.ru
+        // Регистрация макроса запроса к mango-office.ru
         !config('laravel-helper.http.mangoOfficeRu.enabled')
             ?: Http::macro(
                 'mangoOfficeRu',
@@ -42,7 +50,7 @@ class HttpMacrosService
                     ->timeout(30)
             );
 
-        // Регистрация макроса запроса в devline.ru
+        // Регистрация макроса запроса к devline.ru
         !config('laravel-helper.http.devlineRu.enabled')
             ?: Http::macro(
                 'devlineRu',
@@ -53,7 +61,7 @@ class HttpMacrosService
                     ->timeout(config('laravel-helper.http.devlineRu.timeout'))
             );
 
-        // Регистрация макроса запроса в rtsp.me
+        // Регистрация макроса запроса к rtsp.me
         !config('laravel-helper.http.rtspMe.enabled')
             ?: Http::macro(
                 'rtspMe',
@@ -64,7 +72,7 @@ class HttpMacrosService
                     ->timeout(config('laravel-helper.http.rtspMe.timeout'))
             );
 
-        // Регистрация макроса запроса в fcm.googleapis.com
+        // Регистрация макроса запроса к fcm.googleapis.com
         !config('laravel-helper.http.fcmGoogleApisCom.enabled')
             ?: Http::macro(
                 'fcmGoogleApisCom',
@@ -84,7 +92,7 @@ class HttpMacrosService
                 }
             );
 
-        // Регистрация макроса запроса в api.telegram.org
+        // Регистрация макроса запроса к api.telegram.org
         !config('laravel-helper.http.telegramOrg.enabled')
             ?: Http::macro(
                 'telegramOrg',

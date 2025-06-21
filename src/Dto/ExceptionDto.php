@@ -244,7 +244,8 @@ class ExceptionDto extends Dto
                 RequestException::class => $this->getMessage(
                     $this->debugInfo?->throw?->getResponse()->getBody()->getContents(),
                 ),
-                MethodNotAllowedHttpException::class => $this->getMessage('Маршрут :route не поддерживает :method'),
+                MethodNotAllowedHttpException::class
+                => $this->getMessage('Маршрут :route не поддерживает метод :method'),
                 ModelNotFoundException::class => $this->getMessage('Запись :model не найдена'),
                 NotFoundHttpException::class => $this->getMessage('Маршрут :route не найден'),
                 AuthenticationException::class => $this->getMessage('Маршрут :route требует аутентификацию'),
@@ -275,10 +276,10 @@ class ExceptionDto extends Dto
             'model' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
                 ? Hlp::pathClassName($this->debugInfo->throw->getModel() ?? '')
                 : '',
-            'route' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getRequestUri'))
+            'route' => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getRequestUri'))
                 ? ($this->debugInfo->request->getRequestUri() ?? '')
                 : '',
-            'method' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getMethod'))
+            'method' => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getMethod'))
                 ? ($this->debugInfo->request->getMethod() ?? '')
                 : '',
             'class' => $this->toBasename($this::class),

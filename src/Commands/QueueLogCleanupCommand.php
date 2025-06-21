@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\QueueLogService;
  */
 class QueueLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'cleanup:queue_logs';
+    protected $signature = 'lh:cleanup:queue_logs';
     protected $description = 'Очистка логов очередей';
     protected $isolated = true;
 
