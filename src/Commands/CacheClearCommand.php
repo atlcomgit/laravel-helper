@@ -38,7 +38,7 @@ class CacheClearCommand extends DefaultCommand
         if (config('laravel-helper.optimize.cache.enabled')) {
             if (config('laravel-helper.query_cache.enabled') || config('laravel-helper.view_cache.enabled')) {
                 Cache::flush();
-                $this->queryCacheService->flushQueryCache('*');
+                $this->queryCacheService->flushQueryCacheAll();
             }
         }
 

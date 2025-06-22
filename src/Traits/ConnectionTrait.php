@@ -113,7 +113,7 @@ trait ConnectionTrait
     {
         try {
             $status = false;
-            $arrayQueryLogDto = $this->createQueryLog(sql($query, $bindings));
+            $arrayQueryLogDto = is_array($query) ? [] : $this->createQueryLog(sql($query, $bindings));
             $result = parent::statement($query, $bindings);
             !($result && Hlp::sqlHasWrite($query)) ?: $this->flushCache($query, $bindings);
             $status = true;

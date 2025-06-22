@@ -98,7 +98,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(ViewCacheService::class);
         $this->app->singleton(ViewLogService::class);
         $this->app->singleton(ModelLogObserver::class);
-        $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app));
+
+        // $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app)); not need
+        $this->app->bind('db.factory', fn ($app) => new ConnectionFactory($app));
     }
 
 

@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use stdClass;
 use Throwable;
 
+use function Pest\Laravel\instance;
+
 /**
  * Трейт для подключений кеширования к конструктору query запросов
  * 
@@ -61,6 +63,8 @@ trait QueryTrait
             $this->getConnection()->withQueryCache($this->withQueryCache);
         }
 
+        $this->setQueryCacheClass(null, true);
+
         return $this;
     }
 
@@ -74,10 +78,16 @@ trait QueryTrait
     public function withQueryLog(bool|null $enabled = null): static
     {
         $this->withQueryLog = $enabled ?? true;
+
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->withQueryLog($this->withQueryLog);
             $this->getConnection()->withQueryLog($this->withQueryLog);
         }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->withQueryLog($this->withQueryLog);
+        }
+
+        $this->setQueryLogClass(null, true);
 
         return $this;
     }
@@ -92,8 +102,12 @@ trait QueryTrait
     public function withModelLog(bool|null $enabled = null): static
     {
         $this->withModelLog = $enabled ?? true;
+
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->withModelLog($this->withModelLog);
+            $this->getConnection()->withModelLog($this->withModelLog);
+        }
+        if ($this instanceof QueryBuilder) {
             $this->getConnection()->withModelLog($this->withModelLog);
         }
 
@@ -105,12 +119,12 @@ trait QueryTrait
      * Устанавливает класс вызвавший кеш первого query запроса
      * Последовательность вызовов: EloquentBuilder -> QueryBuilder -> Connection
      *
-     * @param string $class
+     * @param string|null $class
      * @return static
      */
-    public function setQueryCacheClass(string $class): static
+    public function setQueryCacheClass(?string $class, bool $reset = false): static
     {
-        $this->withQueryCacheClass ??= $class;
+        !(is_null($this->withQueryCacheClass) || $reset) ?: $this->withQueryCacheClass = $class;
 
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->setQueryCacheClass($this->withQueryCacheClass);
@@ -128,12 +142,12 @@ trait QueryTrait
      * Устанавливает класс вызвавший лог первого query запроса
      * Последовательность вызовов: EloquentBuilder -> QueryBuilder -> Connection
      *
-     * @param string $class
+     * @param string|null $class
      * @return static
      */
-    public function setQueryLogClass(string $class): static
+    public function setQueryLogClass(?string $class, bool $reset = false): static
     {
-        $this->withQueryLogClass ??= $class;
+        !(is_null($this->withQueryLogClass) || $reset) ?: $this->withQueryLogClass = $class;
 
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->setQueryLogClass($this->withQueryLogClass);
@@ -218,13 +232,14 @@ trait QueryTrait
     protected function createQueryLog(EloquentBuilder|QueryBuilder|string $builder): array
     {
         $result = [];
+
+        if (!config('laravel-helper.query_log.enabled') || !$this->withQueryLog) {
+            return $result;
+        }
+
         $this->setQueryLogClass($this::class);
 
-        if (
-            !config('laravel-helper.query_log.enabled')
-            || !$this->withQueryLog
-            || $this->getQueryLogClass() !== $this::class
-        ) {
+        if ($this->getQueryLogClass() !== $this::class) {
             return $result;
         }
 
@@ -362,40 +377,44 @@ trait QueryTrait
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($this);
-            $this->setQueryCacheClass($this::class);
 
             if (
                 $tables
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
                 && ($this->withQueryCache === true || is_integer($this->withQueryCache))
-                && ($this->getQueryCacheClass() === $this::class)
             ) {
-                $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
-                $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $this);
-                $hasCache = $queryCacheService->hasQueryCache(tags: $tags, key: $cacheKey);
-                $result = $hasCache
-                    ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
-                    : parent::get($columns);
+                $this->setQueryCacheClass($this::class);
 
-                $hasCache ?: $isCached = $queryCacheService->setQueryCache(
-                    tags: $tags,
-                    key: $cacheKey,
-                    value: $result,
-                    ttl: $this->withQueryCache,
-                );
-                $isCached ??= false;
-                $isFromCache = $hasCache;
+                if ($this->getQueryCacheClass() === $this::class) {
+                    $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
+                    $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $this);
+                    $hasCache = $queryCacheService->hasQueryCache(tags: $tags, key: $cacheKey);
+                    $result = $hasCache
+                        ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
+                        : parent::get($columns);
 
-                !($result instanceof Collection)
-                    ?: $result->map(
-                        fn (/** @var \Atlcom\LaravelHelper\Defaults\DefaultModel $item */ $item) => match (true) {
-                            (($item instanceof Model) && method_exists($item, 'setFromCached'))
-                            => $item->setCached($isCached)->setFromCached($isFromCache),
-
-                            default => $item,
-                        }
+                    $hasCache ?: $isCached = $queryCacheService->setQueryCache(
+                        tags: $tags,
+                        key: $cacheKey,
+                        value: $result,
+                        ttl: $this->withQueryCache,
                     );
+                    $isCached ??= false;
+                    $isFromCache = $hasCache;
 
+                    !($result instanceof Collection)
+                        ?: $result->map(
+                            fn (/** @var \Atlcom\LaravelHelper\Defaults\DefaultModel $item */ $item) => match (true) {
+                                (($item instanceof Model) && method_exists($item, 'setFromCached'))
+                                => $item->setCached($isCached)->setFromCached($isFromCache),
+
+                                default => $item,
+                            }
+                        );
+
+                } else {
+                    $result = parent::get($columns);
+                }
 
             } else {
                 $result = parent::get($columns);
@@ -438,7 +457,7 @@ trait QueryTrait
                 $tables
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
                 && ($this->withQueryCache === true || is_integer($this->withQueryCache))
-                && ($this->getQueryCacheClass() === $this::class)
+                && ($this->getQueryCacheClass() === $this::class || $this instanceof Connection)
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
                 $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $sql);
@@ -503,13 +522,13 @@ trait QueryTrait
                     $this->getGrammar()->compileInsert($this, $query),
                     [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
-                $this instanceof Connection => sql($query, $bindings),
+                $this instanceof Connection => is_array($query) ? null : sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
                 default => Hlp::castToString($query),
             };
 
-            $arrayQueryLogDto = $this->createQueryLog($sql);
+            $arrayQueryLogDto = is_null($sql) ? [] : $this->createQueryLog($sql);
 
             $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
                 $result = match (true) {
@@ -620,16 +639,16 @@ trait QueryTrait
                     $this->getGrammar()->compileUpdate($this, $query),
                     [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
-                $this instanceof Connection => sql($query, $bindings),
+                $this instanceof Connection => is_array($query) ? null : sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
                 default => Hlp::castToString($query),
             };
 
-            $arrayQueryLogDto = $this->createQueryLog($sql);
+            $arrayQueryLogDto = is_null($sql) ? [] : $this->createQueryLog($sql);
 
             $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
-                $ids = $this->observeModelLog(ModelLogTypeEnum::Update, $query);
+                $ids = $this->observeModelLog(ModelLogTypeEnum::Update, $query, $bindings);
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 $result = match (true) {
@@ -684,13 +703,13 @@ trait QueryTrait
                     $this->getGrammar()->compileDelete($this),
                     [...(Hlp::castToArray($query) ?? []), ...$this->getBindings()],
                 ),
-                $this instanceof Connection => sql($query, $bindings),
+                $this instanceof Connection => is_array($query) ? null : sql($query, $bindings),
                 $this instanceof Builder => sql($query, $bindings),
 
                 default => Hlp::castToString($query),
             };
 
-            $arrayQueryLogDto = $this->createQueryLog($sql);
+            $arrayQueryLogDto = ($isSoftDelete || is_null($sql)) ? [] : $this->createQueryLog($sql);
 
             $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings, &$isSoftDelete) {
                 $ids = $isSoftDelete
@@ -698,6 +717,7 @@ trait QueryTrait
                     : $this->observeModelLog(
                         $isSoftDelete ? ModelLogTypeEnum::SoftDelete : ModelLogTypeEnum::Delete,
                         $query,
+                        $bindings,
                     );
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
@@ -825,7 +845,7 @@ trait QueryTrait
      * Запускает методы observer
      *
      * @param ModelLogTypeEnum $type
-     * @param array|int|null $attributes
+     * @param array|string|int|null $attributes
      * @param array|null $bindings
      * @return array
      */
@@ -833,7 +853,7 @@ trait QueryTrait
     {
         $result = [];
 
-        if ($this instanceof EloquentBuilder) {
+        if ($this instanceof EloquentBuilder && $this->withModelLog) {
             $observer = app(ModelLogObserver::class);
 
             $models = match ($type) {
@@ -872,47 +892,72 @@ trait QueryTrait
             is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
         }
 
-        /* not need
-        if ($this instanceof Connection && is_string($attributes) && is_array($bindings)) {
+        if ($this instanceof Connection && is_string($attributes) && $this->withModelLog) {
             $observer = app(ModelLogObserver::class);
             $sql = sql($attributes, $bindings ?? []);
             $table = Hlp::arrayFirst(Hlp::sqlTables($sql));
             $fields = array_keys(Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($sql)))[$table] ?? []);
             $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
-            $attributes = array_combine($fields, $bindings);
-            $model = (new $modelClass())->fill($attributes);
-            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+            if ($modelClass) {
+                $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                $models = $type === ModelLogTypeEnum::Create
+                    ? [(new $modelClass())->fill($attributes)]
+                    : DB::table($table)
+                        ->withQueryLog($this->withQueryLog)
+                        ->when(
+                            Hlp::stringSplitRange($sql, [' where ', ' WHERE '], 1),
+                            static fn ($q, $v) => $q->whereRaw($v),
+                        )
+                        ->get()
+                        ->map(static fn ($item) => new $modelClass(Hlp::castToArray($item)));
 
-            match ($type) {
-                ModelLogTypeEnum::Create => $observer->created($model, $attributes),
-                ModelLogTypeEnum::Update => $observer->updated($model, $attributes),
-                ModelLogTypeEnum::Delete => $observer->deleted($model, $attributes),
-                ModelLogTypeEnum::SoftDelete => $observer->updated($model, $attributes),
-                ModelLogTypeEnum::ForceDelete => $observer->forceDeleted($model),
-                ModelLogTypeEnum::Restore => $observer->restored($model),
+                foreach ($models as $model) {
+                    if ($model && $model instanceof Model) {
+                        if (method_exists($model, 'isWithModelLog') && method_exists($model, 'withModelLog')) {
+                            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
 
-                default => null,
-            };
+                            match ($type) {
+                                ModelLogTypeEnum::Create => $observer->created($model, $attributes),
+                                ModelLogTypeEnum::Update => $observer->updated($model, $attributes),
+                                ModelLogTypeEnum::Delete => $observer->deleted($model, $attributes),
+                                ModelLogTypeEnum::SoftDelete => $observer->updated($model, $attributes),
+                                ModelLogTypeEnum::ForceDelete => $observer->forceDeleted($model),
+                                ModelLogTypeEnum::Restore => $observer->restored($model),
 
-            $model->withModelLog = false;
-            !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
+                                default => null,
+                            };
+
+                            $model->withModelLog = false;
+                        }
+
+                        $result[] = $model->{$model->getKeyName()};
+                    }
+                }
+
+                !method_exists($this, 'withModelLog') ?: $this->withModelLog(false);
+            }
         }
-        */
 
-        if ($type === ModelLogTypeEnum::Truncate && $attributes) {
+        if ($type === ModelLogTypeEnum::Truncate && is_array($attributes) && $this->withModelLog) {
             $observer = app(ModelLogObserver::class);
 
             foreach ($attributes as $table) {
                 /** @var Model $modelClass */
                 $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
-                $models = $modelClass::query()->withTrashed()->orderBy(with(new $modelClass)->getKeyName())->get();
+                if (!$modelClass) {
+                    continue;
+                }
+
+                $models = (method_exists($modelClass, 'withTrashed')
+                ? $modelClass::query()->withTrashed()
+                : $modelClass::query()
+                )
+                    ->withQueryLog($this->withQueryLog)
+                    ->orderBy(with(new $modelClass)->getKeyName())->get();
 
                 foreach ($models as $model) {
                     if ($model && $model instanceof Model) {
-                        if (
-                            method_exists($model, 'isWithModelLog')
-                            && method_exists($model, 'withModelLog')
-                        ) {
+                        if (method_exists($model, 'isWithModelLog') && method_exists($model, 'withModelLog')) {
                             is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
 
                             $observer->truncated($model);

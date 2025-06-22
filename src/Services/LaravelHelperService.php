@@ -16,6 +16,13 @@ use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
+use Atlcom\LaravelHelper\Models\ConsoleLog;
+use Atlcom\LaravelHelper\Models\HttpLog;
+use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\QueryLog;
+use Atlcom\LaravelHelper\Models\QueueLog;
+use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
@@ -229,12 +236,26 @@ class LaravelHelperService
         foreach (File::allFiles($modelPath) as $file) {
             $class = $this->getClassFromFile($file);
 
-            if ($class && is_subclass_of($class, Model::class) && with(new $class)->getTable() === $table) {
-                return $class;
+            if ($class && is_subclass_of($class, Model::class)) {
+                /** @var Model $model */
+                $model = new $class();
+                if ($model->getTable() === $table) {
+                    return $class;
+                }
             }
         }
 
-        return null;
+        return match (true) {
+            $table === config('laravel-helper.console_log.table') => ConsoleLog::class,
+            $table === config('laravel-helper.http_log.table') => HttpLog::class,
+            $table === config('laravel-helper.model_log.table') => ModelLog::class,
+            $table === config('laravel-helper.query_log.table') => QueryLog::class,
+            $table === config('laravel-helper.queue_log.table') => QueueLog::class,
+            $table === config('laravel-helper.route_log.table') => RouteLog::class,
+            $table === config('laravel-helper.view_log.table') => ViewLog::class,
+
+            default => null,
+        };
     }
 
 

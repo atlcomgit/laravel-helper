@@ -145,13 +145,15 @@ class QueryCacheService
         }
 
         $sql = $this->getSqlFromBuilder($builder);
-        $hash = Hlp::hashXxh128($sql);
+        $hash = 'hash_' . Hlp::hashXxh128(gettype($builder) . $sql);
 
         switch (true) {
             case $builder instanceof EloquentBuilder:
                 /** @var Model $model */
                 $model = $builder->getModel();
-                $id = $model ? Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, '', $model->{$model->getKeyName()}) : '';
+                $id = $model
+                    ? '_' . Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, '', $model->{$model->getKeyName()})
+                    : '';
                 break;
 
             default:
@@ -162,7 +164,7 @@ class QueryCacheService
             ? ''
             : Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, $tags);
 
-        return static::CACHE_TAGS_DELIMITER . Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, $tag, $hash, $id);
+        return static::CACHE_TAGS_DELIMITER . Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, $tag, "{$hash}{$id}");
     }
 
 
@@ -230,7 +232,7 @@ class QueryCacheService
 
 
     /**
-     * Сбрасывает кеш по тегам
+     * Сбрасывает кеш query запросов по тегам
      *
      * @param Model $model
      * @param string|null $relation
@@ -248,6 +250,17 @@ class QueryCacheService
         ) {
             $this->flushCache($tags);
         }
+    }
+
+
+    /**
+     * Сбрасывает весь кеш query запросов
+     *
+     * @return void
+     */
+    public function flushQueryCacheAll(): void
+    {
+        $this->flushCache(['*']);
     }
 
 
@@ -273,7 +286,12 @@ class QueryCacheService
                     return Cache::driver($this->driver)->tags($tags)->has($key);
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
+                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                        . '/' . Hlp::stringConcat(
+                                static::CACHE_TAGS_DELIMITER,
+                                Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                            );
+                    $key = Hlp::stringSplitRange($key, static::CACHE_TAGS_DELIMITER, -2);
                     $file = "{$path}/$key.cache";
 
                     if (!$path || !File::exists($file)) {
@@ -290,7 +308,7 @@ class QueryCacheService
                         'ttl_default' => (int)config('laravel-helper.query_cache.ttl'),
                         'ttl_not_set' => null,
 
-                        default => Hlp::castToInt($ttlSplit),
+                        default => Hlp::castToInt(Hlp::stringSplit($ttlSplit, '_', -1)),
                     };
                     $createdAt = Carbon::createFromTimestamp(File::lastModified($path));
 
@@ -364,7 +382,12 @@ class QueryCacheService
                     return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl ?: null);
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
+                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                        . '/' . Hlp::stringConcat(
+                                static::CACHE_TAGS_DELIMITER,
+                                Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                            );
+                    $key = Hlp::stringSplitRange($key, static::CACHE_TAGS_DELIMITER, -2);
                     $file = "{$path}/$key.cache";
 
                     if (!$path || !File::exists($path)) {
@@ -432,7 +455,12 @@ class QueryCacheService
                     return Cache::driver($this->driver)->tags($tags)->get($key, $default);
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
+                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                        . '/' . Hlp::stringConcat(
+                                static::CACHE_TAGS_DELIMITER,
+                                Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                            );
+                    $key = Hlp::stringSplitRange($key, static::CACHE_TAGS_DELIMITER, -2);
                     $file = "{$path}/$key.cache";
 
                     if (!$path || !File::exists($path) || !File::isFile($file) || !File::exists($file)) {
@@ -501,26 +529,45 @@ class QueryCacheService
                         return;
                     }
 
-                    $files = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-                    );
+                    $isFullFlush = in_array('*', $tags);
+                    $iterator = new FilesystemIterator($path, FilesystemIterator::SKIP_DOTS);
 
-                    $isFullFlush = in_array($tags, ['*']);
-                    foreach ($files as $file) {
-                        /** @var SplFileInfo $file */
-                        $pathFile = $file->getRealPath();
-                        if (
-                            $isFullFlush
-                            || Hlp::stringSplitSearch($file->getFilename(), static::CACHE_TAGS_DELIMITER, $tags)
-                        ) {
-                            $try = 0;
-                            while (++$try <= static::CACHE_FILE_TRY_COUNT) {
-                                File::delete($pathFile)
-                                    ? $try = static::CACHE_FILE_TRY_COUNT
-                                    : usleep(10000);
+                    foreach ($iterator as $fileinfo) {
+                        /** @var SplFileInfo $fileinfo */
+                        if ($fileinfo->isDir()) {
+                            if (
+                                $isFullFlush
+                                || Hlp::stringSplitSearch($fileinfo->getFilename(), static::CACHE_TAGS_DELIMITER, $tags)
+                            ) {
+                                $try = 0;
+                                while (++$try <= static::CACHE_FILE_TRY_COUNT) {
+                                    File::deleteDirectory($fileinfo->getRealPath())
+                                        ? $try = static::CACHE_FILE_TRY_COUNT
+                                        : usleep(10000);
+                                }
                             }
                         }
                     }
+
+                    // $files = new RecursiveIteratorIterator(
+                    //     new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+                    // );
+
+                    // foreach ($files as $file) {
+                    //     /** @var SplFileInfo $file */
+                    //     $pathFile = $file->getRealPath();
+                    //     if (
+                    //         $isFullFlush
+                    //         || Hlp::stringSplitSearch($file->getFilename(), static::CACHE_TAGS_DELIMITER, $tags)
+                    //     ) {
+                    //         $try = 0;
+                    //         while (++$try <= static::CACHE_FILE_TRY_COUNT) {
+                    //             File::delete($pathFile)
+                    //                 ? $try = static::CACHE_FILE_TRY_COUNT
+                    //                 : usleep(10000);
+                    //         }
+                    //     }
+                    // }
                     break;
 
                 // CACHE_STORE=database
