@@ -1,6 +1,5 @@
 {
     "name": "atlcom/laravel-helper",
-    "version": "1.00.5",
     "type": "library",
     "description": "Atlcom Laravel Helper library",
     "license": "MIT",
