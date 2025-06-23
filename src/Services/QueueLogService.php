@@ -69,7 +69,7 @@ class QueueLogService
             payload: $payload, // $event->job->getRawBody(),
             attempts: $event->job->attempts(),
             exception: $event instanceof JobFailed ? Hlp::exceptionToString($event->exception) : null,
-            withJobLog: is_array($command) && ($command['withJobLog'] ?? false),
+            withQueueLog: is_array($command) && ($command['withQueueLog'] ?? false),
             isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
             && config('laravel-helper.queue_log.store_on_start'),
             status: match (true) {

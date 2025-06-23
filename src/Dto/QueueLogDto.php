@@ -32,7 +32,7 @@ class QueueLogDto extends Dto
     public ?string $exception;
     public ?array $info;
 
-    public bool $withJobLog;
+    public bool $withQueueLog;
     public bool $isUpdated;
 
 
@@ -50,7 +50,7 @@ class QueueLogDto extends Dto
             'attempts' => 0,
             'status' => QueueLogStatusEnum::getDefault(),
 
-            'withJobLog' => false,
+            'withQueueLog' => false,
             'isUpdated' => false,
         ];
     }
@@ -108,7 +108,7 @@ class QueueLogDto extends Dto
         $this->onlyKeys(QueueLog::getModelKeys())
             ->mappingKeys($this->mappings())
             ->onlyNotNull()
-            ->excludeKeys(['withJobLog', 'isUpdated']);
+            ->excludeKeys(['withQueueLog', 'isUpdated']);
     }
 
 
@@ -119,7 +119,7 @@ class QueueLogDto extends Dto
      */
     public function dispatch(): void
     {
-        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withJobLog) {
+        if (app(LaravelHelperService::class)->canDispatch($this) && $this->withQueueLog) {
             isTesting()
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);

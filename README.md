@@ -1,9 +1,17 @@
 # Laravel Helper
 
-Класс помощник для Laravel
-
-Версия 1.00
--
+Класс помощник для Laravel добавляет функционал во фреймворк:
+- Логирование консольных команд
+- Логирование входящих/исходящих http запросов
+- Логирование изменения моделей, в том числе массовое изменение/удаление
+- Логирование query запросов через Eloquent/Database/Connection
+- Логирование запуска и выполнения очередей
+- Логирование зарегистрированных роутов и их использование
+- Логирование рендеринга blade шаблонов
+- Кеширование query запросов через Eloquent/Database/Connection
+- Кеширование рендеринга blade шаблонов
+- Обработка всех исключений с отправкой логов в телеграмм
+- Внедрение Dto вместо Request в контроллеры, которое поддерживает: правила валидации, мутацию, маппинг, хуки при создании/изменении свойств
 
 <hr style="border:1px solid black">
 
@@ -44,6 +52,7 @@ php artisan migrate
 ### Примеры логирования
 
 ##### ConsoleLog
+
 Логирование выполнения консольных команд
 
 ```php
@@ -76,6 +85,7 @@ Artisan::call(ExampleCommand::class, ['--telegram', '--log']);
 ```
 
 ##### HttpLog
+
 Логирование входящих запросов в таблице helper_http_logs
 
 ```php
@@ -122,6 +132,7 @@ class ExampleService
 ```
 
 ##### ModelLog
+
 Логирование изменений модели в таблице helper_model_logs
 
 ```php
@@ -170,6 +181,7 @@ class ExampleRepository
 ```
 
 ##### QueryLog
+
 Логирование query запросов в таблице helper_query_logs
 
 ```php
@@ -199,6 +211,7 @@ class ExampleRepository
 ```
 
 ##### QueueLog
+
 Логирование очередей в таблице helper_queue_logs
 
 ```php
@@ -212,17 +225,18 @@ class ExampleDto extends DefaultDto
 
 class ExampleJob extends DefaultJob
 {
-    public bool $withJobLog = false;
+    public bool $withQueueLog = false;
 
     public function __invoke(): void {}
 }
 
 // или
 
-dispatch((new ExampleJob())->withJobLog());
+dispatch((new ExampleJob())->withQueueLog());
 ```
 
 ##### QueueLog
+
 Логирование зарегистрированных роутов в таблице helper_route_logs
 
 ```php
@@ -232,6 +246,7 @@ Route::get('/example', [ExampleController::class, 'example']);
 ```
 
 ##### ViewLog
+
 Логирование рендеринга blade шаблонов в таблице helper_view_logs
 
 ```php
@@ -252,6 +267,7 @@ class ExampleController extends DefaultController
 ### Примеры кеширования
 
 ##### QueryCache
+
 Кеширование query запросов
 
 ```php
@@ -274,6 +290,7 @@ class ExampleRepository
 ```
 
 ##### ViewCache
+
 Кеширование рендеринга blade шаблонов
 
 ```php
@@ -293,6 +310,7 @@ class ExampleController extends DefaultController
 ### Примеры расширения классов
 
 ##### DefaultController и DefaultDto
+
 Расширение класса контроллера с внедрением [Dto](https://github.com/atlcomgit/dto) (замена Request)
 
 ```php
@@ -321,6 +339,7 @@ class ExampleController extends DefaultController
 ```
 
 ##### DefaultCommand
+
 Расширение класса консольных команд
 
 ```php
@@ -332,8 +351,8 @@ class ExampleCommand extends DefaultCommand
 }
 ```
 
-
 ##### DefaultJob
+
 Расширение класса задач для очередей
 
 ```php
@@ -346,6 +365,7 @@ class ExampleJob extends DefaultJob
 ```
 
 ##### DefaultModel
+
 Расширение класса модели
 
 ```php
@@ -357,6 +377,7 @@ class Example extends DefaultModel
 ```
 
 ##### DefaultRequest
+
 Расширение класса запроса
 
 ```php
@@ -368,6 +389,7 @@ class ExampleRequest extends DefaultRequest
 ```
 
 ##### DefaultResource
+
 Расширение класса ресурса
 
 ```php
@@ -379,6 +401,7 @@ class ExampleResource extends DefaultResource
 ```
 
 ##### DefaultException
+
 Расширение класса исключений
 
 ```php
@@ -394,6 +417,7 @@ class ExampleException extends DefaultException
 ### Хелперы
 
 ##### Список вспомогательных функций
+
 ```php
 isDebug() // Возвращает флаг окружения APP_DEBUG
 isDebugData() // Возвращает флаг окружения APP_DEBUG_DATA

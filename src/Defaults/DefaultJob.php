@@ -21,7 +21,7 @@ abstract class DefaultJob implements ShouldQueue, Arrayable
 
 
     /** Флаг включения логирования очереди */
-    public bool $withJobLog = false;
+    public bool $withQueueLog = false;
 
 
     /**
@@ -30,9 +30,9 @@ abstract class DefaultJob implements ShouldQueue, Arrayable
      * @param bool|null $enabled
      * @return static
      */
-    public function withJobLog(?bool $enabled = null): static
+    public function withQueueLog(?bool $enabled = null): static
     {
-        $this->withJobLog = $enabled ?? true;
+        $this->withQueueLog = $enabled ?? true;
 
         return $this;
     }

@@ -114,4 +114,15 @@ class ViewCacheService
 
         return $result;
     }
+
+
+    /**
+     * Сбрасывает весь кеш рендеринга blade шаблонов
+     *
+     * @return void
+     */
+    public function flushViewCacheAll(): void
+    {
+        Cache::driver($this->driver)->flush();
+    }
 }
