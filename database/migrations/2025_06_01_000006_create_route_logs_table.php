@@ -35,7 +35,7 @@ return new class extends Migration {
 
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
-            $table->unique(['method', 'uri']);
+            // $table->unique(['method', 'uri']);
 
             $table->comment('Лог роутов');
         });
