@@ -24,7 +24,7 @@ return new class extends Migration {
 
             $table->string('method')->nullable(false)->index()
                 ->comment('Метод роута');
-            $table->longText('uri')->nullable(false)->index()
+            $table->longText('uri')->nullable(false)
                 ->comment('Uri роута');
             $table->string('controller')->nullable(true)
                 ->comment('Контроллер роута');
