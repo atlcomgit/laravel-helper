@@ -16,14 +16,13 @@ use Illuminate\Cache\RedisStore;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Redis;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use SplFileInfo;
 use Throwable;
 
@@ -39,12 +38,16 @@ class QueryCacheService
 
     protected string $driver = '';
     protected array $exclude = [];
+    protected bool $gzdeflateEnabled = false;
+    protected int $gzdeflateLevel = -1;
 
 
     public function __construct()
     {
         $this->driver = config('laravel-helper.query_cache.driver') ?: config('cache.default');
         $this->exclude = config('laravel-helper.query_cache.exclude') ?? [];
+        $this->gzdeflateEnabled = config('laravel-helper.query_cache.gzdeflate.enabled') ?? false;
+        $this->gzdeflateLevel = config('laravel-helper.query_cache.gzdeflate.level') ?? -1;
     }
 
 
@@ -96,6 +99,10 @@ class QueryCacheService
 
                 default => $tables[] = $model,
             };
+        }
+
+        foreach ($tables as $key => $table) {
+            !($table instanceof Expression) ?: $tables[$key] = $table->getValue(new Grammar());
         }
 
         return array_unique(array_filter($tables));
@@ -369,6 +376,10 @@ class QueryCacheService
      */
     private function setCache(?array $tags, string $key, mixed $value, int $ttl): bool
     {
+        $value = $this->gzdeflateEnabled
+            ? gzdeflate(serialize($value), $this->gzdeflateLevel)
+            : serialize($value);
+
         if (!$this->driver) {
             return false;
 
@@ -396,9 +407,8 @@ class QueryCacheService
                     }
 
                     $try = 0;
-                    $data = serialize($value);
                     while (++$try <= static::CACHE_FILE_TRY_COUNT) {
-                        if (File::put($file, $data, true)) {
+                        if (File::put($file, $value, true)) {
                             return true;
                         }
 
@@ -436,23 +446,25 @@ class QueryCacheService
      *
      * @param array|null $tags
      * @param string $key
-     * @param mixed $value
      * @param mixed|null $default
      * @return mixed
      */
-    private function getCache(?array $tags, string $key, mixed $value, mixed $default = null): mixed
+    private function getCache(?array $tags, string $key, mixed $default = null): mixed
     {
+        $result = null;
+
         if (!$this->driver) {
-            return null;
+            $result = null;
 
         } else if (Cache::driver($this->driver)->getStore() instanceof TaggableStore) {
-            return Cache::driver($this->driver)->tags($tags)->get($key, $default);
+            $result = Cache::driver($this->driver)->tags($tags)->get($key, $default);
 
         } else {
             switch (Cache::driver($this->driver)->getStore()::class) {
 
                 case RedisStore::class:
-                    return Cache::driver($this->driver)->tags($tags)->get($key, $default);
+                    $result = Cache::driver($this->driver)->tags($tags)->get($key, $default);
+                    break;
 
                 case FileStore::class:
                     $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
@@ -464,36 +476,49 @@ class QueryCacheService
                     $file = "{$path}/$key.cache";
 
                     if (!$path || !File::exists($path) || !File::isFile($file) || !File::exists($file)) {
-                        return null;
+                        $result = null;
+                        break;
                     }
 
                     $try = 0;
                     while (++$try <= static::CACHE_FILE_TRY_COUNT) {
                         try {
-                            if ($data = File::get($file, true)) {
-                                return unserialize($data);
+                            if ($result = File::get($file, true)) {
+                                $try = static::CACHE_FILE_TRY_COUNT;
                             }
 
                         } catch (Throwable $exception) {
                         }
 
-                        usleep(10000);
+                        ($try >= static::CACHE_FILE_TRY_COUNT) ?: usleep(10000);
                     }
 
-                    return null;
+                    $result = $result ?: null;
+                    break;
 
                 case DatabaseStore::class:
-                    return Cache::driver($this->driver)->get($key, $default);
+                    $result = Cache::driver($this->driver)->get($key, $default);
+                    break;
 
                 case ArrayStore::class:
-                    return (Hlp::cacheRuntimeGet(__CLASS__) ?? [])[$key] ?? null;
+                    $result = (Hlp::cacheRuntimeGet(__CLASS__) ?? [])[$key] ?? null;
+                    break;
 
                 case MemcachedStore::class:
-                    return null;
+                    $result = null;
+                    break;
             }
         }
 
-        return null;
+        $result = is_null($result)
+            ? null
+            : (
+                $this->gzdeflateEnabled
+                ? ((($tmp = @unserialize(@gzinflate($result))) === false) ? null : $tmp)
+                : @unserialize($result)
+            );
+
+        return $result;
     }
 
 

@@ -231,6 +231,12 @@ class LaravelHelperService
      */
     public function getModelClassByTable(string $table): ?string
     {
+        static $tables = [];
+
+        if (isset($tables[$table])) {
+            return $tables[$table];
+        }
+
         $modelPath = app_path();
 
         foreach (File::allFiles($modelPath) as $file) {
@@ -245,7 +251,7 @@ class LaravelHelperService
             }
         }
 
-        return match (true) {
+        return $tables[$table] = match (true) {
             $table === config('laravel-helper.console_log.table') => ConsoleLog::class,
             $table === config('laravel-helper.http_log.table') => HttpLog::class,
             $table === config('laravel-helper.model_log.table') => ModelLog::class,
@@ -267,7 +273,14 @@ class LaravelHelperService
      */
     public function getClassFromFile(SplFileInfo|string $file): ?string
     {
+        static $classes = [];
+
         !($file instanceof SplFileInfo) ?: $file = app_path($file->getRelativePathname());
+
+        if (isset($classes[$file])) {
+            return $classes[$file];
+        }
+
         $fileData = File::exists($file) ? File::get($file) : '';
 
         if ($fileData && preg_match('/namespace\s+([^;]+);/', $fileData, $matches)) {
@@ -284,10 +297,10 @@ class LaravelHelperService
                 $class = trim($matches[1] ?? '');
                 $classWithNamespace = "{$namespace}\\$class";
 
-                return ($class && class_exists($classWithNamespace)) ? $classWithNamespace : null;
+                return $classes[$file] = ($class && class_exists($classWithNamespace)) ? $classWithNamespace : null;
             }
         }
 
-        return null;
+        return $classes[$file] = null;
     }
 }

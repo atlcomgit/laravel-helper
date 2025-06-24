@@ -225,6 +225,11 @@ return [
         'driver' => (string)env('QUERY_CACHE_DRIVER', env('CACHE_STORE', 'database')),
         // Название папки кеша для драйвера file
         'driver_file_path' => (string)env('QUERY_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/query')),
+        // Сжимать данные кеша
+        'gzdeflate' => [
+            'enabled' => (bool)env('QUERY_CACHE_GZDEFLATE_ENABLED', true),
+            'level' => (int)env('QUERY_CACHE_GZDEFLATE_LEVEL', 9),
+        ],
         // Срок жизни ключа кеша по умолчанию
         'ttl' => Hlp::castToInt(env('QUERY_CACHE_TTL', 3600)),
         // Исключения кеша, например ['key' => '...']
@@ -492,6 +497,11 @@ return [
         'enabled' => (bool)env('VIEW_CACHE_ENABLED', true),
         // Название драйвера кеша
         'driver' => (string)env('VIEW_CACHE_DRIVER'),
+        // Сжимать данные кеша
+        'gzdeflate' => [
+            'enabled' => (bool)env('VIEW_CACHE_GZDEFLATE_ENABLED', true),
+            'level' => (int)env('VIEW_CACHE_GZDEFLATE_LEVEL', 9),
+        ],
         // Срок жизни ключа кеша по умолчанию
         'ttl' => Hlp::castToInt(env('VIEW_CACHE_TTL', 3600)),
         // Исключения кеша, например ['key' => '...']

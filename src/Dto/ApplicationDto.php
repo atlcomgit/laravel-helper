@@ -54,7 +54,7 @@ class ApplicationDto extends DefaultDto
     {
         return Hlp::timeSecondsToString(
             value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
-            withMilliseconds: false,
+            withMilliseconds: true,
         );
     }
 

@@ -108,7 +108,7 @@ class QueryLogDto extends Dto
     {
         return Hlp::timeSecondsToString(
             value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
-            withMilliseconds: false,
+            withMilliseconds: true,
         );
     }
 

@@ -22,8 +22,6 @@ use Illuminate\Support\Facades\DB;
 use stdClass;
 use Throwable;
 
-use function Pest\Laravel\instance;
-
 /**
  * Трейт для подключений кеширования к конструктору query запросов
  * 

@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Listeners\TelegramLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Str;
 
 
 if (!function_exists('isDebug')) {
@@ -269,7 +270,7 @@ if (!function_exists('user')) {
      * @param bool $returnOnlyId
      * @return Authenticatable|int|string|null
      */
-    function user(bool $returnOnlyId = false): ?Authenticatable
+    function user(bool $returnOnlyId = false): Authenticatable|int|string|null
     {
         try {
             $user = isTesting()
