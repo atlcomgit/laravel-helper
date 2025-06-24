@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Dto лога консольной команды
@@ -122,6 +123,17 @@ class ConsoleLogDto extends Dto
      */
     public function store(bool $isForce = true): void
     {
+        static $tableExists = null;
+
+        if (is_null($tableExists)) {
+            $connection = config('laravel-helper.console_log.connection');
+            $tableExists = Schema::connection($connection)->hasTable(config('laravel-helper.console_log.table'));
+
+            if (!$tableExists) {
+                return;
+            }
+        }
+
         if ($isForce || $this->storedAt->diffInSeconds() >= $this->storeInterval) {
             $this->isUpdated = (bool)$this->uuid;
             $this->uuid ??= uuid();

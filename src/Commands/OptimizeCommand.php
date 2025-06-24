@@ -50,37 +50,35 @@ class OptimizeCommand extends DefaultCommand
         $this->outputEol();
 
         if (config('laravel-helper.optimize.cleanup.enabled')) {
-            $connection = config('laravel-helper.console_log.connection');
-    
-            $cleanupConsoleLog = Schema::connection($connection)
+            $cleanupConsoleLog = Schema::connection(config('laravel-helper.console_log.connection'))
                 ->hasTable(config('laravel-helper.console_log.table'))
                 ? $this->consoleLogService->cleanup(0)
                 : 0;
-            $cleanupHttpLog = Schema::connection($connection)
+            $cleanupHttpLog = Schema::connection(config('laravel-helper.http_log.connection'))
                 ->hasTable(config('laravel-helper.http_log.table'))
                 ? $this->httpLogService->cleanup(0)
                 : 0;
-            $cleanupModelLog = Schema::connection($connection)
+            $cleanupModelLog = Schema::connection(config('laravel-helper.model_log.connection'))
                 ->hasTable(config('laravel-helper.model_log.table'))
                 ? $this->modelLogService->cleanup(0)
                 : 0;
-            $cleanupQueryLog = Schema::connection($connection)
+            $cleanupQueryLog = Schema::connection(config('laravel-helper.query_log.connection'))
                 ->hasTable(config('laravel-helper.query_log.table'))
                 ? $this->queryLogService->cleanup(0)
                 : 0;
-            $cleanupQueueLog = Schema::connection($connection)
+            $cleanupQueueLog = Schema::connection(config('laravel-helper.queue_log.connection'))
                 ->hasTable(config('laravel-helper.queue_log.table'))
                 ? $this->queueLogService->cleanup(0)
                 : 0;
-            $cleanupRouteLog = Schema::connection($connection)
+            $cleanupRouteLog = Schema::connection(config('laravel-helper.route_log.connection'))
                 ->hasTable(config('laravel-helper.route_log.table'))
                 ? $this->routeLogService->cleanup()
                 : 0;
-            $cleanupViewLog = Schema::connection($connection)
+            $cleanupViewLog = Schema::connection(config('laravel-helper.view_log.connection'))
                 ->hasTable(config('laravel-helper.view_log.table'))
                 ? $this->viewLogService->cleanup(0)
                 : 0;
-    
+
             $this->telegramLog = (isLocal() || isProd())
                 && (
                     $cleanupConsoleLog > 0
@@ -100,7 +98,7 @@ class OptimizeCommand extends DefaultCommand
                 'RouteLog' => Hlp::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
                 'ViewLog' => Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
             ];
-    
+
             $this->outputEol($this->telegramComment, 'fg=green');
         }
 
