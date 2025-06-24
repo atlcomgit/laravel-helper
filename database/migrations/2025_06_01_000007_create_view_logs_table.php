@@ -31,7 +31,8 @@ return new class extends Migration {
             $userPrimaryKeyType = config('laravel-helper.view_log.user.primary_type');
 
             if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
-                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index()
+                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
+                $table->foreign('user_id')
                     ->references($userPrimaryKeyName)->on($userTableName)
                     ->onUpdate('cascade')->onDelete('restrict')
                     ->comment('Id пользователя');
