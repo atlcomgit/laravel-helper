@@ -133,6 +133,7 @@ class LaravelHelperService
             config('laravel-helper.model_log.table'),
             config('laravel-helper.queue_log.table'),
             config('laravel-helper.query_log.table'),
+            config('laravel-helper.route_log.table'),
             config('laravel-helper.view_log.table'),
             config('cache.stores.database.table', 'cache'),
             'pg_catalog.pg_collation',

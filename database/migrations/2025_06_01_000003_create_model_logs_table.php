@@ -23,9 +23,9 @@ return new class extends Migration {
         Schema::connection($connection)->create($table, function (Blueprint $table) {
             $table->id();
 
-            $userTableName = config('laravel-helper.http_log.user.table_name');
-            $userPrimaryKeyName = config('laravel-helper.http_log.user.primary_key');
-            $userPrimaryKeyType = config('laravel-helper.http_log.user.primary_type');
+            $userTableName = config('laravel-helper.model_log.user.table_name');
+            $userPrimaryKeyName = config('laravel-helper.model_log.user.primary_key');
+            $userPrimaryKeyType = config('laravel-helper.model_log.user.primary_type');
 
             if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
                 $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
