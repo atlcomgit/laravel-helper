@@ -103,7 +103,7 @@ return [
         // Название соединения для записи логов
         'connection' => (string)env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('CONSOLE_LOG_TABLE', 'helper_route_logs'),
+        'table' => (string)env('CONSOLE_LOG_TABLE', 'helper_console_logs'),
         // Класс модели логов
         'model' => ConsoleLog::class,
         // Количество дней хранения логов
@@ -280,7 +280,7 @@ return [
         // Название соединения для записи логов
         'connection' => (string)env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('QUEUE_LOG_TABLE', 'helper_route_logs'),
+        'table' => (string)env('QUEUE_LOG_TABLE', 'helper_queue_logs'),
         // Класс модели логов
         'model' => QueueLog::class,
         // Связь с таблицей пользователей
