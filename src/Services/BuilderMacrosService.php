@@ -20,7 +20,7 @@ class BuilderMacrosService
     public static function setMacros(): void
     {
         if (config('laravel-helper.query_cache.enabled')) {
-            EloquentBuilder::macro('withQueryCache', function (int|bool|null $seconds = null) {
+            EloquentBuilder::macro('withQueryCache', function (int|string|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var int|bool|null $seconds */
                 return $this->withQueryCache($seconds);

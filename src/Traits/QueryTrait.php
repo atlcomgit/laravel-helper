@@ -49,12 +49,14 @@ trait QueryTrait
     /**
      * Устанавливает флаг включения кеширования
      *
-     * @param int|bool|null $seconds
+     * @param int|string|bool|null $seconds
      * @param int|bool|null $seconds - (int в секундах, null/true по умолчанию, false не сохранять)
      * @return static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
      */
-    public function withQueryCache(int|bool|null $seconds = null): static
+    public function withQueryCache(int|string|bool|null $seconds = null): static
     {
+        !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
+
         $this->withQueryCache = $seconds ?? true;
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->withQueryCache($this->withQueryCache);
@@ -192,9 +194,9 @@ trait QueryTrait
         $ttl ??= $this->withQueryCache;
 
         return match (true) {
+            is_null($ttl) || $ttl === 0 => 'ttl_not_set',
             is_integer($ttl) => "ttl_{$ttl}",
             is_bool($ttl) => "ttl_default",
-            is_null($ttl) => 'ttl_not_set',
 
             default => '',
         };

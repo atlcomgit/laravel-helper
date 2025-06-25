@@ -37,9 +37,9 @@ class ViewCacheService
     protected function getTagTtl(int|bool|null $ttl): string
     {
         return match (true) {
+            is_null($ttl) || $ttl === 0 => 'ttl_not_set',
             is_integer($ttl) => "ttl_{$ttl}",
             is_bool($ttl) => "ttl_default",
-            is_null($ttl) => 'ttl_not_set',
 
             default => '',
         };

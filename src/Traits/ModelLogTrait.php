@@ -10,14 +10,18 @@ use Atlcom\LaravelHelper\Observers\ModelLogObserver;
  * Трейт для подключения логирования модели
  * 
  * @property bool|null $withModelLog
- * @property array $logExcludeAttributes
- * @property array $logHideAttributes
+ * @property-read array $modelLogExcludeAttributes
+ * @property-read array $modelLogHiddenAttributes
  * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
  */
 trait ModelLogTrait
 {
     /** Флаг включения лога модели */
     protected ?bool $withModelLog = null;
+    /** Массив полей для исключения из лога */
+    public array $modelLogExcludeAttributes = [];
+    /** Массив полей для скрытого значения в логе */
+    public array $modelLogHiddenAttributes = ['password'];
 
 
     /**

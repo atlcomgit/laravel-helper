@@ -169,16 +169,16 @@ class ModelLogService
     protected function getAttributes(Model $model): ?array
     {
         $result = null;
-        $excludeAttributes = property_exists($model, 'logExcludeAttributes')
-            ? ($model->logExcludeAttributes ?: [])
+        $modelLogExcludeAttributes = property_exists($model, 'modelLogExcludeAttributes')
+            ? ($model->modelLogExcludeAttributes ?: [])
             : [];
-        $hideAttributes = property_exists($model, 'logHideAttributes')
-            ? ($model->logHideAttributes ?: [])
+        $modelLogHiddenAttributes = property_exists($model, 'modelLogHiddenAttributes')
+            ? ($model->modelLogHiddenAttributes ?: [])
             : [];
 
         foreach ($model->getAttributes() as $attribute => $newValue) {
-            if (!in_array($attribute, $excludeAttributes)) {
-                if (in_array($attribute, $hideAttributes)) {
+            if (!in_array($attribute, $modelLogExcludeAttributes)) {
+                if (in_array($attribute, $modelLogHiddenAttributes)) {
                     $newValue = static::HIDDEN_VALUE;
                 }
 
@@ -200,11 +200,11 @@ class ModelLogService
     protected function getChanges(Model $model, ?array $attributes = null): ?array
     {
         $result = null;
-        $excludeAttributes = property_exists($model, 'logExcludeAttributes')
-            ? ($model->logExcludeAttributes ?: [])
+        $modelLogExcludeAttributes = property_exists($model, 'modelLogExcludeAttributes')
+            ? ($model->modelLogExcludeAttributes ?: [])
             : [];
-        $hideAttributes = property_exists($model, 'logHideAttributes')
-            ? ($model->logHideAttributes ?: [])
+        $modelLogHiddenAttributes = property_exists($model, 'modelLogHiddenAttributes')
+            ? ($model->modelLogHiddenAttributes ?: [])
             : [];
 
         foreach ($model->getAttributes() ?:$attributes ?? []  as $attribute => $newValue) {
@@ -213,8 +213,8 @@ class ModelLogService
                 : $attributes[$attribute] ?? $model->getOriginal($attribute);
             $newValue = $model->$attribute;
 
-            if (!in_array($attribute, $excludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
-                if (in_array($attribute, $hideAttributes)) {
+            if (!in_array($attribute, $modelLogExcludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
+                if (in_array($attribute, $modelLogHiddenAttributes)) {
                     $newValue = $oldValue = static::HIDDEN_VALUE;
                 }
 

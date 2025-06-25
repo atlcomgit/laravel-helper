@@ -58,10 +58,10 @@ trait ModelCacheTrait
     /**
      * Вызывает макрос подключения кеша
      *
-     * @param int|bool|null|null $seconds
+     * @param int|string|bool|null|null $seconds
      * @return EloquentBuilder<static>
      */
-    public static function withQueryCache(int|bool|null $seconds = null): EloquentBuilder
+    public static function withQueryCache(int|string|bool|null $seconds = null): EloquentBuilder
     {
         $query = static::query()->withQueryCache($seconds);
 

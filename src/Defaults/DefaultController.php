@@ -23,11 +23,12 @@ class DefaultController extends Controller
     /**
      * Устанавливает флаг кеширования рендеринга blade шаблонов
      *
-     * @param int|bool|null $seconds
+     * @param int|string|bool|null $seconds
      * @return static
      */
-    public function withViewCache(int|bool|null $seconds = null): static
+    public function withViewCache(int|string|bool|null $seconds = null): static
     {
+        !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
         $this->withViewCache = $seconds;
 
         return $this;
