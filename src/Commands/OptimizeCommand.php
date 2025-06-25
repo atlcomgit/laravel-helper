@@ -9,10 +9,12 @@ use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -34,6 +36,7 @@ class OptimizeCommand extends DefaultCommand
         protected QueueLogService $queueLogService,
         protected RouteLogService $routeLogService,
         protected ViewLogService $viewLogService,
+        protected QueryCacheService $queryCacheService,
     ) {
         parent::__construct();
     }
@@ -49,7 +52,7 @@ class OptimizeCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        if (config('laravel-helper.optimize.cleanup.enabled')) {
+        if (config('laravel-helper.optimize.log_cleanup.enabled')) {
             $cleanupConsoleLog = Schema::connection(config('laravel-helper.console_log.connection'))
                 ->hasTable(config('laravel-helper.console_log.table'))
                 ? $this->consoleLogService->cleanup(0)
@@ -100,6 +103,13 @@ class OptimizeCommand extends DefaultCommand
             ];
 
             $this->outputEol($this->telegramComment, 'fg=green');
+        }
+
+        if (config('laravel-helper.optimize.cache_clear.enabled')) {
+            if (config('laravel-helper.query_cache.enabled') || config('laravel-helper.view_cache.enabled')) {
+                Cache::flush();
+                $this->queryCacheService->flushQueryCacheAll();
+            }
         }
 
         return self::SUCCESS;

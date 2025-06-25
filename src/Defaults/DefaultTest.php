@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Defaults;
 
-use Atlcom\LaravelHelper\Traits\TestCaseTrait;
+use Atlcom\LaravelHelper\Traits\TestingTrait;
 use Illuminate\Foundation\Testing\TestCase;
 
 /**
@@ -12,5 +12,5 @@ use Illuminate\Foundation\Testing\TestCase;
  */
 abstract class DefaultTest extends TestCase
 {
-    use TestCaseTrait;
+    use TestingTrait;
 }

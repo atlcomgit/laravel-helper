@@ -149,8 +149,6 @@ class Example extends Model
     protected $casts = [];
 }
 
-// или
-
 class ExampleRepository
 {
 	public function find(): void
@@ -185,9 +183,16 @@ class ExampleRepository
 Логирование query запросов в таблице helper_query_logs
 
 ```php
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultController;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
-use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Traits\ModelLogTrait;
+use Illuminate\Database\Eloquent\Model;
+
+class Example extends Model
+{
+	use ModelTrait;
+}
 
 class ExampleRepository
 {
@@ -199,13 +204,13 @@ class ExampleRepository
 		DB::table('users')->withQueryLog()->insert(['name' => Hlp::fakeName()]);
 		DB::table('users')->withQueryLog()->update(['name' => Hlp::fakeName()]);
 
-		User::withQueryLog()->first();
-		User::withQueryLog()->create(['name' => Hlp::fakeName()]);
-		User::query()->withQueryLog()->count();
-		User::query()->withQueryLog()->exists();
-		User::first()->fill(['name' => Helper::fakeName()])->withQueryLog()->save();
-		User::query()->withQueryLog()->where('id', '>=', 1)->update(['name' => Helper::fakeName()]);
-		User::query()->withQueryLog()->where('id', User::orderByDesc('id')->first()?->id)->delete();
+		Example::withQueryLog()->first();
+		Example::withQueryLog()->create(['name' => Hlp::fakeName()]);
+		Example::query()->withQueryLog()->count();
+		Example::query()->withQueryLog()->exists();
+		Example::first()->fill(['name' => Helper::fakeName()])->withQueryLog()->save();
+		Example::query()->withQueryLog()->where('id', '>=', 1)->update(['name' => Helper::fakeName()]);
+		Example::query()->withQueryLog()->where('id', Example::orderByDesc('id')->first()?->id)->delete();
 	}
 }
 ```
@@ -271,9 +276,16 @@ class ExampleController extends DefaultController
 Кеширование query запросов
 
 ```php
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultController;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
-use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Traits\ModelLogTrait;
+use Illuminate\Database\Eloquent\Model;
+
+class Example extends Model
+{
+	use ModelTrait;
+}
 
 class ExampleRepository
 {
@@ -282,9 +294,9 @@ class ExampleRepository
 		DB::withQueryCache()->select('select * from users');
 		DB::table('users')->withQueryCache()->first();
 
-		User::withQueryCache()->first();
-		User::query()->withQueryCache()->count();
-		User::query()->withQueryCache()->exists();
+		Example::withQueryCache()->first();
+		Example::query()->withQueryCache()->count();
+		Example::query()->withQueryCache()->exists();
 	}
 }
 ```

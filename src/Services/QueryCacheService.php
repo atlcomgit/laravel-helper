@@ -155,13 +155,13 @@ class QueryCacheService
         $hash = 'hash_' . Hlp::hashXxh128(gettype($builder) . $sql);
 
         switch (true) {
-            case $builder instanceof EloquentBuilder:
-                /** @var Model $model */
-                $model = $builder->getModel();
-                $id = $model
-                    ? '_' . Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, '', $model->{$model->getKeyName()})
-                    : '';
-                break;
+            // case $builder instanceof EloquentBuilder:
+            //     /** @var Model $model */
+            //     $model = $builder->getModel();
+            //     $id = $model
+            //         ? '_' . Hlp::stringConcat(static::CACHE_TAGS_DELIMITER, '', $model->{$model->getKeyName()})
+            //         : '';
+            //     break;
 
             default:
                 $id = '';
@@ -338,12 +338,18 @@ class QueryCacheService
                     return Cache::driver($this->driver)->has($key);
 
                 case ArrayStore::class:
+                    $rootKey = Hlp::stringConcat(
+                        static::CACHE_TAGS_DELIMITER,
+                        Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                    );
+                    $key = Hlp::stringSplit($key, static::CACHE_TAGS_DELIMITER, -1);
                     $cache = Hlp::cacheRuntimeGet(__CLASS__) ?? [];
-                    if (!isset($cache[$key])) {
+
+                    if (!isset($cache[$rootKey][$key])) {
                         return false;
                     }
 
-                    $data = $cache[$key] ?? [];
+                    $data = $cache[$rootKey][$key] ?? [];
                     /** @var Carbon $createdAt */
                     $createdAt = $data['created_at'] ?? null;
                     $ttl = $data['ttl'] ?? null;
@@ -421,9 +427,14 @@ class QueryCacheService
                     return Cache::driver($this->driver)->put($key, $value, $ttl ?: null);
 
                 case ArrayStore::class:
+                    $rootKey = Hlp::stringConcat(
+                        static::CACHE_TAGS_DELIMITER,
+                        Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                    );
+                    $key = Hlp::stringSplit($key, static::CACHE_TAGS_DELIMITER, -1);
                     $cache = Hlp::cacheRuntimeGet(__CLASS__);
-                    $cache[$key] = [
-                        'tags' => $tags,
+
+                    $cache[$rootKey][$key] = [
                         'value' => $value,
                         'created_at' => now(),
                         'ttl' => $ttl ?: null,
@@ -501,7 +512,13 @@ class QueryCacheService
                     break;
 
                 case ArrayStore::class:
-                    $result = (Hlp::cacheRuntimeGet(__CLASS__) ?? [])[$key] ?? null;
+                    $rootKey = Hlp::stringConcat(
+                        static::CACHE_TAGS_DELIMITER,
+                        Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                    );
+                    $key = Hlp::stringSplit($key, static::CACHE_TAGS_DELIMITER, -1);
+
+                    $result = (Hlp::cacheRuntimeGet(__CLASS__) ?? [])[$rootKey][$key] ?? null;
                     break;
 
                 case MemcachedStore::class:
@@ -608,12 +625,17 @@ class QueryCacheService
                         Hlp::cacheRuntimeClear();
 
                     } else {
+                        $rootKey = Hlp::stringConcat(
+                            static::CACHE_TAGS_DELIMITER,
+                            Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
+                        );
                         $cache = Hlp::cacheRuntimeGet(__CLASS__);
-                        foreach ($cache as $key => $data) {
-                            if (Hlp::arraySearchValues($data['tags'] ?? [], $tags)) {
-                                unset($cache[$key]);
+                        foreach (array_keys($cache) as $rootKey) {
+                            if (Hlp::stringSplitSearch($rootKey, static::CACHE_TAGS_DELIMITER, $tags)) {
+                                unset($cache[$rootKey]);
                             }
                         }
+
                         Hlp::cacheRuntimeSet(__CLASS__, $cache);
                     }
                     break;

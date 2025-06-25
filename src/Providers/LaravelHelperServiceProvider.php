@@ -159,11 +159,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
             });
 
             // Запуск команд при выполнении artisan optimize
-            !(config('laravel-helper.optimize.cleanup.enabled') && method_exists($this, 'optimizes'))
-                ?: $this->optimizes(
-                    optimize: OptimizeCommand::class,
-                    clear: CacheClearCommand::class,
-                );
+            !method_exists($this, 'optimizes') ?: $this->optimizes(
+                optimize: OptimizeCommand::class,
+                clear: CacheClearCommand::class,
+            );
         }
 
         /** @var Kernel $kernel */

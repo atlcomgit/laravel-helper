@@ -35,11 +35,9 @@ class CacheClearCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        if (config('laravel-helper.optimize.cache.enabled')) {
-            if (config('laravel-helper.query_cache.enabled') || config('laravel-helper.view_cache.enabled')) {
-                Cache::flush();
-                $this->queryCacheService->flushQueryCacheAll();
-            }
+        if (config('laravel-helper.query_cache.enabled') || config('laravel-helper.view_cache.enabled')) {
+            Cache::flush();
+            $this->queryCacheService->flushQueryCacheAll();
         }
 
         return self::SUCCESS;

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Трейт для подключения настройки тестов
  */
-trait TestCaseTrait
+trait TestingTrait
 {
     use CreatesApplication;
     use RefreshDatabase;

@@ -58,14 +58,14 @@ return [
      */
     'optimize' => [
         // Очистка таблиц
-        'cleanup' => [
+        'log_cleanup' => [
             // Флаг включения
-            'enabled' => (bool)env('OPTIMIZE_CLEANUP_ENABLED', true),
+            'enabled' => (bool)env('OPTIMIZE_LOG_CLEANUP_ENABLED', true),
         ],
         // Очистка кеша
-        'cache' => [
+        'cache_clear' => [
             // Флаг включения
-            'enabled' => (bool)env('OPTIMIZE_CACHE_ENABLED', true),
+            'enabled' => (bool)env('OPTIMIZE_CACHE_CLEAR_ENABLED', true),
         ],
     ],
 
