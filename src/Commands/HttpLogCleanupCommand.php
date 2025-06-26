@@ -31,7 +31,6 @@ class HttpLogCleanupCommand extends DefaultCommand
      */
     public function handle()
     {
-        $this->outputClear();
         $this->outputBold($this->description);
         $this->outputEol();
 

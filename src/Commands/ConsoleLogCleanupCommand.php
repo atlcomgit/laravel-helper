@@ -31,7 +31,6 @@ class ConsoleLogCleanupCommand extends DefaultCommand
      */
     public function handle(): int
     {
-        $this->outputClear();
         $this->outputBold($this->description);
         $this->outputEol();
 

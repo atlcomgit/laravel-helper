@@ -18,7 +18,7 @@ class RouteCacheCommand extends \Illuminate\Foundation\Console\RouteCacheCommand
     {
         parent::handle();
 
-        $this->call('lh:cleanup:route_log');
+        $this->call(RouteLogCleanupCommand::class, []);
 
         return self::SUCCESS;
     }

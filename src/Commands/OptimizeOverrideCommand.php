@@ -24,7 +24,7 @@ class OptimizeOverrideCommand extends OptimizeCommand
     {
         parent::handle();
 
-        $this->call('lh:optimize');
+        $this->call(\Atlcom\LaravelHelper\Commands\OptimizeCommand::class, []);
 
         return self::SUCCESS;
     }

@@ -48,6 +48,13 @@ abstract class DefaultCommand extends Command
             ';
         }
 
+        // Добавляем в команду флаг логирования консольной команды
+        if (!Str::contains($this->signature, '--cls')) {
+            $this->signature .= '
+                { --cls : Флаг включения очистки консоли stdout }
+            ';
+        }
+
         parent::__construct();
     }
 
@@ -72,6 +79,9 @@ abstract class DefaultCommand extends Command
             );
 
             !config('laravel-helper.console_log.store_on_start', true) ?: $this->consoleLogDto->store(true);
+
+            // Очищаем консоль stdout
+            $this->outputClear();
 
             // Запускаем команду
             $this->consoleLogDto->result = parent::execute($input, $output) ?? self::SUCCESS;
@@ -137,12 +147,17 @@ abstract class DefaultCommand extends Command
 
     /**
      * Очистка консоли
-     *
+     * 
+     * @param bool $isForce
      * @return void
      */
-    public function outputClear()
+    public function outputClear(bool $isForce = false)
     {
-        if (!$this->isTesting) {
+        if (
+            !$this->isTesting && (
+                $isForce
+                || ($this->hasOption('cls') && $this->option('cls')))
+        ) {
             echo "\033\143";
             $this->consoleLogDto->output('')->store(false);
         }
