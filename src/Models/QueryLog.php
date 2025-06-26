@@ -27,6 +27,8 @@ use Illuminate\Foundation\Auth\User;
  * @property bool $is_cached
  * @property bool $is_from_cache
  * @property QueryLogStatusEnum $status
+ * @property ?float $duration
+ * @property ?int $memory
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -51,6 +53,8 @@ class QueryLog extends DefaultModel
         'is_cached' => 'bool',
         'is_from_cache' => 'bool',
         'status' => QueryLogStatusEnum::class,
+        'duration' => 'float',
+        'memory' => 'integer',
         'info' => 'array',
     ];
 

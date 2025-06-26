@@ -33,6 +33,8 @@ use Illuminate\Foundation\Auth\User;
  * @property int $attempts
  * @property QueueLogStatusEnum $status
  * @property ?string $exception
+ * @property ?float $duration
+ * @property ?int $memory
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -65,6 +67,8 @@ class QueueLog extends DefaultModel
         'attempts' => 'integer',
         'status' => QueueLogStatusEnum::class,
         'exception' => 'string',
+        'duration' => 'float',
+        'memory' => 'integer',
         'info' => 'array',
     ];
 

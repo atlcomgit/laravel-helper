@@ -30,6 +30,8 @@ class QueueLogDto extends Dto
     public int $attempts;
     public QueueLogStatusEnum $status;
     public ?string $exception;
+    public ?float $duration;
+    public ?int $memory;
     public ?array $info;
 
     public bool $withQueueLog;

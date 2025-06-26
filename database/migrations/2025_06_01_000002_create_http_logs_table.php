@@ -26,7 +26,7 @@ return new class extends Migration {
             $table->id();
 
             $table->uuid('uuid')->nullable(false)->index()
-                ->comment('Uuid запроса');
+                ->comment('Uuid http запроса');
 
             $userTableName = config('laravel-helper.http_log.user.table_name');
             $userPrimaryKeyName = config('laravel-helper.http_log.user.primary_key');
@@ -43,35 +43,39 @@ return new class extends Migration {
             $table->string('name')->nullable(true)->index();
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()
                 ->default(HttpLogTypeEnum::getDefault())
-                ->comment('Тип запроса');
+                ->comment('Тип http запроса');
             $table->enum('method', HttpLogMethodEnum::enumValues())->nullable(false)->index()
                 ->default(HttpLogMethodEnum::getDefault())
-                ->comment('Метод запроса');
+                ->comment('Метод http запроса');
             $table->enum('status', HttpLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(HttpLogStatusEnum::getDefault())
-                ->comment('Статус запроса');
+                ->comment('Статус http запроса');
             $table->string('ip')->nullable(true)->index()
-                ->comment('Ip адрес запроса');
+                ->comment('Ip адрес http запроса');
             $table->longText('url')->nullable(false)
-                ->comment('Url запроса');
+                ->comment('Url http запроса');
             $table->jsonb('request_headers')->nullable(true)
-                ->comment('Заголовки запроса');
+                ->comment('Заголовки http запроса');
             $table->longText('request_data')->nullable(true)
-                ->comment('Тело запроса');
+                ->comment('Тело http запроса');
             $table->string('request_hash')->nullable(false)->index()
-                ->comment('Хеш запроса');
+                ->comment('Хеш http запроса');
             $table->integer('response_code')->nullable(true)->index()
-                ->comment('Код ответа на запрос');
+                ->comment('Код ответа на http запрос');
             $table->string('response_message')->nullable(true)
-                ->comment('Сообщение ответа на запрос');
+                ->comment('Сообщение ответа на http запрос');
             $table->jsonb('response_headers')->nullable(true)
-                ->comment('Заголовки ответа на запрос');
+                ->comment('Заголовки ответа на http запрос');
             $table->longText('response_data')->nullable(true)
-                ->comment('Тело ответа на запрос');
+                ->comment('Тело ответа на http запрос');
             $table->integer('try_count')->nullable(true)->default(0)
-                ->comment('Количество попыток запроса');
+                ->comment('Количество попыток http запроса');
+            $table->decimal('duration', 10, 3)->nullable(true)
+                ->comment('Время выполнения http запроса');
+            $table->unsignedBigInteger('size')->nullable(true)
+                ->comment('Размер http запроса');
             $table->jsonb('info')->nullable(true)
-                ->comment('Информация о запросе');
+                ->comment('Информация о http запросе');
 
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);

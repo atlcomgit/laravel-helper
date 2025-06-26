@@ -100,10 +100,15 @@ abstract class DefaultCommand extends Command
             throw $exception;
 
         } finally {
+            $this->consoleLogDto->duration = $this->consoleLogDto->getDuration();
+            $this->consoleLogDto->memory = $this->consoleLogDto->getMemory();
             $info = [
                 'class' => $this::class,
-                'duration' => $duration = $this->consoleLogDto->getDuration(),
-                'memory' => $memory = $this->consoleLogDto->getMemory(),
+                'duration' => $duration = Hlp::timeSecondsToString(
+                    value: $this->consoleLogDto->duration,
+                    withMilliseconds: true,
+                ),
+                'memory' => $memory = Hlp::sizeBytesToString($this->consoleLogDto->memory),
                 'hidden' => $this->hidden,
                 'isolated' => $this->isolated,
                 'isolated_exit_code' => $this->isolatedExitCode,

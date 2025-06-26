@@ -40,16 +40,7 @@ class HttpLogMiddleware
     {
         !static::$uuid
             ?: HttpLogDto::createByResponse(static::$uuid, $request, $response, [
-                ...(static::$startAt
-                    ? [
-                        'duration' => Hlp::timeSecondsToString(
-                            value: Carbon::createFromTimestampMs(static::$startAt)->diffInMilliseconds() / 1000,
-                            withMilliseconds: true,
-                        ),
-                    ]
-                    : []
-                ),
-
+                'startAt' => static::$startAt,
             ])->dispatch()
         ;
     }

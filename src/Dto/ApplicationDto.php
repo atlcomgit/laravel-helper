@@ -48,25 +48,22 @@ class ApplicationDto extends DefaultDto
     /**
      * Возвращает длительность работы скрипта
      *
-     * @return string
+     * @return float
      */
-    public function getDuration(): string
+    public function getDuration(): float
     {
-        return Hlp::timeSecondsToString(
-            value: Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000,
-            withMilliseconds: true,
-        );
+        return Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000;
     }
 
 
     /**
      * Возвращает потребляемую память скрипта
      *
-     * @return string
+     * @return int
      */
-    public function getMemory(): string
+    public function getMemory(): int
     {
-        return Hlp::sizeBytesToString(memory_get_usage() - $this->startMemory);
+        return max(0, memory_get_usage() - $this->startMemory);
     }
 
 

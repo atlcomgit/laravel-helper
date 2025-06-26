@@ -55,6 +55,10 @@ return new class extends Migration {
             $table->enum('status', ViewLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(ViewLogStatusEnum::getDefault())
                 ->comment('Статус выполнения рендеринга blade шаблона');
+            $table->decimal('duration', 10, 3)->nullable(true)
+                ->comment('Время выполнения рендеринга blade шаблона');
+            $table->unsignedBigInteger('memory')->nullable(true)
+                ->comment('Потребляемая память при выполнении рендеринга blade шаблона');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о выполнении рендеринга blade шаблона');
 

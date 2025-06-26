@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property ?int $result
  * @property ConsoleLogStatusEnum $status
  * @property ?string $exception
+ * @property ?float $duration
+ * @property ?int $memory
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -52,6 +54,8 @@ class ConsoleLog extends DefaultModel
         'result' => 'integer',
         'status' => ConsoleLogStatusEnum::class,
         'exception' => 'string',
+        'duration' => 'float',
+        'memory' => 'integer',
         'info' => 'array',
     ];
 

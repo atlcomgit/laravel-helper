@@ -51,6 +51,10 @@ return new class extends Migration {
             $table->enum('status', QueryLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(QueryLogStatusEnum::getDefault())
                 ->comment('Статус выполнения query запроса');
+            $table->decimal('duration', 10, 3)->nullable(true)
+                ->comment('Время выполнения query запроса');
+            $table->unsignedBigInteger('memory')->nullable(true)
+                ->comment('Потребляемая память при выполнении query запроса');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о выполнении query запроса');
 

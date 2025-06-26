@@ -31,6 +31,8 @@ class ConsoleLogFactory extends Factory
             'result' => 0,
             'status' => fake()->randomElement(ConsoleLogStatusEnum::enumValues()),
             'exception' => null,
+            'duration' => null,
+            'memory' => null,
             'info' => null,
         ];
     }

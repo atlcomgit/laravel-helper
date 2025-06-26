@@ -42,6 +42,8 @@ class HttpLogDto extends Dto
     public ?string $responseMessage;
     public ?array $responseHeaders;
     public ?string $responseData;
+    public ?float $duration;
+    public ?int $size;
     public ?array $info;
 
     public ?Exception $exception;
@@ -127,15 +129,32 @@ class HttpLogDto extends Dto
      * @param string|null $uuid
      * @param RequestIn|RequestOut|null|null $request
      * @param ResponseIn|ResponseOut|null|null $response
-     * @param array|null $info
+     * @param array|null $attributes
      * @return static
      */
     public static function createByResponse(
         string|null $uuid,
         RequestIn|RequestOut|null $request = null,
         ResponseIn|ResponseOut|null $response = null,
-        ?array $info = null,
+        ?array $attributes = null,
     ): static {
+        $startAt = match (true) {
+            $response instanceof ResponseIn => $attributes['startAt'] ?? null,
+            $response instanceof ResponseOut => ($request->header(HttpLogService::HTTP_HEADER_TIME) ?? [])[0]
+            ?? null,
+
+            default => null,
+        };
+        $duration = $startAt ? Carbon::createFromTimestampMs($startAt)->diffInMilliseconds() / 1000 : 0;
+        $size = Str::length(
+            match (true) {
+                $response instanceof ResponseIn => $response->getContent(),
+                $response instanceof ResponseOut => $response->body(),
+
+                default => '',
+            },
+        );
+
         return ($dto = static::createByRequest($uuid, $request))
             ->merge([
                 ...match (true) {
@@ -165,27 +184,12 @@ class HttpLogDto extends Dto
 
                 'info' => [
                     ...($dto->info ?? []),
-                    ...($info ?? []),
-                    ...(($startAt = ($request->header(HttpLogService::HTTP_HEADER_TIME) ?? [])[0] ?? null)
-                        ? [
-                            'duration' => Hlp::timeSecondsToString(
-                                value: Carbon::createFromTimestampMs($startAt)->diffInMilliseconds() / 1000,
-                                withMilliseconds: true,
-                            ),
-                        ]
-                        : []
-                    ),
-                    'response_data_size' => Hlp::sizeBytesToString(
-                        Str::length(
-                            match (true) {
-                                $response instanceof ResponseIn => $response->getContent(),
-                                $response instanceof ResponseOut => $response->body(),
-
-                                default => '',
-                            },
-                        ),
-                    ),
+                    'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
+                    'response_data_size' => Hlp::sizeBytesToString($size),
                 ],
+                'duration' => $duration ?? null,
+                'size' => $size,
+
             ]);
     }
 

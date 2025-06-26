@@ -81,13 +81,12 @@ class QueueLogService
 
         !($dto->isUpdated || !config('laravel-helper.queue_log.store_on_start'))
             ?: $dto->merge([
+                'duration' => $duration = Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
+                'memory' => $memory = ApplicationDto::restore()?->getMemory(),
                 'info' => [
                     'class' => $name,
-                    'duration' => Hlp::timeSecondsToString(
-                        value: Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
-                        withMilliseconds: true,
-                    ),
-                    'memory' => Hlp::sizeBytesToString(ApplicationDto::restore()?->getMemory()),
+                    'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
+                    'memory' => Hlp::sizeBytesToString($memory),
                     'deleted' => $event->job->isDeleted(),
                     'released' => $event->job->isReleased(),
                     'failed' => $event->job->hasFailed(),

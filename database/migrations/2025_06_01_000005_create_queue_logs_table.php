@@ -59,6 +59,10 @@ return new class extends Migration {
                 ->comment('Статус выполнения очереди');
             $table->longText('exception')->nullable(true)
                 ->comment('Исключение очереди');
+            $table->decimal('duration', 10, 3)->nullable(true)
+                ->comment('Время выполнения очереди');
+            $table->unsignedBigInteger('memory')->nullable(true)
+                ->comment('Потребляемая память при выполнении очереди');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о выполнении очереди');
 

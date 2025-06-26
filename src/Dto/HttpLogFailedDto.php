@@ -25,6 +25,8 @@ class HttpLogFailedDto extends Dto
     public ?string $responseMessage;
     public ?array $responseHeaders;
     public ?string $responseData;
+    public ?float $duration;
+    public ?int $size;
     public ?array $info;
 
 

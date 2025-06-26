@@ -29,6 +29,8 @@ use Illuminate\Foundation\Auth\User;
  * @property bool $is_cached
  * @property bool $is_from_cache
  * @property ViewLogStatusEnum $status
+ * @property ?float $duration
+ * @property ?int $memory
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -56,6 +58,8 @@ class ViewLog extends DefaultModel
         'is_cached' => 'bool',
         'is_from_cache' => 'bool',
         'status' => ViewLogStatusEnum::class,
+        'duration' => 'float',
+        'memory' => 'integer',
         'info' => 'array',
     ];
 

@@ -46,6 +46,8 @@ class QueryLogFactory extends Factory
             'is_cached' => fake()->boolean(),
             'is_from_cache' => fake()->boolean(),
             'status' => fake()->randomElement(QueryLogStatusEnum::enumValues()),
+            'duration' => null,
+            'memory' => null,
             'info' => null,
         ];
     }

@@ -44,6 +44,9 @@ class HttpLogFactory extends Factory
             'response_message' => fake()->text(190),
             'response_headers' => [],
             'response_data' => json_encode(['test' => true]),
+            'duration' => null,
+            'size' => null,
+            'info' => null,
         ];
     }
 

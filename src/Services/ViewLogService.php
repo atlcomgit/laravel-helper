@@ -74,10 +74,12 @@ class ViewLogService
     {
         $dto->render = $render;
         $dto->isUpdated = config('laravel-helper.view_log.store_on_start');
+        $dto->duration = $dto->getDuration();
+        $dto->memory = $dto->getMemory();
         $dto->info = [
             ...($dto->info ?? []),
-            'duration' => $dto->getDuration(),
-            'memory' => $dto->getMemory(),
+            'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
+            'memory' => Hlp::sizeBytesToString($dto->memory),
             'size_render' => Hlp::stringLength($render),
         ];
 

@@ -312,10 +312,12 @@ trait QueryTrait
             $dto->isFromCache = is_null($isFromCache) ? false : $isFromCache;
             $dto->status = $status ? QueryLogStatusEnum::Success : QueryLogStatusEnum::Failed;
             $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
+            $dto->duration = $dto->getDuration();
+            $dto->memory = $dto->getMemory();
             $dto->info = [
                 ...($dto->info ?? []),
-                'duration' => $dto->getDuration(),
-                'memory' => $dto->getMemory(),
+                'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
+                'memory' => Hlp::sizeBytesToString($dto->memory),
                 'size_result' => Hlp::stringLength(json_encode($result, Hlp::jsonFlags()) ?: ''),
                 'count' => match (true) {
                     $result instanceof Collection => $result->count(),
@@ -348,10 +350,12 @@ trait QueryTrait
             /** @var QueryLogDto $dto */
             $dto->status = QueryLogStatusEnum::Failed;
             $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
+            $dto->duration = $dto->getDuration();
+            $dto->memory = $dto->getMemory();
             $dto->info = [
                 ...($dto->info ?? []),
-                'duration' => $dto->getDuration(),
-                'memory' => $dto->getMemory(),
+                'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
+                'memory' => Hlp::sizeBytesToString($dto->memory),
                 'exception' => Hlp::exceptionToArray($exception),
             ];
 

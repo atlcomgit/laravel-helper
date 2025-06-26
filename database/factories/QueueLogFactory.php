@@ -38,6 +38,8 @@ class QueueLogFactory extends Factory
             'attempts' => 0,
             'status' => fake()->randomElement(QueueLogStatusEnum::enumValues()),
             'exception' => null,
+            'duration' => null,
+            'memory' => null,
             'info' => null,
         ];
     }

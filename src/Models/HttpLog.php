@@ -40,6 +40,8 @@ use Illuminate\Foundation\Auth\User;
  * @property ?array $response_headers
  * @property ?string $response_data
  * @property int|null $try_count
+ * @property ?float $duration
+ * @property ?int $size
  * @property array|null $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -77,6 +79,8 @@ class HttpLog extends DefaultModel
         'response_headers' => 'array',
         'response_data' => 'string',
         // 'try_count' => 'integer', - не нужно!
+        'duration' => 'float',
+        'size' => 'integer',
         'info' => 'array',
     ];
 
