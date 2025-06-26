@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Dto;
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
@@ -243,7 +244,11 @@ class LaravelHelperService
         foreach (File::allFiles($modelPath) as $file) {
             $class = $this->getClassFromFile($file);
 
-            if ($class && is_subclass_of($class, Model::class)) {
+            if (
+                $class && (
+                    is_subclass_of($class, Model::class) || is_subclass_of($class, DefaultModel::class)
+                )
+            ) {
                 /** @var Model $model */
                 $model = new $class();
                 if ($model->getTable() === $table) {
