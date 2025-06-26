@@ -22,8 +22,10 @@ use Illuminate\Support\Facades\Schema;
  */
 class OptimizeCommand extends DefaultCommand
 {
-    protected $signature = 'lh:optimize';
-    protected $description = 'Очистка логов';
+    protected $signature = 'lh:optimize
+        {--schedule= : Запуск команды по расписанию }
+    ';
+    protected $description = 'Оптимизация всех логов';
     protected $isolated = true;
     protected bool $withConsoleLog = true;
 
@@ -52,26 +54,38 @@ class OptimizeCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
+        $isSchedule = $this->hasOption('schedule') && Hlp::castToBool($this->option('schedule'));
+
         if (config('laravel-helper.optimize.log_cleanup.enabled')) {
             $cleanupConsoleLog = Schema::connection(config('laravel-helper.console_log.connection'))
                 ->hasTable(config('laravel-helper.console_log.table'))
-                ? $this->consoleLogService->cleanup(0)
+                ? $this->consoleLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.console_log.cleanup_days') : 0
+                )
                 : 0;
             $cleanupHttpLog = Schema::connection(config('laravel-helper.http_log.connection'))
                 ->hasTable(config('laravel-helper.http_log.table'))
-                ? $this->httpLogService->cleanup(0)
+                ? $this->httpLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.http_log.cleanup_days') : 0
+                )
                 : 0;
             $cleanupModelLog = Schema::connection(config('laravel-helper.model_log.connection'))
                 ->hasTable(config('laravel-helper.model_log.table'))
-                ? $this->modelLogService->cleanup(0)
+                ? $this->modelLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.model_log.cleanup_days') : 0
+                )
                 : 0;
             $cleanupQueryLog = Schema::connection(config('laravel-helper.query_log.connection'))
                 ->hasTable(config('laravel-helper.query_log.table'))
-                ? $this->queryLogService->cleanup(0)
+                ? $this->queryLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.query_log.cleanup_days') : 0
+                )
                 : 0;
             $cleanupQueueLog = Schema::connection(config('laravel-helper.queue_log.connection'))
                 ->hasTable(config('laravel-helper.queue_log.table'))
-                ? $this->queueLogService->cleanup(0)
+                ? $this->queueLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.queue_log.cleanup_days') : 0
+                )
                 : 0;
             $cleanupRouteLog = Schema::connection(config('laravel-helper.route_log.connection'))
                 ->hasTable(config('laravel-helper.route_log.table'))
@@ -79,10 +93,12 @@ class OptimizeCommand extends DefaultCommand
                 : 0;
             $cleanupViewLog = Schema::connection(config('laravel-helper.view_log.connection'))
                 ->hasTable(config('laravel-helper.view_log.table'))
-                ? $this->viewLogService->cleanup(0)
+                ? $this->viewLogService->cleanup(
+                    $isSchedule ? config('laravel-helper.view_log.cleanup_days') : 0
+                )
                 : 0;
 
-            $this->telegramLog = (isLocal() || isProd())
+            $this->withTelegramLog = (isLocal() || isProd())
                 && (
                     $cleanupConsoleLog > 0
                     || $cleanupHttpLog > 0

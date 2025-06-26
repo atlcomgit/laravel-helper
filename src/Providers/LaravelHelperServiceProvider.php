@@ -149,13 +149,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
             // Запуск команд по расписанию
             $this->app->booted(function () {
                 $schedule = $this->app->make(Schedule::class);
-                $schedule->command(ConsoleLogCleanupCommand::class, ['--telegram'])->dailyAt('03:01');
-                $schedule->command(HttpLogCleanupCommand::class, ['--telegram'])->dailyAt('03:02');
-                $schedule->command(ModelLogCleanupCommand::class, ['--telegram'])->dailyAt('03:03');
-                $schedule->command(RouteLogCleanupCommand::class, ['--telegram'])->dailyAt('03:04');
-                $schedule->command(QueueLogCleanupCommand::class, ['--telegram'])->dailyAt('03:05');
-                $schedule->command(QueryLogCleanupCommand::class, ['--telegram'])->dailyAt('03:06');
-                $schedule->command(ViewLogCleanupCommand::class, ['--telegram'])->dailyAt('03:07');
+                $schedule->command(OptimizeCommand::class, ['--telegram' => true, '--schedule' => true])
+                    ->dailyAt('03:00');
             });
 
             // Запуск команд при выполнении artisan optimize

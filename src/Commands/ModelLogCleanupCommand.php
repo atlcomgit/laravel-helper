@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\ModelLogService;
  */
 class ModelLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'lh:cleanup:model_logs';
+    protected $signature = 'lh:cleanup:model_log';
     protected $description = 'Очистка логов моделей';
     protected $isolated = true;
 

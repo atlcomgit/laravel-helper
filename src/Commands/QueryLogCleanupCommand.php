@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\QueryLogService;
  */
 class QueryLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'lh:cleanup:query_logs';
+    protected $signature = 'lh:cleanup:query_log';
     protected $description = 'Очистка логов query запросов';
     protected $isolated = true;
 

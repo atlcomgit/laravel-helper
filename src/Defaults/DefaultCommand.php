@@ -21,7 +21,7 @@ abstract class DefaultCommand extends Command
 {
     protected bool $isTesting;
     /** Флаг включения отправки сообщения в телеграм */
-    protected bool $telegramLog = true;
+    protected ?bool $withTelegramLog = null;
     /** Комментарий для отправки сообщения в телеграм */
     protected mixed $telegramComment = null;
     /** Флаг включения логирования консольной команды */
@@ -103,9 +103,12 @@ abstract class DefaultCommand extends Command
 
             // Отправляем результат в телеграм
             if (
-                $this->telegramLog
-                && $this->hasOption('telegram')
-                && Hlp::castToBool($this->option('telegram'))
+                $this->withTelegramLog === true
+                || (
+                    is_null($this->withTelegramLog)
+                    && $this->hasOption('telegram')
+                    && Hlp::castToBool($this->option('telegram'))
+                )
             ) {
                 $this->output->write(
                     PHP_EOL

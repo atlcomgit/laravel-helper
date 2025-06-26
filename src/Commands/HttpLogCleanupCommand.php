@@ -13,7 +13,7 @@ use Atlcom\LaravelHelper\Services\HttpLogService;
  */
 class HttpLogCleanupCommand extends DefaultCommand
 {
-    protected $signature = 'lh:cleanup:http_logs';
+    protected $signature = 'lh:cleanup:http_log';
     protected $description = 'Очистка логов http запросов';
     protected $isolated = true;
 
