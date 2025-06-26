@@ -105,6 +105,7 @@ class ExceptionDto extends Dto
             !in_array($exception::class, [
                     // ModelNotFoundException::class,
                 MaxAttemptsExceededException::class,
+                '\League\OAuth2\Server\Exception\OAuthServerException',
             ])
             && !is_subclass_of($exception, WithoutTelegramException::class)
             && !($exception instanceof WithoutTelegramException)
@@ -222,6 +223,13 @@ class ExceptionDto extends Dto
             HttpResponseException::class, ValidationException::class => 400,
 
             AuthenticationException::class => 401,
+
+            '\League\OAuth2\Server\Exception\OAuthServerException'
+            => (
+                ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getHttpStatusCode'))
+                ? $this->debugInfo->throw->getHttpStatusCode()
+                : 0
+            ) ?: 401,
 
             RouteNotFoundException::class,
             ModelNotFoundException::class,

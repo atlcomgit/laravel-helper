@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Repositories\HttpLogRepository;
+use BackedEnum;
 
 /**
  * Сервис логирования исходящих http запросов
@@ -30,10 +31,13 @@ class HttpLogService
      * @param HttpLogHeaderEnum $headerName
      * @return array
      */
-    public static function getLogHeaders(HttpLogHeaderEnum $headerName): array
+    public static function getLogHeaders(HttpLogHeaderEnum|string $headerName): array
     {
+        !($headerName instanceof BackedEnum) ?: $headerName = $headerName->value;
+
         return config('laravel-helper.http_log.out.enabled')
-            ? ($headerName === HttpLogHeaderEnum::None
+            ? (
+                $headerName === HttpLogHeaderEnum::None->value
                 ? [
                     self::HTTP_HEADER_UUID => '',
                     self::HTTP_HEADER_NAME => '',
@@ -41,7 +45,7 @@ class HttpLogService
                 ]
                 : [
                     self::HTTP_HEADER_UUID => uuid(),
-                    self::HTTP_HEADER_NAME => $headerName->value,
+                    self::HTTP_HEADER_NAME => $headerName,
                     self::HTTP_HEADER_TIME => (string)now()->getTimestampMs(),
                 ]
             )

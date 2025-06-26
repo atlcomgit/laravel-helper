@@ -21,6 +21,7 @@ enum HttpLogHeaderEnum: string
     case RtspMe = 'rtsp.me';
     case FcmGoogleApisCom = 'fcm-google-apis.com';
     case TelegramOrg = 'api.telegram.org';
+    case DaDataRu = 'dadata.ru';
 
 
     /**
@@ -52,6 +53,7 @@ enum HttpLogHeaderEnum: string
             self::RtspMe => 'Сервис rtsp потока',
             self::FcmGoogleApisCom => 'Сервис fcm google apis',
             self::TelegramOrg => 'Сервис telegram api',
+            self::DaDataRu => 'Сервис dadata',
 
             default => null,
         };

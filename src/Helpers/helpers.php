@@ -221,11 +221,12 @@ if (!function_exists('json')) {
      * Возвращает json строку
      *
      * @param mixed $data
+     * @param int $flags
      * @return string
      */
-    function json(mixed $data): string
+    function json(mixed $data, int $flags = 0): string
     {
-        return json_encode($data, Hlp::jsonFlags()) ?? '{}';
+        return json_encode($data, Hlp::jsonFlags() | $flags) ?? '{}';
     }
 } else {
     throw new LaravelHelperException('Функция json() уже определена в приложении');

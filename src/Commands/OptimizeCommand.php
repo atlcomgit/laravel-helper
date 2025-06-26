@@ -118,7 +118,7 @@ class OptimizeCommand extends DefaultCommand
                 'ViewLog' =>'Удалено ' .  Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
             ];
 
-            $this->outputEol($this->telegramComment, 'fg=green');
+            $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
         }
 
         if (config('laravel-helper.optimize.cache_clear.enabled')) {
