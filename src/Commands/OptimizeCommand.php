@@ -109,13 +109,13 @@ class OptimizeCommand extends DefaultCommand
                     || $cleanupViewLog > 0
                 );
             $this->telegramComment = [
-                'ConsoleLog' => Hlp::stringPlural($cleanupConsoleLog, ['записей', 'запись', 'записи']),
-                'HttpLog' => Hlp::stringPlural($cleanupHttpLog, ['записей', 'запись', 'записи']),
-                'ModelLog' => Hlp::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
-                'QueryLog' => Hlp::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
-                'QueueLog' => Hlp::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
-                'RouteLog' => Hlp::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
-                'ViewLog' => Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
+                'ConsoleLog' => 'Удалено ' . Hlp::stringPlural($cleanupConsoleLog, ['записей', 'запись', 'записи']),
+                'HttpLog' => 'Удалено ' . Hlp::stringPlural($cleanupHttpLog, ['записей', 'запись', 'записи']),
+                'ModelLog' => 'Удалено ' . Hlp::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
+                'QueryLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
+                'QueueLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
+                'RouteLog' => 'Доступно ' . Hlp::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
+                'ViewLog' =>'Удалено ' .  Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
             ];
 
             $this->outputEol($this->telegramComment, 'fg=green');

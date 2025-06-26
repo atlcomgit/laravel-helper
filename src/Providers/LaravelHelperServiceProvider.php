@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Commands\OptimizeCommand;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\OptimizeOverrideCommand;
 use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
@@ -154,10 +155,14 @@ class LaravelHelperServiceProvider extends ServiceProvider
             });
 
             // Запуск команд при выполнении artisan optimize
-            !method_exists($this, 'optimizes') ?: $this->optimizes(
-                optimize: OptimizeCommand::class,
-                clear: CacheClearCommand::class,
-            );
+            if (method_exists($this, 'optimizes')) {
+                $this->optimizes(
+                    optimize: OptimizeCommand::class,
+                    clear: CacheClearCommand::class,
+                );
+            } else {
+                $this->commands([OptimizeOverrideCommand::class]);
+            }
         }
 
         /** @var Kernel $kernel */
