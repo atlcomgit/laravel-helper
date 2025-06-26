@@ -138,6 +138,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
             $this->commands([
                 OptimizeCommand::class,
                 CacheClearCommand::class,
+                // RouteCacheCommand::class,
+
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
@@ -155,14 +157,14 @@ class LaravelHelperServiceProvider extends ServiceProvider
             });
 
             // Запуск команд при выполнении artisan optimize
-            if (method_exists($this, 'optimizes')) {
-                $this->optimizes(
+            method_exists($this, 'optimizes')
+                ? $this->optimizes(
                     optimize: OptimizeCommand::class,
                     clear: CacheClearCommand::class,
-                );
-            } else {
-                $this->commands([OptimizeOverrideCommand::class]);
-            }
+                )
+                : $this->commands([
+                    OptimizeOverrideCommand::class,
+                ]);
         }
 
         /** @var Kernel $kernel */

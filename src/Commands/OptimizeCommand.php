@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Консольная команда очистки логов консольных команд
+ * Консольная команда optimize laravel-helper
  */
 class OptimizeCommand extends DefaultCommand
 {

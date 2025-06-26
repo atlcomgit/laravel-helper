@@ -9,7 +9,7 @@ use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Консольная команда очистки кеша
+ * Консольная команда cache:clear (очистка кеша laravel-helper)
  */
 class CacheClearCommand extends DefaultCommand
 {
