@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeOverrideCommand;
 use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\RouteCacheCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ViewLogCleanupCommand;
 use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
@@ -138,7 +139,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
             $this->commands([
                 OptimizeCommand::class,
                 CacheClearCommand::class,
-                // RouteCacheCommand::class,
+                RouteCacheCommand::class,
 
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,

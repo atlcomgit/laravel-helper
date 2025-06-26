@@ -100,6 +100,8 @@ return [
         'enabled' => (bool)env('CONSOLE_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('CONSOLE_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('CONSOLE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -123,6 +125,8 @@ return [
     'http_log' => [
         // Название очереди для логов
         'queue' => (string)env('HTTP_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('HTTP_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -170,6 +174,8 @@ return [
         'enabled' => (bool)env('MODEL_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('MODEL_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('MODEL_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -204,6 +210,8 @@ return [
         'enabled' => (bool)env('ROUTE_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('ROUTE_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('ROUTE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -245,6 +253,8 @@ return [
         'enabled' => (bool)env('QUERY_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('QUERY_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('QUERY_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('QUERY_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -277,6 +287,8 @@ return [
         'enabled' => (bool)env('QUEUE_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('QUEUE_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('QUEUE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -309,6 +321,8 @@ return [
         'enabled' => (bool)env('TELEGRAM_LOG_ENABLED', true),
         // Название очереди для логов
         'queue' => (string)env('TELEGRAM_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('TELEGRAM_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Токен бота
         'token' => (string)env('TELEGRAM_LOG_TOKEN'),
         // Настройка отправки логов информации
@@ -465,6 +479,8 @@ return [
         'enabled' => (bool)env('VIEW_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('VIEW_LOG_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('VIEW_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
         'connection' => (string)env('VIEW_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов

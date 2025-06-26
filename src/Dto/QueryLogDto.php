@@ -132,7 +132,7 @@ class QueryLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            isTesting()
+            config('laravel-helper.query_log.queue_dispatch_sync')
                 ? QueryLogJob::dispatchSync($this)
                 : QueryLogJob::dispatch($this);
         }

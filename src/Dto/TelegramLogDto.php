@@ -161,7 +161,7 @@ class TelegramLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            isTesting()
+            config('laravel-helper.telegram_log.queue_dispatch_sync')
                 ? TelegramLogJob::dispatchSync($this)
                 : TelegramLogJob::dispatch($this);
         }

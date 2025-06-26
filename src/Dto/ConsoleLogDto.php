@@ -153,7 +153,7 @@ class ConsoleLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this) && $this->withConsoleLog) {
-            isTesting()
+            config('laravel-helper.console_log.queue_dispatch_sync')
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }

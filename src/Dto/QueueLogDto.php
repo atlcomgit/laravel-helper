@@ -120,7 +120,7 @@ class QueueLogDto extends Dto
     public function dispatch(): void
     {
         if (app(LaravelHelperService::class)->canDispatch($this) && $this->withQueueLog) {
-            isTesting()
+            config('laravel-helper.queue_log.queue_dispatch_sync')
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);
         }

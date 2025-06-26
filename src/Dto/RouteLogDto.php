@@ -73,7 +73,7 @@ class RouteLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            isTesting()
+            config('laravel-helper.route_log.queue_dispatch_sync')
                 ? RouteLogJob::dispatchSync($this)
                 : RouteLogJob::dispatch($this);
         }

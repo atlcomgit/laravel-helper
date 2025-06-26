@@ -198,7 +198,7 @@ class HttpLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            isTesting()
+            config('laravel-helper.http_log.queue_dispatch_sync')
                 ? HttpLogJob::dispatchSync($this)
                 : HttpLogJob::dispatch($this);
         }

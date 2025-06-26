@@ -113,7 +113,7 @@ class ModelLogDto extends DefaultDto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            isTesting()
+            config('laravel-helper.model_log.queue_dispatch_sync')
                 ? ModelLogJob::dispatchSync($this)
                 : ModelLogJob::dispatch($this);
         }

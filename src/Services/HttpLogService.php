@@ -28,7 +28,7 @@ class HttpLogService
     /**
      * Возвращает идентификатор сообщения для http заголовка
      *
-     * @param HttpLogHeaderEnum $headerName
+     * @param HttpLogHeaderEnum|string $headerName
      * @return array
      */
     public static function getLogHeaders(HttpLogHeaderEnum|string $headerName): array

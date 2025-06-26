@@ -138,7 +138,7 @@ class ViewLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this) && $this->withViewLog) {
-            isTesting()
+            config('laravel-helper.view_log.queue_dispatch_sync')
                 ? ViewLogJob::dispatchSync($this)
                 : ViewLogJob::dispatch($this);
         }
