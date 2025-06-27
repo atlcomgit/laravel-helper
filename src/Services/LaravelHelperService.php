@@ -137,10 +137,11 @@ class LaravelHelperService
             config('laravel-helper.route_log.table'),
             config('laravel-helper.view_log.table'),
             config('cache.stores.database.table', 'cache'),
-            'pg_catalog.pg_collation',
-            'pg_catalog.pg_attrdef',
-            'pg_catalog.pg_attribute',
+            'pg_catalog.*',
             'pg_attrdef',
+            'information_schema.*',
+            'table_schema.*',
+            'telescope_*',
         ];
 
         return empty(Hlp::arraySearchValues($tables, $ignoreTables));

@@ -31,7 +31,7 @@ class BuilderMacrosService
                 return $this->withQueryCache(false);
             });
 
-            QueryBuilder::macro('withQueryCache', function (int|bool|null $seconds = null) {
+            QueryBuilder::macro('withQueryCache', function (int|string|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
                 /** @var int|bool|null $seconds */
                 return $this->withQueryCache($seconds);

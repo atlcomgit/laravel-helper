@@ -36,9 +36,9 @@ use Throwable;
 trait QueryTrait
 {
     /** Флаг включения кеширования запроса или ttl */
-    protected int|bool|null $withQueryCache = false;
+    protected int|bool|null $withQueryCache = null;
     /** Флаг включения лога query запроса */
-    protected bool|null $withQueryLog = false;
+    protected bool|null $withQueryLog = null;
     /** Флаг включения лога модели */
     protected bool|null $withModelLog = null;
 
@@ -56,8 +56,8 @@ trait QueryTrait
     public function withQueryCache(int|string|bool|null $seconds = null): static
     {
         !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
-
         $this->withQueryCache = $seconds ?? true;
+        
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->withQueryCache($this->withQueryCache);
             $this->getConnection()->withQueryCache($this->withQueryCache);

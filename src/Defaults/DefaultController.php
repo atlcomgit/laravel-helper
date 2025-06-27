@@ -14,10 +14,10 @@ use Throwable;
 class DefaultController extends Controller
 {
     /** Флаг кеширования рендеринга blade шаблонов */
-    protected int|bool|null $withViewCache = false;
+    protected int|bool|null $withViewCache = null;
 
     /** Флаг логирования рендеринга blade шаблонов */
-    protected bool|null $withViewLog = false;
+    protected bool|null $withViewLog = null;
 
 
     /**
@@ -29,7 +29,7 @@ class DefaultController extends Controller
     public function withViewCache(int|string|bool|null $seconds = null): static
     {
         !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
-        $this->withViewCache = $seconds;
+        $this->withViewCache = $seconds ?? true;
 
         return $this;
     }
