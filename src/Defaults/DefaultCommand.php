@@ -119,6 +119,7 @@ abstract class DefaultCommand extends Command
             // Отправляем результат в телеграм
             if (
                 $this->withTelegramLog === true
+                || ($this->withTelegramLog !== false && config('laravel-helper.console_log.global'))
                 || (
                     is_null($this->withTelegramLog)
                     && $this->hasOption('telegram')

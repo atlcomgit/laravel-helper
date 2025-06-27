@@ -17,11 +17,13 @@ use Illuminate\Foundation\Auth\User;
  */
 
 // Название таблицы пользователей
-$userTableName = (string)(new User())->getTable();
+$userClass = (string)env('HELPER_USER_CLASS') ?: User::class;
+$user = new $userClass();
+$userTableName = (string)$user->getTable();
 // Первичный ключ в таблице пользователей
-$userPrimaryKeyName = (string)(new User())->getKeyName();
+$userPrimaryKeyName = (string)$user->getKeyName();
 // Тип первичного ключа в таблице пользователей
-$userPrimaryKeyType = (string)match ((new User())->getKeyType()) {
+$userPrimaryKeyType = (string)match ($user->getKeyType()) {
     'int', 'integer' => 'bigInteger',
     'string', 'uuid' => 'uuid',
 
@@ -60,12 +62,12 @@ return [
         // Очистка таблиц
         'log_cleanup' => [
             // Флаг включения
-            'enabled' => (bool)env('OPTIMIZE_LOG_CLEANUP_ENABLED', true),
+            'enabled' => (bool)env('HELPER_OPTIMIZE_LOG_CLEANUP_ENABLED', true),
         ],
         // Очистка кеша
         'cache_clear' => [
             // Флаг включения
-            'enabled' => (bool)env('OPTIMIZE_CACHE_CLEAR_ENABLED', true),
+            'enabled' => (bool)env('HELPER_OPTIMIZE_CACHE_CLEAR_ENABLED', true),
         ],
     ],
 
@@ -77,17 +79,17 @@ return [
         // Макросы конструктора query запросов
         'builder' => [
             // Флаг включения макросов
-            'enabled' => (bool)env('BUILDER_MACROS_ENABLED', true),
+            'enabled' => (bool)env('HELPER_BUILDER_MACROS_ENABLED', true),
         ],
         // Макросы хелпера Str
         'str' => [
             // Флаг включения макросов
-            'enabled' => (bool)env('STR_MACROS_ENABLED', true),
+            'enabled' => (bool)env('HELPER_STR_MACROS_ENABLED', true),
         ],
         // Макросы фасада Http
         'http' => [
             // Флаг включения макросов
-            'enabled' => (bool)env('HTTP_MACROS_ENABLED', true),
+            'enabled' => (bool)env('HELPER_HTTP_MACROS_ENABLED', true),
         ],
     ],
 
@@ -97,25 +99,27 @@ return [
      */
     'console_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('CONSOLE_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_CONSOLE_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('CONSOLE_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_CONSOLE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('CONSOLE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_CONSOLE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('CONSOLE_LOG_TABLE', 'helper_console_logs'),
+        'table' => (string)env('HELPER_CONSOLE_LOG_TABLE', 'helper_console_logs'),
         // Класс модели логов
         'model' => ConsoleLog::class,
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('CONSOLE_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HELPER_CONSOLE_LOG_CLEANUP_DAYS', 7),
         // Флаг включения записи логов перед запуском
-        'store_on_start' => (bool)env('CONSOLE_LOG_STORE_ON_START', false),
+        'store_on_start' => (bool)env('HELPER_CONSOLE_LOG_STORE_ON_START', false),
         // Интервал записи логов для длительных операций
-        'store_interval_seconds' => (int)env('CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
+        'store_interval_seconds' => (int)env('HELPER_CONSOLE_LOG_STORE_INTERVAL_SECONDS', 3),
         // Исключения логов, например ['name' => '...']
-        'exclude' => (array)(Hlp::envGet('CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_CONSOLE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения логирования всех консольных команд
+        'global' => (bool)env('HELPER_CONSOLE_LOG_GLOBAL', false),
     ],
 
 
@@ -124,13 +128,13 @@ return [
      */
     'http_log' => [
         // Название очереди для логов
-        'queue' => (string)env('HTTP_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_HTTP_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HTTP_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_HTTP_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('HTTP_LOG_TABLE', 'helper_http_logs'),
+        'table' => (string)env('HELPER_HTTP_LOG_TABLE', 'helper_http_logs'),
         // Класс модели логов
         'model' => HttpLog::class,
         // Связь с таблицей пользователей
@@ -143,26 +147,27 @@ return [
             'primary_type' => (string)$userPrimaryKeyType,
         ],
         // Флаг включения записи логов только после получения ответа на запрос
-        'only_response' => (bool)env('HTTP_LOG_ONLY_RESPONSE', true),
+        'only_response' => (bool)env('HELPER_HTTP_LOG_ONLY_RESPONSE', true),
         // Входящие запросы
         'in' => [
             // Флаг включения логов
-            'enabled' => (bool)env('HTTP_LOG_IN_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HELPER_HTTP_LOG_IN_ENABLED', env('HELPER_HTTP_LOG_ENABLED', false)),
             // Исключения логов, например ['name' => '...']
-            'exclude' => (array)(Hlp::envGet('HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
-            // Флаг включения middleware глобально
-            'global' => (bool)env('HTTP_LOG_IN_GLOBAL', false),
+            'exclude' => (array)(Hlp::envGet('HELPER_HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
+            // Флаг включения логирования всех входящих запросов (HttpLogMiddleware глобально)
+            'global' => (bool)env('HELPER_HTTP_LOG_IN_GLOBAL', false),
         ],
         // Исходящие запросы
         'out' => [
             // Флаг включения логов
-            'enabled' => (bool)env('HTTP_LOG_OUT_ENABLED', env('HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HELPER_HTTP_LOG_OUT_ENABLED', env('HELPER_HTTP_LOG_ENABLED', false)),
             // Исключения логов, например ['name' => '...']
-            'exclude' => (array)(Hlp::envGet('HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
+            'exclude' => (array)(Hlp::envGet('HELPER_HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
+            // Флаг включения логирования всех исходящих запросов
+            'global' => (bool)env('HELPER_HTTP_LOG_OUT_GLOBAL', true),
         ],
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('HTTP_LOG_CLEANUP_DAYS', 7),
-
+        'cleanup_days' => (int)env('HELPER_HTTP_LOG_CLEANUP_DAYS', 7),
     ],
 
 
@@ -171,15 +176,15 @@ return [
      */
     'model_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('MODEL_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_MODEL_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('MODEL_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_MODEL_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('MODEL_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_MODEL_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('MODEL_LOG_TABLE', 'helper_model_logs'),
+        'table' => (string)env('HELPER_MODEL_LOG_TABLE', 'helper_model_logs'),
         // Класс модели логов
         'model' => ModelLog::class,
         // Связь с таблицей пользователей
@@ -192,13 +197,15 @@ return [
             'primary_type' => (string)$userPrimaryKeyType,
         ],
         // Название драйвера логов
-        'drivers' => (array)(explode(',', env('MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value))),
+        'drivers' => (array)(explode(',', env('HELPER_MODEL_LOG_DRIVERS', ModelLogDriverEnum::Database->value))),
         // Название файла для драйвера File
-        'file' => (string)env('MODEL_LOG_FILE', storage_path('logs/model.log')),
+        'file' => (string)env('HELPER_MODEL_LOG_FILE', storage_path('logs/model.log')),
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('MODEL_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HELPER_MODEL_LOG_CLEANUP_DAYS', 7),
         // Исключения логов, например ['type' => '...']
-        'exclude' => (array)(Hlp::envGet('MODEL_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_MODEL_LOG_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения логирования всех моделей
+        'global' => (bool)env('HELPER_MODEL_LOG_GLOBAL', false),
     ],
 
 
@@ -207,19 +214,19 @@ return [
      */
     'route_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('ROUTE_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_ROUTE_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('ROUTE_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_ROUTE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('ROUTE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_ROUTE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('ROUTE_LOG_TABLE', 'helper_route_logs'),
+        'table' => (string)env('HELPER_ROUTE_LOG_TABLE', 'helper_route_logs'),
         // Класс модели логов
         'model' => RouteLog::class,
         // Исключения логов, например ['uri' => '...']
-        'exclude' => (array)(Hlp::envGet('ROUTE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_ROUTE_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],
 
 
@@ -228,20 +235,22 @@ return [
      */
     'query_cache' => [
         // Флаг включения кеша
-        'enabled' => (bool)env('QUERY_CACHE_ENABLED', true),
+        'enabled' => (bool)env('HELPER_QUERY_CACHE_ENABLED', true),
         // Название драйвера кеша
-        'driver' => (string)env('QUERY_CACHE_DRIVER', env('CACHE_STORE', 'database')),
+        'driver' => (string)env('HELPER_QUERY_CACHE_DRIVER', env('CACHE_STORE', 'database')),
         // Название папки кеша для драйвера file
-        'driver_file_path' => (string)env('QUERY_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/query')),
+        'driver_file_path' => (string)env('HELPER_QUERY_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/query')),
         // Сжимать данные кеша
         'gzdeflate' => [
-            'enabled' => (bool)env('QUERY_CACHE_GZDEFLATE_ENABLED', true),
-            'level' => (int)env('QUERY_CACHE_GZDEFLATE_LEVEL', 9),
+            'enabled' => (bool)env('HELPER_QUERY_CACHE_GZDEFLATE_ENABLED', true),
+            'level' => (int)env('HELPER_QUERY_CACHE_GZDEFLATE_LEVEL', 9),
         ],
         // Срок жизни ключа кеша по умолчанию
-        'ttl' => Hlp::castToInt(env('QUERY_CACHE_TTL', 3600)),
+        'ttl' => Hlp::castToInt(env('HELPER_QUERY_CACHE_TTL', 3600)),
         // Исключения кеша, например ['key' => '...']
-        'exclude' => (array)(Hlp::envGet('QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_QUERY_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения кеширования всех query запросов
+        'global' => (bool)env('HELPER_QUERY_CACHE_GLOBAL', false),
     ],
 
 
@@ -250,15 +259,15 @@ return [
      */
     'query_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('QUERY_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_QUERY_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('QUERY_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_QUERY_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('QUERY_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_QUERY_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('QUERY_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_QUERY_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('QUERY_LOG_TABLE', 'helper_query_logs'),
+        'table' => (string)env('HELPER_QUERY_LOG_TABLE', 'helper_query_logs'),
         // Класс модели логов
         'model' => QueryLog::class,
         // Связь с таблицей пользователей
@@ -271,11 +280,13 @@ return [
             'primary_type' => (string)$userPrimaryKeyType,
         ],
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('QUERY_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HELPER_QUERY_LOG_CLEANUP_DAYS', 7),
         // Флаг включения записи логов перед запуском
-        'store_on_start' => (bool)env('QUERY_LOG_STORE_ON_START', false),
+        'store_on_start' => (bool)env('HELPER_QUERY_LOG_STORE_ON_START', false),
         // Исключения логов, например ['key' => '...']
-        'exclude' => (array)(Hlp::envGet('QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения логирования всех query запросов
+        'global' => (bool)env('HELPER_QUERY_LOG_GLOBAL', false),
     ],
 
 
@@ -284,15 +295,15 @@ return [
      */
     'queue_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('QUEUE_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_QUEUE_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('QUEUE_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_QUEUE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('QUEUE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_QUEUE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('QUEUE_LOG_TABLE', 'helper_queue_logs'),
+        'table' => (string)env('HELPER_QUEUE_LOG_TABLE', 'helper_queue_logs'),
         // Класс модели логов
         'model' => QueueLog::class,
         // Связь с таблицей пользователей
@@ -305,11 +316,13 @@ return [
             'primary_type' => (string)$userPrimaryKeyType,
         ],
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('QUEUE_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HELPER_QUEUE_LOG_CLEANUP_DAYS', 7),
         // Флаг включения записи логов перед запуском
-        'store_on_start' => (bool)env('QUEUE_LOG_STORE_ON_START', false),
+        'store_on_start' => (bool)env('HELPER_QUEUE_LOG_STORE_ON_START', false),
         // Исключения логов, например ['name' => '...']
-        'exclude' => (array)(Hlp::envGet('QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_QUEUE_LOG_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения логирования всех очередей
+        'global' => (bool)env('HELPER_QUEUE_LOG_GLOBAL', false),
     ],
 
 
@@ -318,60 +331,60 @@ return [
      */
     'telegram_log' => [
         // Вкл/Выкл отправки в телеграм
-        'enabled' => (bool)env('TELEGRAM_LOG_ENABLED', true),
+        'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ENABLED', true),
         // Название очереди для логов
-        'queue' => (string)env('TELEGRAM_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_TELEGRAM_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('TELEGRAM_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_TELEGRAM_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Токен бота
-        'token' => (string)env('TELEGRAM_LOG_TOKEN'),
+        'token' => (string)env('HELPER_TELEGRAM_LOG_TOKEN'),
         // Настройка отправки логов информации
         'info' => [
             // Вкл/Выкл отправки информации
-            'enabled' => (bool)env('TELEGRAM_INFO_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_INFO_ENABLED', true),
             // Telegram chat id для информации
-            'chat_id' => (string)env('TELEGRAM_INFO_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_INFO_CHAT_ID'),
             // Токен бота для информации
-            'token' => (string)env('TELEGRAM_INFO_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_INFO_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
-            'exclude' => (array)(Hlp::envGet('TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов ошибок
         'error' => [
             // Вкл/Выкл отправки ошибок
-            'enabled' => (bool)env('TELEGRAM_ERROR_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_ERROR_ENABLED', true),
             // Telegram chat id для ошибок
-            'chat_id' => (string)env('TELEGRAM_ERROR_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_ERROR_CHAT_ID'),
             // Токен бота для ошибок
-            'token' => (string)env('TELEGRAM_ERROR_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_ERROR_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
-            'exclude' => (array)(Hlp::envGet('TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов предупреждений
         'warning' => [
             // Вкл/Выкл отправки предупреждений
-            'enabled' => (bool)env('TELEGRAM_WARNING_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_WARNING_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => (string)env('TELEGRAM_WARNING_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_WARNING_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => (string)env('TELEGRAM_WARNING_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_WARNING_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Hlp::envGet('TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов отладки
         'debug' => [
             // Вкл/Выкл отправки предупреждений
-            'enabled' => (bool)env('TELEGRAM_DEBUG_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_DEBUG_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => (string)env('TELEGRAM_DEBUG_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_DEBUG_CHAT_ID'),
             // Токен бота для предупреждений
-            'token' => (string)env('TELEGRAM_DEBUG_TOKEN', env('TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_DEBUG_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Hlp::envGet('TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
     ],
 
@@ -382,91 +395,91 @@ return [
         // Сервис localhost
         'localhost' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_LOCALHOST_ENABLED', true),
+            'enabled' => (bool)env('HELPER_HTTP_LOCALHOST_ENABLED', true),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
+            'url' => (string)env('HELPER_HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
         ],
         // Сервис sms.ru
         'smsRu' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_SMSRU_ENABLED', false),
+            'enabled' => (bool)env('HELPER_HTTP_SMSRU_ENABLED', false),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_SMSRU_URL', 'https://sms.ru'),
+            'url' => (string)env('HELPER_HTTP_SMSRU_URL', 'https://sms.ru'),
             // Ключ api
-            'api_key' => (string)env('HTTP_SMSRU_API_KEY'),
+            'api_key' => (string)env('HELPER_HTTP_SMSRU_API_KEY'),
             // Номер отправителя сообщений
-            'from' => (string)env('HTTP_SMSRU_FROM'),
+            'from' => (string)env('HELPER_HTTP_SMSRU_FROM'),
             // Номер получателя сообщений
-            'to' => (string)env('HTTP_SMSRU_TO'),
+            'to' => (string)env('HELPER_HTTP_SMSRU_TO'),
             // Флаг включения отправки ip адреса клиента
-            'send_ip_address' => (bool)env('HTTP_SMSRU_SEND_IP_ADDRESS', false),
+            'send_ip_address' => (bool)env('HELPER_HTTP_SMSRU_SEND_IP_ADDRESS', false),
         ],
         // Сервис mango-office.ru
         'mangoOfficeRu' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_MANGOOFFICERU_ENABLED', false),
+            'enabled' => (bool)env('HELPER_HTTP_MANGOOFFICERU_ENABLED', false),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
+            'url' => (string)env('HELPER_HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
             // Ключ api
-            'api_key' => (string)env('HTTP_MANGOOFFICERU_API_KEY', ''),
+            'api_key' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_KEY', ''),
             // Дополнительная соль для формирования подписи
-            'api_salt' => (string)env('HTTP_MANGOOFFICERU_API_SALT', ''),
+            'api_salt' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_SALT', ''),
             // Токен вебхука для входящих запросов от сервиса
-            'webhook_token' => (string)env('HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
+            'webhook_token' => (string)env('HELPER_HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
         ],
         // Сервис mango-devline.ru
         'devlineRu' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_DEVLINERU_ENABLED', false),
+            'enabled' => (bool)env('HELPER_HTTP_DEVLINERU_ENABLED', false),
             // Url адрес для запросов api
             'url' => [
                 // Url адрес для формирования http ссылки видео-потока камеры
-                'http' => (string)env('HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
+                'http' => (string)env('HELPER_HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
                 // Url адрес для формирования rtsp ссылки видео-потока
-                'rtsp' => (string)env('HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
+                'rtsp' => (string)env('HELPER_HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
             ],
-            'timeout' => (int)env('HTTP_DEVLINERU_TIMEOUT', 10),
+            'timeout' => (int)env('HELPER_HTTP_DEVLINERU_TIMEOUT', 10),
 
-            'authorization' => (string)env('HTTP_DEVLINERU_AUTHORIZATION', ''),
+            'authorization' => (string)env('HELPER_HTTP_DEVLINERU_AUTHORIZATION', ''),
         ],
         // Сервис rtsp.me
         'rtspMe' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_RTSPME_ENABLED', false),
+            'enabled' => (bool)env('HELPER_HTTP_RTSPME_ENABLED', false),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_RTSPME_URL', 'https://rtsp.me'),
+            'url' => (string)env('HELPER_HTTP_RTSPME_URL', 'https://rtsp.me'),
             // Таймаут подключения api к сервису
-            'timeout' => (int)env('HTTP_RTSPME_TIMEOUT', 10),
+            'timeout' => (int)env('HELPER_HTTP_RTSPME_TIMEOUT', 10),
             // Креды авторизации api
             'auth' => [
                 // Адрес электронной почты
-                'email' => (string)env('HTTP_RTSPME_EMAIL'),
+                'email' => (string)env('HELPER_HTTP_RTSPME_EMAIL'),
                 // Пароль
-                'password' => (string)env('HTTP_RTSPME_PASSWORD'),
+                'password' => (string)env('HELPER_HTTP_RTSPME_PASSWORD'),
             ],
             'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
         ],
         // Сервис FCM Google API
         'fcmGoogleApisCom' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
+            'enabled' => (bool)env('HELPER_HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
+            'url' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
             // Креды авторизации api
-            'firebase_credentials' => (string)env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
+            'firebase_credentials' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
             // Идентификатор проекта fcm
-            'project_id' => (string)env('HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
+            'project_id' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
             // Таймаут подключения api к сервису
-            'timeout' => (int)env('HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
+            'timeout' => (int)env('HELPER_HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
         ],
         // Сервис Telegram API
         'telegramOrg' => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HTTP_TELEGRAMORG_ENABLED', true),
+            'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
             // Url адрес для запросов api
-            'url' => (string)env('HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
+            'url' => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
             // Таймаут подключения api к сервису
-            'timeout' => (int)env('HTTP_TELEGRAMORG_TIMEOUT', 10),
+            'timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 10),
         ],
     ],
 
@@ -476,15 +489,15 @@ return [
      */
     'view_log' => [
         // Флаг включения логов
-        'enabled' => (bool)env('VIEW_LOG_ENABLED', false),
+        'enabled' => (bool)env('HELPER_VIEW_LOG_ENABLED', false),
         // Название очереди для логов
-        'queue' => (string)env('VIEW_LOG_QUEUE', 'default'),
+        'queue' => (string)env('HELPER_VIEW_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('VIEW_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_VIEW_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
         // Название соединения для записи логов
-        'connection' => (string)env('VIEW_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        'connection' => (string)env('HELPER_VIEW_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
-        'table' => (string)env('VIEW_LOG_TABLE', 'helper_view_logs'),
+        'table' => (string)env('HELPER_VIEW_LOG_TABLE', 'helper_view_logs'),
         // Класс модели логов
         'model' => ViewLog::class,
         // Связь с таблицей пользователей
@@ -497,11 +510,13 @@ return [
             'primary_type' => (string)$userPrimaryKeyType,
         ],
         // Количество дней хранения логов
-        'cleanup_days' => (int)env('VIEW_LOG_CLEANUP_DAYS', 7),
+        'cleanup_days' => (int)env('HELPER_VIEW_LOG_CLEANUP_DAYS', 7),
         // Флаг включения записи логов перед запуском
-        'store_on_start' => (bool)env('VIEW_LOG_STORE_ON_START', false),
+        'store_on_start' => (bool)env('HELPER_VIEW_LOG_STORE_ON_START', false),
         // Исключения логов, например ['name' => '...']
-        'exclude' => (array)(Hlp::envGet('VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_VIEW_LOG_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения логирования рендеринга всех blade шаблонов
+        'global' => (bool)env('HELPER_VIEW_LOG_GLOBAL', false),
     ],
 
 
@@ -510,17 +525,19 @@ return [
      */
     'view_cache' => [
         // Флаг включения кеша
-        'enabled' => (bool)env('VIEW_CACHE_ENABLED', true),
+        'enabled' => (bool)env('HELPER_VIEW_CACHE_ENABLED', true),
         // Название драйвера кеша
-        'driver' => (string)env('VIEW_CACHE_DRIVER'),
+        'driver' => (string)env('HELPER_VIEW_CACHE_DRIVER'),
         // Сжимать данные кеша
         'gzdeflate' => [
-            'enabled' => (bool)env('VIEW_CACHE_GZDEFLATE_ENABLED', true),
-            'level' => (int)env('VIEW_CACHE_GZDEFLATE_LEVEL', 9),
+            'enabled' => (bool)env('HELPER_VIEW_CACHE_GZDEFLATE_ENABLED', true),
+            'level' => (int)env('HELPER_VIEW_CACHE_GZDEFLATE_LEVEL', 9),
         ],
         // Срок жизни ключа кеша по умолчанию
-        'ttl' => Hlp::castToInt(env('VIEW_CACHE_TTL', 3600)),
+        'ttl' => Hlp::castToInt(env('HELPER_VIEW_CACHE_TTL', 3600)),
         // Исключения кеша, например ['key' => '...']
-        'exclude' => (array)(Hlp::envGet('VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        'exclude' => (array)(Hlp::envGet('HELPER_VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения кеширования рендеринга всех blade шаблонов
+        'global' => (bool)env('HELPER_VIEW_CACHE_GLOBAL', false),
     ],
 ];

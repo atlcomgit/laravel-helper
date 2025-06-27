@@ -27,6 +27,7 @@ class QueryLogDto extends Dto
     public QueryLogStatusEnum $status;
     public ?float $duration;
     public ?int $memory;
+    public ?int $count;
     public ?array $info;
 
     public string $startTime;

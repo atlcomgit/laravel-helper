@@ -127,7 +127,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         !config('laravel-helper.macros.http.enabled') ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
-        Http::globalOptions([
+        !config('laravel-helper.http_log.out.global') ?: Http::globalOptions([
             'headers' => HttpLogService::getLogHeaders(HttpLogHeaderEnum::Unknown),
             'curl' => [
                 CURLOPT_FOLLOWLOCATION => true,

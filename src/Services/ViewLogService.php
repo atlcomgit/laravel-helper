@@ -80,7 +80,7 @@ class ViewLogService
             ...($dto->info ?? []),
             'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
             'memory' => Hlp::sizeBytesToString($dto->memory),
-            'size_render' => Hlp::stringLength($render),
+            'render_length' => Hlp::stringLength($render),
         ];
 
         $dto->dispatch();

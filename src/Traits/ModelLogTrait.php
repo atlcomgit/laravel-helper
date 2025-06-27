@@ -61,7 +61,8 @@ trait ModelLogTrait
      */
     public function isWithModelLog(): ?bool
     {
-        return $this->withModelLog;
+        return $this->withModelLog === true
+            || ($this->withModelLog !== false && config('laravel-helper.model_log.global'));
     }
 
 

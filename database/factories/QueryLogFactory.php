@@ -48,6 +48,7 @@ class QueryLogFactory extends Factory
             'status' => fake()->randomElement(QueryLogStatusEnum::enumValues()),
             'duration' => null,
             'memory' => null,
+            'count' => null,
             'info' => null,
         ];
     }

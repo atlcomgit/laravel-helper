@@ -69,7 +69,15 @@ class DefaultController extends Controller
             $dto = app(ViewLogService::class)->createViewLog(name: $view, withViewLog: $this->withViewLog);
 
 
-            $render = (config('laravel-helper.view_cache.enabled') && $this->withViewCache !== false)
+            $render = (
+                config('laravel-helper.view_cache.enabled')
+                && (
+                    $this->withViewCache === true
+                    || is_integer($this->withViewCache)
+                    || is_null($this->withViewCache)
+                    || ($this->withViewCache !== false && config('laravel-helper.view_cache.global'))
+                )
+            )
                 ? app(ViewCacheService::class)
                     ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->withViewCache)
                 : view($view, $data, $mergeData)->render();

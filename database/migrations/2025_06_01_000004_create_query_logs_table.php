@@ -55,6 +55,8 @@ return new class extends Migration {
                 ->comment('Время выполнения query запроса');
             $table->unsignedBigInteger('memory')->nullable(true)
                 ->comment('Потребляемая память при выполнении query запроса');
+            $table->unsignedBigInteger('count')->nullable(true)
+                ->comment('Количество затронутых записей при выполнении query запроса');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о выполнении query запроса');
 

@@ -234,7 +234,13 @@ trait QueryTrait
     {
         $result = [];
 
-        if (!config('laravel-helper.query_log.enabled') || !$this->withQueryLog) {
+        if (
+            !config('laravel-helper.query_log.enabled')
+            || !(
+                $this->withQueryLog === true
+                || ($this->withQueryLog !== false && config('laravel-helper.query_log.global'))
+            )
+        ) {
             return $result;
         }
 
@@ -265,7 +271,7 @@ trait QueryTrait
                     'tables' => Hlp::sqlTables($sql),
                     'fields' => Hlp::sqlFields($sql),
                     'ids' => $ids[$class] ?? null,
-                    'size_query' => Hlp::stringLength($sql),
+                    'query_length' => Hlp::stringLength($sql),
                     ...(config('laravel-helper.app.debug_trace')
                         ? [
                             'trace' => config('laravel-helper.app.debug_trace_vendor')
@@ -314,16 +320,23 @@ trait QueryTrait
             $dto->isUpdated = config('laravel-helper.query_log.store_on_start');
             $dto->duration = $dto->getDuration();
             $dto->memory = $dto->getMemory();
+            $dto->count = match (true) {
+                $result instanceof Collection => $result->count(),
+                $result instanceof Model => 1,
+                is_array($result) => count($result),
+
+                default => Hlp::castToInt((bool)$result),
+            };
             $dto->info = [
                 ...($dto->info ?? []),
                 'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
                 'memory' => Hlp::sizeBytesToString($dto->memory),
-                'size_result' => Hlp::stringLength(json_encode($result, Hlp::jsonFlags()) ?: ''),
-                'count' => match (true) {
-                    $result instanceof Collection => $result->count(),
-                    is_array($result) => count($result),
+                'count' => Hlp::stringPlural($dto->count, ['записей', 'запись', 'записи']),
+                // 'result_length' => Hlp::stringLength(serialize($result)),
+                'result_type' => match (true) {
+                    is_object($result) => $result::class,
 
-                    default => $result,
+                    default => gettype($result)
                 },
             ];
 
@@ -386,7 +399,11 @@ trait QueryTrait
             if (
                 $tables
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
-                && ($this->withQueryCache === true || is_integer($this->withQueryCache))
+                && (
+                    $this->withQueryCache === true
+                    || is_integer($this->withQueryCache)
+                    || ($this->withQueryCache !== false && config('laravel-helper.query_cache.global'))
+                )
             ) {
                 $this->setQueryCacheClass($this::class);
 
@@ -461,7 +478,11 @@ trait QueryTrait
             if (
                 $tables
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
-                && ($this->withQueryCache === true || is_integer($this->withQueryCache))
+                && (
+                    $this->withQueryCache === true
+                    || is_integer($this->withQueryCache)
+                    || ($this->withQueryCache !== false && config('laravel-helper.query_cache.global'))
+                )
                 && ($this->getQueryCacheClass() === $this::class || $this instanceof Connection)
             ) {
                 $tags = $queryCacheService->getQueryTags(...[...$tables, $this->getTagTtl($this->withQueryCache)]);
@@ -858,7 +879,13 @@ trait QueryTrait
     {
         $result = [];
 
-        if ($this instanceof EloquentBuilder && $this->withModelLog) {
+        if (
+            $this instanceof EloquentBuilder
+            && (
+                $this->withModelLog === true
+                || ($this->withModelLog !== false && config('laravel-helper.model_log.global'))
+            )
+        ) {
             $observer = app(ModelLogObserver::class);
 
             $models = match ($type) {
@@ -897,7 +924,13 @@ trait QueryTrait
             is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
         }
 
-        if ($this instanceof Connection && is_string($attributes) && $this->withModelLog) {
+        if (
+            $this instanceof Connection && is_string($attributes)
+            && (
+                $this->withModelLog === true
+                || ($this->withModelLog !== false && config('laravel-helper.model_log.global'))
+            )
+        ) {
             $observer = app(ModelLogObserver::class);
             $sql = sql($attributes, $bindings ?? []);
             $table = Hlp::arrayFirst(Hlp::sqlTables($sql));
@@ -943,7 +976,13 @@ trait QueryTrait
             }
         }
 
-        if ($type === ModelLogTypeEnum::Truncate && is_array($attributes) && $this->withModelLog) {
+        if (
+            $type === ModelLogTypeEnum::Truncate && is_array($attributes)
+            && (
+                $this->withModelLog === true
+                || ($this->withModelLog !== false && config('laravel-helper.model_log.global'))
+            )
+        ) {
             $observer = app(ModelLogObserver::class);
 
             foreach ($attributes as $table) {
