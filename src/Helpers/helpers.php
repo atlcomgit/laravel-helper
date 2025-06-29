@@ -273,7 +273,15 @@ if (!function_exists('user')) {
      */
     function user(bool $returnOnlyId = false): Authenticatable|int|string|null
     {
-        return Hlp::cacheRuntime(__FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
+        // Флаг от зацикливания
+        static $functionRunning = false;
+
+        if ($functionRunning) {
+            return null;
+        }
+
+        $functionRunning = true;
+        $user = Hlp::cacheRuntime(__FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
             try {
                 $user = isTesting()
                     ? ($returnOnlyId ? auth()->id() : auth()->user())
@@ -284,6 +292,9 @@ if (!function_exists('user')) {
 
             return $user;
         });
+        $functionRunning = false;
+
+        return $user;
     }
 } else {
     throw new LaravelHelperException('Функция user() уже определена в приложении');
