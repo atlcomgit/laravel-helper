@@ -26,6 +26,7 @@ use Atlcom\LaravelHelper\Models\RouteLog;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
+use ReflectionClass;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
@@ -250,10 +251,13 @@ class LaravelHelperService
                     is_subclass_of($class, Model::class) || is_subclass_of($class, DefaultModel::class)
                 )
             ) {
-                /** @var Model $model */
-                $model = new $class();
-                if ($model->getTable() === $table) {
-                    return $class;
+                $reflection = new ReflectionClass($class);
+                if (!$reflection->isAbstract()) {
+                    /** @var Model $model */
+                    $model = new $class();
+                    if ($model->getTable() === $table) {
+                        return $class;
+                    }
                 }
             }
         }
