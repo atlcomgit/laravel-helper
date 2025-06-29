@@ -57,7 +57,7 @@ trait QueryTrait
     {
         !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
         $this->withQueryCache = $seconds ?? true;
-        
+
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->withQueryCache($this->withQueryCache);
             $this->getConnection()->withQueryCache($this->withQueryCache);
@@ -933,11 +933,27 @@ trait QueryTrait
         ) {
             $observer = app(ModelLogObserver::class);
             $sql = sql($attributes, $bindings ?? []);
-            $table = Hlp::arrayFirst(Hlp::sqlTables($sql));
-            $fields = array_keys(Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($sql)))[$table] ?? []);
+            $table = Hlp::arrayFirst(Hlp::sqlTables($attributes));
             $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
+
+            switch ($type) {
+                case ModelLogTypeEnum::Create:
+                    $fields = Hlp::sqlFieldsInsert($attributes);
+                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                    break;
+
+                case ModelLogTypeEnum::Update:
+                case ModelLogTypeEnum::SoftDelete:
+                    $fields = Hlp::sqlFieldsUpdate($attributes);
+                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                    break;
+
+                default:
+                    $fields = array_keys(Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($attributes, false)))[$table] ?? []);
+                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+            }
+
             if ($modelClass) {
-                $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
                 $models = $type === ModelLogTypeEnum::Create
                     ? [(new $modelClass())->fill($attributes)]
                     : DB::table($table)

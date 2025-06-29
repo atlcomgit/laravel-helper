@@ -59,7 +59,7 @@ class ModelLogService
     {
         $type = method_exists($model, 'softDeleted')
             ? match (true) {
-                !is_null($attributes) && isset($attributes['deleted_at']) => match (true) {
+                !is_null($attributes) && array_key_exists('deleted_at', $attributes) => match (true) {
                         is_null($attributes['deleted_at']) => ModelLogTypeEnum::Restore,
 
                         default => ModelLogTypeEnum::SoftDelete,
@@ -70,6 +70,7 @@ class ModelLogService
             }
             : ModelLogTypeEnum::Update;
         $isSoftDelete = $type == ModelLogTypeEnum::SoftDelete;
+        $isRestore = $type == ModelLogTypeEnum::Restore;
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
@@ -79,7 +80,7 @@ class ModelLogService
             'changes' => $this->getChanges($model, $attributes),
         ]);
 
-        !($dto->changes || $isSoftDelete) ?: $dto->dispatch();
+        !($dto->changes || $isSoftDelete || $isRestore) ?: $dto->dispatch();
     }
 
 
@@ -103,6 +104,10 @@ class ModelLogService
 
             default => ModelLogTypeEnum::Delete,
         };
+
+        if ($type === ModelLogTypeEnum::SoftDelete && !$attributes) {
+            return;
+        }
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
@@ -207,11 +212,11 @@ class ModelLogService
             ? ($model->modelLogHiddenAttributes ?: [])
             : [];
 
-        foreach ($model->getAttributes() ?:$attributes ?? []  as $attribute => $newValue) {
-            $oldValue = is_null($attributes)
-                ? $model->getOriginal($attribute)
-                : $attributes[$attribute] ?? $model->getOriginal($attribute);
-            $newValue = $model->$attribute;
+        foreach (($model->getAttributes() ?: $attributes) ?? [] as $attribute => $newValue) {
+            $oldValue = $model->getOriginal($attribute);
+            $newValue = (!is_null($attributes) && array_key_exists($attribute, $attributes))
+                ? $attributes[$attribute]
+                : $model->$attribute;
 
             if (!in_array($attribute, $modelLogExcludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
                 if (in_array($attribute, $modelLogHiddenAttributes)) {
@@ -239,7 +244,9 @@ class ModelLogService
     protected function hasDifference(mixed $oldValue, mixed $newValue): bool
     {
         return !match (true) {
-            is_float($oldValue) && is_float($newValue) => (string)$oldValue == (string)$newValue,
+            is_numeric($oldValue) && is_numeric($newValue) => (string)(float)$oldValue === (string)(float)$newValue,
+
+            is_float($oldValue) && is_float($newValue) => (string)$oldValue === (string)$newValue,
 
             is_scalar($oldValue) && is_scalar($newValue) => $oldValue === $newValue,
 
