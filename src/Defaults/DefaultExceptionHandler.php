@@ -42,38 +42,40 @@ class DefaultExceptionHandler extends Handler
     /**
      * Report or log an exception.
      * This is a great spot to send exceptions to Sentry.
+     * @see parent::report()
      *
-     * @param Throwable  $exception
+     * @param Throwable $e
      * @return void
      */
-    public function report(Throwable $exception): void
+    public function report(Throwable $e)
     {
         // Формируем Dto об ошибке, если это не ошибка роута
-        in_array($exception::class, [
+        in_array($e::class, [
             NotFoundHttpException::class,
             MaxAttemptsExceededException::class,
         ])
-            ?: $this->exceptionDto ??= ExceptionDto::createFromException(exception: $exception);
+            ?: $this->exceptionDto ??= ExceptionDto::createFromException(exception: $e);
 
-        parent::report($exception);
+        parent::report($e);
     }
 
 
     /**
      * Обработчик общих исключений
+     * @see parent::render()
      *
      * @param Request $request
-     * @param Throwable|HttpResponseException $exception
-     * @return Response
+     * @param Throwable|HttpResponseException $e
+     * @return JsonResponse|Response|StreamedResponse
      */
-    public function render($request, Throwable $exception): JsonResponse|Response|StreamedResponse
+    public function render($request, Throwable $e)
     {
         try {
             // Если запрос картинки и она не найдена
             if (
                 !$request->wantsJson()
                 && str_contains($request->url(), 'storage/images')
-                && $exception instanceof NotFoundHttpException
+                && $e instanceof NotFoundHttpException
             ) {
                 return response()->stream(
                     static function () {
@@ -88,7 +90,7 @@ class DefaultExceptionHandler extends Handler
             }
 
             // Формируем Dto об ошибке
-            $this->exceptionDto ??= ExceptionDto::createFromException($exception, $request);
+            $this->exceptionDto ??= ExceptionDto::createFromException($e, $request);
             $response = $this->exceptionDto->response(isRender: true);
 
         } catch (Throwable $e) {
@@ -107,6 +109,6 @@ class DefaultExceptionHandler extends Handler
 
         return (true || $request->wantsJson())
             ? $response
-            : parent::render($request, $exception);
+            : parent::render($request, $e);
     }
 }
