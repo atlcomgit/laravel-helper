@@ -273,15 +273,17 @@ if (!function_exists('user')) {
      */
     function user(bool $returnOnlyId = false): Authenticatable|int|string|null
     {
-        try {
-            $user = isTesting()
-                ? ($returnOnlyId ? auth()->id() : auth()->user())
-                : (request()->bearerToken() ? ($returnOnlyId ? auth()->id() : auth()->user()) : null);
-        } catch (Throwable $e) {
-            $user = null;
-        }
+        return Hlp::cacheRuntime(__FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
+            try {
+                $user = isTesting()
+                    ? ($returnOnlyId ? auth()->id() : auth()->user())
+                    : (request()->bearerToken() ? ($returnOnlyId ? auth()->id() : auth()->user()) : null);
+            } catch (Throwable $e) {
+                $user = null;
+            }
 
-        return $user;
+            return $user;
+        });
     }
 } else {
     throw new LaravelHelperException('Функция user() уже определена в приложении');
@@ -296,9 +298,12 @@ if (!function_exists('ip')) {
      */
     function ip(): ?string
     {
-        return (request()->headers->all()['x-forwarded-for'][0] ?? null)
+        return Hlp::cacheRuntime(
+            __FUNCTION__,
+            static fn () => (request()->headers->all()['x-forwarded-for'][0] ?? null)
             ?: (request()->headers->all()['x-real-ip'][0] ?? null)
-            ?: request()->getClientIp();
+            ?: request()->getClientIp()
+        );
     }
 } else {
     throw new LaravelHelperException('Функция ip() уже определена в приложении');
