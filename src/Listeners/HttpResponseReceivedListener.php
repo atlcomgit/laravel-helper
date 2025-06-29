@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Listeners;
 
+use Atlcom\LaravelHelper\Defaults\DefaultListener;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
@@ -11,7 +12,7 @@ use Atlcom\LaravelHelper\Services\LaravelHelperService;
 /**
  * @see \Illuminate\Http\Client\Events\ResponseReceived
  */
-class HttpResponseReceivedListener
+class HttpResponseReceivedListener extends DefaultListener
 {
     public function __construct(
         private HttpLogService $httpLogService,

@@ -7,7 +7,7 @@ use Atlcom\LaravelHelper\Dto\ExceptionDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
-use Atlcom\LaravelHelper\Listeners\TelegramLogger;
+use Atlcom\LaravelHelper\Loggers\TelegramLogLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -275,7 +275,7 @@ if (!function_exists('telegram')) {
     function telegram(mixed $data, string|TelegramTypeEnum $type = TelegramTypeEnum::Debug, array $context = []): void
     {
         try {
-            $log = Log::build(['driver' => 'custom', 'via' => TelegramLogger::class]);
+            $log = Log::build(['driver' => 'custom', 'via' => TelegramLogLogger::class]);
             $data instanceof Throwable
                 ? ExceptionDto::createFromException(exception: $data)
                 : match (TelegramTypeEnum::enumFrom($type)) {

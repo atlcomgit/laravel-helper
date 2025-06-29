@@ -1,6 +1,6 @@
 <?php
 
-namespace Atlcom\LaravelHelper\Listeners;
+namespace Atlcom\LaravelHelper\Handlers;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
@@ -16,7 +16,7 @@ use Psr\Log\LogLevel;
 /**
  * Обработчик логирования сообщений в телеграм
  */
-class TelegramLoggerHandler extends AbstractProcessingHandler
+class TelegramLogHandler extends AbstractProcessingHandler
 {
     public function write(LogRecord $record): void
     {

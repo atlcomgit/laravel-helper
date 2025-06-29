@@ -2,17 +2,13 @@
 
 namespace Atlcom\LaravelHelper\Events;
 
+use Atlcom\LaravelHelper\Defaults\DefaultEvent;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
 /**
  * Событие логирования очередей
  */
-class QueueLogEvent
+class QueueLogEvent extends DefaultEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
     public function __construct(public QueueLogDto $dto) {}
 }
