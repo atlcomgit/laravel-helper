@@ -60,9 +60,9 @@ use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 
 class ExampleCommand extends DefaultCommand
 {
-	protected bool $telegramLog = true;
+	protected ?bool $withTelegramLog = true;
 	protected mixed $telegramComment = null;
-	protected bool $withConsoleLog = true;
+	protected ?bool $withConsoleLog = true;
 
 	public function handle(): int
 	{

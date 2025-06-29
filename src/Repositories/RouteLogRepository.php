@@ -43,6 +43,8 @@ class RouteLogRepository
     {
         /** @var RouteLog $routeLog */
         $routeLog = $this->routeLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofMethod($dto->method)
             ->ofUri($dto->uri)
             ->first()
@@ -63,6 +65,8 @@ class RouteLogRepository
     {
         /** @var RouteLog $routeLog */
         $routeLog = $this->routeLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofMethod($dto->method)
             ->ofUri($dto->uri)
             ->first()
@@ -83,6 +87,8 @@ class RouteLogRepository
         try {
             /** @var RouteLog $routeLog */
             $routeLog = $this->routeLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
                 ->ofMethod($dto->method)
                 ->ofUri($dto->uri)
                 ->first()
@@ -103,7 +109,10 @@ class RouteLogRepository
      */
     public function setExistAll(bool $value): void
     {
-        $this->routeLogClass::query()->update(['exist' => $value]);
+        $this->routeLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->update(['exist' => $value]);
     }
 
 
@@ -115,6 +124,8 @@ class RouteLogRepository
     public function deleteNotExist(): void
     {
         $this->routeLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofExist(false)
             ->delete();
     }

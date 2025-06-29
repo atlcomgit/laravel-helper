@@ -25,7 +25,7 @@ abstract class DefaultCommand extends Command
     /** Комментарий для отправки сообщения в телеграм */
     protected mixed $telegramComment = null;
     /** Флаг включения логирования консольной команды */
-    protected bool $withConsoleLog = false;
+    protected ?bool $withConsoleLog = null;
     /** Буфер вывода stdout для логирования */
     private ?string $outputBuffer = null;
     /** Dto логирования консольной команды */

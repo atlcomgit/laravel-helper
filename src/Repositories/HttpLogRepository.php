@@ -29,7 +29,10 @@ class HttpLogRepository
     public function create(HttpLogCreateDto $dto): void
     {
         /** @var HttpLog $this->httpLogClass */
-        $this->httpLogClass::query()->create($dto->toArray());
+        $this->httpLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->create($dto->toArray());
     }
 
 
@@ -43,6 +46,8 @@ class HttpLogRepository
     {
         /** @var HttpLog $this->httpLogClass */
         $this->httpLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -58,6 +63,8 @@ class HttpLogRepository
     {
         /** @var HttpLog $this->httpLogClass */
         return $this->httpLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

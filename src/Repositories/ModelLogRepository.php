@@ -30,7 +30,10 @@ class ModelLogRepository
         $this->modelLogClass = config('laravel-helper.model_log.model') ?? ModelLog::class;
 
         if ($dto->modelType !== $this->modelLogClass) {
-            $this->modelLogClass::query()->create($dto->toArray());
+            $this->modelLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->create($dto->toArray());
         }
     }
 
@@ -45,6 +48,8 @@ class ModelLogRepository
     {
         /** @var ModelLog $this->consoleLogClass */
         return $this->modelLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

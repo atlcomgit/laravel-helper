@@ -27,7 +27,10 @@ class QueryLogRepository
     public function create(QueryLogDto $dto): void
     {
         /** @var QueryLog $this->queryLogClass */
-        $this->queryLogClass::query()->create($dto->toArray());
+        $this->queryLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->create($dto->toArray());
     }
 
 
@@ -41,6 +44,8 @@ class QueryLogRepository
     {
         /** @var QueryLog $this->queryLogClass */
         $this->queryLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -56,6 +61,8 @@ class QueryLogRepository
     {
         /** @var QueryLog $this->queryLogClass */
         return $this->queryLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

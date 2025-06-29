@@ -16,7 +16,8 @@ class CacheClearCommand extends DefaultCommand
     protected $signature = 'lh:clear:cache';
     protected $description = 'Очистка кеша';
     protected $isolated = true;
-    protected bool $withConsoleLog = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected QueryCacheService $queryCacheService)

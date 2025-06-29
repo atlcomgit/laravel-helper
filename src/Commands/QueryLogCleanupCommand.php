@@ -16,6 +16,8 @@ class QueryLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:query_log';
     protected $description = 'Очистка логов query запросов';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected QueryLogService $queryLogService)

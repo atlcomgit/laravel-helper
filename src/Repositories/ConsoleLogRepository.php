@@ -28,7 +28,10 @@ class ConsoleLogRepository
     public function create(ConsoleLogDto $dto): void
     {
         /** @var ConsoleLog $this->consoleLogClass */
-        $this->consoleLogClass::query()->create($dto->toArray());
+        $this->consoleLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->create($dto->toArray());
     }
 
 
@@ -42,6 +45,8 @@ class ConsoleLogRepository
     {
         /** @var ConsoleLog $this->consoleLogClass */
         $this->consoleLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofUuid($dto->uuid)
             ->update(
                 $dto->includeArray(
@@ -64,6 +69,8 @@ class ConsoleLogRepository
     {
         /** @var ConsoleLog $this->consoleLogClass */
         return $this->consoleLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

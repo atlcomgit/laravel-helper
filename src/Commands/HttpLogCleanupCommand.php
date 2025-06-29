@@ -16,6 +16,8 @@ class HttpLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:http_log';
     protected $description = 'Очистка логов http запросов';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected HttpLogService $httpLogService)

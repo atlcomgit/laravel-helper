@@ -16,6 +16,8 @@ class ViewLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:view_log';
     protected $description = 'Очистка логов рендеринга blade шаблонов';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected ViewLogService $viewLogService)

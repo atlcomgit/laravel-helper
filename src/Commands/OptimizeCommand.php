@@ -27,7 +27,8 @@ class OptimizeCommand extends DefaultCommand
     ';
     protected $description = 'Оптимизация всех логов';
     protected $isolated = true;
-    protected bool $withConsoleLog = true;
+    protected ?bool $withConsoleLog = true;
+    protected ?bool $withTelegramLog = true;
 
 
     public function __construct(
@@ -87,10 +88,6 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? config('laravel-helper.queue_log.cleanup_days') : 0
                 )
                 : 0;
-            $cleanupRouteLog = Schema::connection(config('laravel-helper.route_log.connection'))
-                ->hasTable(config('laravel-helper.route_log.table'))
-                ? $this->routeLogService->cleanup()
-                : 0;
             $cleanupViewLog = Schema::connection(config('laravel-helper.view_log.connection'))
                 ->hasTable(config('laravel-helper.view_log.table'))
                 ? $this->viewLogService->cleanup(
@@ -105,7 +102,6 @@ class OptimizeCommand extends DefaultCommand
                     || $cleanupModelLog > 0
                     || $cleanupQueryLog > 0
                     || $cleanupQueueLog > 0
-                    || $cleanupRouteLog > 0
                     || $cleanupViewLog > 0
                 );
             $this->telegramComment = [
@@ -114,7 +110,6 @@ class OptimizeCommand extends DefaultCommand
                 'ModelLog' => 'Удалено ' . Hlp::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
                 'QueryLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
                 'QueueLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
-                'RouteLog' => 'Доступно ' . Hlp::stringPlural($cleanupRouteLog, ['записей', 'запись', 'записи']),
                 'ViewLog' =>'Удалено ' .  Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
             ];
 

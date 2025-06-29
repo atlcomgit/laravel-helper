@@ -16,6 +16,8 @@ class QueueLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:queue_log';
     protected $description = 'Очистка логов очередей';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected QueueLogService $queueLogService)

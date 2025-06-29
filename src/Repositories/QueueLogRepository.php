@@ -27,7 +27,10 @@ class QueueLogRepository
     public function create(QueueLogDto $dto): void
     {
         /** @var QueueLog $this->queueLogClass */
-        $this->queueLogClass::query()->create($dto->toArray());
+        $this->queueLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->create($dto->toArray());
     }
 
 
@@ -41,6 +44,8 @@ class QueueLogRepository
     {
         /** @var QueueLog $this->queueLogClass */
         $this->queueLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -56,6 +61,8 @@ class QueueLogRepository
     {
         /** @var QueueLog $this->queueLogClass */
         return $this->queueLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

@@ -16,6 +16,8 @@ class ConsoleLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:console_log';
     protected $description = 'Очистка логов консольных команд';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected ConsoleLogService $consoleLogService)

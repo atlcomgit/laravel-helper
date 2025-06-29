@@ -16,6 +16,8 @@ class RouteLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:route_log';
     protected $description = 'Очистка логов роутов';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected RouteLogService $routeLogService)

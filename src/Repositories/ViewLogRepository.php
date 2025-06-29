@@ -27,7 +27,10 @@ class ViewLogRepository
     public function create(ViewLogDto $dto): void
     {
         /** @var ViewLog $this->viewLogClass */
-        $this->viewLogClass::query()->create($dto->toArray());
+        $this->viewLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
+            ->create($dto->toArray());
     }
 
 
@@ -41,6 +44,8 @@ class ViewLogRepository
     {
         /** @var ViewLog $this->viewLogClass */
         $this->viewLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->ofUuid($dto->uuid)
             ->update($dto->toArray());
     }
@@ -56,6 +61,8 @@ class ViewLogRepository
     {
         /** @var ViewLog $this->viewLogClass */
         return $this->viewLogClass::query()
+            ->withoutQueryLog()
+            ->withoutQueryCache()
             ->whereDate('created_at', '<=', now()->subDays($days))
             ->delete();
     }

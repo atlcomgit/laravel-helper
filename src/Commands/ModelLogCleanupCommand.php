@@ -16,6 +16,8 @@ class ModelLogCleanupCommand extends DefaultCommand
     protected $signature = 'lh:cleanup:model_log';
     protected $description = 'Очистка логов моделей';
     protected $isolated = true;
+    protected ?bool $withConsoleLog = false;
+    protected ?bool $withTelegramLog = false;
 
 
     public function __construct(protected ModelLogService $modelLogService)
