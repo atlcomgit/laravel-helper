@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Throwable;
@@ -11,7 +12,7 @@ use Throwable;
 /**
  * Репозиторий логирования роутов
  */
-class RouteLogRepository
+class RouteLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $routeLogClass = null)
     {
@@ -27,9 +28,9 @@ class RouteLogRepository
      */
     public function new(RouteLogDto $dto): RouteLog
     {
-        return (new $this->routeLogClass($dto->toArray()))
+        return $this->withoutTelescope(fn () => (new $this->routeLogClass($dto->toArray()))
             ->setConnection(config('laravel-helper.route_log.connection'))
-            ->setTable(config('laravel-helper.route_log.table'));
+            ->setTable(config('laravel-helper.route_log.table')));
     }
 
 
@@ -41,17 +42,19 @@ class RouteLogRepository
      */
     public function setExistOrCreate(RouteLogDto $dto): void
     {
-        /** @var RouteLog $routeLog */
-        $routeLog = $this->routeLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofMethod($dto->method)
-            ->ofUri($dto->uri)
-            ->first()
-            ?? $this->new($dto);
-        $routeLog->controller = $dto->controller;
-        $routeLog->exist = true;
-        $routeLog->save();
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var RouteLog $routeLog */
+            $routeLog = $this->routeLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofMethod($dto->method)
+                ->ofUri($dto->uri)
+                ->first()
+                ?? $this->new($dto);
+            $routeLog->controller = $dto->controller;
+            $routeLog->exist = true;
+            $routeLog->save();
+        });
     }
 
 
@@ -63,16 +66,18 @@ class RouteLogRepository
      */
     public function setCountZero(RouteLogDto $dto): void
     {
-        /** @var RouteLog $routeLog */
-        $routeLog = $this->routeLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofMethod($dto->method)
-            ->ofUri($dto->uri)
-            ->first()
-            ?? $this->new($dto);
-        $routeLog->count = 0;
-        $routeLog->save();
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var RouteLog $routeLog */
+            $routeLog = $this->routeLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofMethod($dto->method)
+                ->ofUri($dto->uri)
+                ->first()
+                ?? $this->new($dto);
+            $routeLog->count = 0;
+            $routeLog->save();
+        });
     }
 
 
@@ -84,20 +89,22 @@ class RouteLogRepository
      */
     public function incrementCount(RouteLogDto $dto): void
     {
-        try {
-            /** @var RouteLog $routeLog */
-            $routeLog = $this->routeLogClass::query()
-                ->withoutQueryLog()
-                ->withoutQueryCache()
-                ->ofMethod($dto->method)
-                ->ofUri($dto->uri)
-                ->first()
-                ?? $this->new($dto);
-            $routeLog->controller = $dto->controller;
-            $routeLog->count++;
-            $routeLog->save();
-        } catch (Throwable $exception) {
-        }
+        $this->withoutTelescope(function () use ($dto) {
+            try {
+                /** @var RouteLog $routeLog */
+                $routeLog = $this->routeLogClass::query()
+                    ->withoutQueryLog()
+                    ->withoutQueryCache()
+                    ->ofMethod($dto->method)
+                    ->ofUri($dto->uri)
+                    ->first()
+                    ?? $this->new($dto);
+                $routeLog->controller = $dto->controller;
+                $routeLog->count++;
+                $routeLog->save();
+            } catch (Throwable $exception) {
+            }
+        });
     }
 
 
@@ -109,10 +116,12 @@ class RouteLogRepository
      */
     public function setExistAll(bool $value): void
     {
-        $this->routeLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->update(['exist' => $value]);
+        $this->withoutTelescope(function () use ($value) {
+            $this->routeLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->update(['exist' => $value]);
+        });
     }
 
 
@@ -123,10 +132,12 @@ class RouteLogRepository
      */
     public function deleteNotExist(): void
     {
-        $this->routeLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofExist(false)
-            ->delete();
+        $this->withoutTelescope(function () {
+            $this->routeLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofExist(false)
+                ->delete();
+        });
     }
 }

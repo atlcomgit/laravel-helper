@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Models\ViewLog;
 
 /**
  * Репозиторий логирования query запросов
  */
-class ViewLogRepository
+class ViewLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $viewLogClass = null)
     {
@@ -26,11 +27,13 @@ class ViewLogRepository
      */
     public function create(ViewLogDto $dto): void
     {
-        /** @var ViewLog $this->viewLogClass */
-        $this->viewLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->create($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var ViewLog $this->viewLogClass */
+            $this->viewLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->create($dto->toArray());
+        });
     }
 
 
@@ -42,12 +45,14 @@ class ViewLogRepository
      */
     public function update(ViewLogDto $dto): void
     {
-        /** @var ViewLog $this->viewLogClass */
-        $this->viewLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofUuid($dto->uuid)
-            ->update($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var ViewLog $this->viewLogClass */
+            $this->viewLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofUuid($dto->uuid)
+                ->update($dto->toArray());
+        });
     }
 
 
@@ -59,11 +64,13 @@ class ViewLogRepository
      */
     public function cleanup(int $days): int
     {
-        /** @var ViewLog $this->viewLogClass */
-        return $this->viewLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->whereDate('created_at', '<=', now()->subDays($days))
-            ->delete();
+        return $this->withoutTelescope(function () use ($days) {
+            /** @var ViewLog $this->viewLogClass */
+            return $this->viewLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereDate('created_at', '<=', now()->subDays($days))
+                ->delete();
+        });
     }
 }

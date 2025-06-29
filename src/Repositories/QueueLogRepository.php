@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
  * Репозиторий логирования очередей
  */
-class QueueLogRepository
+class QueueLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $queueLogClass = null)
     {
@@ -26,11 +27,13 @@ class QueueLogRepository
      */
     public function create(QueueLogDto $dto): void
     {
-        /** @var QueueLog $this->queueLogClass */
-        $this->queueLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->create($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var QueueLog $this->queueLogClass */
+            $this->queueLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->create($dto->toArray());
+        });
     }
 
 
@@ -42,12 +45,14 @@ class QueueLogRepository
      */
     public function update(QueueLogDto $dto): void
     {
-        /** @var QueueLog $this->queueLogClass */
-        $this->queueLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofUuid($dto->uuid)
-            ->update($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var QueueLog $this->queueLogClass */
+            $this->queueLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofUuid($dto->uuid)
+                ->update($dto->toArray());
+        });
     }
 
 
@@ -59,11 +64,13 @@ class QueueLogRepository
      */
     public function cleanup(int $days): int
     {
-        /** @var QueueLog $this->queueLogClass */
-        return $this->queueLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->whereDate('created_at', '<=', now()->subDays($days))
-            ->delete();
+        return $this->withoutTelescope(function () use ($days) {
+            /** @var QueueLog $this->queueLogClass */
+            return $this->queueLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereDate('created_at', '<=', now()->subDays($days))
+                ->delete();
+        });
     }
 }

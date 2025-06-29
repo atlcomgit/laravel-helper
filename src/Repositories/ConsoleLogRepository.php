@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Репозиторий логирования консольных команд
  */
-class ConsoleLogRepository
+class ConsoleLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $consoleLogClass = null)
     {
@@ -27,11 +28,13 @@ class ConsoleLogRepository
      */
     public function create(ConsoleLogDto $dto): void
     {
-        /** @var ConsoleLog $this->consoleLogClass */
-        $this->consoleLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->create($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var ConsoleLog $this->consoleLogClass */
+            $this->consoleLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->create($dto->toArray());
+        });
     }
 
 
@@ -43,19 +46,21 @@ class ConsoleLogRepository
      */
     public function update(ConsoleLogDto $dto): void
     {
-        /** @var ConsoleLog $this->consoleLogClass */
-        $this->consoleLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofUuid($dto->uuid)
-            ->update(
-                $dto->includeArray(
-                    is_null($dto->output)
-                    ? []
-                    : ['output' => DB::raw("COALESCE(output, '') || '{$dto->output}'")]
-                )
-                    ->toArray(),
-            );
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var ConsoleLog $this->consoleLogClass */
+            $this->consoleLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofUuid($dto->uuid)
+                ->update(
+                    $dto->includeArray(
+                        is_null($dto->output)
+                        ? []
+                        : ['output' => DB::raw("COALESCE(output, '') || '{$dto->output}'")]
+                    )
+                        ->toArray(),
+                );
+        });
     }
 
 
@@ -67,11 +72,13 @@ class ConsoleLogRepository
      */
     public function cleanup(int $days): int
     {
-        /** @var ConsoleLog $this->consoleLogClass */
-        return $this->consoleLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->whereDate('created_at', '<=', now()->subDays($days))
-            ->delete();
+        return $this->withoutTelescope(function () use ($days) {
+            /** @var ConsoleLog $this->consoleLogClass */
+            return $this->consoleLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereDate('created_at', '<=', now()->subDays($days))
+                ->delete();
+        });
     }
 }

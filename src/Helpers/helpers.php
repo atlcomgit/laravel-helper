@@ -233,6 +233,36 @@ if (!function_exists('json')) {
 }
 
 
+if (!function_exists('telescope')) {
+    /**
+     * Включает/Отключает логи telescope
+     *
+     * @param bool|null $enabled
+     * @return bool
+     */
+    function telescope(?bool $enabled = null): bool
+    {
+        $telescopeClass = '\Laravel\Telescope\Telescope';
+
+        if (class_exists($telescopeClass)) {
+            if (is_null($enabled)) {
+                return $telescopeClass::isRecording();
+            }
+
+            $enabled
+                ? $telescopeClass::startRecording()
+                : $telescopeClass::stopRecording();
+
+            return $enabled;
+        }
+
+        return false;
+    }
+} else {
+    throw new LaravelHelperException('Функция telescope() уже определена в приложении');
+}
+
+
 if (!function_exists('telegram')) {
     /**
      * Отправляет сообщение в телеграм

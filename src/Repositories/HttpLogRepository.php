@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\HttpLogCreateDto;
 use Atlcom\LaravelHelper\Dto\HttpLogFailedDto;
 use Atlcom\LaravelHelper\Dto\HttpLogUpdateDto;
@@ -12,7 +13,7 @@ use Atlcom\LaravelHelper\Models\HttpLog;
 /**
  * Репозиторий логирования http запросов
  */
-class HttpLogRepository
+class HttpLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $httpLogClass = null)
     {
@@ -28,11 +29,13 @@ class HttpLogRepository
      */
     public function create(HttpLogCreateDto $dto): void
     {
-        /** @var HttpLog $this->httpLogClass */
-        $this->httpLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->create($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var HttpLog $this->httpLogClass */
+            $this->httpLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->create($dto->toArray());
+        });
     }
 
 
@@ -44,12 +47,14 @@ class HttpLogRepository
      */
     public function update(HttpLogUpdateDto|HttpLogFailedDto $dto): void
     {
-        /** @var HttpLog $this->httpLogClass */
-        $this->httpLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->ofUuid($dto->uuid)
-            ->update($dto->toArray());
+        $this->withoutTelescope(function () use ($dto) {
+            /** @var HttpLog $this->httpLogClass */
+            $this->httpLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->ofUuid($dto->uuid)
+                ->update($dto->toArray());
+        });
     }
 
 
@@ -61,11 +66,13 @@ class HttpLogRepository
      */
     public function cleanup(int $days): int
     {
-        /** @var HttpLog $this->httpLogClass */
-        return $this->httpLogClass::query()
-            ->withoutQueryLog()
-            ->withoutQueryCache()
-            ->whereDate('created_at', '<=', now()->subDays($days))
-            ->delete();
+        return $this->withoutTelescope(function () use ($days) {
+            /** @var HttpLog $this->httpLogClass */
+            return $this->httpLogClass::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereDate('created_at', '<=', now()->subDays($days))
+                ->delete();
+        });
     }
 }
