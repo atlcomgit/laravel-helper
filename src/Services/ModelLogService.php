@@ -35,9 +35,9 @@ class ModelLogService extends DefaultService
             'modelType' => $model::class,
             'modelId' => $model->id
                 ?? (
-                    is_null($attributes)
+                    (is_null($attributes) || !$model->getKeyName())
                     ? null
-                    : ($model->id = $model::query()->where($attributes)->latest()->first()?->{$model->getKeyName()})
+                    : ($model->id = $model::query()->where($attributes)->orderByDesc($model->getKeyName())->first()?->{$model->getKeyName()})
                 )
                 ?? null,
             'type' => $type,

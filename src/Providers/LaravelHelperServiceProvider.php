@@ -74,6 +74,11 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация миграций
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
 
+        // Публикация миграций
+        $this->publishes([
+            __DIR__ . '/../../database/migrations' => database_path('migrations'),
+        ], 'laravel-helper');
+
         // Регистрация фабрик
         $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
 
@@ -82,9 +87,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // $this->renderable(fn (Throwable $e, $request) => app(DefaultExceptionHandler::class)->render($request, $e)));
 
         // Регистрация dto
-        $this->app->resolving(Dto::class, function (Dto $dto, Application $app) {
-            return $dto->fillFromRequest(request()->toArray());
-        });
+        $this->app->resolving(
+            Dto::class,
+            fn (Dto $dto, Application $app) => $dto->fillFromRequest(request()->toArray())
+        );
 
         // Регистрация сервисов
         $this->app->singleton(LaravelHelperService::class);

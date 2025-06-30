@@ -97,6 +97,17 @@ trait TestingTrait
         Config::set('database.connections.sqlsrv', config('database.connections.testing'));
         Config::set('telescope.storage.database.connection', self::ENV);
 
+        Config::set('laravel-helper.console_log.enabled', false);
+        Config::set('laravel-helper.http_log.enabled', false);
+        Config::set('laravel-helper.model_log.enabled', false);
+        Config::set('laravel-helper.route_log.enabled', false);
+        Config::set('laravel-helper.query_cache.enabled', false);
+        Config::set('laravel-helper.query_log.enabled', false);
+        Config::set('laravel-helper.queue_log.enabled', false);
+        Config::set('laravel-helper.telegram_log.enabled', false);
+        Config::set('laravel-helper.view_log.enabled', false);
+        Config::set('laravel-helper.view_cache.enabled', false);
+
         $databaseTesting = 'testing';
         switch (env('DB_CONNECTION_TESTING')) {
             case 'pgsql':
