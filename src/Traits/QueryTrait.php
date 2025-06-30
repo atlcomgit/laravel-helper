@@ -556,7 +556,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = is_null($sql) ? [] : $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
+            $callback = function () use (&$arrayQueryLogDto, &$query, &$bindings) {
                 $result = match (true) {
                     $this instanceof EloquentBuilder => parent::insert($query),
                     $this instanceof QueryBuilder => parent::insert($query),
@@ -572,7 +572,8 @@ trait QueryTrait
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 return $result;
-            });
+            };
+            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -613,7 +614,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$attributes) {
+            $callback = function () use (&$arrayQueryLogDto, &$attributes) {
                 $result = match (true) {
                     $this instanceof EloquentBuilder => parent::create($attributes),
 
@@ -626,7 +627,8 @@ trait QueryTrait
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
                 return $result;
-            });
+            };
+            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -673,7 +675,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = is_null($sql) ? [] : $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings) {
+            $callback = function () use (&$arrayQueryLogDto, &$query, &$bindings) {
                 $ids = $this->observeModelLog(ModelLogTypeEnum::Update, $query, $bindings);
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
@@ -689,7 +691,8 @@ trait QueryTrait
                 $this->flushCache($query, $bindings);
 
                 return $result;
-            });
+            };
+            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -737,7 +740,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = ($isSoftDelete || is_null($sql)) ? [] : $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$query, &$bindings, &$isSoftDelete) {
+            $callback = function () use (&$arrayQueryLogDto, &$query, &$bindings, &$isSoftDelete) {
                 $ids = $isSoftDelete
                     ? null
                     : $this->observeModelLog(
@@ -759,7 +762,8 @@ trait QueryTrait
                 $this->flushCache($query, $bindings);
 
                 return $result;
-            });
+            };
+            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -802,7 +806,7 @@ trait QueryTrait
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
 
-            $result = DB::transaction(function () use (&$arrayQueryLogDto, &$sql) {
+            $callback = function () use (&$arrayQueryLogDto, &$sql) {
                 $ids = $this->observeModelLog(ModelLogTypeEnum::Truncate, Hlp::sqlTables($sql));
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
 
@@ -818,7 +822,8 @@ trait QueryTrait
                 $this->flushCache();
 
                 return $result;
-            });
+            };
+            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
 
             $status = true;
 

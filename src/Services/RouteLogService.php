@@ -66,7 +66,7 @@ class RouteLogService extends DefaultService
             return 0;
         }
 
-        return DB::transaction(function () {
+        $callback = function () {
             /** @var \Illuminate\Routing\Route[] $routes */
             $routes = $this->getRoutes();
             $count = 0;
@@ -93,6 +93,8 @@ class RouteLogService extends DefaultService
             $this->routeLogRepository->deleteNotExist();
 
             return $count;
-        });
+        };
+
+        return DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
     }
 }
