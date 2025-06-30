@@ -57,7 +57,7 @@ class ModelLogService extends DefaultService
 
                             return $q;
                         })
-                        ->orderByDesc($model->getKeyName())
+                        // ->orderByDesc($model->getKeyName())
                         ->first()
                         ?->{$model->getKeyName()})
                 )
