@@ -30,12 +30,13 @@ class ModelLogService extends DefaultService
     public function created(Model $model, ?array $attributes = null): void
     {
         $type = ModelLogTypeEnum::Create;
+        $primaryKey = $model->getKeyName();
 
         $dto = ModelLogDto::create([
             'modelType' => $model::class,
             'modelId' => $model->id
                 ?? (
-                    (is_null($attributes) || !($primaryKey = $model->getKeyName()))
+                    (is_null($attributes) || !$primaryKey)
                     ? null
                     : ($model->id = $model::query()
                         ->when($attributes, static function ($q) use (&$attributes, &$primaryKey) {
@@ -57,9 +58,10 @@ class ModelLogService extends DefaultService
 
                             return $q;
                         })
-                        // ->orderByDesc($model->getKeyName())
+                        // ->when(!$attributes, static fn ($q) => $q->orderByDesc($primaryKey))
                         ->first()
-                        ?->{$model->getKeyName()})
+                        ?->{$primaryKey}
+                    )
                 )
                 ?? null,
             'type' => $type,

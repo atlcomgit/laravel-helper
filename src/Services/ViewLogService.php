@@ -54,10 +54,10 @@ class ViewLogService extends DefaultService
      * Создает dto для логирования рендеринга blade шаблона
      *
      * @param string $name
-     * @param bool $withViewLog
+     * @param bool|null $withViewLog
      * @return ViewLogDto
      */
-    public function createViewLog(string $name, bool $withViewLog): ViewLogDto
+    public function createViewLog(string $name, ?bool $withViewLog): ViewLogDto
     {
         $dto = ViewLogDto::create(name: $name, withViewLog: $withViewLog);
         !config('laravel-helper.view_log.store_on_start') ?: $dto->dispatch();

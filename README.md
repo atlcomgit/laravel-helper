@@ -23,7 +23,7 @@
 composer require atlcom/laravel-helper
 ```
 
-##### 2. Публикация настроек
+##### 2. Публикация настроек и миграций
 
 ```bash
 php artisan vendor:publish --tag="laravel-helper"
@@ -99,6 +99,7 @@ Route::get('/', function (Request $request) {
 Логирование исходящих запросов в таблице helper_http_logs
 
 ```php
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Illuminate\Support\Facades\Http;
 
@@ -114,7 +115,7 @@ class HttpServiceProvider
 	}
 }
 
-class ExampleService
+class ExampleService extends DefaultService
 {
 	public function getHttp(): Http|PendingRequest
     {
@@ -135,12 +136,14 @@ class ExampleService
 Логирование изменений модели в таблице helper_model_logs
 
 ```php
+use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Example extends Model
+// class Example extends Model
+class Example extends DefaultModel
 {
-	use ModelLogTrait;
+	// use ModelLogTrait;
 
     protected ?bool $withModelLog = true;
     public $guarded = ['id'];
@@ -185,15 +188,18 @@ class ExampleRepository
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultController;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Example extends Model
+// class Example extends Model
+class Example extends DefaultModel
 {
-	use ModelTrait;
+	// use ModelTrait;
 }
 
-class ExampleRepository
+class ExampleRepository extends DefaultRepository
 {
 	public function example(ExampleDto $dto)
 	{
@@ -278,6 +284,7 @@ class ExampleController extends DefaultController
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultController;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -286,7 +293,7 @@ class Example extends Model
 	use ModelTrait;
 }
 
-class ExampleRepository
+class ExampleRepository extends DefaultRepository
 {
 	public function example(ExampleDto $dto)
 	{
@@ -500,38 +507,19 @@ class ExampleTest extends DefaultTest
 
 ### События хелпера
 
-##### ConsoleLogEvent
-Событие логирования консольных команд
-
-##### ExceptionEvent
-Событие логирования исключений
-
-##### HttpLogEvent
-Событие логирования http запросов
-
-##### ModelLogEvent
-Событие логирования моделей
-
-##### QueryCacheEvent
-Событие кеширования query запросов
-
-##### QueryLogEvent
-Событие логирования query запросов
-
-##### QueueLogEvent
-Событие логирования очередей
-
-##### RouteLogEvent
-Событие логирования роутов
-
-##### TelegramLogEvent
-Событие логирования отправки сообщения в телеграм
-
-##### ViewCacheEvent
-Событие кеширования рендеринга blade шаблонов
-
-##### ViewLogEvent
-Событие логирования рендеринга blade шаблонов
+```php
+ConsoleLogEvent::class // Событие логирования консольных команд
+ExceptionEvent::class // Событие логирования исключений
+HttpLogEvent::class // Событие логирования http запросов
+ModelLogEvent::class // Событие логирования моделей
+QueryCacheEvent::class // Событие кеширования query запросов
+QueryLogEvent::class // Событие логирования query запросов
+QueueLogEvent::class // Событие логирования очередей
+RouteLogEvent::class // Событие логирования роутов
+TelegramLogEvent::class // Событие логирования отправки сообщения в телеграм
+ViewCacheEvent::class // Событие кеширования рендеринга blade шаблонов
+ViewLogEvent::class // Событие логирования рендеринга blade шаблонов
+```
 
 <hr style="border:1px solid black">
 

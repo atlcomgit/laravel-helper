@@ -101,7 +101,7 @@ class ViewCacheService extends DefaultService
                 break;
 
             default:
-                $this->withoutTelescope(
+                $result = $this->withoutTelescope(
                     function () use (&$dto, &$view, &$data, &$mergeData, &$ignoreData, &$ttl, &$render) {
                         $dto->cacheKey = $this->getTagTtl($ttl)
                             . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
@@ -159,6 +159,8 @@ class ViewCacheService extends DefaultService
                         }
 
                         $dto->cacheKey = Hlp::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
+                        
+                        return $result;
                     }
                 );
                 break;
