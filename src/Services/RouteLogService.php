@@ -95,6 +95,6 @@ class RouteLogService extends DefaultService
             return $count;
         };
 
-        return DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+        return (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
     }
 }

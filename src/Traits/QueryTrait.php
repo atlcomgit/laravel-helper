@@ -573,7 +573,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -628,7 +628,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -692,7 +692,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -763,7 +763,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -823,7 +823,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = DB::transactionLevel() === 0 ? DB::transaction($callback) : $callback();
+            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 

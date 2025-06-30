@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * Трейт для подключения настройки тестов
@@ -68,7 +69,7 @@ trait TestingTrait
     protected function beforeRefreshingDatabase()
     {
         ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
-        
+
         Config::set('app.env', env('APP_ENV'));
         (($appEnv = env('APP_ENV')) === self::ENV)
             ?: throw new WithoutTelegramException("APP_ENV = {$appEnv}: не является тестовой");
@@ -125,5 +126,16 @@ trait TestingTrait
                     ?: touch(storage_path("{$databaseTesting}.sqlite"));
                 break;
         }
+    }
+
+
+    /**
+     * Обработка исключения ошибочного теста
+     *
+     * @throws Throwable
+     */
+    protected function onNotSuccessfulTest(Throwable $t): never
+    {
+        parent::onNotSuccessfulTest($t);
     }
 }
