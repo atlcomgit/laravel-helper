@@ -35,9 +35,31 @@ class ModelLogService extends DefaultService
             'modelType' => $model::class,
             'modelId' => $model->id
                 ?? (
-                    (is_null($attributes) || !$model->getKeyName())
+                    (is_null($attributes) || !($primaryKey = $model->getKeyName()))
                     ? null
-                    : ($model->id = $model::query()->where($attributes)->orderByDesc($model->getKeyName())->first()?->{$model->getKeyName()})
+                    : ($model->id = $model::query()
+                        ->when($attributes, static function ($q) use (&$attributes, &$primaryKey) {
+                            if ($primaryKey && array_key_exists($primaryKey, $attributes)) {
+                                $q->where($primaryKey, $attributes[$primaryKey] ?? null);
+
+                            } else {
+                                foreach ($attributes as $column => $value) {
+                                    match (true) {
+                                        is_null($value) => $q->whereNull($column),
+                                        is_array($value) => $q->whereIn($column, $value),
+                                        is_object($value) => $q->whereIn($column, Hlp::castToArray($value)),
+                                        is_scalar($value) => $q->where($column, $value),
+
+                                        default => null,
+                                    };
+                                }
+                            }
+
+                            return $q;
+                        })
+                        ->orderByDesc($model->getKeyName())
+                        ->first()
+                        ?->{$model->getKeyName()})
                 )
                 ?? null,
             'type' => $type,
