@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Repositories\ConsoleLogRepository;
 
 /**
  * Сервис логирования консольных команд
  */
-class ConsoleLogService
+class ConsoleLogService extends DefaultService
 {
     public function __construct(private ConsoleLogRepository $consoleLogRepository) {}
 

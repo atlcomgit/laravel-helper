@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
@@ -32,7 +33,7 @@ use Symfony\Component\Finder\SplFileInfo;
 /**
  * Сервис пакета laravel-helper
  */
-class LaravelHelperService
+class LaravelHelperService extends DefaultService
 {
     /**
      * Проверяет параметры конфига laravel-helper

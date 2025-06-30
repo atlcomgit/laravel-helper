@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
@@ -19,7 +20,7 @@ use Illuminate\Queue\Events\JobProcessing;
 /**
  * Сервис логирования очередей
  */
-class QueueLogService
+class QueueLogService extends DefaultService
 {
     public function __construct(
         private QueueLogRepository $queueLogRepository,

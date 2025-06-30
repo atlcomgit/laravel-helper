@@ -320,6 +320,19 @@ class ExampleController extends DefaultController
 
 ### Примеры расширения классов
 
+##### DefaultCommand
+
+Расширение класса консольных команд
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultCommand;
+
+class ExampleCommand extends DefaultCommand
+{
+	public function handle(): int
+}
+```
+
 ##### DefaultController и DefaultDto
 
 Расширение класса контроллера с внедрением [Dto](https://github.com/atlcomgit/dto) (замена Request)
@@ -349,16 +362,28 @@ class ExampleController extends DefaultController
 }
 ```
 
-##### DefaultCommand
+##### DefaultEvent
 
-Расширение класса консольных команд
+Расширение класса событий
 
 ```php
-use Atlcom\LaravelHelper\Defaults\DefaultCommand;
+use Atlcom\LaravelHelper\Defaults\DefaultEvent;
 
-class ExampleCommand extends DefaultCommand
+class ExampleEvent extends DefaultEvent
 {
-	public function handle(): int
+    public function __construct() {}
+}
+```
+
+##### DefaultException
+
+Расширение класса исключений
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultException;
+
+class ExampleException extends DefaultException
+{
 }
 ```
 
@@ -375,6 +400,30 @@ class ExampleJob extends DefaultJob
 }
 ```
 
+##### DefaultListener
+
+Расширение класса слушателя события
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultListener;
+
+class ExampleListener extends DefaultListener
+{
+}
+```
+
+##### DefaultLogger
+
+Расширение класса логирования
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultLogger;
+
+class ExampleLogger extends DefaultLogger
+{
+}
+```
+
 ##### DefaultModel
 
 Расширение класса модели
@@ -382,7 +431,19 @@ class ExampleJob extends DefaultJob
 ```php
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 
-class Example extends DefaultModel
+class ExampleModel extends DefaultModel
+{
+}
+```
+
+##### DefaultRepository
+
+Расширение класса репозитория
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
+
+class ExampleRepository extends DefaultRepository
 {
 }
 ```
@@ -411,17 +472,66 @@ class ExampleResource extends DefaultResource
 }
 ```
 
-##### DefaultException
+##### DefaultService
 
-Расширение класса исключений
+Расширение класса сервиса
 
 ```php
-use Atlcom\LaravelHelper\Defaults\DefaultException;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 
-class ExampleException extends DefaultException
+class ExampleService extends DefaultService
 {
 }
 ```
+
+##### DefaultTest
+
+Расширение класса теста
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultTest;
+
+class ExampleTest extends DefaultTest
+{
+}
+```
+
+<hr style="border:1px solid black">
+
+### События хелпера
+
+##### ConsoleLogEvent
+Событие логирования консольных команд
+
+##### ExceptionEvent
+Событие логирования исключений
+
+##### HttpLogEvent
+Событие логирования http запросов
+
+##### ModelLogEvent
+Событие логирования моделей
+
+##### QueryCacheEvent
+Событие кеширования query запросов
+
+##### QueryLogEvent
+Событие логирования query запросов
+
+##### QueueLogEvent
+Событие логирования очередей
+
+##### RouteLogEvent
+Событие логирования роутов
+
+##### TelegramLogEvent
+Событие логирования отправки сообщения в телеграм
+
+##### ViewCacheEvent
+Событие кеширования рендеринга blade шаблонов
+
+##### ViewLogEvent
+Событие логирования рендеринга blade шаблонов
 
 <hr style="border:1px solid black">
 
@@ -443,6 +553,7 @@ isQueue() // Проверяет на запуск приложения из оч
 queue() // Ставит job в очередь и запускает её
 sql() // Возвращает сырой sql запрос c заменой плейсхолдеров
 json() // Возвращает json строку
+telescope() // Включает/Отключает логи telescope
 telegram() // Отправляет сообщение в телеграм
 user() // Возвращает модель авторизованного пользователя или null
 ip() // Возвращает ip адрес из запроса

@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
@@ -14,7 +15,7 @@ use Throwable;
 /**
  * Сервис логирования моделей
  */
-class ModelLogService
+class ModelLogService extends DefaultService
 {
     public const HIDDEN_VALUE = '••••••';
 

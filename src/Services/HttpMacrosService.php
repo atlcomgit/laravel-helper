@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Illuminate\Support\Facades\Http;
 
 /**
  * Сервис регистрации http макросов
  */
-class HttpMacrosService
+class HttpMacrosService extends DefaultService
 {
     /**
      * Добавляет макросы в http запросы

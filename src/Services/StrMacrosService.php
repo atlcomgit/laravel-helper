@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
 /**
  * Сервис регистрации str макросов
  */
-class StrMacrosService
+class StrMacrosService extends DefaultService
 {
     /**
      * Добавляет макросы в строковый помощник

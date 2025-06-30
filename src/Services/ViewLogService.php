@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Repositories\ViewLogRepository;
 
 /**
  * Сервис логирования рендеринга blade шаблонов
  */
-class ViewLogService
+class ViewLogService extends DefaultService
 {
     public function __construct(
         private ViewLogRepository $viewLogRepository,

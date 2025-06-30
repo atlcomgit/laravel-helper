@@ -7,9 +7,9 @@ namespace Atlcom\LaravelHelper\Defaults;
 use Atlcom\LaravelHelper\Traits\TelescopeTrait;
 
 /**
- * Абстрактный класс для репозитория
+ * Абстрактный класс для сервиса
  */
-abstract class DefaultRepository
+abstract class DefaultService
 {
     use TelescopeTrait;
 }

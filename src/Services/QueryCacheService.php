@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\QueryCacheEventDto;
+use Atlcom\LaravelHelper\Enums\EventTypeEnum;
+use Atlcom\LaravelHelper\Events\QueryCacheEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Carbon\Carbon;
 use FilesystemIterator;
@@ -29,7 +33,7 @@ use Throwable;
 /**
  * Сервис кеширования query запросов
  */
-class QueryCacheService
+class QueryCacheService extends DefaultService
 {
     // Количество попыток записи кеша в файл
     public const CACHE_FILE_TRY_COUNT = 3;
@@ -203,20 +207,38 @@ class QueryCacheService
      */
     public function setQueryCache(?array $tags = null, ?string $key, mixed $value, int|bool|null $ttl = null): bool
     {
-        if (!$key) {
-            return false;
-        }
+        return $this->withoutTelescope(
+            function () use (&$tags, &$key, &$value, &$ttl) {
+                if (!$key) {
+                    return false;
+                }
 
-        $ttl = match (true) {
-            is_integer($ttl) => $ttl,
-            is_null($ttl), $ttl === true => (int)config('laravel-helper.query_cache.ttl'),
+                $ttl = match (true) {
+                    is_integer($ttl) => $ttl,
+                    is_null($ttl), $ttl === true => (int)config('laravel-helper.query_cache.ttl'),
 
-            default => false,
-        };
+                    default => false,
+                };
 
-        return ($ttl !== false)
-            ? $this->setCache($tags, $key, $value, $ttl)
-            : false;
+                $result = ($ttl !== false)
+                    ? $this->setCache($tags, $key, $value, $ttl)
+                    : false;
+
+                event(
+                    new QueryCacheEvent(
+                        QueryCacheEventDto::create(
+                            type: EventTypeEnum::SetQueryCache,
+                            tags: $tags,
+                            key: $key,
+                            ttl: $ttl,
+                            data: $value,
+                        ),
+                    ),
+                );
+
+                return $result;
+            }
+        );
     }
 
 
@@ -230,11 +252,28 @@ class QueryCacheService
      */
     public function getQueryCache(?array $tags = null, ?string $key, mixed $default = null): mixed
     {
-        if (!$key) {
-            return null;
-        }
+        return $this->withoutTelescope(
+            function () use (&$tags, &$key, &$default) {
+                if (!$key) {
+                    return null;
+                }
 
-        return $this->getCache($tags, $key, $default);
+                $result = $this->getCache($tags, $key, $default);
+
+                event(
+                    new QueryCacheEvent(
+                        QueryCacheEventDto::create(
+                            type: EventTypeEnum::GetQueryCache,
+                            tags: $tags,
+                            key: $key,
+                            data: $result,
+                        ),
+                    ),
+                );
+
+                return $result;
+            }
+        );
     }
 
 
@@ -243,20 +282,33 @@ class QueryCacheService
      *
      * @param Model $model
      * @param string|null $relation
-     * @param Collection|null $pivotedModels
+     * @param Collection<Model>|null $pivotedModels
      * @return void
      */
     public function flushQueryCache(Model|string $table, ?string $relation = null, ?Collection $pivotedModels = null): void
     {
-        $tags = $this->getQueryTags($table, $relation, ...$pivotedModels?->all() ?? []);
+        $this->withoutTelescope(
+            function () use (&$table, &$relation, &$pivotedModels) {
+                $tags = $this->getQueryTags($table, $relation, [$pivotedModels?->first()?->getTable()]);
 
-        // Если таблица не в игноре и теги не в исключении, то чистим кеш (иначе кеш не сохранялся)
-        if (
-            app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
-            && !Hlp::arraySearchValues($tags, $this->exclude)
-        ) {
-            $this->flushCache($tags);
-        }
+                // Если таблица не в игноре и теги не в исключении, то чистим кеш (иначе кеш не сохранялся)
+                if (
+                    app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
+                    && !Hlp::arraySearchValues($tags, $this->exclude)
+                ) {
+                    $this->flushCache($tags);
+
+                    event(
+                        new QueryCacheEvent(
+                            QueryCacheEventDto::create(
+                                type: EventTypeEnum::FlushQueryCache,
+                                tags: $tags,
+                            ),
+                        ),
+                    );
+                }
+            }
+        );
     }
 
 
@@ -267,7 +319,20 @@ class QueryCacheService
      */
     public function flushQueryCacheAll(): void
     {
-        $this->flushCache(['*']);
+        $this->withoutTelescope(
+            function () {
+                $this->flushCache($tags = ['*']);
+
+                event(
+                    new QueryCacheEvent(
+                        QueryCacheEventDto::create(
+                            type: EventTypeEnum::FlushQueryCache,
+                            tags: $tags,
+                        ),
+                    ),
+                );
+            }
+        );
     }
 
 

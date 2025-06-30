@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Repositories\QueryLogRepository;
 
 /**
  * Сервис логирования query запросов
  */
-class QueryLogService
+class QueryLogService extends DefaultService
 {
     public function __construct(
         private QueryLogRepository $queryLogRepository,

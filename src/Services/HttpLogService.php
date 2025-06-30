@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\HttpLogCreateDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogFailedDto;
@@ -18,7 +19,7 @@ use BackedEnum;
 /**
  * Сервис логирования исходящих http запросов
  */
-class HttpLogService
+class HttpLogService extends DefaultService
 {
     public const HTTP_HEADER_UUID = 'X-UUID';
     public const HTTP_HEADER_NAME = 'X-NAME';

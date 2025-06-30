@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Сервис регистрации builder макросов
  */
-class BuilderMacrosService
+class BuilderMacrosService extends DefaultService
 {
     /**
      * Добавляет макросы в конструкторы запросов

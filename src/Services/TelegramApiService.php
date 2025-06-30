@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Http;
 /**
  * Сервис api telegram
  */
-class TelegramApiService
+class TelegramApiService extends DefaultService
 {
     /**
      * Возвращает фасад запроса

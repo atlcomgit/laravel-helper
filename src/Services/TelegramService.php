@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
@@ -13,7 +14,7 @@ use Throwable;
 /**
  * Сервис отправки сообщений в telegram
  */
-final class TelegramService
+final class TelegramService extends DefaultService
 {
     /** Максимальное количество частей сообщения */
     public const TELEGRAM_MESSAGE_MAX_COUNT = 10;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Repositories\RouteLogRepository;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 /**
  * Сервис логирования роутов
  */
-class RouteLogService
+class RouteLogService extends DefaultService
 {
     public function __construct(private RouteLogRepository $routeLogRepository) {}
 

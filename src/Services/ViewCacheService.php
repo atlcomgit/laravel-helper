@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\ViewCacheEventDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
+use Atlcom\LaravelHelper\Enums\EventTypeEnum;
+use Atlcom\LaravelHelper\Events\ViewCacheEvent;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Сервис кеширования рендеринга blade шаблонов
  */
-class ViewCacheService
+class ViewCacheService extends DefaultService
 {
     protected string $driver = '';
     protected array $exclude = [];
@@ -97,32 +101,66 @@ class ViewCacheService
                 break;
 
             default:
-                $dto->cacheKey = $this->getTagTtl($ttl) . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
+                $this->withoutTelescope(
+                    function () use (&$dto, &$view, &$data, &$mergeData, &$ignoreData, &$ttl, &$render) {
+                        $dto->cacheKey = $this->getTagTtl($ttl)
+                            . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
 
-                if ($dto->isFromCache = Cache::driver($this->driver)->has($dto->cacheKey)) {
-                    $result = Cache::driver($this->driver)->get($dto->cacheKey, '');
+                        if ($dto->isFromCache = Cache::driver($this->driver)->has($dto->cacheKey)) {
+                            $result = Cache::driver($this->driver)->get($dto->cacheKey, '');
 
-                    !(is_string($result) && $this->gzdeflateEnabled)
-                        ?: $result = (($tmp = @gzinflate($result)) === false) ? '' : $tmp;
+                            !(is_string($result) && $this->gzdeflateEnabled)
+                                ?: $result = (($tmp = @gzinflate($result)) === false) ? '' : $tmp;
 
-                } else {
-                    $result = $render();
-                    $cache = $this->gzdeflateEnabled
-                        ? $cache = gzdeflate($result, $this->gzdeflateLevel)
-                        : $result;
+                            event(
+                                new ViewCacheEvent(
+                                    ViewCacheEventDto::create(
+                                        type: EventTypeEnum::GetViewCache,
+                                        key: $dto->cacheKey,
+                                        view: $view,
+                                        data: $data,
+                                        mergeData: $mergeData,
+                                        ignoreData: $ignoreData,
+                                        render: $result,
+                                    ),
+                                ),
+                            );
 
-                    match (true) {
-                        $ttl === 0 => Cache::driver($this->driver)->forever($dto->cacheKey, $cache),
-                        $ttl === true, is_null($ttl) => Cache::driver($this->driver)
-                            ->set($dto->cacheKey, $cache, config('laravel-helper.view_cache.ttl')),
+                        } else {
+                            $result = $render();
+                            $cache = $this->gzdeflateEnabled
+                                ? $cache = gzdeflate($result, $this->gzdeflateLevel)
+                                : $result;
 
-                        default => Cache::driver($this->driver)->set($dto->cacheKey, $cache, $ttl),
-                    };
+                            match (true) {
+                                $ttl === 0 => Cache::driver($this->driver)->forever($dto->cacheKey, $cache),
+                                $ttl === true, is_null($ttl) => Cache::driver($this->driver)
+                                    ->set($dto->cacheKey, $cache, config('laravel-helper.view_cache.ttl')),
 
-                    $dto->isCached = true;
-                }
+                                default => Cache::driver($this->driver)->set($dto->cacheKey, $cache, $ttl),
+                            };
 
-                $dto->cacheKey = Hlp::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
+                            $dto->isCached = true;
+
+                            event(
+                                new ViewCacheEvent(
+                                    ViewCacheEventDto::create(
+                                        type: EventTypeEnum::SetViewCache,
+                                        key: $dto->cacheKey,
+                                        view: $view,
+                                        data: $data,
+                                        mergeData: $mergeData,
+                                        ignoreData: $ignoreData,
+                                        ttl: $ttl,
+                                        render: $result,
+                                    ),
+                                ),
+                            );
+                        }
+
+                        $dto->cacheKey = Hlp::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
+                    }
+                );
                 break;
         }
 
@@ -137,6 +175,19 @@ class ViewCacheService
      */
     public function flushViewCacheAll(): void
     {
-        Cache::driver($this->driver)->flush();
+        $this->withoutTelescope(
+            function () {
+                Cache::driver($this->driver)->flush();
+
+                event(
+                    new ViewCacheEvent(
+                        ViewCacheEventDto::create(
+                            type: EventTypeEnum::FlushViewCache,
+                        ),
+                    ),
+                );
+            }
+        );
+
     }
 }
