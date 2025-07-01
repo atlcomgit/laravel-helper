@@ -28,7 +28,8 @@ class DefaultController extends Controller
      */
     public function withViewCache(int|string|bool|null $seconds = null): static
     {
-        !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
+        !is_string($seconds)
+            ?: $seconds = abs(now()->setTime(0,0,0,0)->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
         $this->withViewCache = $seconds ?? true;
 
         return $this;

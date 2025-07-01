@@ -55,15 +55,10 @@ trait QueryTrait
      */
     public function withQueryCache(int|string|bool|null $seconds = null): static
     {
-        !is_string($seconds) ?: $seconds = abs(now()->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
-        $this->withQueryCache = $seconds ?? true;
-
-        if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->withQueryCache($this->withQueryCache);
-            $this->getConnection()->withQueryCache($this->withQueryCache);
-        }
-
-        $this->setQueryCacheClass(null, true);
+        !is_string($seconds)
+            ?: $seconds = abs(now()->setTime(0, 0, 0, 0)->modify(trim((string)$seconds, '- '))->diffInSeconds(now()));
+        $this->setQueryCache($seconds ?? true);
+        ($seconds === false) ?: $this->setQueryCacheClass(null, true);
 
         return $this;
     }
@@ -77,17 +72,8 @@ trait QueryTrait
      */
     public function withQueryLog(bool|null $enabled = null): static
     {
-        $this->withQueryLog = $enabled ?? true;
-
-        if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->withQueryLog($this->withQueryLog);
-            $this->getConnection()->withQueryLog($this->withQueryLog);
-        }
-        if ($this instanceof QueryBuilder) {
-            $this->getConnection()->withQueryLog($this->withQueryLog);
-        }
-
-        $this->setQueryLogClass(null, true);
+        $this->setQueryLog($enabled ?? true);
+        ($enabled === false) ?: $this->setQueryLogClass(null, true);
 
         return $this;
     }
@@ -101,17 +87,82 @@ trait QueryTrait
      */
     public function withModelLog(bool|null $enabled = null): static
     {
+        $this->setModelLog($enabled ?? true);
+
+        return $this;
+    }
+
+
+    /**
+     * Устанавливает флаг включения кеша query по цепочке EloquentBuilder->QueryBuilder->Connection
+     *
+     * @param int|string|bool|null $seconds
+     * @return void
+     */
+    public function setQueryCache(int|string|bool|null $seconds): void
+    {
+        $this->withQueryCache = $seconds;
+
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->setQueryCache($this->withQueryCache);
+            // $this->getQuery()->getConnection()->setQueryCache($this->withQueryCache);
+        }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->setQueryCache($this->withQueryCache);
+        }
+    }
+
+
+    /**
+     * Устанавливает флаг включения лога query по цепочке EloquentBuilder->QueryBuilder->Connection
+     *
+     * @param bool|null $enabled
+     * @return void
+     */
+    public function setQueryLog(bool|null $enabled): void
+    {
+        $this->withQueryLog = $enabled;
+
+        if ($this instanceof EloquentBuilder) {
+            $this->getQuery()->setQueryLog($this->withQueryLog);
+            // $this->getQuery()->getConnection()->setQueryLog($this->withQueryLog);
+        }
+        if ($this instanceof QueryBuilder) {
+            $this->getConnection()->setQueryLog($this->withQueryLog);
+        }
+    }
+
+
+    /**
+     * Устанавливает флаг включения лога модели по цепочке EloquentBuilder->QueryBuilder->Connection
+     *
+     * @param bool|null $enabled
+     * @return void
+     */
+    public function setModelLog(bool|null $enabled): void
+    {
         $this->withModelLog = $enabled ?? true;
 
         if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->withModelLog($this->withModelLog);
-            $this->getConnection()->withModelLog($this->withModelLog);
+            $this->getQuery()->setModelLog($this->withModelLog);
+            // $this->getQuery()->getConnection()->setModelLog($this->withModelLog);
         }
         if ($this instanceof QueryBuilder) {
-            $this->getConnection()->withModelLog($this->withModelLog);
+            $this->getConnection()->setModelLog($this->withModelLog);
         }
+    }
 
-        return $this;
+
+    /**
+     * Синхронизирует флаги по цепочке EloquentBuilder->QueryBuilder->Connection
+     *
+     * @return void
+     */
+    public function syncQueryProperties(): void
+    {
+        $this->setQueryCache($this->withQueryCache);
+        $this->setQueryLog($this->withQueryLog);
+        $this->setModelLog($this->withModelLog);
     }
 
 
@@ -127,11 +178,11 @@ trait QueryTrait
         !(is_null($this->withQueryCacheClass) || $reset) ?: $this->withQueryCacheClass = $class;
 
         if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->setQueryCacheClass($this->withQueryCacheClass);
-            $this->getQuery()->getConnection()->setQueryCacheClass($this->withQueryCacheClass);
+            $this->getQuery()->setQueryCacheClass($this->withQueryCacheClass, $reset);
+            // $this->getQuery()->getConnection()->setQueryCacheClass($this->withQueryCacheClass, $reset);
         }
         if ($this instanceof QueryBuilder) {
-            $this->getConnection()->setQueryCacheClass($this->withQueryCacheClass);
+            $this->getConnection()->setQueryCacheClass($this->withQueryCacheClass, $reset);
         }
 
         return $this;
@@ -150,11 +201,11 @@ trait QueryTrait
         !(is_null($this->withQueryLogClass) || $reset) ?: $this->withQueryLogClass = $class;
 
         if ($this instanceof EloquentBuilder) {
-            $this->getQuery()->setQueryLogClass($this->withQueryLogClass);
-            $this->getQuery()->getConnection()->setQueryLogClass($this->withQueryLogClass);
+            $this->getQuery()->setQueryLogClass($this->withQueryLogClass, $reset);
+            // $this->getQuery()->getConnection()->setQueryLogClass($this->withQueryLogClass);
         }
         if ($this instanceof QueryBuilder) {
-            $this->getConnection()->setQueryLogClass($this->withQueryLogClass);
+            $this->getConnection()->setQueryLogClass($this->withQueryLogClass, $reset);
         }
 
         return $this;
@@ -388,6 +439,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $queryCacheService = app(QueryCacheService::class);
             $tables = $queryCacheService->getTablesFromModels(
                 [$this] // $this instanceof EloquentBuilder ? $this->getModels() : [$this]
@@ -398,6 +450,7 @@ trait QueryTrait
 
             if (
                 $tables
+                && config('laravel-helper.query_cache.enabled')
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
                 && (
                     $this->withQueryCache === true
@@ -467,6 +520,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $queryCacheService = app(QueryCacheService::class);
             $sql = sql($query, $bindings);
             $tables = $queryCacheService->getTablesFromSql($sql);
@@ -478,6 +532,7 @@ trait QueryTrait
             if (
                 $tables
                 && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
+                && config('laravel-helper.query_cache.enabled')
                 && (
                     $this->withQueryCache === true
                     || is_integer($this->withQueryCache)
@@ -944,25 +999,36 @@ trait QueryTrait
             switch ($type) {
                 case ModelLogTypeEnum::Create:
                     $fields = Hlp::sqlFieldsInsert($attributes);
-                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                    $attributes = array_combine(
+                        $fields,
+                        array_slice(array_pad($bindings ?? [], count($fields), null), 0, count($fields)),
+                    );
                     break;
 
                 case ModelLogTypeEnum::Update:
                 case ModelLogTypeEnum::SoftDelete:
                     $fields = Hlp::sqlFieldsUpdate($attributes);
-                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                    $attributes = array_combine(
+                        $fields,
+                        array_slice(array_pad($bindings ?? [], count($fields), null), 0, count($fields)),
+                    );
                     break;
 
                 default:
-                    $fields = array_keys(Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($attributes, false)))[$table] ?? []);
-                    $attributes = array_combine($fields, array_pad($bindings ?? [], count($fields), null));
+                    $fields = array_keys(
+                        Hlp::arrayUnDot(Hlp::arrayFlip(Hlp::sqlFields($attributes, false)))[$table] ?? []
+                    );
+                    $attributes = array_combine(
+                        $fields,
+                        array_slice(array_pad($bindings ?? [], count($fields), null), 0, count($fields)),
+                    );
             }
 
             if ($modelClass) {
                 $models = $type === ModelLogTypeEnum::Create
                     ? [(new $modelClass())->fill($attributes)]
                     : DB::table($table)
-                        ->withQueryLog($this->withQueryLog)
+                        ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
                         ->when(
                             Hlp::stringSplitRange($sql, [' where ', ' WHERE '], 1),
                             static fn ($q, $v) => $q->whereRaw($v),
@@ -1017,7 +1083,7 @@ trait QueryTrait
                 ? $modelClass::query()->withTrashed()
                 : $modelClass::query()
                 )
-                    ->withQueryLog($this->withQueryLog)
+                    ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
                     ->orderBy(with(new $modelClass)->getKeyName())->get();
 
                 foreach ($models as $model) {
