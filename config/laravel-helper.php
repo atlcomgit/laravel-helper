@@ -49,13 +49,6 @@ return [
 
 
     /**
-     * Testing. Авто-тестирование
-     */
-    'testing' => [
-        'email' => 'test@test.ru',
-    ],
-
-    /**
      * Optimize. Настройки при выполнении команды оптимизации
      */
     'optimize' => [
