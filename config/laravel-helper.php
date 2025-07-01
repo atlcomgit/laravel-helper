@@ -540,4 +540,24 @@ return [
         // Флаг включения кеширования рендеринга всех blade шаблонов
         'global' => (bool)env('HELPER_VIEW_CACHE_GLOBAL', false),
     ],
+
+    /**
+     * Testing. Авто-тестирование
+     */
+    'testing' => [
+        // Пользователь для тестов
+        'user' => [
+            'email' => (string)env('HELPER_TESTING_USER_EMAIL'),
+            'name' => (string)env('HELPER_TESTING_USER_NAME'),
+        ],
+        // Включение функционала хелпера при тестировании
+        'helper' => [
+            'enabled' => (bool)env('HELPER_TESTING_ENABLED', true),
+        ],
+        // Настройка тестовой базы данных
+        'database' => [
+            'name' => (string)env('HELPER_TESTING_DATABASE_NAME', 'testing'),
+            'seed' => (bool)env('HELPER_TESTING_DATABASE_SEED_ENABLED', true),
+        ],
+    ],
 ];

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Tests\Unit;
 
-use Atlcom\LaravelHelper\Tests\TestCase;
+use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Тесты макросов
  */
-final class LaravelHelperMacroTest extends TestCase
+final class LaravelHelperMacroTest extends DefaultTest
 {
     #[Test]
     public function intervalBetween(): void
