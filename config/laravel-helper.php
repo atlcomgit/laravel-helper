@@ -544,8 +544,8 @@ return [
             'name' => (string)env('HELPER_TESTING_USER_NAME'),
         ],
         // Включение функционала хелпера при тестировании
-        'helper' => [
-            'enabled' => (bool)env('HELPER_TESTING_ENABLED', true),
+        'log' => [
+            'enabled' => (bool)env('HELPER_TESTING_LOG_ENABLED', true),
         ],
         // Настройка тестовой базы данных
         'database' => [

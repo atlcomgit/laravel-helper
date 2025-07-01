@@ -121,7 +121,7 @@ trait TestingTrait
         Config::set('database.connections.sqlsrv', config('database.connections.testing'));
         Config::set('telescope.storage.database.connection', static::ENV);
 
-        $helperEnabled = config('laravel-helper.testing.helper.enabled');
+        $helperEnabled = config('laravel-helper.testing.log.enabled');
         Config::set('laravel-helper.console_log.enabled', $helperEnabled);
         Config::set('laravel-helper.http_log.enabled', $helperEnabled);
         Config::set('laravel-helper.model_log.enabled', $helperEnabled);
