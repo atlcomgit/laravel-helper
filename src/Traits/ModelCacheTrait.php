@@ -63,7 +63,7 @@ trait ModelCacheTrait
     /**
      * Вызывает макрос подключения кеша
      *
-     * @param int|string|bool|null|null $seconds
+     * @param int|string|bool|null $seconds
      * @return EloquentBuilder<static>
      */
     public static function withQueryCache(int|string|bool|null $seconds = null): EloquentBuilder
@@ -77,7 +77,7 @@ trait ModelCacheTrait
     /**
      * Вызывает макрос подключения лога query запроса
      *
-     * @param bool|null|null $enabled
+     * @param bool|null $enabled
      * @return EloquentBuilder<static>
      */
     public static function withQueryLog(bool|null $enabled = null): EloquentBuilder

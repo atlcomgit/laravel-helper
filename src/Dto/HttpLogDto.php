@@ -16,8 +16,10 @@ use Exception;
 use Illuminate\Http\Request as RequestIn;
 use Illuminate\Http\Client\Request as RequestOut;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as ResponseIn;
 use Illuminate\Http\Client\Response as ResponseOut;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Dto лога http запроса
@@ -68,7 +70,7 @@ class HttpLogDto extends Dto
      * Создает dto из http запроса
      *
      * @param string|null $uuid
-     * @param RequestIn|RequestOut|null|null $request
+     * @param RequestIn|RequestOut|null $request
      * @param array|null $info
      * @return static
      */
@@ -127,15 +129,15 @@ class HttpLogDto extends Dto
      * Создает dto из http ответа
      *
      * @param string|null $uuid
-     * @param RequestIn|RequestOut|null|null $request
-     * @param ResponseIn|ResponseOut|null|null $response
+     * @param RequestIn|RequestOut|null $request
+     * @param ResponseIn|ResponseOut|StreamedResponse|BinaryFileResponse|null $response
      * @param array|null $attributes
      * @return static
      */
     public static function createByResponse(
         string|null $uuid,
         RequestIn|RequestOut|null $request = null,
-        ResponseIn|ResponseOut|null $response = null,
+        ResponseIn|ResponseOut|StreamedResponse|BinaryFileResponse|null $response = null,
         ?array $attributes = null,
     ): static {
         $startAt = match (true) {
@@ -158,11 +160,29 @@ class HttpLogDto extends Dto
         return ($dto = static::createByRequest($uuid, $request))
             ->merge([
                 ...match (true) {
+                    $response instanceof StreamedResponse => [
+                        'responseCode' => $response->getStatusCode(),
+                        'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
+                        'responseHeaders' => $response->headers->all(),
+                        'responseData' => '[' . $response::class . ']',
+                        'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                            ? HttpLogStatusEnum::Success
+                            : HttpLogStatusEnum::Failed
+                    ],
+                    $response instanceof BinaryFileResponse => [
+                        'responseCode' => $response->getStatusCode(),
+                        'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
+                        'responseHeaders' => $response->headers->all(),
+                        'responseData' => '[' . $response::class . ', ' . $response->getFile()->getMimeType() . ']',
+                        'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                            ? HttpLogStatusEnum::Success
+                            : HttpLogStatusEnum::Failed
+                    ],
                     $response instanceof ResponseIn => [
                         'responseCode' => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData' => $response->getContent(),
+                        'responseData' => Hlp::castToString($response->getContent()),
                         'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
@@ -171,13 +191,14 @@ class HttpLogDto extends Dto
                         'responseCode' => $response->status(),
                         'responseMessage' => $response->reason(),
                         'responseHeaders' => $response->headers(),
-                        'responseData' => $response->body(),
+                        'responseData' => Hlp::castToString($response->body()),
                         'status' => $response->successful()
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
 
                     default => [
+                        'responseData' => $response::class,
                         'status' => HttpLogStatusEnum::Failed,
                     ],
                 },

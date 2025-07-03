@@ -34,11 +34,11 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::create([
             'modelType' => $model::class,
-            'modelId' => $model->id
+            'modelId' => $model->{$primaryKey}
                 ?? (
                     (is_null($attributes) || !$primaryKey)
                     ? null
-                    : ($model->id = $model::query()
+                    : ($model->{$primaryKey} = $model::query()
                         ->when($attributes, static function ($q) use (&$attributes, &$primaryKey) {
                             if ($primaryKey && array_key_exists($primaryKey, $attributes)) {
                                 $q->where($primaryKey, $attributes[$primaryKey] ?? null);

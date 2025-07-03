@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Абстрактный класс моделей
  *
- * @property int $id
  * @property array $config
  * @property string $morph_name
  */

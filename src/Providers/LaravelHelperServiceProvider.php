@@ -118,7 +118,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         app(LaravelHelperService::class)->checkConfig();
 
         // Подключение событий HttpLog
-        if (config('laravel-helper.http_log.out.enabled')) {
+        if (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.out.enabled')) {
             Event::listen(RequestSending::class, HttpRequestSendingListener::class);
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);

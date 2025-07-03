@@ -36,7 +36,7 @@ class HttpLogService extends DefaultService
     {
         !($headerName instanceof BackedEnum) ?: $headerName = $headerName->value;
 
-        return config('laravel-helper.http_log.out.enabled')
+        return (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.out.enabled'))
             ? (
                 $headerName === HttpLogHeaderEnum::None->value
                 ? [
@@ -155,6 +155,9 @@ class HttpLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
+        if (!config('laravel-helper.http_log.enabled')) {
+            return 0;
+        }
         if (!config('laravel-helper.http_log.in.enabled') && !config('laravel-helper.http_log.out.enabled')) {
             return 0;
         }

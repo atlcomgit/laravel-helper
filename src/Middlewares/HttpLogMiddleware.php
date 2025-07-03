@@ -23,7 +23,7 @@ class HttpLogMiddleware
     public function handle(Request $request, Closure $next)
     {
         $dto = null;
-        if (config('laravel-helper.http_log.in.enabled')) {
+        if (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.in.enabled')) {
             static::$startAt = (string)now()->getTimestampMs();
             static::$uuid = uuid();
             $dto = HttpLogDto::createByRequest(static::$uuid, $request);

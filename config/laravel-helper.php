@@ -120,6 +120,8 @@ return [
      * HttpLog. Логирование http запросов
      */
     'http_log' => [
+        // Флаг включения логов
+        'enabled' => (bool)env('HELPER_HTTP_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('HELPER_HTTP_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
