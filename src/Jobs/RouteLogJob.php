@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Jobs;
 
 use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\RouteLogEvent;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 
@@ -17,7 +18,7 @@ class RouteLogJob extends DefaultJob
 
     public function __construct(protected RouteLogDto $dto)
     {
-        $this->onQueue(config('laravel-helper.route_log.queue'));
+        $this->onQueue(lhConfig(ConfigEnum::RouteLog, 'queue'));
     }
 
 

@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\HttpLogCreateDto;
 use Atlcom\LaravelHelper\Dto\HttpLogFailedDto;
 use Atlcom\LaravelHelper\Dto\HttpLogUpdateDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\HttpLog;
 
 /**
@@ -17,7 +18,7 @@ class HttpLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $httpLogClass = null)
     {
-        $this->httpLogClass ??= config('laravel-helper.http_log.model') ?? HttpLog::class;
+        $this->httpLogClass ??= lhConfig(ConfigEnum::HttpLog, 'model') ?? HttpLog::class;
     }
 
 

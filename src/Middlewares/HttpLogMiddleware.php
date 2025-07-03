@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Middlewares;
 
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
-use Carbon\Carbon;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,13 +22,13 @@ class HttpLogMiddleware
     public function handle(Request $request, Closure $next)
     {
         $dto = null;
-        if (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.in.enabled')) {
+        if (lhConfig(ConfigEnum::HttpLog, 'enabled') && lhConfig(ConfigEnum::HttpLog, 'in.enabled')) {
             static::$startAt = (string)now()->getTimestampMs();
             static::$uuid = uuid();
             $dto = HttpLogDto::createByRequest(static::$uuid, $request);
         }
 
-        !(static::$uuid && $dto && !config('laravel-helper.http_log.only_response'))
+        !(static::$uuid && $dto && !lhConfig(ConfigEnum::HttpLog, 'only_response'))
             ?: $dto->dispatch();
 
         return $next($request);

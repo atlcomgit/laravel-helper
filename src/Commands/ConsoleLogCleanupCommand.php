@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 
 /**
@@ -36,7 +37,7 @@ class ConsoleLogCleanupCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        $cleanup = $this->consoleLogService->cleanup(config('laravel-helper.console_log.cleanup_days'));
+        $cleanup = $this->consoleLogService->cleanup(lhConfig(ConfigEnum::ConsoleLog, 'cleanup_days'));
 
         $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);

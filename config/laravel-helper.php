@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\User;
  */
 
 // Название таблицы пользователей
-$userClass = (string)env('HELPER_USER_CLASS') ?: User::class;
+$userClass = (string)env('HELPER_USER_CLASS', config('auth.providers.users.model', User::class));
 $user = new $userClass();
 $userTableName = (string)$user->getTable();
 // Первичный ключ в таблице пользователей
@@ -45,6 +45,8 @@ return [
         'debug_trace' => (bool)env('APP_DEBUG_TRACE', false),
         // Флаг включения вывода vendor классов в трассировку
         'debug_trace_vendor' => (bool)env('APP_DEBUG_TRACE_VENDOR', false),
+        // Класс пользователя
+        'user' => $userClass,
     ],
 
 
@@ -96,7 +98,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_CONSOLE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_CONSOLE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_CONSOLE_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_CONSOLE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -125,7 +127,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_HTTP_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_HTTP_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_HTTP_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_HTTP_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -175,7 +177,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_MODEL_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_MODEL_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_MODEL_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_MODEL_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -213,7 +215,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_ROUTE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_ROUTE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_ROUTE_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_ROUTE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -258,7 +260,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_QUERY_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_QUERY_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_QUERY_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_QUERY_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -294,7 +296,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_QUEUE_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_QUEUE_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_QUEUE_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_QUEUE_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -330,7 +332,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_TELEGRAM_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_TELEGRAM_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_TELEGRAM_LOG_QUEUE_DISPATCH_SYNC'),
         // Токен бота
         'token' => (string)env('HELPER_TELEGRAM_LOG_TOKEN'),
         // Настройка отправки логов информации
@@ -488,7 +490,7 @@ return [
         // Название очереди для логов
         'queue' => (string)env('HELPER_VIEW_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
-        'queue_dispatch_sync' => (bool)env('HELPER_VIEW_LOG_QUEUE_DISPATCH_SYNC', isLocal() || isTesting()),
+        'queue_dispatch_sync' => (bool)env('HELPER_VIEW_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов
         'connection' => (string)env('HELPER_VIEW_LOG_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи логов
@@ -542,8 +544,7 @@ return [
     'testing' => [
         // Пользователь для тестов
         'user' => [
-            'email' => (string)env('HELPER_TESTING_USER_EMAIL'),
-            'name' => (string)env('HELPER_TESTING_USER_NAME'),
+            'email' => (string)env('HELPER_TESTING_USER_EMAIL', 'testing@test.ru'),
         ],
         // Включение функционала хелпера при тестировании
         'log' => [
@@ -552,6 +553,7 @@ return [
         // Настройка тестовой базы данных
         'database' => [
             'name' => (string)env('HELPER_TESTING_DATABASE_NAME', 'testing'),
+            'fresh' => (bool)env('HELPER_TESTING_DATABASE_FRESH_ENABLED', true),
             'seed' => (bool)env('HELPER_TESTING_DATABASE_SEED_ENABLED', true),
         ],
     ],

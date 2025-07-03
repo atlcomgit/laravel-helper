@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
@@ -54,7 +54,7 @@ class ConsoleLogDto extends Dto
             'status' => ConsoleLogStatusEnum::getDefault(),
 
             'withConsoleLog' => false,
-            'storeInterval' => config('laravel-helper.console_log.store_interval_seconds', 10),
+            'storeInterval' => lhConfig(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
             'storedAt' => now(),
@@ -88,7 +88,14 @@ class ConsoleLogDto extends Dto
     {
         $this->onlyKeys(ConsoleLog::getModelKeys())
             ->onlyNotNull()
-            ->excludeKeys(['withConsoleLog', 'storeInterval', 'startTime', 'startMemory', 'storedAt', 'isUpdated']);
+            ->excludeKeys([
+                'withConsoleLog',
+                'storeInterval',
+                'startTime',
+                'startMemory',
+                'storedAt',
+                'isUpdated',
+            ]);
     }
 
 
@@ -125,8 +132,8 @@ class ConsoleLogDto extends Dto
         static $tableExists = null;
 
         if (is_null($tableExists)) {
-            $connection = config('laravel-helper.console_log.connection');
-            $tableExists = Schema::connection($connection)->hasTable(config('laravel-helper.console_log.table'));
+            $tableExists = Schema::connection(LaravelHelperService::getConnection(ConfigEnum::ConsoleLog))
+                ->hasTable(LaravelHelperService::getTable(ConfigEnum::ConsoleLog));
 
             if (!$tableExists) {
                 return;
@@ -155,10 +162,10 @@ class ConsoleLogDto extends Dto
             app(LaravelHelperService::class)->canDispatch($this)
             && (
                 $this->withConsoleLog === true
-                || ($this->withConsoleLog !== false && config('laravel-helper.console_log.global'))
+                || ($this->withConsoleLog !== false && lhConfig(ConfigEnum::ConsoleLog, 'global'))
             )
         ) {
-            config('laravel-helper.console_log.queue_dispatch_sync')
+            (lhConfig(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }

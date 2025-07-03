@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Dto\HttpLogCreateDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogFailedDto;
 use Atlcom\LaravelHelper\Dto\HttpLogUpdateDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
@@ -36,7 +37,7 @@ class HttpLogService extends DefaultService
     {
         !($headerName instanceof BackedEnum) ?: $headerName = $headerName->value;
 
-        return (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.out.enabled'))
+        return (lhConfig(ConfigEnum::HttpLog, 'enabled') && lhConfig(ConfigEnum::HttpLog, 'out.enabled'))
             ? (
                 $headerName === HttpLogHeaderEnum::None->value
                 ? [
@@ -86,7 +87,7 @@ class HttpLogService extends DefaultService
      */
     public function update(HttpLogDto $dto): void
     {
-        config('laravel-helper.http_log.only_response')
+        lhConfig(ConfigEnum::HttpLog, 'only_response')
             ? $this->create($dto)
             : (
                 !($dto->uuid = $this->getUuid($dto))
@@ -105,7 +106,7 @@ class HttpLogService extends DefaultService
      */
     public function failed(HttpLogDto $dto): void
     {
-        config('laravel-helper.http_log.only_response')
+        lhConfig(ConfigEnum::HttpLog, 'only_response')
             ? $this->create($dto->merge([
                 'responseCode' => $dto->responseCode ?? 0,
                 'responseMessage' => $dto->responseMessage ?? 'Connection error',
@@ -155,10 +156,10 @@ class HttpLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!config('laravel-helper.http_log.enabled')) {
+        if (!lhConfig(ConfigEnum::HttpLog, 'enabled')) {
             return 0;
         }
-        if (!config('laravel-helper.http_log.in.enabled') && !config('laravel-helper.http_log.out.enabled')) {
+        if (!lhConfig(ConfigEnum::HttpLog, 'in.enabled') && !lhConfig(ConfigEnum::HttpLog, 'out.enabled')) {
             return 0;
         }
 

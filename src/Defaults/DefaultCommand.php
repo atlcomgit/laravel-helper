@@ -7,6 +7,7 @@ use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -78,7 +79,8 @@ abstract class DefaultCommand extends Command
                 withConsoleLog: ($this->hasOption('log') && $this->option('log')) || $this->withConsoleLog,
             );
 
-            !config('laravel-helper.console_log.store_on_start', true) ?: $this->consoleLogDto->store(true);
+            $config = ConfigEnum::ConsoleLog;
+            !lhConfig($config, 'store_on_start', true) ?: $this->consoleLogDto->store(true);
 
             // Очищаем консоль stdout
             $this->outputClear();
@@ -119,7 +121,7 @@ abstract class DefaultCommand extends Command
             // Отправляем результат в телеграм
             if (
                 $this->withTelegramLog === true
-                || ($this->withTelegramLog !== false && config('laravel-helper.console_log.global'))
+                || ($this->withTelegramLog !== false && lhConfig($config, 'global'))
                 || (
                     is_null($this->withTelegramLog)
                     && $this->hasOption('telegram')

@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,24 +13,27 @@ use Illuminate\Support\Facades\Schema;
  * @see \Atlcom\LaravelHelper\Models\QueueLog
  */
 return new class extends Migration {
+    public ConfigEnum $config = ConfigEnum::ConsoleLog;
+
+
     public function up(): void
     {
-        $connection = config($config = 'laravel-helper.queue_log.connection')
+        $connection = config($config = LaravelHelperService::getConnection($this->config))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = 'laravel-helper.queue_log.table')
+        $table = config($config = LaravelHelperService::getTable($this->config))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);
 
-        Schema::connection($connection)->create($table, function (Blueprint $table) {
+        Schema::connection($connection)->create($table, function (Blueprint $table) use ($this) {
             $table->id();
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid очереди');
 
-            $userTableName = config('laravel-helper.queue_log.user.table_name');
-            $userPrimaryKeyName = config('laravel-helper.queue_log.user.primary_key');
-            $userPrimaryKeyType = config('laravel-helper.queue_log.user.primary_type');
+            $userTableName = lhConfig($this->config, 'user.table_name');
+            $userPrimaryKeyName = lhConfig($this->config, 'user.primary_key');
+            $userPrimaryKeyType = lhConfig($this->config, 'user.primary_type');
 
             if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
                 $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
@@ -76,9 +81,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $connection = config($config = 'laravel-helper.queue_log.connection')
+        $connection = config($config = LaravelHelperService::getConnection($this->config))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = 'laravel-helper.queue_log.table')
+        $table = config($config = LaravelHelperService::getTable($this->config))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);

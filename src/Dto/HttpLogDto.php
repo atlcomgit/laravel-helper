@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\HttpLogJob;
@@ -223,7 +224,7 @@ class HttpLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            config('laravel-helper.http_log.queue_dispatch_sync')
+            (lhConfig(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? HttpLogJob::dispatchSync($this)
                 : HttpLogJob::dispatch($this);
         }

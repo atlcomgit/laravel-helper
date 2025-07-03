@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Repositories\ConsoleLogRepository;
 
 /**
@@ -38,7 +39,7 @@ class ConsoleLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!config('laravel-helper.console_log.enabled')) {
+        if (!lhConfig(ConfigEnum::ConsoleLog, 'enabled')) {
             return 0;
         }
 

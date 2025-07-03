@@ -5,6 +5,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Storage;
@@ -35,12 +36,12 @@ final class TelegramService extends DefaultService
      */
     public function sendMessage(TelegramLogDto $dto): bool
     {
-        if (!config('laravel-helper.telegram_log.enabled')) {
+        if (!lhConfig(ConfigEnum::TelegramLog, 'enabled')) {
             return false;
         }
 
-        $telegramBotToken = config("laravel-helper.telegram_log.{$dto->type}.token");
-        $telegramChatId = config("laravel-helper.telegram_log.{$dto->type}.chat_id");
+        $telegramBotToken = lhConfig(ConfigEnum::TelegramLog, "{$dto->type}.token");
+        $telegramChatId = lhConfig(ConfigEnum::TelegramLog, "{$dto->type}.chat_id");
 
         if (!$telegramBotToken || !$telegramChatId) {
             return false;

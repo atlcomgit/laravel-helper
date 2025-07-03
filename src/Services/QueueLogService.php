@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Repositories\QueueLogRepository;
@@ -39,8 +40,8 @@ class QueueLogService extends DefaultService
         $name = $event->job->resolveName();
 
         if (
-            !config('laravel-helper.queue_log.enabled')
-            || (($event instanceof JobProcessing) && !config('laravel-helper.queue_log.store_on_start'))
+            !lhConfig(ConfigEnum::QueueLog, 'enabled')
+            || (($event instanceof JobProcessing) && !lhConfig(ConfigEnum::QueueLog, 'store_on_start'))
             || ($name === QueueLogJob::class)
         ) {
             return;
@@ -72,7 +73,7 @@ class QueueLogService extends DefaultService
             exception: $event instanceof JobFailed ? Hlp::exceptionToString($event->exception) : null,
             withQueueLog: is_array($command) && ($command['withQueueLog'] ?? false),
             isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
-            && config('laravel-helper.queue_log.store_on_start'),
+            && lhConfig(ConfigEnum::QueueLog, 'store_on_start'),
             status: match (true) {
                 $event instanceof JobProcessing => QueueLogStatusEnum::Process,
                 $event instanceof JobProcessed => QueueLogStatusEnum::Success,
@@ -80,7 +81,7 @@ class QueueLogService extends DefaultService
             },
         );
 
-        !($dto->isUpdated || !config('laravel-helper.queue_log.store_on_start'))
+        !($dto->isUpdated || !lhConfig(ConfigEnum::QueueLog, 'store_on_start'))
             ?: $dto->merge([
                 'duration' => $duration = Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
                 'memory' => $memory = ApplicationDto::restore()?->getMemory(),
@@ -120,7 +121,7 @@ class QueueLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!config('laravel-helper.queue_log.enabled')) {
+        if (!lhConfig(ConfigEnum::QueueLog, 'enabled')) {
             return 0;
         }
 

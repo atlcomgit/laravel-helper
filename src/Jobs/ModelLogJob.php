@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Jobs;
 
 use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\ModelLogEvent;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 
@@ -17,7 +18,7 @@ class ModelLogJob extends DefaultJob
 
     public function __construct(protected ModelLogDto $dto)
     {
-        $this->onQueue(config('laravel-helper.model_log.queue'));
+        $this->onQueue(lhConfig(ConfigEnum::ModelLog, 'queue'));
     }
 
 

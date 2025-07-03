@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Handlers;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use DateInterval;
 use Illuminate\Support\Facades\Cache;
@@ -20,7 +21,7 @@ class TelegramLogHandler extends AbstractProcessingHandler
 {
     public function write(LogRecord $record): void
     {
-        if ($record->message && config('laravel-helper.telegram_log.enabled', false)) {
+        if ($record->message && lhConfig(ConfigEnum::TelegramLog, 'enabled', false)) {
 
             $type = $title = $chatId = '';
 
@@ -30,8 +31,8 @@ class TelegramLogHandler extends AbstractProcessingHandler
                 ? json_encode($message, Hlp::jsonFlags() | JSON_PRETTY_PRINT)
                 : $record->message;
 
-            $maxSize = TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH * TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH;
-            if (Str::length($message) > (config('telegraph.message.max_size') ?: $maxSize)) {
+            $maxSize = TelegramService::TELEGRAM_MESSAGE_MAX_COUNT * TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH;
+            if (Str::length($message) > $maxSize) {
                 return;
             }
 
@@ -68,8 +69,8 @@ class TelegramLogHandler extends AbstractProcessingHandler
             }
 
             if (
-                !config("laravel-helper.telegram_log.{$type}.enabled", false)
-                || !($chatId = config("laravel-helper.telegram_log.{$type}.chat_id"))
+                !lhConfig(ConfigEnum::TelegramLog, "{$type}.enabled", false)
+                || !($chatId = lhConfig(ConfigEnum::TelegramLog, "{$type}.chat_id"))
             ) {
                 return;
             }
@@ -86,7 +87,7 @@ class TelegramLogHandler extends AbstractProcessingHandler
                 Cache::set(
                     $cacheHash,
                     $file,
-                    DateInterval::createFromDateString(config("laravel-helper.telegram_log.{$type}.cache_ttl")),
+                    DateInterval::createFromDateString(lhConfig(ConfigEnum::TelegramLog, "{$type}.cache_ttl")),
                 );
             }
 

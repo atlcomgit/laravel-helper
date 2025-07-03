@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Repositories\QueryLogRepository;
 
 /**
@@ -41,7 +42,7 @@ class QueryLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!config('laravel-helper.query_log.enabled')) {
+        if (!lhConfig(ConfigEnum::QueryLog, 'enabled')) {
             return 0;
         }
 

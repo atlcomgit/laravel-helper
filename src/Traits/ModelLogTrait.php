@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 
@@ -62,7 +63,7 @@ trait ModelLogTrait
     public function isWithModelLog(): ?bool
     {
         return $this->withModelLog === true
-            || ($this->withModelLog !== false && config('laravel-helper.model_log.global'));
+            || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'));
     }
 
 
@@ -74,7 +75,7 @@ trait ModelLogTrait
     protected static function bootModelLogTrait()
     {
         if (
-            config('laravel-helper.model_log.enabled')
+            lhConfig(ConfigEnum::ModelLog, 'enabled')
             && property_exists(static::class, 'withModelLog')
             && static::class !== ModelLog::class
         ) {

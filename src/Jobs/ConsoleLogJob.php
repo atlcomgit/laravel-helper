@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Jobs;
 
 use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\ConsoleLogEvent;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 
@@ -17,7 +18,7 @@ class ConsoleLogJob extends DefaultJob
 
     public function __construct(protected ConsoleLogDto $dto)
     {
-        $this->onQueue(config('laravel-helper.console_log.queue'));
+        $this->onQueue(lhConfig(ConfigEnum::ConsoleLog, 'queue'));
     }
 
 

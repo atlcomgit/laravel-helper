@@ -6,8 +6,10 @@ namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
@@ -57,67 +59,81 @@ class OptimizeCommand extends DefaultCommand
 
         $isSchedule = $this->hasOption('schedule') && Hlp::castToBool($this->option('schedule'));
 
-        if (config('laravel-helper.optimize.log_cleanup.enabled')) {
-            $cleanupConsoleLog = Schema::connection(config('laravel-helper.console_log.connection'))
-                ->hasTable(config('laravel-helper.console_log.table'))
-                ? $this->consoleLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.console_log.cleanup_days') : 0
-                )
-                : 0;
-            $cleanupHttpLog = Schema::connection(config('laravel-helper.http_log.connection'))
-                ->hasTable(config('laravel-helper.http_log.table'))
-                ? $this->httpLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.http_log.cleanup_days') : 0
-                )
-                : 0;
-            $cleanupModelLog = Schema::connection(config('laravel-helper.model_log.connection'))
-                ->hasTable(config('laravel-helper.model_log.table'))
-                ? $this->modelLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.model_log.cleanup_days') : 0
-                )
-                : 0;
-            $cleanupQueryLog = Schema::connection(config('laravel-helper.query_log.connection'))
-                ->hasTable(config('laravel-helper.query_log.table'))
-                ? $this->queryLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.query_log.cleanup_days') : 0
-                )
-                : 0;
-            $cleanupQueueLog = Schema::connection(config('laravel-helper.queue_log.connection'))
-                ->hasTable(config('laravel-helper.queue_log.table'))
-                ? $this->queueLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.queue_log.cleanup_days') : 0
-                )
-                : 0;
-            $cleanupViewLog = Schema::connection(config('laravel-helper.view_log.connection'))
-                ->hasTable(config('laravel-helper.view_log.table'))
-                ? $this->viewLogService->cleanup(
-                    $isSchedule ? config('laravel-helper.view_log.cleanup_days') : 0
-                )
-                : 0;
+        if (lhConfig(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
+            $this->telegramComment = ['Env' => config('app.env')];
+            $this->withTelegramLog = isLocal() || isProd();
 
-            $this->withTelegramLog = (isLocal() || isProd())
-                && (
-                    $cleanupConsoleLog > 0
-                    || $cleanupHttpLog > 0
-                    || $cleanupModelLog > 0
-                    || $cleanupQueryLog > 0
-                    || $cleanupQueueLog > 0
-                    || $cleanupViewLog > 0
-                );
-            $this->telegramComment = [
-                'ConsoleLog' => 'Удалено ' . Hlp::stringPlural($cleanupConsoleLog, ['записей', 'запись', 'записи']),
-                'HttpLog' => 'Удалено ' . Hlp::stringPlural($cleanupHttpLog, ['записей', 'запись', 'записи']),
-                'ModelLog' => 'Удалено ' . Hlp::stringPlural($cleanupModelLog, ['записей', 'запись', 'записи']),
-                'QueryLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueryLog, ['записей', 'запись', 'записи']),
-                'QueueLog' => 'Удалено ' . Hlp::stringPlural($cleanupQueueLog, ['записей', 'запись', 'записи']),
-                'ViewLog' =>'Удалено ' .  Hlp::stringPlural($cleanupViewLog, ['записей', 'запись', 'записи']),
+            $config = ConfigEnum::ConsoleLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->consoleLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+            ];
+
+            $config = ConfigEnum::HttpLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->httpLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+            ];
+
+            $config = ConfigEnum::ModelLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->modelLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+            ];
+
+            $config = ConfigEnum::QueryLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->queryLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+            ];
+
+            $config = ConfigEnum::QueueLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->queueLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+            ];
+
+            $config = ConfigEnum::ViewLog;
+            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                ->hasTable(LaravelHelperService::getTable($config))
+                ? $this->viewLogService->cleanup(
+                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
+                )
+                : 0;
+            $this->telegramComment[] = [
+                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
             $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
         }
 
-        if (config('laravel-helper.optimize.cache_clear.enabled')) {
-            if (config('laravel-helper.query_cache.enabled') || config('laravel-helper.view_cache.enabled')) {
+        if (lhConfig(ConfigEnum::Optimize, 'cache_clear.enabled')) {
+            if (lhConfig(ConfigEnum::QueryCache, 'enabled') || lhConfig(ConfigEnum::ViewCache, 'enabled')) {
                 Cache::flush();
                 $this->queryCacheService->flushQueryCacheAll();
             }

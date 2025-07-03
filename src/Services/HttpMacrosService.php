@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Illuminate\Support\Facades\Http;
 
@@ -21,26 +22,26 @@ class HttpMacrosService extends DefaultService
     public static function setMacros(): void
     {
         // Регистрация макроса запроса к localhost
-        !config('laravel-helper.http.localhost.enabled')
+        !lhConfig(ConfigEnum::Http, 'localhost.enabled')
             ?: Http::macro(
                 'localhost',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.localhost.url'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'localhost.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::Localhost))
             );
 
         // Регистрация макроса запроса к sms.ru
-        !config('laravel-helper.http.smsRu.enabled')
+        !lhConfig(ConfigEnum::Http, 'smsRu.enabled')
             ?: Http::macro(
                 'smsRu',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.smsRu.url'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'smsRu.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::SmsRu))
             );
 
         // Регистрация макроса запроса к mango-office.ru
-        !config('laravel-helper.http.mangoOfficeRu.enabled')
+        !lhConfig(ConfigEnum::Http, 'mangoOfficeRu.enabled')
             ?: Http::macro(
                 'mangoOfficeRu',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.mangoOfficeRu.url'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'mangoOfficeRu.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::MangoOfficeRu))
                     ->withOptions([
                         'curl' => [CURLOPT_FOLLOWLOCATION => true],
@@ -52,57 +53,57 @@ class HttpMacrosService extends DefaultService
             );
 
         // Регистрация макроса запроса к devline.ru
-        !config('laravel-helper.http.devlineRu.enabled')
+        !lhConfig(ConfigEnum::Http, 'devlineRu.enabled')
             ?: Http::macro(
                 'devlineRu',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.devlineRu.url.http'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'devlineRu.url.http'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::DevlineRu))
                     ->asJson()
                     ->acceptJson()
-                    ->timeout(config('laravel-helper.http.devlineRu.timeout'))
+                    ->timeout(lhConfig(ConfigEnum::Http, 'devlineRu.timeout'))
             );
 
         // Регистрация макроса запроса к rtsp.me
-        !config('laravel-helper.http.rtspMe.enabled')
+        !lhConfig(ConfigEnum::Http, 'rtspMe.enabled')
             ?: Http::macro(
                 'rtspMe',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.rtspMe.url'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'rtspMe.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::RtspMe))
                     ->asForm()
                     ->acceptJson()
-                    ->timeout(config('laravel-helper.http.rtspMe.timeout'))
+                    ->timeout(lhConfig(ConfigEnum::Http, 'rtspMe.timeout'))
             );
 
         // Регистрация макроса запроса к fcm.googleapis.com
-        !config('laravel-helper.http.fcmGoogleApisCom.enabled')
+        !lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.enabled')
             ?: Http::macro(
                 'fcmGoogleApisCom',
                 function () {
                     $client = new \Google\Client();
-                    $client->setAuthConfig(config('laravel-helper.http.fcmGoogleApisCom.firebase_credentials'));
+                    $client->setAuthConfig(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.firebase_credentials'));
                     $client->addScope(\Google\Service\FirebaseCloudMessaging::CLOUD_PLATFORM);
                     $token = $client->fetchAccessTokenWithAssertion()['access_token'];
-                    $projectId = config('laravel-helper.http.fcmGoogleApisCom.project_id');
+                    $projectId = lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.project_id');
 
-                    return Http::baseUrl(rtrim(config('laravel-helper.http.fcmGoogleApisCom.url'), '/') . "/projects/{$projectId}")
+                    return Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.url'), '/') . "/projects/{$projectId}")
                         ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::FcmGoogleApisCom))
                         ->withToken($token)
                         ->asJson()
                         ->acceptJson()
-                        ->timeout(config('laravel-helper.http.fcmGoogleApisCom.timeout'));
+                        ->timeout(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.timeout'));
                 }
             );
 
         // Регистрация макроса запроса к api.telegram.org
-        !config('laravel-helper.http.telegramOrg.enabled')
+        !lhConfig(ConfigEnum::Http, 'telegramOrg.enabled')
             ?: Http::macro(
                 'telegramOrg',
-                fn () => Http::baseUrl(rtrim(config('laravel-helper.http.telegramOrg.url'), '/'))
+                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'telegramOrg.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::TelegramOrg))
                     ->asMultipart()
                     ->acceptJson()
-                    ->timeout(config('laravel-helper.http.telegramOrg.timeout'))
-                    ->connectTimeout(config('laravel-helper.http.telegramOrg.timeout'))
+                    ->timeout(lhConfig(ConfigEnum::Http, 'telegramOrg.timeout'))
+                    ->connectTimeout(lhConfig(ConfigEnum::Http, 'telegramOrg.timeout'))
             );
     }
 }

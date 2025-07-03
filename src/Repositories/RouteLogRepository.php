@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Throwable;
 
@@ -16,7 +17,7 @@ class RouteLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $routeLogClass = null)
     {
-        $this->routeLogClass ??= config('laravel-helper.route_log.model') ?? RouteLog::class;
+        $this->routeLogClass ??= lhConfig(ConfigEnum::RouteLog, 'model') ?? RouteLog::class;
     }
 
 
@@ -29,8 +30,8 @@ class RouteLogRepository extends DefaultRepository
     public function new(RouteLogDto $dto): RouteLog
     {
         return $this->withoutTelescope(fn () => (new $this->routeLogClass($dto->toArray()))
-            ->setConnection(config('laravel-helper.route_log.connection'))
-            ->setTable(config('laravel-helper.route_log.table')));
+            ->setConnection(lhConfig(ConfigEnum::RouteLog, 'connection'))
+            ->setTable(lhConfig(ConfigEnum::RouteLog, 'table')));
     }
 
 

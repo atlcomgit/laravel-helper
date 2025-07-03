@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
@@ -161,7 +162,7 @@ class TelegramLogDto extends Dto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            config('laravel-helper.telegram_log.queue_dispatch_sync')
+            (lhConfig(ConfigEnum::TelegramLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? TelegramLogJob::dispatchSync($this)
                 : TelegramLogJob::dispatch($this);
         }

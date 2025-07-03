@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ViewLogCleanupCommand;
 use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
@@ -118,22 +119,22 @@ class LaravelHelperServiceProvider extends ServiceProvider
         app(LaravelHelperService::class)->checkConfig();
 
         // Подключение событий HttpLog
-        if (config('laravel-helper.http_log.enabled') && config('laravel-helper.http_log.out.enabled')) {
+        if (lhConfig(ConfigEnum::HttpLog, 'enabled') && lhConfig(ConfigEnum::HttpLog, 'out.enabled')) {
             Event::listen(RequestSending::class, HttpRequestSendingListener::class);
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
 
         // Подключение макросов Builder
-        !(config('laravel-helper.macros.builder.enabled') || config('laravel-helper.query_cache.enabled'))
+        !(lhConfig(ConfigEnum::Macros, 'builder.enabled') || lhConfig(ConfigEnum::QueryCache, 'enabled'))
             ?: BuilderMacrosService::setMacros();
         // Подключение макросов Str
-        !config('laravel-helper.macros.str.enabled') ?: StrMacrosService::setMacros();
+        !lhConfig(ConfigEnum::Macros, 'str.enabled') ?: StrMacrosService::setMacros();
         // Подключение макросов Http
-        !config('laravel-helper.macros.http.enabled') ?: HttpMacrosService::setMacros();
+        !lhConfig(ConfigEnum::Macros, 'http.enabled') ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
-        !config('laravel-helper.http_log.out.global') ?: Http::globalOptions([
+        !lhConfig(ConfigEnum::HttpLog, 'out.global') ?: Http::globalOptions([
             'headers' => HttpLogService::getLogHeaders(HttpLogHeaderEnum::Unknown),
             'curl' => [
                 CURLOPT_FOLLOWLOCATION => true,
@@ -180,7 +181,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Подключение middleware глобально
         $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
         $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
-        if (config('laravel-helper.http_log.in.global')) {
+        if (lhConfig(ConfigEnum::HttpLog, 'in.global')) {
             $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
             $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
         }

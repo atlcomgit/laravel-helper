@@ -5,6 +5,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Repositories\ModelLogRepository;
@@ -313,7 +314,7 @@ class ModelLogService extends DefaultService
      */
     public function log(ModelLogDto $dto): void
     {
-        $drivers = config('laravel-helper.model_log.drivers', []);
+        $drivers = lhConfig(ConfigEnum::ModelLog, 'drivers', []);
 
         foreach ($drivers as $driver) {
             try {
@@ -321,7 +322,7 @@ class ModelLogService extends DefaultService
 
                 switch (ModelLogDriverEnum::enumFrom($driver)) {
                     case ModelLogDriverEnum::File:
-                        if ($file = config('laravel-helper.model_log.file')) {
+                        if ($file = lhConfig(ConfigEnum::ModelLog, 'file')) {
                             file_put_contents(
                                 $file,
                                 now()->format('d-m-Y H:i:s') . ' '
@@ -358,7 +359,7 @@ class ModelLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!config('laravel-helper.model_log.enabled')) {
+        if (!lhConfig(ConfigEnum::ModelLog, 'enabled')) {
             return 0;
         }
 

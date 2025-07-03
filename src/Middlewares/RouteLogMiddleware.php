@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Middlewares;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 use Closure;
@@ -33,7 +34,7 @@ final class RouteLogMiddleware
     {
         ApplicationDto::create(type: ApplicationTypeEnum::Http, class: $request->route()?->getControllerClass());
 
-        if (config('laravel-helper.route_log.enabled')) {
+        if (lhConfig(ConfigEnum::RouteLog, 'enabled')) {
             $dto = RouteLogDto::create(
                 method: $request->method(),
                 uri: $this->routeLogService->getRouteByRequest($request)?->uri ?? $request->getPathInfo(),

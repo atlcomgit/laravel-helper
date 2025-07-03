@@ -8,6 +8,7 @@ use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
@@ -16,6 +17,7 @@ use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -36,6 +38,30 @@ use Symfony\Component\Finder\SplFileInfo;
 class LaravelHelperService extends DefaultService
 {
     /**
+     * Возвращает название соединения БД к таблице лога
+     *
+     * @param ConfigEnum $config
+     * @return string
+     */
+    public static function getConnection(ConfigEnum $config): string
+    {
+        return isTesting() ? DefaultTest::ENV : lhConfig($config, 'connection');
+    }
+
+
+    /**
+     * Возвращает название таблицы лога
+     *
+     * @param ConfigEnum $config
+     * @return string
+     */
+    public static function getTable(ConfigEnum $config): string
+    {
+        return lhConfig($config, 'table');
+    }
+
+
+    /**
      * Проверяет параметры конфига laravel-helper
      *
      * @return void
@@ -45,37 +71,43 @@ class LaravelHelperService extends DefaultService
         $config = Hlp::arrayDot((array)config('laravel-helper') ?? []);
 
         !(
-            ($config[$param = 'console_log.queue'] ?? null)
-            && ($config[$param = 'console_log.connection'] ?? null)
-            && ($config[$param = 'console_log.table'] ?? null)
-            && ($config[$param = 'console_log.model'] ?? null)
-            && ($config[$param = 'console_log.cleanup_days'] ?? null)
+            ($config[$param = ConfigEnum::ConsoleLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::ConsoleLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::ConsoleLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::ConsoleLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::ConsoleLog->value . 'cleanup_days'] ?? null)
 
-            && ($config[$param = 'http_log.queue'] ?? null)
-            && ($config[$param = 'http_log.connection'] ?? null)
-            && ($config[$param = 'http_log.table'] ?? null)
-            && ($config[$param = 'http_log.model'] ?? null)
-            && ($config[$param = 'http_log.cleanup_days'] ?? null)
+            && ($config[$param = ConfigEnum::HttpLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::HttpLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::HttpLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::HttpLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::HttpLog->value . 'cleanup_days'] ?? null)
 
-            && ($config[$param = 'model_log.queue'] ?? null)
-            && ($config[$param = 'model_log.connection'] ?? null)
-            && ($config[$param = 'model_log.table'] ?? null)
-            && ($config[$param = 'model_log.model'] ?? null)
-            && ($config[$param = 'model_log.cleanup_days'] ?? null)
-            && ($config[$param = 'model_log.drivers'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'cleanup_days'] ?? null)
+            && ($config[$param = ConfigEnum::ModelLog->value . 'drivers'] ?? null)
 
-            && ($config[$param = 'route_log.queue'] ?? null)
-            && ($config[$param = 'route_log.connection'] ?? null)
-            && ($config[$param = 'route_log.table'] ?? null)
-            && ($config[$param = 'route_log.model'] ?? null)
+            && ($config[$param = ConfigEnum::RouteLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::RouteLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::RouteLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::RouteLog->value . 'model'] ?? null)
 
-            && ($config[$param = 'queue_log.queue'] ?? null)
-            && ($config[$param = 'queue_log.connection'] ?? null)
-            && ($config[$param = 'queue_log.table'] ?? null)
-            && ($config[$param = 'queue_log.model'] ?? null)
-            && ($config[$param = 'queue_log.cleanup_days'] ?? null)
+            && ($config[$param = ConfigEnum::QueryLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::QueryLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::QueryLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::QueryLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::QueryLog->value . 'cleanup_days'] ?? null)
 
-            && ($config[$param = 'telegram_log.queue'] ?? null)
+            && ($config[$param = ConfigEnum::QueueLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::QueueLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::QueueLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::QueueLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::QueueLog->value . 'cleanup_days'] ?? null)
+
+            && ($config[$param = ConfigEnum::TelegramLog->value . 'queue'] ?? null)
 
         ) ?? throw new WithoutTelegramException("Не указан параметр в конфиге: laravel-helper.{$param}");
     }
@@ -131,13 +163,13 @@ class LaravelHelperService extends DefaultService
         static $ignoreTables = null;
 
         $ignoreTables ??= [
-            config('laravel-helper.console_log.table'),
-            config('laravel-helper.http_log.table'),
-            config('laravel-helper.model_log.table'),
-            config('laravel-helper.queue_log.table'),
-            config('laravel-helper.query_log.table'),
-            config('laravel-helper.route_log.table'),
-            config('laravel-helper.view_log.table'),
+            lhConfig(ConfigEnum::ConsoleLog, 'table'),
+            lhConfig(ConfigEnum::HttpLog, 'table'),
+            lhConfig(ConfigEnum::ModelLog, 'table'),
+            lhConfig(ConfigEnum::QueueLog, 'table'),
+            lhConfig(ConfigEnum::QueryLog, 'table'),
+            lhConfig(ConfigEnum::RouteLog, 'table'),
+            lhConfig(ConfigEnum::ViewLog, 'table'),
             config('cache.stores.database.table', 'cache'),
             'pg_catalog.*',
             'pg_attrdef',
@@ -160,63 +192,72 @@ class LaravelHelperService extends DefaultService
         switch ($dto::class) {
 
             case ConsoleLogDto::class:
+                $config = ConfigEnum::ConsoleLog;
                 /** @var ConsoleLogDto $dto */
-                $can = config('laravel-helper.console_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.console_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
 
             case HttpLogDto::class:
+                $config = ConfigEnum::HttpLog;
                 /** @var HttpLogDto $dto */
                 $type = $dto->type->value;
-                $can = config("laravel-helper.http_log.{$type}.enabled")
-                    && $this->notFoundConfigExclude("laravel-helper.http_log.{$type}.exclude", $dto)
+                $can = lhConfig($config, 'enabled')
+                    && lhConfig($config, "{$type}.enabled")
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
                 ;
                 break;
 
             case ModelLogDto::class:
+                $config = ConfigEnum::ModelLog;
                 /** @var ModelLogDto $dto */
-                $can = config('laravel-helper.model_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.model_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
 
             case QueryLogDto::class:
+                $config = ConfigEnum::QueryLog;
                 /** @var QueryLogDto $dto */
-                $can = config('laravel-helper.query_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.query_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                     && $this->notFoundIgnoreTables($dto->info['tables'] ?? [])
-                    && !Hlp::arraySearchValues($dto->info['tables'] ?? [], [config('laravel-helper.query_log.table')])
+                    && !Hlp::arraySearchValues($dto->info['tables'] ?? [], [lhConfig($config, 'table')])
                 ;
                 break;
 
             case QueueLogDto::class:
+                $config = ConfigEnum::QueueLog;
                 /** @var QueueLogDto $dto */
-                $can = config('laravel-helper.queue_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.queue_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                     && (($dto->info['class'] ?? null) !== QueueLogJob::class)
                 ;
                 break;
 
             case RouteLogDto::class:
+                $config = ConfigEnum::RouteLog;
                 /** @var RouteLogDto $dto */
-                $can = config('laravel-helper.route_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.route_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
 
             case TelegramLogDto::class:
+                $config = ConfigEnum::TelegramLog;
                 /** @var TelegramLogDto $dto */
                 $type = $dto->type;
-                $can = config('laravel-helper.telegram_log.enabled')
-                    && $this->notFoundConfigExclude("laravel-helper.telegram_log.{$type}.exclude", $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
                 ;
                 break;
 
             case ViewLogDto::class:
+                $config = ConfigEnum::ViewLog;
                 /** @var ViewLogDto $dto */
-                $can = config('laravel-helper.view_log.enabled')
-                    && $this->notFoundConfigExclude('laravel-helper.view_log.exclude', $dto)
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
 
@@ -264,13 +305,13 @@ class LaravelHelperService extends DefaultService
         }
 
         return $tables[$table] = match (true) {
-            $table === config('laravel-helper.console_log.table') => ConsoleLog::class,
-            $table === config('laravel-helper.http_log.table') => HttpLog::class,
-            $table === config('laravel-helper.model_log.table') => ModelLog::class,
-            $table === config('laravel-helper.query_log.table') => QueryLog::class,
-            $table === config('laravel-helper.queue_log.table') => QueueLog::class,
-            $table === config('laravel-helper.route_log.table') => RouteLog::class,
-            $table === config('laravel-helper.view_log.table') => ViewLog::class,
+            $table === lhConfig(ConfigEnum::ConsoleLog, 'table') => ConsoleLog::class,
+            $table === lhConfig(ConfigEnum::HttpLog, 'table') => HttpLog::class,
+            $table === lhConfig(ConfigEnum::ModelLog, 'table') => ModelLog::class,
+            $table === lhConfig(ConfigEnum::QueryLog, 'table') => QueryLog::class,
+            $table === lhConfig(ConfigEnum::QueueLog, 'table') => QueueLog::class,
+            $table === lhConfig(ConfigEnum::RouteLog, 'table') => RouteLog::class,
+            $table === lhConfig(ConfigEnum::ViewLog, 'table') => ViewLog::class,
 
             default => null,
         };

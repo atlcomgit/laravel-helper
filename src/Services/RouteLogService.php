@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Repositories\RouteLogRepository;
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteCollectionInterface;
@@ -62,7 +63,7 @@ class RouteLogService extends DefaultService
      */
     public function cleanup(): int
     {
-        if (!config('laravel-helper.route_log.enabled')) {
+        if (!lhConfig(ConfigEnum::RouteLog, 'enabled')) {
             return 0;
         }
 

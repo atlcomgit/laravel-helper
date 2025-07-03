@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\LaravelHelper\Defaults\DefaultTest;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
@@ -11,6 +13,7 @@ use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Atlcom\LaravelHelper\Models\ViewLog;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -56,13 +59,15 @@ trait DynamicTableModelTrait
     /**
      * Возвращает конструктор запроса с указанием соединения
      *
-     * @param string $connection
-     * @param string $table
+     * @param ConfigEnum $config
      * @return Builder
      */
-    public static function queryFrom(string $connection, string $table): Builder
+    public static function queryFrom(ConfigEnum $config): Builder
     {
-        return (new static())->setConnection($connection)->setTable($table)->newQuery();
+        return (new static())
+            ->setConnection(LaravelHelperService::getConnection($config))
+            ->setTable(LaravelHelperService::getTable($config))
+            ->newQuery();
     }
 
 
@@ -75,40 +80,13 @@ trait DynamicTableModelTrait
     public static function query()
     {
         return match (static::class) {
-            ConsoleLog::class => static::queryFrom(
-                connection: config('laravel-helper.console_log.connection'),
-                table: config('laravel-helper.console_log.table'),
-            ),
-
-            HttpLog::class => static::queryFrom(
-                connection: config('laravel-helper.http_log.connection'),
-                table: config('laravel-helper.http_log.table'),
-            ),
-
-            ModelLog::class => static::queryFrom(
-                connection: config('laravel-helper.model_log.connection'),
-                table: config('laravel-helper.model_log.table'),
-            ),
-
-            QueryLog::class => static::queryFrom(
-                connection: config('laravel-helper.query_log.connection'),
-                table: config('laravel-helper.query_log.table'),
-            ),
-
-            QueueLog::class => static::queryFrom(
-                connection: config('laravel-helper.queue_log.connection'),
-                table: config('laravel-helper.queue_log.table'),
-            ),
-
-            RouteLog::class => static::queryFrom(
-                connection: config('laravel-helper.route_log.connection'),
-                table: config('laravel-helper.route_log.table'),
-            ),
-
-            ViewLog::class => static::queryFrom(
-                connection: config('laravel-helper.view_log.connection'),
-                table: config('laravel-helper.view_log.table'),
-            ),
+            ConsoleLog::class => static::queryFrom(ConfigEnum::ConsoleLog),
+            HttpLog::class => static::queryFrom(ConfigEnum::HttpLog),
+            ModelLog::class => static::queryFrom(ConfigEnum::ModelLog),
+            QueryLog::class => static::queryFrom(ConfigEnum::QueryLog),
+            QueueLog::class => static::queryFrom(ConfigEnum::QueueLog),
+            RouteLog::class => static::queryFrom(ConfigEnum::RouteLog),
+            ViewLog::class => static::queryFrom(ConfigEnum::ViewLog),
 
             default => parent::query(),
         };

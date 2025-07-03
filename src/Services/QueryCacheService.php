@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\QueryCacheEventDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 use Atlcom\LaravelHelper\Events\QueryCacheEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
@@ -48,10 +49,10 @@ class QueryCacheService extends DefaultService
 
     public function __construct()
     {
-        $this->driver = config('laravel-helper.query_cache.driver') ?: config('cache.default');
-        $this->exclude = config('laravel-helper.query_cache.exclude') ?? [];
-        $this->gzdeflateEnabled = config('laravel-helper.query_cache.gzdeflate.enabled') ?? false;
-        $this->gzdeflateLevel = config('laravel-helper.query_cache.gzdeflate.level') ?? -1;
+        $this->driver = lhConfig(ConfigEnum::QueryCache, 'driver') ?: config('cache.default');
+        $this->exclude = lhConfig(ConfigEnum::QueryCache, 'exclude') ?? [];
+        $this->gzdeflateEnabled = lhConfig(ConfigEnum::QueryCache, 'gzdeflate.enabled') ?? false;
+        $this->gzdeflateLevel = lhConfig(ConfigEnum::QueryCache, 'gzdeflate.level') ?? -1;
     }
 
 
@@ -215,7 +216,7 @@ class QueryCacheService extends DefaultService
 
                 $ttl = match (true) {
                     is_integer($ttl) => $ttl,
-                    is_null($ttl), $ttl === true => (int)config('laravel-helper.query_cache.ttl'),
+                    is_null($ttl), $ttl === true => (int)lhConfig(ConfigEnum::QueryCache, 'ttl'),
 
                     default => false,
                 };
@@ -358,7 +359,7 @@ class QueryCacheService extends DefaultService
                     return Cache::driver($this->driver)->tags($tags)->has($key);
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -377,7 +378,7 @@ class QueryCacheService extends DefaultService
                     }
 
                     $ttl = match ($ttlSplit = Hlp::stringSplit($key, static::CACHE_TAGS_DELIMITER, $ttls[$ttlMask][0] ?? 0)) {
-                        'ttl_default' => (int)config('laravel-helper.query_cache.ttl'),
+                        'ttl_default' => (int)lhConfig(ConfigEnum::QueryCache, 'ttl'),
                         'ttl_not_set' => null,
 
                         default => Hlp::castToInt(Hlp::stringSplit($ttlSplit, '_', -1)),
@@ -464,7 +465,7 @@ class QueryCacheService extends DefaultService
                     return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl ?: null);
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -543,7 +544,7 @@ class QueryCacheService extends DefaultService
                     break;
 
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/')
+                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -630,7 +631,7 @@ class QueryCacheService extends DefaultService
 
                 // CACHE_STORE=file
                 case FileStore::class:
-                    $path = rtrim(config('laravel-helper.query_cache.driver_file_path'), '/');
+                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/');
 
                     if (!$path || !File::exists($path)) {
                         return;

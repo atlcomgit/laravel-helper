@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
@@ -71,12 +72,12 @@ class DefaultController extends Controller
 
 
             $render = (
-                config('laravel-helper.view_cache.enabled')
+                lhConfig(ConfigEnum::ViewCache, 'enabled')
                 && (
                     $this->withViewCache === true
                     || is_integer($this->withViewCache)
                     || is_null($this->withViewCache)
-                    || ($this->withViewCache !== false && config('laravel-helper.view_cache.global'))
+                    || ($this->withViewCache !== false && lhConfig(ConfigEnum::ViewCache, 'global'))
                 )
             )
                 ? app(ViewCacheService::class)

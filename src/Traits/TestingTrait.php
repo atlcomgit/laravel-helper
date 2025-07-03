@@ -6,10 +6,10 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -20,12 +20,11 @@ use Throwable;
 trait TestingTrait
 {
     use CreatesApplication;
-    use RefreshDatabase;
+
 
     public const ENV = 'testing';
 
-    protected static bool $refreshDatabase = false;
-    protected static ?User $user = null;
+    protected ?User $user = null;
 
 
     /**
@@ -43,7 +42,7 @@ trait TestingTrait
 
 
     /**
-     * Старт тестов
+     * Старт класса теста
      *
      * @return void
      */
@@ -54,18 +53,55 @@ trait TestingTrait
 
 
     /**
-     * Начальная настройка тестов
+     * Настройка перед запуском теста
      *
      * @return void
      */
     protected function setUp(): void
     {
-        echo PHP_EOL . class_basename($this->toString()) . ' ';
+        echo PHP_EOL . class_basename($this->toString()) . ' '; //?!? перенести в TestingDto
 
         parent::setUp();
 
-        // Авторизуем все тесты
-        !static::$user ?: $this->actingAs(static::$user);
+        static $started = false;
+        static $user = null;
+
+        $this->setConfig();
+
+        if (!$started) {
+            //?!? TestingDto::create() - register_shutdown_function([TestingDto::class, 'onAllTestsCompleted']);
+            !lhConfig(ConfigEnum::Testing, 'database.fresh') ?: $this->artisan('migrate:fresh');
+
+            // Авторизуем все тесты
+            if (!$user && $userData = array_filter(lhConfig(ConfigEnum::Testing, 'user') ?? [])) {
+                $userClass = lhConfig(ConfigEnum::App, 'user');
+                $user = method_exists($userClass, 'factory')
+                    ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
+                    : $userClass::firstOrCreate($user);
+            }
+
+            // Запускаем сидеры
+            !lhConfig(ConfigEnum::Testing, 'database.seed') ?: $this->artisan('db:seed', []);
+
+            $started = true;
+        }
+
+        !$user ?: $this->actingAs($user);
+
+        DB::beginTransaction();
+    }
+
+
+    /**
+     * Настройка после выполнения теста
+     *
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        DB::rollBack();
+
+        parent::tearDown();
     }
 
 
@@ -75,24 +111,38 @@ trait TestingTrait
      * 
      * @return void
      */
-    protected function beforeRefreshingDatabase()
+    protected function setConfig()
     {
         ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
 
-        Config::set('app.env', env('APP_ENV'));
         (($appEnv = env('APP_ENV')) === static::ENV)
             ?: throw new WithoutTelegramException("APP_ENV = {$appEnv}: не является тестовой");
         ($isTesting = (int)isTesting())
             ?: throw new WithoutTelegramException("isTesting() = {$isTesting}: не является тестовым");
+        Config::set('app.env', $appEnv);
 
         Config::set('app.debug', false);
         Config::set('app.debug_data', true);
         Config::set('app.debug_trace', true);
         Config::set('app.debug_trace_vendor', false);
 
-        Config::set('database.default', env('DB_CONNECTION'));
-        (($dbConnection = env('DB_CONNECTION')) === static::ENV)
-            ?: throw new WithoutTelegramException("DB_CONNECTION = {$dbConnection}: не является тестовой");
+        $config = ConfigEnum::App;
+        Config::set("laravel-helper.{$config->value}.debug", false);
+        Config::set("laravel-helper.{$config->value}.debug_data", true);
+        Config::set("laravel-helper.{$config->value}.debug_trace", true);
+        Config::set("laravel-helper.{$config->value}.debug_trace_vendor", false);
+
+        (($connection = env('DB_CONNECTION')) === $appEnv)
+            ?: throw new WithoutTelegramException("DB_CONNECTION = {$connection}: не является тестовой");
+        Config::set('database.default', $connection);
+
+        $connectionTesting = config("database.connections.{$appEnv}");
+        Config::set('telescope.storage.database.connection', $appEnv);
+        Config::set('database.connections.sqlite', $connectionTesting);
+        Config::set('database.connections.mysql', $connectionTesting);
+        Config::set('database.connections.mariadb', $connectionTesting);
+        Config::set('database.connections.pgsql', $connectionTesting);
+        Config::set('database.connections.sqlsrv', $connectionTesting);
 
         Config::set('cache.default', env('CACHE_DRIVER'));
         Config::set('session.default', env('SESSION_DRIVER'));
@@ -100,65 +150,54 @@ trait TestingTrait
         Config::set('mail.default', env('MAIL_MAILER'));
         Config::set('telescope.enabled', env('TELESCOPE_ENABLED'));
 
-        Config::set('database.connections.sqlite', config('database.connections.testing'));
-        Config::set('database.connections.mysql', config('database.connections.testing'));
-        Config::set('database.connections.mariadb', config('database.connections.testing'));
-        Config::set('database.connections.pgsql', config('database.connections.testing'));
-        Config::set('database.connections.sqlsrv', config('database.connections.testing'));
-        Config::set('telescope.storage.database.connection', static::ENV);
+        $helperEnabled = lhConfig(ConfigEnum::Testing, 'log.enabled');
+        if ($helperEnabled !== null) {
+            $config = ConfigEnum::ConsoleLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::HttpLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::ModelLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::RouteLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::QueryCache;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::QueryLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::QueueLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::TelegramLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::ViewCache;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            $config = ConfigEnum::ViewLog;
+            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+        }
 
-        $helperEnabled = config('laravel-helper.testing.log.enabled');
-        Config::set('laravel-helper.console_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.http_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.model_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.route_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.query_cache.enabled', $helperEnabled);
-        Config::set('laravel-helper.query_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.queue_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.telegram_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.view_log.enabled', $helperEnabled);
-        Config::set('laravel-helper.view_cache.enabled', $helperEnabled);
+        ($databaseTesting = $connectionTesting['database'] ?: '')
+            ?: throw new WithoutTelegramException("Не задано название тестовой базы данных");
 
-        $databaseTesting = config('laravel-helper.testing.database.name');
-        switch (env('DB_CONNECTION_TESTING')) {
+        switch (config("database.connections.{$connection}.driver")) {
             case 'pgsql':
-                DB::connection(static::ENV)->select(
+                DB::connection($appEnv)->select(
                     "SELECT 1 FROM pg_database WHERE datname = ?",
                     [$databaseTesting],
                 )
-                    ?: DB::connection(static::ENV)->statement("CREATE DATABASE \"$databaseTesting\"");
+                    ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS \"$databaseTesting\"");
                 break;
 
             case 'mysql':
-                DB::connection(static::ENV)->select(
+                DB::connection($appEnv)->select(
                     "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
                     [$databaseTesting],
                 )
-                    ?: DB::connection(static::ENV)->statement("CREATE DATABASE `$databaseTesting`");
+                    ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS `$databaseTesting`");
                 break;
 
             case 'sqlite':
                 file_exists(storage_path("{$databaseTesting}.sqlite"))
                     ?: touch(storage_path("{$databaseTesting}.sqlite"));
                 break;
-        }
-    }
-
-
-    /**
-     * Настройка тестов после миграции тестовой базы
-     *
-     * @return void
-     */
-    protected function afterRefreshingDatabase()
-    {
-        if (!static::$refreshDatabase) {
-            // Запускаем сидеры
-            !config('laravel-helper.testing.database.seed') ?: $this->seed();
-
-            $user = array_filter(config('laravel-helper.testing.user') ?? []);
-            !$user ?: static::$user = User::firstOrCreate($user);
-            static::$refreshDatabase = true;
         }
     }
 

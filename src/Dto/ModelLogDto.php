@@ -3,6 +3,7 @@
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Jobs\ModelLogJob;
 use Atlcom\LaravelHelper\Models\ModelLog;
@@ -113,7 +114,7 @@ class ModelLogDto extends DefaultDto
     public function dispatch()
     {
         if (app(LaravelHelperService::class)->canDispatch($this)) {
-            config('laravel-helper.model_log.queue_dispatch_sync')
+            (lhConfig(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ModelLogJob::dispatchSync($this)
                 : ModelLogJob::dispatch($this);
         }
