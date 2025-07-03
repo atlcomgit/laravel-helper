@@ -1025,16 +1025,58 @@ trait QueryTrait
             }
 
             if ($modelClass) {
-                $models = $type === ModelLogTypeEnum::Create
-                    ? [(new $modelClass())->fill($attributes)]
-                    : DB::table($table)
-                        ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
-                        ->when(
-                            Hlp::stringSplitRange($sql, [' where ', ' WHERE '], 1),
-                            static fn ($q, $v) => $q->whereRaw($v),
-                        )
-                        ->get()
-                        ->map(static fn ($item) => new $modelClass(Hlp::castToArray($item)));
+                switch ($type) {
+                    case ModelLogTypeEnum::Create:
+                        $models = [(new $modelClass())->fill($attributes)];
+                        break;
+
+                    default:
+                        try {
+                            $primaryKey = (new $modelClass())->getKeyName();
+                            $models = DB::table($table)
+                                ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
+                                ->when(
+                                    Hlp::stringSplitRange($sql, [' where ', ' WHERE '], 1),
+                                    static fn ($q, $v) => $q->whereRaw($v),
+                                )
+                                ->get()
+                                ->map(
+                                    static function ($item) use ($modelClass, $primaryKey) {
+                                        $model = new $modelClass(Hlp::castToArray($item));
+                                        $model->$primaryKey = $item->$primaryKey;
+
+                                        return $model;
+                                    }
+                                );
+                        } catch (Throwable $exception) {
+                            try {
+                                $whereAttributes = [];
+                                foreach ($attributes as $column => $value) {
+                                    $whereAttributes[$column] = match (true) {
+                                        is_scalar($value) => $value,
+                                        is_array($value) || is_object($value) => Hlp::castToArray($value),
+
+                                        default => $value,
+                                    };
+                                }
+
+                                $models = DB::table($table)
+                                    ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
+                                    ->where($whereAttributes)
+                                    ->get()
+                                    ->map(
+                                        static function ($item) use ($modelClass, $primaryKey) {
+                                            $model = new $modelClass(Hlp::castToArray($item));
+                                            $model->$primaryKey = $item->$primaryKey;
+
+                                            return $model;
+                                        }
+                                    );
+                            } catch (Throwable $exception) {
+                                $models = [];
+                            }
+                        }
+                }
 
                 foreach ($models as $model) {
                     if ($model && $model instanceof Model) {

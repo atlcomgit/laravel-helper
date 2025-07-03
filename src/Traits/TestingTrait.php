@@ -20,9 +20,7 @@ use Throwable;
 trait TestingTrait
 {
     use CreatesApplication;
-    use RefreshDatabase {
-        refreshDatabase as baseRefreshDatabase;
-    }
+    use RefreshDatabase;
 
     public const ENV = 'testing';
 
@@ -68,18 +66,6 @@ trait TestingTrait
 
         // Авторизуем все тесты
         !static::$user ?: $this->actingAs(static::$user);
-    }
-
-
-    /**
-     * [Description for refreshDatabase]
-     * @see parent::refreshDatabase()
-     *
-     * @return void
-     */
-    public function refreshDatabase()
-    {
-        $this->baseRefreshDatabase();
     }
 
 

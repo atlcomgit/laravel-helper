@@ -54,7 +54,7 @@ trait ModelCacheTrait
         $builder = new EloquentBuilder($query);
         $builder->getQuery()->setQueryCache(null);
         $builder->getQuery()->setQueryLog(null);
-        $builder->getQuery()->setModelLog(null);
+        $builder->getQuery()->setModelLog($this->withModelLog);
 
         return $builder;
     }
