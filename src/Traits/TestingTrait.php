@@ -81,7 +81,10 @@ trait TestingTrait
             // register_shutdown_function([static::class, 'onFinishTest']);
 
             // Запускаем полную миграцию БД
-            !lhConfig(ConfigEnum::TestingLog, 'database.fresh') ?: $this->artisan('migrate:fresh');
+            if (lhConfig(ConfigEnum::TestingLog, 'database.fresh')) {
+                $this->artisan('migrate:fresh');
+                $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
+            }
 
             // Получаем пользователя для авторизации
             if (!$user && $userData = array_filter(lhConfig(ConfigEnum::TestingLog, 'user') ?? [])) {

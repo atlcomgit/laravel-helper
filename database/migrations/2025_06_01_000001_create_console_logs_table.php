@@ -13,14 +13,11 @@ use Illuminate\Support\Facades\Schema;
  * @see \Atlcom\LaravelHelper\Models\ConsoleLog
  */
 return new class extends Migration {
-    public ConfigEnum $config = ConfigEnum::ConsoleLog;
-
-
     public function up(): void
     {
-        $connection = config($config = LaravelHelperService::getConnection($this->config))
+        $connection = config($config = LaravelHelperService::getConnection(ConfigEnum::ConsoleLog))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = LaravelHelperService::getTable($this->config))
+        $table = config($config = LaravelHelperService::getTable(ConfigEnum::ConsoleLog))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);
@@ -63,9 +60,9 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $connection = config($config = LaravelHelperService::getConnection($this->config))
+        $connection = config($config = LaravelHelperService::getConnection(ConfigEnum::ConsoleLog))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = LaravelHelperService::getTable($this->config))
+        $table = config($config = LaravelHelperService::getTable(ConfigEnum::ConsoleLog))
             ?? throw new Exception("Не указан параметр в конфиге: {$config}");
 
         Schema::connection($connection)->dropIfExists($table);
