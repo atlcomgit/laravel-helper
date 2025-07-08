@@ -176,6 +176,7 @@ class LaravelHelperService extends DefaultService
             'information_schema.*',
             'table_schema.*',
             'telescope_*',
+            'migrations',
         ];
 
         return empty(Hlp::arraySearchValues($tables, $ignoreTables));

@@ -14,10 +14,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        $connection = config($config = LaravelHelperService::getConnection(ConfigEnum::RouteLog))
-            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = LaravelHelperService::getTable(ConfigEnum::RouteLog))
-            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
+        $config = ConfigEnum::RouteLog;
+        $connection = LaravelHelperService::getConnection($config)
+            ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
+        $table = LaravelHelperService::getTable($config)
+            ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);
 
@@ -46,10 +47,11 @@ return new class extends Migration {
 
     public function down(): void
     {
-        $connection = config($config = LaravelHelperService::getConnection(ConfigEnum::RouteLog))
-            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
-        $table = config($config = LaravelHelperService::getTable(ConfigEnum::RouteLog))
-            ?? throw new Exception("Не указан параметр в конфиге: {$config}");
+        $config = ConfigEnum::RouteLog;
+        $connection = LaravelHelperService::getConnection($config)
+            ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
+        $table = LaravelHelperService::getTable($config)
+            ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);
     }

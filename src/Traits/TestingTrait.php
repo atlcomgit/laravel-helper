@@ -75,27 +75,34 @@ trait TestingTrait
         $this->setConfig();
 
         if (!$started) {
-            ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
+            if (lhConfig(ConfigEnum::TestingLog, 'enabled')) {
+                ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
 
-            // Регистрируем функцию завершения тестов
-            // register_shutdown_function([static::class, 'onFinishTest']);
+                // Регистрируем функцию завершения тестов
+                // register_shutdown_function([static::class, 'onFinishTest']);
 
-            // Запускаем полную миграцию БД
-            if (lhConfig(ConfigEnum::TestingLog, 'database.fresh')) {
-                $this->artisan('migrate:fresh');
-                $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
+                // Запускаем полную миграцию БД
+                if (lhConfig(ConfigEnum::TestingLog, 'database.fresh')) {
+                    $config = ConfigEnum::ModelLog;
+                    Config::set("laravel-helper.{$config->value}.enabled", false);
+
+                    $this->artisan('migrate:fresh');
+                    $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
+                }
+
+                // Получаем пользователя для авторизации
+                if (!$user && $userData = array_filter(lhConfig(ConfigEnum::TestingLog, 'user') ?? [])) {
+                    $userClass = lhConfig(ConfigEnum::App, 'user');
+                    $user = method_exists($userClass, 'factory')
+                        ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
+                        : $userClass::firstOrCreate($user);
+                }
+
+                // Запускаем сидеры
+                if (lhConfig(ConfigEnum::TestingLog, 'database.seed')) {
+                    $this->artisan('db:seed', []);
+                }
             }
-
-            // Получаем пользователя для авторизации
-            if (!$user && $userData = array_filter(lhConfig(ConfigEnum::TestingLog, 'user') ?? [])) {
-                $userClass = lhConfig(ConfigEnum::App, 'user');
-                $user = method_exists($userClass, 'factory')
-                    ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
-                    : $userClass::firstOrCreate($user);
-            }
-
-            // Запускаем сидеры
-            !lhConfig(ConfigEnum::TestingLog, 'database.seed') ?: $this->artisan('db:seed', []);
 
             $started = true;
         }
