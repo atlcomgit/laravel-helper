@@ -548,7 +548,7 @@ return [
 
         'helper_logs' => [
             // Флаг включения логов
-            'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', false),
         ],
 
         // Пользователь для тестов

@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
@@ -81,13 +82,25 @@ trait TestingTrait
                 // Регистрируем функцию завершения тестов
                 // register_shutdown_function([static::class, 'onFinishTest']);
 
+                // Вычисляем хеш миграций
+                $migrations = DB::table('migrations')->get();
+                $migrationsHashCurrent = Hlp::hashXxh128(json($migrations));
+                $migrationsHashPrevious = Storage::get(storage_path('framework/testing/migrations.hash'));
+
                 // Запускаем полную миграцию БД
-                if (lhConfig(ConfigEnum::TestingLog, 'database.fresh')) {
+                if (lhConfig(ConfigEnum::TestingLog, 'database.fresh') || $migrationsHashCurrent !== $migrationsHashPrevious) {
                     $config = ConfigEnum::ModelLog;
                     Config::set("laravel-helper.{$config->value}.enabled", false);
 
                     $this->artisan('migrate:fresh');
                     $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
+
+                    // Запускаем сидеры
+                    if (lhConfig(ConfigEnum::TestingLog, 'database.seed')) {
+                        $this->artisan('db:seed', []);
+                    }
+
+                    Storage::put(storage_path('framework/testing/migrations.hash'), $migrationsHashCurrent);
                 }
 
                 // Получаем пользователя для авторизации
@@ -96,11 +109,6 @@ trait TestingTrait
                     $user = method_exists($userClass, 'factory')
                         ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
                         : $userClass::firstOrCreate($user);
-                }
-
-                // Запускаем сидеры
-                if (lhConfig(ConfigEnum::TestingLog, 'database.seed')) {
-                    $this->artisan('db:seed', []);
                 }
             }
 
