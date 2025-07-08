@@ -8,6 +8,8 @@ use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
@@ -29,9 +31,13 @@ class RouteLogRepository extends DefaultRepository
      */
     public function new(RouteLogDto $dto): RouteLog
     {
-        return $this->withoutTelescope(fn () => (new $this->routeLogClass($dto->toArray()))
-            ->setConnection(lhConfig(ConfigEnum::RouteLog, 'connection'))
-            ->setTable(lhConfig(ConfigEnum::RouteLog, 'table')));
+        $laravelHelperService = app(LaravelHelperService::class);
+
+        return $this->withoutTelescope(
+            fn () => (new $this->routeLogClass($dto->toArray()))
+                ->setConnection($laravelHelperService->getConnection(ConfigEnum::RouteLog))
+                ->setTable($laravelHelperService->getTable(ConfigEnum::RouteLog))
+        );
     }
 
 
@@ -92,17 +98,15 @@ class RouteLogRepository extends DefaultRepository
     {
         $this->withoutTelescope(function () use ($dto) {
             try {
-                /** @var RouteLog $routeLog */
-                $routeLog = $this->routeLogClass::query()
+                $this->routeLogClass::query()
                     ->withoutQueryLog()
                     ->withoutQueryCache()
                     ->ofMethod($dto->method)
                     ->ofUri($dto->uri)
-                    ->first()
-                    ?? $this->new($dto);
-                $routeLog->controller = $dto->controller;
-                $routeLog->count++;
-                $routeLog->save();
+                    ->update([
+                        'controller' => $dto->controller,
+                        'count' => DB::raw('count + 1'),
+                    ]);
             } catch (Throwable $exception) {
             }
         });

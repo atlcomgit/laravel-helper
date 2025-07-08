@@ -23,10 +23,10 @@ enum ConfigEnum: string
     case QueueLog = 'queue_log';
     case RouteLog = 'route_log';
     case TelegramLog = 'telegram_log';
+    case TestingLog = 'testing_log';
     case ViewCache = 'view_cache';
     case ViewLog = 'view_log';
     case Http = 'http';
-    case Testing = 'testing';
 
 
     /**
@@ -60,10 +60,10 @@ enum ConfigEnum: string
             self::QueueLog => 'Лог очереди',
             self::RouteLog => 'Лог зарегистрированного роута',
             self::TelegramLog => 'Лог телеграм сообщения',
+            self::TestingLog => 'Лог тестирования',
             self::ViewCache => 'Кеш blade шаблона',
             self::ViewLog => 'Лог blade шаблона',
             self::Http => 'Макрос http',
-            self::Testing => 'Тестирование',
 
             default => null,
         };

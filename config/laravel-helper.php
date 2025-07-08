@@ -1,6 +1,7 @@
 <?php
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
@@ -34,7 +35,7 @@ return [
     /**
      * Application. Настройки пакета
      */
-    'app' => [
+    ConfigEnum::App->value => [
         // Версия настроек пакета laravel-helper
         'version' => '1.00',
         // Флаг включения отладочной информации в response
@@ -53,7 +54,7 @@ return [
     /**
      * Optimize. Настройки при выполнении команды оптимизации
      */
-    'optimize' => [
+    ConfigEnum::Optimize->value => [
         // Очистка таблиц
         'log_cleanup' => [
             // Флаг включения
@@ -70,7 +71,7 @@ return [
     /**
      * Macro. Включение макросов хелпера
      */
-    'macros' => [
+    ConfigEnum::Macros->value => [
         // Макросы конструктора query запросов
         'builder' => [
             // Флаг включения макросов
@@ -92,7 +93,7 @@ return [
     /**
      * ConsoleLog. Логирование консольных команд
      */
-    'console_log' => [
+    ConfigEnum::ConsoleLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_CONSOLE_LOG_ENABLED', false),
         // Название очереди для логов
@@ -121,7 +122,7 @@ return [
     /**
      * HttpLog. Логирование http запросов
      */
-    'http_log' => [
+    ConfigEnum::HttpLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_HTTP_LOG_ENABLED', false),
         // Название очереди для логов
@@ -171,7 +172,7 @@ return [
     /**
      * ModelLog. Логирование моделей
      */
-    'model_log' => [
+    ConfigEnum::ModelLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_MODEL_LOG_ENABLED', false),
         // Название очереди для логов
@@ -209,7 +210,7 @@ return [
     /**
      * RouteLog. Логирование роутов
      */
-    'route_log' => [
+    ConfigEnum::RouteLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_ROUTE_LOG_ENABLED', false),
         // Название очереди для логов
@@ -230,7 +231,7 @@ return [
     /**
      * QueryCache. Кеширование query запросов
      */
-    'query_cache' => [
+    ConfigEnum::QueryCache->value => [
         // Флаг включения кеша
         'enabled' => (bool)env('HELPER_QUERY_CACHE_ENABLED', true),
         // Название драйвера кеша
@@ -254,7 +255,7 @@ return [
     /**
      * QueryLog. Логирование query запросов
      */
-    'query_log' => [
+    ConfigEnum::QueryLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_QUERY_LOG_ENABLED', false),
         // Название очереди для логов
@@ -290,7 +291,7 @@ return [
     /**
      * QueueLog. Логирование очередей
      */
-    'queue_log' => [
+    ConfigEnum::QueueLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_QUEUE_LOG_ENABLED', false),
         // Название очереди для логов
@@ -326,7 +327,7 @@ return [
     /**
      * TelegramLog. Логирование в телеграм
      */
-    'telegram_log' => [
+    ConfigEnum::TelegramLog->value => [
         // Вкл/Выкл отправки в телеграм
         'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ENABLED', true),
         // Название очереди для логов
@@ -388,7 +389,7 @@ return [
     /**
      * Http Macro. Макросы исходящих http запросов через фасад Http
      */
-    'http' => [
+    ConfigEnum::Http->value => [
         // Сервис localhost
         'localhost' => [
             // Флаг включения макроса
@@ -484,7 +485,7 @@ return [
     /**
      * ViewLog. Логирование рендеринга blade шаблонов
      */
-    'view_log' => [
+    ConfigEnum::ViewLog->value => [
         // Флаг включения логов
         'enabled' => (bool)env('HELPER_VIEW_LOG_ENABLED', false),
         // Название очереди для логов
@@ -520,7 +521,7 @@ return [
     /**
      * ViewCache. Кеширование рендеринга blade шаблонов
      */
-    'view_cache' => [
+    ConfigEnum::ViewCache->value => [
         // Флаг включения кеша
         'enabled' => (bool)env('HELPER_VIEW_CACHE_ENABLED', true),
         // Название драйвера кеша
@@ -541,20 +542,24 @@ return [
     /**
      * Testing. Авто-тестирование
      */
-    'testing' => [
+    ConfigEnum::TestingLog->value => [
+        // Флаг включения логов
+        'enabled' => (bool)env('HELPER_TESTING_LOG_ENABLED', true),
+
+        'helper_logs' => [
+            // Флаг включения логов
+            'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', true),
+        ],
+
         // Пользователь для тестов
         'user' => [
-            'email' => (string)env('HELPER_TESTING_USER_EMAIL', 'testing@test.ru'),
-        ],
-        // Включение функционала хелпера при тестировании
-        'log' => [
-            'enabled' => (bool)env('HELPER_TESTING_LOG_ENABLED', true),
+            'email' => (string)env('HELPER_TESTING_LOG_USER_EMAIL', 'testing@test.ru'),
         ],
         // Настройка тестовой базы данных
         'database' => [
-            'name' => (string)env('HELPER_TESTING_DATABASE_NAME', 'testing'),
-            'fresh' => (bool)env('HELPER_TESTING_DATABASE_FRESH_ENABLED', true),
-            'seed' => (bool)env('HELPER_TESTING_DATABASE_SEED_ENABLED', true),
+            'name' => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
+            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', false),
+            'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', false),
         ],
     ],
 ];

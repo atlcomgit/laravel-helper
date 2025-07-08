@@ -19,14 +19,14 @@ if (!function_exists('lhConfig')) {
     /**
      * Возвращает конфиг по типу лога
      * 
-     * @param ConfigEnum $logType
-     * @param string $config
+     * @param ConfigEnum $configType
+     * @param string $configName
      * @param mixed $default
      * @return mixed
      */
-    function lhConfig(ConfigEnum $logType, string $config, mixed $default = null): mixed
+    function lhConfig(ConfigEnum $configType, string $configName, mixed $default = null): mixed
     {
-        return config("laravel-helper.{$logType->value}.{$config}", $default);
+        return config("laravel-helper.{$configType->value}.{$configName}", $default);
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция lhConfig() уже определена в приложении');

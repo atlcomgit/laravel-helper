@@ -21,6 +21,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
+use Atlcom\LaravelHelper\Listeners\TestFinishedListener;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;

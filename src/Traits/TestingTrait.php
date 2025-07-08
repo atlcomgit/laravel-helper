@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -20,6 +21,7 @@ use Throwable;
 trait TestingTrait
 {
     use CreatesApplication;
+    use DatabaseTransactions;
 
 
     public const ENV = 'testing';
@@ -52,6 +54,12 @@ trait TestingTrait
     }
 
 
+    public static function tearDownAfterClass(): void
+    {
+        parent::tearDownAfterClass();
+    }
+
+
     /**
      * Настройка перед запуском теста
      *
@@ -59,8 +67,6 @@ trait TestingTrait
      */
     protected function setUp(): void
     {
-        echo PHP_EOL . class_basename($this->toString()) . ' '; //?!? перенести в TestingDto
-
         parent::setUp();
 
         static $started = false;
@@ -69,11 +75,16 @@ trait TestingTrait
         $this->setConfig();
 
         if (!$started) {
-            //?!? TestingDto::create() - register_shutdown_function([TestingDto::class, 'onAllTestsCompleted']);
-            !lhConfig(ConfigEnum::Testing, 'database.fresh') ?: $this->artisan('migrate:fresh');
+            ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
 
-            // Авторизуем все тесты
-            if (!$user && $userData = array_filter(lhConfig(ConfigEnum::Testing, 'user') ?? [])) {
+            // Регистрируем функцию завершения тестов
+            // register_shutdown_function([static::class, 'onFinishTest']);
+
+            // Запускаем полную миграцию БД
+            !lhConfig(ConfigEnum::TestingLog, 'database.fresh') ?: $this->artisan('migrate:fresh');
+
+            // Получаем пользователя для авторизации
+            if (!$user && $userData = array_filter(lhConfig(ConfigEnum::TestingLog, 'user') ?? [])) {
                 $userClass = lhConfig(ConfigEnum::App, 'user');
                 $user = method_exists($userClass, 'factory')
                     ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
@@ -81,13 +92,15 @@ trait TestingTrait
             }
 
             // Запускаем сидеры
-            !lhConfig(ConfigEnum::Testing, 'database.seed') ?: $this->artisan('db:seed', []);
+            !lhConfig(ConfigEnum::TestingLog, 'database.seed') ?: $this->artisan('db:seed', []);
 
             $started = true;
         }
 
+        // Авторизуем все тесты
         !$user ?: $this->actingAs($user);
 
+        // Открываем транзакцию
         DB::beginTransaction();
     }
 
@@ -99,6 +112,7 @@ trait TestingTrait
      */
     protected function tearDown(): void
     {
+        // Откатываем транзакцию
         DB::rollBack();
 
         parent::tearDown();
@@ -113,8 +127,6 @@ trait TestingTrait
      */
     protected function setConfig()
     {
-        ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
-
         (($appEnv = env('APP_ENV')) === static::ENV)
             ?: throw new WithoutTelegramException("APP_ENV = {$appEnv}: не является тестовой");
         ($isTesting = (int)isTesting())
@@ -150,7 +162,7 @@ trait TestingTrait
         Config::set('mail.default', env('MAIL_MAILER'));
         Config::set('telescope.enabled', env('TELESCOPE_ENABLED'));
 
-        $helperEnabled = lhConfig(ConfigEnum::Testing, 'log.enabled');
+        $helperEnabled = lhConfig(ConfigEnum::TestingLog, 'helper_logs.enabled');
         if ($helperEnabled !== null) {
             $config = ConfigEnum::ConsoleLog;
             Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
@@ -211,4 +223,10 @@ trait TestingTrait
     {
         parent::onNotSuccessfulTest($t);
     }
+
+
+    /**
+     * Обрабатывает завершение выполнения всех тестов
+     */
+    protected static function onFinishTest(): void {}
 }

@@ -70,7 +70,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
@@ -81,7 +82,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
@@ -92,7 +94,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
@@ -103,7 +106,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
@@ -114,7 +118,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
@@ -125,7 +130,8 @@ class OptimizeCommand extends DefaultCommand
                     $isSchedule ? lhConfig($config, 'cleanup_days') : 0
                 )
                 : 0;
-            $this->telegramComment[] = [
+            $this->telegramComment = [
+                ...$this->telegramComment,
                 $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
             ];
 
