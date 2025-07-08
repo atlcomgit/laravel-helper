@@ -558,8 +558,8 @@ return [
         // Настройка тестовой базы данных
         'database' => [
             'name' => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
-            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', false),
-            'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', false),
+            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
+            'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
         ],
     ],
 ];

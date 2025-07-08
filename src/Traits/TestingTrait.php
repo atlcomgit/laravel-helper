@@ -21,7 +21,7 @@ use Throwable;
 trait TestingTrait
 {
     use CreatesApplication;
-    use DatabaseTransactions;
+    // use DatabaseTransactions;
 
 
     public const ENV = 'testing';

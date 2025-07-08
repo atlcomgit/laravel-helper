@@ -62,8 +62,11 @@ trait ModelLogTrait
      */
     public function isWithModelLog(): ?bool
     {
-        return $this->withModelLog === true
-            || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'));
+        return lhConfig(ConfigEnum::ModelLog, 'enabled')
+            && (
+                $this->withModelLog === true
+                    || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
+            );
     }
 
 

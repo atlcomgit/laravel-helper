@@ -80,7 +80,8 @@ abstract class DefaultCommand extends Command
             );
 
             $config = ConfigEnum::ConsoleLog;
-            !lhConfig($config, 'store_on_start', true) ?: $this->consoleLogDto->store(true);
+            !(lhConfig($config, 'enabled') && lhConfig($config, 'store_on_start', true))
+                ?: $this->consoleLogDto->store(true);
 
             // Очищаем консоль stdout
             $this->outputClear();
@@ -120,12 +121,15 @@ abstract class DefaultCommand extends Command
 
             // Отправляем результат в телеграм
             if (
-                $this->withTelegramLog === true
-                || ($this->withTelegramLog !== false && lhConfig($config, 'global'))
-                || (
-                    is_null($this->withTelegramLog)
-                    && $this->hasOption('telegram')
-                    && Hlp::castToBool($this->option('telegram'))
+                lhConfig($config, 'enabled')
+                && (
+                    $this->withTelegramLog === true
+                    || ($this->withTelegramLog !== false && lhConfig($config, 'global'))
+                    || (
+                        is_null($this->withTelegramLog)
+                        && $this->hasOption('telegram')
+                        && Hlp::castToBool($this->option('telegram'))
+                    )
                 )
             ) {
                 $this->output->write(

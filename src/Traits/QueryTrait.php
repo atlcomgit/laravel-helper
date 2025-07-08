@@ -942,6 +942,7 @@ trait QueryTrait
 
         if (
             $this instanceof EloquentBuilder
+            && lhConfig(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
                 || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
@@ -987,6 +988,7 @@ trait QueryTrait
 
         if (
             $this instanceof Connection && is_string($attributes)
+            && lhConfig(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
                 || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
@@ -1108,6 +1110,7 @@ trait QueryTrait
 
         if (
             $type === ModelLogTypeEnum::Truncate && is_array($attributes)
+            && lhConfig(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
                 || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
