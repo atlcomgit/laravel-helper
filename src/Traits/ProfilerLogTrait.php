@@ -83,17 +83,16 @@ trait ProfilerLogTrait
             class: static::class,
             method: $method,
             isStatic: $isStatic,
-            arguments: $arguments,
             info: [
                 'function' => $function,
             ],
         );
+        $dto->arguments = $arguments;
         $dto->startTime = (string)now()->getTimestampMs();
         $dto->startMemory = memory_get_usage();
         $dto->count++;
 
-        // !lhConfig(ConfigEnum::ProfilerLog, 'store_on_start') ?: 
-        $dto->dispatch();
+        !lhConfig(ConfigEnum::ProfilerLog, 'store_on_start') ?: $dto->dispatch();
 
         return $profilerLogs[$function] = $dto;
     }
@@ -138,17 +137,26 @@ trait ProfilerLogTrait
             'trace' => Hlp::arrayExcludeTraceVendor(debug_backtrace()),
         ];
 
+        $dto->info['calls'] ??= [];
+        $dto->info['calls'][$dto->count] = $dto->arguments;
+
         $dto->info['results'] ??= [];
-        $dto->info['results'][$dto->count] = ($dto->status === ProfilerLogStatusEnum::Exception)
-            ? [
-                'type' => $dto->exception::class,
-                'message' => $dto->exception->getMessage(),
-            ]
-            : [
-                'type' => is_object($dto->result) ? $dto->result::class : gettype($dto->result),
-                'value' => $dto->result,
-            ];
-        $dto->exception = Hlp::exceptionToString($dto->exception);
+        $dto->info['results'][$dto->count] = [
+            ...(($dto->status === ProfilerLogStatusEnum::Exception)
+                ? [
+                    'type' => $dto->exception::class,
+                    'message' => $dto->exception->getMessage(),
+                ]
+                : [
+                    'type' => is_object($dto->result) ? $dto->result::class : gettype($dto->result),
+                    'value' => $dto->result,
+                ]),
+            'duration' => round($duration, 3),
+            'memory' => $memory,
+        ];
+        $dto->exception = $dto->exception instanceof Throwable
+            ? Hlp::exceptionToString($dto->exception)
+            : $dto->exception;
 
         $dto->dispatch();
 
