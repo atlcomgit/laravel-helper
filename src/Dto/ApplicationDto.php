@@ -52,7 +52,7 @@ class ApplicationDto extends DefaultDto
      */
     public function getDuration(): float
     {
-        return Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000;
+        return max(0, Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000);
     }
 
 

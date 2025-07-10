@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
+use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Dto\RouteLogDto;
@@ -90,6 +91,12 @@ class LaravelHelperService extends DefaultService
             && ($config[$param = ConfigEnum::ModelLog->value . 'cleanup_days'] ?? null)
             && ($config[$param = ConfigEnum::ModelLog->value . 'drivers'] ?? null)
 
+            && ($config[$param = ConfigEnum::ProfilerLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::ProfilerLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::ProfilerLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::ProfilerLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::ProfilerLog->value . 'cleanup_days'] ?? null)
+
             && ($config[$param = ConfigEnum::RouteLog->value . 'queue'] ?? null)
             && ($config[$param = ConfigEnum::RouteLog->value . 'connection'] ?? null)
             && ($config[$param = ConfigEnum::RouteLog->value . 'table'] ?? null)
@@ -166,6 +173,7 @@ class LaravelHelperService extends DefaultService
             lhConfig(ConfigEnum::ConsoleLog, 'table'),
             lhConfig(ConfigEnum::HttpLog, 'table'),
             lhConfig(ConfigEnum::ModelLog, 'table'),
+            lhConfig(ConfigEnum::ProfilerLog, 'table'),
             lhConfig(ConfigEnum::QueueLog, 'table'),
             lhConfig(ConfigEnum::QueryLog, 'table'),
             lhConfig(ConfigEnum::RouteLog, 'table'),
@@ -213,6 +221,14 @@ class LaravelHelperService extends DefaultService
             case ModelLogDto::class:
                 $config = ConfigEnum::ModelLog;
                 /** @var ModelLogDto $dto */
+                $can = lhConfig($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
+                ;
+                break;
+
+            case ProfilerLogDto::class:
+                $config = ConfigEnum::ProfilerLog;
+                /** @var ProfilerLogDto $dto */
                 $can = lhConfig($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
@@ -309,6 +325,7 @@ class LaravelHelperService extends DefaultService
             $table === lhConfig(ConfigEnum::ConsoleLog, 'table') => ConsoleLog::class,
             $table === lhConfig(ConfigEnum::HttpLog, 'table') => HttpLog::class,
             $table === lhConfig(ConfigEnum::ModelLog, 'table') => ModelLog::class,
+            $table === lhConfig(ConfigEnum::ProfilerLog, 'table') => ProfilerLog::class,
             $table === lhConfig(ConfigEnum::QueryLog, 'table') => QueryLog::class,
             $table === lhConfig(ConfigEnum::QueueLog, 'table') => QueueLog::class,
             $table === lhConfig(ConfigEnum::RouteLog, 'table') => RouteLog::class,

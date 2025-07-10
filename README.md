@@ -12,6 +12,7 @@
 - Кеширование рендеринга blade шаблонов
 - Обработка всех исключений с отправкой логов в телеграмм
 - Внедрение Dto вместо Request в контроллеры, которое поддерживает: правила валидации, мутацию, маппинг, хуки при создании/изменении свойств
+- Профилирование методов класса на производительность и потребление памяти
 
 <hr style="border:1px solid black">
 
@@ -323,6 +324,32 @@ class ExampleController extends DefaultController
 }
 ```
 
+##### ProfilerLog
+
+Логирование профилирования методов класса
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultController;
+
+class Example extends DefaultProfiler
+{
+	public function example() {}
+}
+
+new Example()->_example();
+
+// или
+
+class Example
+{
+	use ProfilerLogTrait;
+
+	public static function example() {}
+}
+
+Example::_example();
+```
+
 <hr style="border:1px solid black">
 
 ### Примеры расширения классов
@@ -439,6 +466,18 @@ class ExampleLogger extends DefaultLogger
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 
 class ExampleModel extends DefaultModel
+{
+}
+```
+
+##### DefaultProfiler
+
+Расширение класса для профилирования методов
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultProfiler;
+
+class ExampleModel extends DefaultProfiler
 {
 }
 ```

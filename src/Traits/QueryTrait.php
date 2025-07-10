@@ -268,9 +268,10 @@ trait QueryTrait
             lhConfig(ConfigEnum::ConsoleLog, 'table'),
             lhConfig(ConfigEnum::HttpLog, 'table'),
             lhConfig(ConfigEnum::ModelLog, 'table'),
+            lhConfig(ConfigEnum::ProfilerLog, 'table'),
+            lhConfig(ConfigEnum::RouteLog, 'table'),
             lhConfig(ConfigEnum::QueryLog, 'table'),
             lhConfig(ConfigEnum::QueueLog, 'table'),
-            lhConfig(ConfigEnum::RouteLog, 'table'),
             lhConfig(ConfigEnum::ViewLog, 'table'),
         ];
     }
@@ -1128,8 +1129,8 @@ trait QueryTrait
                 /** @var \Illuminate\Database\Eloquent\Collection $models */
                 $models = (
                     method_exists($modelClass, 'withTrashed')
-                    ? $modelClass::query()->withTrashed()
-                    : $modelClass::query()
+                ? $modelClass::query()->withTrashed()
+                : $modelClass::query()
                 )
                     ->when($this->withQueryLog, static fn ($q, $v) => $q->withQueryLog($v))
                     ->get();

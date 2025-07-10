@@ -37,10 +37,8 @@ class CacheClearCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        if (lhConfig(ConfigEnum::QueryCache, 'enabled') || lhConfig(ConfigEnum::ViewCache, 'enabled')) {
-            Cache::flush();
-            $this->queryCacheService->flushQueryCacheAll();
-        }
+        !lhConfig(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->flushQueryCacheAll();
+        !lhConfig(ConfigEnum::ViewCache, 'enabled') ?: Cache::flush();
 
         return self::SUCCESS;
     }

@@ -11,10 +11,10 @@ use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
-use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -37,11 +37,11 @@ class OptimizeCommand extends DefaultCommand
         protected ConsoleLogService $consoleLogService,
         protected HttpLogService $httpLogService,
         protected ModelLogService $modelLogService,
+        protected ProfilerLogService $profileLogService,
+        protected QueryCacheService $queryCacheService,
         protected QueryLogService $queryLogService,
         protected QueueLogService $queueLogService,
-        protected RouteLogService $routeLogService,
         protected ViewLogService $viewLogService,
-        protected QueryCacheService $queryCacheService,
     ) {
         parent::__construct();
     }
@@ -63,77 +63,27 @@ class OptimizeCommand extends DefaultCommand
             $this->telegramComment = ['Env' => config('app.env')];
             $this->withTelegramLog = isLocal() || isProd();
 
-            $config = ConfigEnum::ConsoleLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->consoleLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
+            foreach ([
+                ['config' => ConfigEnum::ConsoleLog, 'service' => $this->consoleLogService],
+                ['config' => ConfigEnum::HttpLog, 'service' => $this->httpLogService],
+                ['config' => ConfigEnum::ModelLog, 'service' => $this->modelLogService],
+                ['config' => ConfigEnum::ProfilerLog, 'service' => $this->profileLogService],
+                ['config' => ConfigEnum::QueryLog, 'service' => $this->queryLogService],
+                ['config' => ConfigEnum::QueueLog, 'service' => $this->queueLogService],
+                ['config' => ConfigEnum::ViewLog, 'service' => $this->viewLogService],
+            ] as $log) {
+                $config = $log['config'];
+                $service = $log['service'];
+                $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
+                    ->hasTable(LaravelHelperService::getTable($config))
+                    ? $service->cleanup($isSchedule ? lhConfig($config, 'cleanup_days') : 0)
+                    : 0;
+                $this->telegramComment = [
+                    ...$this->telegramComment,
+                    $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
+                ];
+            }
 
-            $config = ConfigEnum::HttpLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->httpLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
-
-            $config = ConfigEnum::ModelLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->modelLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
-
-            $config = ConfigEnum::QueryLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->queryLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
-
-            $config = ConfigEnum::QueueLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->queueLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
-
-            $config = ConfigEnum::ViewLog;
-            $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                ->hasTable(LaravelHelperService::getTable($config))
-                ? $this->viewLogService->cleanup(
-                    $isSchedule ? lhConfig($config, 'cleanup_days') : 0
-                )
-                : 0;
-            $this->telegramComment = [
-                ...$this->telegramComment,
-                $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
-            ];
 
             $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
         }

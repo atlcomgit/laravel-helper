@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeOverrideCommand;
+use Atlcom\LaravelHelper\Commands\ProfilerLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteCacheCommand;
@@ -31,6 +32,7 @@ use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
+use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
@@ -96,17 +98,19 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // Регистрация сервисов
         $this->app->singleton(LaravelHelperService::class);
-        $this->app->singleton(ModelLogService::class);
         $this->app->singleton(ConsoleLogService::class);
         $this->app->singleton(HttpLogService::class);
-        $this->app->singleton(QueueLogService::class);
+        $this->app->singleton(ModelLogService::class);
+        $this->app->singleton(ProfilerLogService::class);
         $this->app->singleton(RouteLogService::class);
-        $this->app->singleton(TelegramApiService::class);
-        $this->app->singleton(TelegramService::class);
+        $this->app->singleton(QueueLogService::class);
         $this->app->singleton(QueryCacheService::class);
         $this->app->singleton(QueryLogService::class);
+        $this->app->singleton(TelegramApiService::class);
+        $this->app->singleton(TelegramService::class);
         $this->app->singleton(ViewCacheService::class);
         $this->app->singleton(ViewLogService::class);
+
         $this->app->singleton(ModelLogObserver::class);
 
         // $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app)); not need
@@ -152,6 +156,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
+                ProfilerLogCleanupCommand::class,
                 RouteLogCleanupCommand::class,
                 QueueLogCleanupCommand::class,
                 QueryLogCleanupCommand::class,

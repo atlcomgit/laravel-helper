@@ -26,8 +26,8 @@ class ConsoleLogDto extends Dto
     public string $cli;
     public ?string $output;
     public ?int $result;
-    public ConsoleLogStatusEnum $status;
     public ?string $exception;
+    public ConsoleLogStatusEnum $status;
     public ?float $duration;
     public ?int $memory;
     public ?array $info;
@@ -106,7 +106,7 @@ class ConsoleLogDto extends Dto
      */
     public function getDuration(): float
     {
-        return Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000;
+        return max(0, Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000);
     }
 
 

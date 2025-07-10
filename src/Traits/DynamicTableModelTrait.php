@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
@@ -83,9 +84,10 @@ trait DynamicTableModelTrait
             ConsoleLog::class => static::queryFrom(ConfigEnum::ConsoleLog),
             HttpLog::class => static::queryFrom(ConfigEnum::HttpLog),
             ModelLog::class => static::queryFrom(ConfigEnum::ModelLog),
+            ProfilerLog::class => static::queryFrom(ConfigEnum::ProfilerLog),
+            RouteLog::class => static::queryFrom(ConfigEnum::RouteLog),
             QueryLog::class => static::queryFrom(ConfigEnum::QueryLog),
             QueueLog::class => static::queryFrom(ConfigEnum::QueueLog),
-            RouteLog::class => static::queryFrom(ConfigEnum::RouteLog),
             ViewLog::class => static::queryFrom(ConfigEnum::ViewLog),
 
             default => parent::query(),

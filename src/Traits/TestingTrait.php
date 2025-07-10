@@ -182,26 +182,21 @@ trait TestingTrait
 
         $helperEnabled = lhConfig(ConfigEnum::TestingLog, 'helper_logs.enabled');
         if ($helperEnabled !== null) {
-            $config = ConfigEnum::ConsoleLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::HttpLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::ModelLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::RouteLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::QueryCache;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::QueryLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::QueueLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::TelegramLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::ViewCache;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            $config = ConfigEnum::ViewLog;
-            Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            foreach ([
+                ConfigEnum::ConsoleLog,
+                ConfigEnum::HttpLog,
+                ConfigEnum::ModelLog,
+                ConfigEnum::ProfilerLog,
+                ConfigEnum::RouteLog,
+                ConfigEnum::QueryCache,
+                ConfigEnum::QueryLog,
+                ConfigEnum::QueueLog,
+                ConfigEnum::TelegramLog,
+                ConfigEnum::ViewCache,
+                ConfigEnum::ViewLog,
+            ] as $config) {
+                Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
+            }
         }
 
         ($databaseTesting = $connectionTesting['database'] ?: '')

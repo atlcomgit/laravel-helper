@@ -39,6 +39,8 @@ return new class extends Migration {
                 ->comment('Вывод консольной команды');
             $table->integer('result')->nullable(true)
                 ->comment('Результат выполнения консольной команды');
+            $table->longText('exception')->nullable(true)
+                ->comment('Исключение консольной команды');
             $table->enum('status', ConsoleLogStatusEnum::enumValues())->nullable(false)->index()
                 ->default(ConsoleLogStatusEnum::getDefault())
                 ->comment('Статус выполнения консольной команды');
@@ -46,8 +48,6 @@ return new class extends Migration {
                 ->comment('Время выполнения команды');
             $table->unsignedBigInteger('memory')->nullable(true)
                 ->comment('Потребляемая память при выполнении команды');
-            $table->longText('exception')->nullable(true)
-                ->comment('Исключение консольной команды');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о выполнении консольной команды');
 
