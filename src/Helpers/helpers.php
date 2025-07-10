@@ -340,7 +340,7 @@ if (!function_exists('user')) {
             }
 
             return $user;
-        });
+        }, !isTesting());
         $functionRunning = false;
 
         return $user;
@@ -359,7 +359,7 @@ if (!function_exists('ip')) {
     function ip(): ?string
     {
         return Hlp::cacheRuntime(
-            __FUNCTION__,
+            'helpers' . __FUNCTION__,
             static fn () => (request()->headers->all()['x-forwarded-for'][0] ?? null)
             ?: (request()->headers->all()['x-real-ip'][0] ?? null)
             ?: request()->getClientIp()
