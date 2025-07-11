@@ -11,8 +11,8 @@ use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Exception;
 use Illuminate\Database\Connection;
@@ -265,14 +265,14 @@ trait QueryTrait
         static $result = null;
 
         return $result ??= [
-            lhConfig(ConfigEnum::ConsoleLog, 'table'),
-            lhConfig(ConfigEnum::HttpLog, 'table'),
-            lhConfig(ConfigEnum::ModelLog, 'table'),
-            lhConfig(ConfigEnum::ProfilerLog, 'table'),
-            lhConfig(ConfigEnum::RouteLog, 'table'),
-            lhConfig(ConfigEnum::QueryLog, 'table'),
-            lhConfig(ConfigEnum::QueueLog, 'table'),
-            lhConfig(ConfigEnum::ViewLog, 'table'),
+            Lh::config(ConfigEnum::ConsoleLog, 'table'),
+            Lh::config(ConfigEnum::HttpLog, 'table'),
+            Lh::config(ConfigEnum::ModelLog, 'table'),
+            Lh::config(ConfigEnum::ProfilerLog, 'table'),
+            Lh::config(ConfigEnum::RouteLog, 'table'),
+            Lh::config(ConfigEnum::QueryLog, 'table'),
+            Lh::config(ConfigEnum::QueueLog, 'table'),
+            Lh::config(ConfigEnum::ViewLog, 'table'),
         ];
     }
 
@@ -288,10 +288,10 @@ trait QueryTrait
         $result = [];
 
         if (
-            !lhConfig(ConfigEnum::QueryLog, 'enabled')
+            !Lh::config(ConfigEnum::QueryLog, 'enabled')
             || !(
                 $this->withQueryLog === true
-                || ($this->withQueryLog !== false && lhConfig(ConfigEnum::QueryLog, 'global'))
+                || ($this->withQueryLog !== false && Lh::config(ConfigEnum::QueryLog, 'global'))
             )
         ) {
             return $result;
@@ -325,9 +325,9 @@ trait QueryTrait
                     'fields' => Hlp::sqlFields($sql),
                     'ids' => $ids[$class] ?? null,
                     'query_length' => Hlp::stringLength($sql),
-                    ...(lhConfig(ConfigEnum::App, 'debug_trace')
+                    ...(Lh::config(ConfigEnum::App, 'debug_trace')
                         ? [
-                            'trace' => lhConfig(ConfigEnum::App, 'debug_trace_vendor')
+                            'trace' => Lh::config(ConfigEnum::App, 'debug_trace_vendor')
                                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
                                 : Hlp::arrayExcludeTraceVendor(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS))
                         ]
@@ -336,8 +336,8 @@ trait QueryTrait
                 ],
             );
 
-            if (app(LaravelHelperService::class)->canDispatch($dto)) {
-                !lhConfig(ConfigEnum::QueryLog, 'store_on_start') ?: $dto->dispatch();
+            if (Lh::canDispatch($dto)) {
+                !Lh::config(ConfigEnum::QueryLog, 'store_on_start') ?: $dto->dispatch();
                 $result[] = $dto;
             }
         }
@@ -370,7 +370,7 @@ trait QueryTrait
             $dto->isCached = is_null($isCached) ? false : $isCached;
             $dto->isFromCache = is_null($isFromCache) ? false : $isFromCache;
             $dto->status = $status ? QueryLogStatusEnum::Success : QueryLogStatusEnum::Failed;
-            $dto->isUpdated = lhConfig(ConfigEnum::QueryLog, 'store_on_start');
+            $dto->isUpdated = Lh::config(ConfigEnum::QueryLog, 'store_on_start');
             $dto->duration = $dto->getDuration();
             $dto->memory = $dto->getMemory();
             $dto->count = match (true) {
@@ -415,7 +415,7 @@ trait QueryTrait
         foreach ($arrayQueryLogDto as $dto) {
             /** @var QueryLogDto $dto */
             $dto->status = QueryLogStatusEnum::Failed;
-            $dto->isUpdated = lhConfig(ConfigEnum::QueryLog, 'store_on_start');
+            $dto->isUpdated = Lh::config(ConfigEnum::QueryLog, 'store_on_start');
             $dto->duration = $dto->getDuration();
             $dto->memory = $dto->getMemory();
             $dto->info = [
@@ -452,12 +452,12 @@ trait QueryTrait
 
             if (
                 $tables
-                && lhConfig(ConfigEnum::QueryCache, 'enabled')
-                && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
+                && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && (Lh::notFoundIgnoreTables($tables))
                 && (
                     $this->withQueryCache === true
                     || is_integer($this->withQueryCache)
-                    || ($this->withQueryCache !== false && lhConfig(ConfigEnum::QueryCache, 'global'))
+                    || ($this->withQueryCache !== false && Lh::config(ConfigEnum::QueryCache, 'global'))
                 )
             ) {
                 $this->setQueryCacheClass($this::class);
@@ -533,12 +533,12 @@ trait QueryTrait
 
             if (
                 $tables
-                && (app(LaravelHelperService::class)->notFoundIgnoreTables($tables))
-                && lhConfig(ConfigEnum::QueryCache, 'enabled')
+                && (Lh::notFoundIgnoreTables($tables))
+                && Lh::config(ConfigEnum::QueryCache, 'enabled')
                 && (
                     $this->withQueryCache === true
                     || is_integer($this->withQueryCache)
-                    || ($this->withQueryCache !== false && lhConfig(ConfigEnum::QueryCache, 'global'))
+                    || ($this->withQueryCache !== false && Lh::config(ConfigEnum::QueryCache, 'global'))
                 )
                 && ($this->getQueryCacheClass() === $this::class || $this instanceof Connection)
             ) {
@@ -905,7 +905,7 @@ trait QueryTrait
      */
     public function flushCache($query = null, $bindings = []): void
     {
-        if (!lhConfig(ConfigEnum::QueryLog, 'enabled')) {
+        if (!Lh::config(ConfigEnum::QueryLog, 'enabled')) {
             return;
         }
 
@@ -919,7 +919,7 @@ trait QueryTrait
             default => $queryCacheService->getTablesFromSql($query),
         };
 
-        if (app(LaravelHelperService::class)->isFoundIgnoreTables($tables)) {
+        if (Lh::isFoundIgnoreTables($tables)) {
             return;
         }
 
@@ -943,10 +943,10 @@ trait QueryTrait
 
         if (
             $this instanceof EloquentBuilder
-            && lhConfig(ConfigEnum::ModelLog, 'enabled')
+            && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
-                || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
+                || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
             $observer = app(ModelLogObserver::class);
@@ -989,16 +989,16 @@ trait QueryTrait
 
         if (
             $this instanceof Connection && is_string($attributes)
-            && lhConfig(ConfigEnum::ModelLog, 'enabled')
+            && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
-                || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
+                || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
             $observer = app(ModelLogObserver::class);
             $sql = sql($attributes, $bindings ?? []);
             $table = Hlp::arrayFirst(Hlp::sqlTables($attributes));
-            $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
+            $modelClass = Lh::getModelClassByTable($table);
 
             switch ($type) {
                 case ModelLogTypeEnum::Create:
@@ -1111,17 +1111,17 @@ trait QueryTrait
 
         if (
             $type === ModelLogTypeEnum::Truncate && is_array($attributes)
-            && lhConfig(ConfigEnum::ModelLog, 'enabled')
+            && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
-                || ($this->withModelLog !== false && lhConfig(ConfigEnum::ModelLog, 'global'))
+                || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
             $observer = app(ModelLogObserver::class);
 
             foreach ($attributes as $table) {
                 /** @var Model $modelClass */
-                $modelClass = app(LaravelHelperService::class)->getModelClassByTable($table);
+                $modelClass = Lh::getModelClassByTable($table);
                 if (!$modelClass) {
                     continue;
                 }

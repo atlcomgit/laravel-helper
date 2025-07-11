@@ -4,6 +4,7 @@ namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Observers\QueryCacheObserver;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 
@@ -37,7 +38,7 @@ trait ModelCacheTrait
      */
     protected static function bootModelCacheTrait()
     {
-        if (lhConfig(ConfigEnum::QueryCache, 'enabled')) {
+        if (Lh::config(ConfigEnum::QueryCache, 'enabled')) {
             static::observe(QueryCacheObserver::class);
         }
     }

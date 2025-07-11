@@ -14,6 +14,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\HttpLogRepository;
 use BackedEnum;
 
@@ -37,7 +38,7 @@ class HttpLogService extends DefaultService
     {
         !($headerName instanceof BackedEnum) ?: $headerName = $headerName->value;
 
-        return (lhConfig(ConfigEnum::HttpLog, 'enabled') && lhConfig(ConfigEnum::HttpLog, 'out.enabled'))
+        return (Lh::config(ConfigEnum::HttpLog, 'enabled') && Lh::config(ConfigEnum::HttpLog, 'out.enabled'))
             ? (
                 $headerName === HttpLogHeaderEnum::None->value
                 ? [
@@ -87,7 +88,7 @@ class HttpLogService extends DefaultService
      */
     public function update(HttpLogDto $dto): void
     {
-        lhConfig(ConfigEnum::HttpLog, 'only_response')
+        Lh::config(ConfigEnum::HttpLog, 'only_response')
             ? $this->create($dto)
             : (
                 !($dto->uuid = $this->getUuid($dto))
@@ -106,7 +107,7 @@ class HttpLogService extends DefaultService
      */
     public function failed(HttpLogDto $dto): void
     {
-        lhConfig(ConfigEnum::HttpLog, 'only_response')
+        Lh::config(ConfigEnum::HttpLog, 'only_response')
             ? $this->create($dto->merge([
                 'responseCode' => $dto->responseCode ?? 0,
                 'responseMessage' => $dto->responseMessage ?? 'Connection error',
@@ -156,10 +157,10 @@ class HttpLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!lhConfig(ConfigEnum::HttpLog, 'enabled')) {
+        if (!Lh::config(ConfigEnum::HttpLog, 'enabled')) {
             return 0;
         }
-        if (!lhConfig(ConfigEnum::HttpLog, 'in.enabled') && !lhConfig(ConfigEnum::HttpLog, 'out.enabled')) {
+        if (!Lh::config(ConfigEnum::HttpLog, 'in.enabled') && !Lh::config(ConfigEnum::HttpLog, 'out.enabled')) {
             return 0;
         }
 

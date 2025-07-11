@@ -5,6 +5,7 @@ namespace Atlcom\LaravelHelper\Handlers;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use DateInterval;
 use Illuminate\Support\Facades\Cache;
@@ -21,7 +22,7 @@ class TelegramLogHandler extends AbstractProcessingHandler
 {
     public function write(LogRecord $record): void
     {
-        if ($record->message && lhConfig(ConfigEnum::TelegramLog, 'enabled', false)) {
+        if ($record->message && Lh::config(ConfigEnum::TelegramLog, 'enabled', false)) {
 
             $type = $title = $chatId = '';
 
@@ -69,8 +70,8 @@ class TelegramLogHandler extends AbstractProcessingHandler
             }
 
             if (
-                !lhConfig(ConfigEnum::TelegramLog, "{$type}.enabled", false)
-                || !($chatId = lhConfig(ConfigEnum::TelegramLog, "{$type}.chat_id"))
+                !Lh::config(ConfigEnum::TelegramLog, "{$type}.enabled", false)
+                || !($chatId = Lh::config(ConfigEnum::TelegramLog, "{$type}.chat_id"))
             ) {
                 return;
             }
@@ -87,7 +88,7 @@ class TelegramLogHandler extends AbstractProcessingHandler
                 Cache::set(
                     $cacheHash,
                     $file,
-                    DateInterval::createFromDateString(lhConfig(ConfigEnum::TelegramLog, "{$type}.cache_ttl")),
+                    DateInterval::createFromDateString(Lh::config(ConfigEnum::TelegramLog, "{$type}.cache_ttl")),
                 );
             }
 

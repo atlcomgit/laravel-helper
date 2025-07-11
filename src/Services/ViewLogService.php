@@ -8,6 +8,7 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ViewLogRepository;
 
 /**
@@ -43,7 +44,7 @@ class ViewLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!lhConfig(ConfigEnum::ViewLog, 'enabled')) {
+        if (!Lh::config(ConfigEnum::ViewLog, 'enabled')) {
             return 0;
         }
 
@@ -61,7 +62,7 @@ class ViewLogService extends DefaultService
     public function createViewLog(string $name, ?bool $withViewLog): ViewLogDto
     {
         $dto = ViewLogDto::create(name: $name, withViewLog: $withViewLog);
-        !lhConfig(ConfigEnum::ViewLog, 'store_on_start') ?: $dto->dispatch();
+        !Lh::config(ConfigEnum::ViewLog, 'store_on_start') ?: $dto->dispatch();
 
         return $dto;
     }
@@ -75,7 +76,7 @@ class ViewLogService extends DefaultService
     public function updateViewLog(ViewLogDto $dto, string &$render): void
     {
         $dto->render = $render;
-        $dto->isUpdated = lhConfig(ConfigEnum::ViewLog, 'store_on_start');
+        $dto->isUpdated = Lh::config(ConfigEnum::ViewLog, 'store_on_start');
         $dto->duration = $dto->getDuration();
         $dto->memory = $dto->getMemory();
         $dto->info = [

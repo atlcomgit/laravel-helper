@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Models\QueryLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 
 /**
@@ -132,8 +131,8 @@ class QueryLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
-            (lhConfig(ConfigEnum::QueryLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+        if (Lh::canDispatch($this)) {
+            (Lh::config(ConfigEnum::QueryLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? QueryLogJob::dispatchSync($this)
                 : QueryLogJob::dispatch($this);
         }

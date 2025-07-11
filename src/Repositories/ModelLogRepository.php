@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ModelLog;
 
 /**
@@ -16,7 +17,7 @@ class ModelLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $modelLogClass = null)
     {
-        $this->modelLogClass ??= lhConfig(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
+        $this->modelLogClass ??= Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
     }
 
 
@@ -30,7 +31,7 @@ class ModelLogRepository extends DefaultRepository
     {
         $this->withoutTelescope(function () use ($dto) {
             /** @var ModelLog $this->modelLogClass */
-            $this->modelLogClass = lhConfig(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
+            $this->modelLogClass = Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
 
             if ($dto->modelType !== $this->modelLogClass) {
                 $this->modelLogClass::query()

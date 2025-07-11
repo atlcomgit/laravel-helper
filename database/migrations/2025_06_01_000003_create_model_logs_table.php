@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +16,9 @@ return new class extends Migration {
     public function up(): void
     {
         $config = ConfigEnum::ModelLog;
-        $connection = LaravelHelperService::getConnection($config)
+        $connection = Lh::getConnection($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
-        $table = LaravelHelperService::getTable($config)
+        $table = Lh::getTable($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);
@@ -26,9 +26,9 @@ return new class extends Migration {
         Schema::connection($connection)->create($table, function (Blueprint $table) {
             $table->id();
 
-            $userTableName = lhConfig(ConfigEnum::ModelLog, 'user.table_name');
-            $userPrimaryKeyName = lhConfig(ConfigEnum::ModelLog, 'user.primary_key');
-            $userPrimaryKeyType = lhConfig(ConfigEnum::ModelLog, 'user.primary_type');
+            $userTableName = Lh::config(ConfigEnum::ModelLog, 'user.table_name');
+            $userPrimaryKeyName = Lh::config(ConfigEnum::ModelLog, 'user.primary_key');
+            $userPrimaryKeyType = Lh::config(ConfigEnum::ModelLog, 'user.primary_type');
 
             if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
                 $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
@@ -60,9 +60,9 @@ return new class extends Migration {
     public function down(): void
     {
         $config = ConfigEnum::ModelLog;
-        $connection = LaravelHelperService::getConnection($config)
+        $connection = Lh::getConnection($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
-        $table = LaravelHelperService::getTable($config)
+        $table = Lh::getTable($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);

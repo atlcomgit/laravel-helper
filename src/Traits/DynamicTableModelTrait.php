@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
-use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
@@ -14,7 +14,6 @@ use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Atlcom\LaravelHelper\Models\ViewLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -66,8 +65,8 @@ trait DynamicTableModelTrait
     public static function queryFrom(ConfigEnum $config): Builder
     {
         return (new static())
-            ->setConnection(LaravelHelperService::getConnection($config))
-            ->setTable(LaravelHelperService::getTable($config))
+            ->setConnection(Lh::getConnection($config))
+            ->setTable(Lh::getTable($config))
             ->newQuery();
     }
 

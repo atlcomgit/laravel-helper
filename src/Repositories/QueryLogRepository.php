@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\QueryLog;
 
 /**
@@ -16,7 +17,7 @@ class QueryLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $queryLogClass = null)
     {
-        $this->queryLogClass ??= lhConfig(ConfigEnum::QueryLog, 'model') ?? QueryLog::class;
+        $this->queryLogClass ??= Lh::config(ConfigEnum::QueryLog, 'model') ?? QueryLog::class;
     }
 
 

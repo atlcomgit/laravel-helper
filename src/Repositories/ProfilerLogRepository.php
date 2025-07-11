@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
 
 /**
@@ -16,7 +17,7 @@ class ProfilerLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $profilerLogClass = null)
     {
-        $this->profilerLogClass ??= lhConfig(ConfigEnum::ProfilerLog, 'model') ?? ProfilerLog::class;
+        $this->profilerLogClass ??= Lh::config(ConfigEnum::ProfilerLog, 'model') ?? ProfilerLog::class;
     }
 
 

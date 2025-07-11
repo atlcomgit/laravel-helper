@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 use Atlcom\LaravelHelper\Events\ViewCacheEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -26,10 +27,10 @@ class ViewCacheService extends DefaultService
 
     public function __construct()
     {
-        $this->driver = lhConfig(ConfigEnum::ViewCache, 'driver') ?: config('cache.default');
-        $this->exclude = lhConfig(ConfigEnum::ViewCache, 'exclude') ?? [];
-        $this->gzdeflateEnabled = lhConfig(ConfigEnum::ViewCache, 'gzdeflate.enabled') ?? false;
-        $this->gzdeflateLevel = lhConfig(ConfigEnum::ViewCache, 'gzdeflate.level') ?? -1;
+        $this->driver = Lh::config(ConfigEnum::ViewCache, 'driver') ?: config('cache.default');
+        $this->exclude = Lh::config(ConfigEnum::ViewCache, 'exclude') ?? [];
+        $this->gzdeflateEnabled = Lh::config(ConfigEnum::ViewCache, 'gzdeflate.enabled') ?? false;
+        $this->gzdeflateLevel = Lh::config(ConfigEnum::ViewCache, 'gzdeflate.level') ?? -1;
     }
 
 
@@ -136,7 +137,7 @@ class ViewCacheService extends DefaultService
                             match (true) {
                                 $ttl === 0 => Cache::driver($this->driver)->forever($dto->cacheKey, $cache),
                                 $ttl === true, is_null($ttl) => Cache::driver($this->driver)
-                                    ->set($dto->cacheKey, $cache, lhConfig(ConfigEnum::ViewCache, 'ttl')),
+                                    ->set($dto->cacheKey, $cache, Lh::config(ConfigEnum::ViewCache, 'ttl')),
 
                                 default => Cache::driver($this->driver)->set($dto->cacheKey, $cache, $ttl),
                             };

@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Events\HttpLogEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 
 /**
@@ -21,7 +22,7 @@ class HttpLogJob extends DefaultJob
 
     public function __construct(protected HttpLogDto $dto)
     {
-        $this->onQueue(lhConfig(ConfigEnum::HttpLog, 'queue'));
+        $this->onQueue(Lh::config(ConfigEnum::HttpLog, 'queue'));
     }
 
 

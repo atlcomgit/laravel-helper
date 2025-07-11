@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\ViewLogJob;
 use Atlcom\LaravelHelper\Models\ViewLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 
 /**
@@ -138,13 +137,13 @@ class ViewLogDto extends Dto
     public function dispatch()
     {
         if (
-            app(LaravelHelperService::class)->canDispatch($this)
+            Lh::canDispatch($this)
             && (
                 $this->withViewLog === true
-                || ($this->withViewLog !== false && lhConfig(ConfigEnum::ViewLog, 'global'))
+                || ($this->withViewLog !== false && Lh::config(ConfigEnum::ViewLog, 'global'))
             )
         ) {
-            (lhConfig(ConfigEnum::ViewLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ViewLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ViewLogJob::dispatchSync($this)
                 : ViewLogJob::dispatch($this);
         }

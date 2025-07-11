@@ -1,4 +1,6 @@
-<?php
+<?php 
+use Atlcom\LaravelHelper\Facades\Lh;
+?><?php
 
 declare(strict_types=1);
 
@@ -39,7 +41,7 @@ class ConsoleLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!lhConfig(ConfigEnum::ConsoleLog, 'enabled')) {
+        if (!Lh::config(ConfigEnum::ConsoleLog, 'enabled')) {
             return 0;
         }
 

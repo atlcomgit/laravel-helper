@@ -7,9 +7,9 @@ namespace Atlcom\LaravelHelper\Dto;
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\ConsoleLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 
@@ -54,7 +54,7 @@ class ConsoleLogDto extends Dto
             'status' => ConsoleLogStatusEnum::getDefault(),
 
             'withConsoleLog' => false,
-            'storeInterval' => lhConfig(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
+            'storeInterval' => Lh::config(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
             'storedAt' => now(),
@@ -132,8 +132,8 @@ class ConsoleLogDto extends Dto
         static $tableExists = null;
 
         if (is_null($tableExists)) {
-            $tableExists = Schema::connection(LaravelHelperService::getConnection(ConfigEnum::ConsoleLog))
-                ->hasTable(LaravelHelperService::getTable(ConfigEnum::ConsoleLog));
+            $tableExists = Schema::connection(Lh::getConnection(ConfigEnum::ConsoleLog))
+                ->hasTable(Lh::getTable(ConfigEnum::ConsoleLog));
 
             if (!$tableExists) {
                 return;
@@ -159,13 +159,13 @@ class ConsoleLogDto extends Dto
     public function dispatch()
     {
         if (
-            app(LaravelHelperService::class)->canDispatch($this)
+            Lh::canDispatch($this)
             && (
                 $this->withConsoleLog === true
-                || ($this->withConsoleLog !== false && lhConfig(ConfigEnum::ConsoleLog, 'global'))
+                || ($this->withConsoleLog !== false && Lh::config(ConfigEnum::ConsoleLog, 'global'))
             )
         ) {
-            (lhConfig(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }

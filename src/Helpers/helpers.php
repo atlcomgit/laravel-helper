@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Loggers\TelegramLogLogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -26,7 +27,7 @@ if (!function_exists('lhConfig')) {
      */
     function lhConfig(ConfigEnum $configType, string $configName, mixed $default = null): mixed
     {
-        return config("laravel-helper.{$configType->value}.{$configName}", $default);
+        return Lh::config($configType, $configName, $default);
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция lhConfig() уже определена в приложении');
@@ -41,7 +42,7 @@ if (!function_exists('isDebug')) {
      */
     function isDebug(): bool
     {
-        return (bool)lhConfig(ConfigEnum::App, 'debug');
+        return (bool)Lh::config(ConfigEnum::App, 'debug');
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция isDebug() уже определена в приложении');
@@ -56,7 +57,7 @@ if (!function_exists('isDebugData')) {
      */
     function isDebugData(): bool
     {
-        return (bool)lhConfig(ConfigEnum::App, 'debug_data');
+        return (bool)Lh::config(ConfigEnum::App, 'debug_data');
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция isDebugData() уже определена в приложении');
@@ -71,7 +72,7 @@ if (!function_exists('isDebugTrace')) {
      */
     function isDebugTrace(): bool
     {
-        return (bool)lhConfig(ConfigEnum::App, 'debug_trace');
+        return (bool)Lh::config(ConfigEnum::App, 'debug_trace');
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция isDebugTrace() уже определена в приложении');

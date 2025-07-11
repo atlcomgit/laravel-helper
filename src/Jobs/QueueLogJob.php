@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\QueueLogEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 
 /**
@@ -18,7 +19,7 @@ class QueueLogJob extends DefaultJob
 
     public function __construct(protected QueueLogDto $dto)
     {
-        $this->onQueue(lhConfig(ConfigEnum::QueueLog, 'queue'));
+        $this->onQueue(Lh::config(ConfigEnum::QueueLog, 'queue'));
     }
 
 

@@ -7,9 +7,9 @@ namespace Atlcom\LaravelHelper\Commands;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
@@ -59,7 +59,7 @@ class OptimizeCommand extends DefaultCommand
 
         $isSchedule = $this->hasOption('schedule') && Hlp::castToBool($this->option('schedule'));
 
-        if (lhConfig(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
+        if (Lh::config(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
             $this->telegramComment = ['Env' => config('app.env')];
             $this->withTelegramLog = isLocal() || isProd();
 
@@ -74,9 +74,9 @@ class OptimizeCommand extends DefaultCommand
             ] as $log) {
                 $config = $log['config'];
                 $service = $log['service'];
-                $cleanup = Schema::connection(LaravelHelperService::getConnection($config))
-                    ->hasTable(LaravelHelperService::getTable($config))
-                    ? $service->cleanup($isSchedule ? lhConfig($config, 'cleanup_days') : 0)
+                $cleanup = Schema::connection(Lh::getConnection($config))
+                    ->hasTable(Lh::getTable($config))
+                    ? $service->cleanup($isSchedule ? Lh::config($config, 'cleanup_days') : 0)
                     : 0;
                 $this->telegramComment = [
                     ...$this->telegramComment,
@@ -88,8 +88,8 @@ class OptimizeCommand extends DefaultCommand
             $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
         }
 
-        if (lhConfig(ConfigEnum::Optimize, 'cache_clear.enabled')) {
-            if (lhConfig(ConfigEnum::QueryCache, 'enabled') || lhConfig(ConfigEnum::ViewCache, 'enabled')) {
+        if (Lh::config(ConfigEnum::Optimize, 'cache_clear.enabled')) {
+            if (Lh::config(ConfigEnum::QueryCache, 'enabled') || Lh::config(ConfigEnum::ViewCache, 'enabled')) {
                 Cache::flush();
                 $this->queryCacheService->flushQueryCacheAll();
             }

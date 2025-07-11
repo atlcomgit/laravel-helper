@@ -9,6 +9,7 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Throwable;
 
 /**
@@ -22,10 +23,20 @@ trait ProfilerLogTrait
 
         try {
             // $dto->result = call_user_func_array([static::class, $method], $args);
-            method_exists(static::class, $method)
-                ?: throw new HelperException('Метод не найден: ' . $dto->info['function']);
+            if (!method_exists(static::class, $method)) {
+                $parent = get_parent_class(static::class);
 
-            $dto->result = $this->$method(...$args);
+                if ($parent && method_exists($parent, '__call')) {
+                    $dto->result = $parent::__call($method, $args);
+
+                } else {
+                    throw new HelperException('Метод не найден: ' . $dto->info['function']);
+                }
+
+            } else {
+                $dto->result = $this->$method(...$args);
+            }
+
             $dto->status = ProfilerLogStatusEnum::Success;
 
         } catch (Throwable $exception) {
@@ -46,10 +57,20 @@ trait ProfilerLogTrait
 
         try {
             // $dto->result = call_user_func_array([static::class, $method], $args);
-            method_exists(static::class, $method)
-                ?: throw new HelperException('Метод не найден: ' . $dto->info['function']);
+            if (!method_exists(static::class, $method)) {
+                $parent = get_parent_class(static::class);
 
-            $dto->result = static::$method(...$args);
+                if ($parent && method_exists($parent, '__call')) {
+                    $dto->result = $parent::__callStatic($method, $args);
+
+                } else {
+                    throw new HelperException('Метод не найден: ' . $dto->info['function']);
+                }
+
+            } else {
+                $dto->result = static::$method(...$args);
+            }
+
             $dto->status = ProfilerLogStatusEnum::Success;
 
         } catch (Throwable $exception) {
@@ -92,7 +113,7 @@ trait ProfilerLogTrait
         $dto->startMemory = memory_get_usage();
         $dto->count++;
 
-        !lhConfig(ConfigEnum::ProfilerLog, 'store_on_start') ?: $dto->dispatch();
+        !Lh::config(ConfigEnum::ProfilerLog, 'store_on_start') ?: $dto->dispatch();
 
         return $profilerLogs[$function] = $dto;
     }
@@ -138,10 +159,10 @@ trait ProfilerLogTrait
         ];
 
         $dto->info['calls'] ??= [];
-        $dto->info['calls'][$dto->count] = $dto->arguments;
+        $dto->info['calls'][$dto->count - 1] = $dto->arguments;
 
         $dto->info['results'] ??= [];
-        $dto->info['results'][$dto->count] = [
+        $dto->info['results'][$dto->count - 1] = [
             ...(($dto->status === ProfilerLogStatusEnum::Exception)
                 ? [
                     'type' => $dto->exception::class,

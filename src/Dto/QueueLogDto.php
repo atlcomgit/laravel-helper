@@ -7,9 +7,9 @@ namespace Atlcom\LaravelHelper\Dto;
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\QueueLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use DateInterval;
 use DateTimeInterface;
@@ -123,13 +123,13 @@ class QueueLogDto extends Dto
     public function dispatch(): void
     {
         if (
-            app(LaravelHelperService::class)->canDispatch($this)
+            Lh::canDispatch($this)
             && (
                 $this->withQueueLog === true
-                || ($this->withQueueLog !== false && lhConfig(ConfigEnum::QueueLog, 'global'))
+                || ($this->withQueueLog !== false && Lh::config(ConfigEnum::QueueLog, 'global'))
             )
         ) {
-            (lhConfig(ConfigEnum::QueueLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::QueueLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);
         }

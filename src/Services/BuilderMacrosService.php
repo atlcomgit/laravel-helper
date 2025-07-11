@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -21,7 +22,7 @@ class BuilderMacrosService extends DefaultService
      */
     public static function setMacros(): void
     {
-        if (lhConfig(ConfigEnum::QueryCache, 'enabled')) {
+        if (Lh::config(ConfigEnum::QueryCache, 'enabled')) {
             EloquentBuilder::macro('withQueryCache', function (int|string|bool|null $seconds = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var int|bool|null $seconds */
@@ -45,7 +46,7 @@ class BuilderMacrosService extends DefaultService
             });
         }
 
-        if (lhConfig(ConfigEnum::QueryLog, 'enabled')) {
+        if (Lh::config(ConfigEnum::QueryLog, 'enabled')) {
             EloquentBuilder::macro('withQueryLog', function (bool|null $enabled = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var bool|null $enabled */
@@ -69,7 +70,7 @@ class BuilderMacrosService extends DefaultService
             });
         }
 
-        if (lhConfig(ConfigEnum::ModelLog, 'enabled')) {
+        if (Lh::config(ConfigEnum::ModelLog, 'enabled')) {
             EloquentBuilder::macro('withModelLog', function (bool|null $enabled = null) {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 /** @var bool|null $enabled */
@@ -93,7 +94,7 @@ class BuilderMacrosService extends DefaultService
             });
         }
 
-        if (lhConfig(ConfigEnum::Macros, 'builder.enabled')) {
+        if (Lh::config(ConfigEnum::Macros, 'builder.enabled')) {
             // ...
         }
     }

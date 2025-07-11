@@ -228,8 +228,6 @@ return [
         'cleanup_days' => (int)env('HELPER_PROFILER_LOG_CLEANUP_DAYS', 7),
         // Флаг включения записи логов перед запуском
         'store_on_start' => (bool)env('HELPER_PROFILER_LOG_STORE_ON_START', false),
-        // Название драйвера кеша
-        // 'driver' => (string)env('HELPER_PROFILER_LOG_DRIVER', 'database'),
         // Исключения логов, например ['name' => '...']
         'exclude' => (array)(Hlp::envGet('HELPER_PROFILER_LOG_EXCLUDE', base_path('.env')) ?? []),
     ],

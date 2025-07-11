@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +16,9 @@ return new class extends Migration {
     public function up(): void
     {
         $config = ConfigEnum::ProfilerLog;
-        $connection = LaravelHelperService::getConnection($config)
+        $connection = Lh::getConnection($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
-        $table = LaravelHelperService::getTable($config)
+        $table = Lh::getTable($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);
@@ -64,9 +64,9 @@ return new class extends Migration {
     public function down(): void
     {
         $config = ConfigEnum::ProfilerLog;
-        $connection = LaravelHelperService::getConnection($config)
+        $connection = Lh::getConnection($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
-        $table = LaravelHelperService::getTable($config)
+        $table = Lh::getTable($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
         Schema::connection($connection)->dropIfExists($table);

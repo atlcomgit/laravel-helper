@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Listeners;
 use Atlcom\LaravelHelper\Defaults\DefaultListener;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 
@@ -24,7 +25,7 @@ class HttpRequestSendingListener extends DefaultListener
     public function __invoke(object $event): void
     {
         !(
-            !lhConfig(ConfigEnum::HttpLog, 'only_response')
+            !Lh::config(ConfigEnum::HttpLog, 'only_response')
             && ($dto = HttpLogDto::createByRequest(
                 uuid: ($event->request?->header(HttpLogService::HTTP_HEADER_UUID) ?? [])[0] ?? null,
                 request: $event->request,

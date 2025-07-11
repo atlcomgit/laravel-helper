@@ -9,9 +9,9 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\HttpLogJob;
 use Atlcom\LaravelHelper\Services\HttpLogService;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request as RequestIn;
@@ -223,8 +223,8 @@ class HttpLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
-            (lhConfig(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+        if (Lh::canDispatch($this)) {
+            (Lh::config(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? HttpLogJob::dispatchSync($this)
                 : HttpLogJob::dispatch($this);
         }

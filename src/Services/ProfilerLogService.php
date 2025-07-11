@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ProfilerLogRepository;
 
 /**
@@ -39,7 +40,7 @@ class ProfilerLogService extends DefaultService
      */
     public function cleanup(int $days): int
     {
-        if (!lhConfig(ConfigEnum::ProfilerLog, 'enabled')) {
+        if (!Lh::config(ConfigEnum::ProfilerLog, 'enabled')) {
             return 0;
         }
 

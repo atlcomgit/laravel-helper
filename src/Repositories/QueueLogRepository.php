@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\QueueLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
@@ -16,7 +17,7 @@ class QueueLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $queueLogClass = null)
     {
-        $this->queueLogClass ??= lhConfig(ConfigEnum::QueueLog, 'model') ?? QueueLog::class;
+        $this->queueLogClass ??= Lh::config(ConfigEnum::QueueLog, 'model') ?? QueueLog::class;
     }
 
 

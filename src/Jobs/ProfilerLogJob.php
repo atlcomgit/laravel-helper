@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\ProfilerLogEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 
 /**
@@ -18,7 +19,7 @@ class ProfilerLogJob extends DefaultJob
 
     public function __construct(protected ProfilerLogDto $dto)
     {
-        $this->onQueue(lhConfig(ConfigEnum::ProfilerLog, 'queue'));
+        $this->onQueue(Lh::config(ConfigEnum::ProfilerLog, 'queue'));
     }
 
 

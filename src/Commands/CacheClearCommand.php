@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Illuminate\Support\Facades\Cache;
 
@@ -37,8 +38,8 @@ class CacheClearCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        !lhConfig(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->flushQueryCacheAll();
-        !lhConfig(ConfigEnum::ViewCache, 'enabled') ?: Cache::flush();
+        !Lh::config(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->flushQueryCacheAll();
+        !Lh::config(ConfigEnum::ViewCache, 'enabled') ?: Cache::flush();
 
         return self::SUCCESS;
     }

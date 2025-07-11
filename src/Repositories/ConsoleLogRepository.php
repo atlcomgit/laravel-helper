@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +18,7 @@ class ConsoleLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $consoleLogClass = null)
     {
-        $this->consoleLogClass ??= lhConfig(ConfigEnum::ConsoleLog, 'model') ?? ConsoleLog::class;
+        $this->consoleLogClass ??= Lh::config(ConfigEnum::ConsoleLog, 'model') ?? ConsoleLog::class;
     }
 
 

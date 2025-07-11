@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Repositories;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ViewLog;
 
 /**
@@ -16,7 +17,7 @@ class ViewLogRepository extends DefaultRepository
 {
     public function __construct(private ?string $viewLogClass = null)
     {
-        $this->viewLogClass ??= lhConfig(ConfigEnum::ViewLog, 'model') ?? ViewLog::class;
+        $this->viewLogClass ??= Lh::config(ConfigEnum::ViewLog, 'model') ?? ViewLog::class;
     }
 
 

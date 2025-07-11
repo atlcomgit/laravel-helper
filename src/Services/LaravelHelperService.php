@@ -24,6 +24,7 @@ use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
@@ -39,14 +40,28 @@ use Symfony\Component\Finder\SplFileInfo;
 class LaravelHelperService extends DefaultService
 {
     /**
+     * Возвращает конфиг по типу лога
+     *
+     * @param ConfigEnum $configType
+     * @param string $configName
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public function config(ConfigEnum $configType, string $configName, mixed $default = null): mixed
+    {
+        return config("laravel-helper.{$configType->value}.{$configName}", $default);
+    }
+
+
+    /**
      * Возвращает название соединения БД к таблице лога
      *
      * @param ConfigEnum $config
      * @return string
      */
-    public static function getConnection(ConfigEnum $config): string
+    public function getConnection(ConfigEnum $config): string
     {
-        return isTesting() ? DefaultTest::ENV : lhConfig($config, 'connection');
+        return isTesting() ? DefaultTest::ENV : $this->config($config, 'connection');
     }
 
 
@@ -56,9 +71,9 @@ class LaravelHelperService extends DefaultService
      * @param ConfigEnum $config
      * @return string
      */
-    public static function getTable(ConfigEnum $config): string
+    public function getTable(ConfigEnum $config): string
     {
-        return lhConfig($config, 'table');
+        return $this->config($config, 'table');
     }
 
 
@@ -170,14 +185,14 @@ class LaravelHelperService extends DefaultService
         static $ignoreTables = null;
 
         $ignoreTables ??= [
-            lhConfig(ConfigEnum::ConsoleLog, 'table'),
-            lhConfig(ConfigEnum::HttpLog, 'table'),
-            lhConfig(ConfigEnum::ModelLog, 'table'),
-            lhConfig(ConfigEnum::ProfilerLog, 'table'),
-            lhConfig(ConfigEnum::QueueLog, 'table'),
-            lhConfig(ConfigEnum::QueryLog, 'table'),
-            lhConfig(ConfigEnum::RouteLog, 'table'),
-            lhConfig(ConfigEnum::ViewLog, 'table'),
+            $this->config(ConfigEnum::ConsoleLog, 'table'),
+            $this->config(ConfigEnum::HttpLog, 'table'),
+            $this->config(ConfigEnum::ModelLog, 'table'),
+            $this->config(ConfigEnum::ProfilerLog, 'table'),
+            $this->config(ConfigEnum::QueueLog, 'table'),
+            $this->config(ConfigEnum::QueryLog, 'table'),
+            $this->config(ConfigEnum::RouteLog, 'table'),
+            $this->config(ConfigEnum::ViewLog, 'table'),
             config('cache.stores.database.table', 'cache'),
             'pg_catalog.*',
             'pg_attrdef',
@@ -203,7 +218,7 @@ class LaravelHelperService extends DefaultService
             case ConsoleLogDto::class:
                 $config = ConfigEnum::ConsoleLog;
                 /** @var ConsoleLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
@@ -212,8 +227,8 @@ class LaravelHelperService extends DefaultService
                 $config = ConfigEnum::HttpLog;
                 /** @var HttpLogDto $dto */
                 $type = $dto->type->value;
-                $can = lhConfig($config, 'enabled')
-                    && lhConfig($config, "{$type}.enabled")
+                $can = $this->config($config, 'enabled')
+                    && $this->config($config, "{$type}.enabled")
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
                 ;
                 break;
@@ -221,7 +236,7 @@ class LaravelHelperService extends DefaultService
             case ModelLogDto::class:
                 $config = ConfigEnum::ModelLog;
                 /** @var ModelLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
@@ -229,7 +244,7 @@ class LaravelHelperService extends DefaultService
             case ProfilerLogDto::class:
                 $config = ConfigEnum::ProfilerLog;
                 /** @var ProfilerLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
@@ -237,17 +252,17 @@ class LaravelHelperService extends DefaultService
             case QueryLogDto::class:
                 $config = ConfigEnum::QueryLog;
                 /** @var QueryLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                     && $this->notFoundIgnoreTables($dto->info['tables'] ?? [])
-                    && !Hlp::arraySearchValues($dto->info['tables'] ?? [], [lhConfig($config, 'table')])
+                    && !Hlp::arraySearchValues($dto->info['tables'] ?? [], [$this->config($config, 'table')])
                 ;
                 break;
 
             case QueueLogDto::class:
                 $config = ConfigEnum::QueueLog;
                 /** @var QueueLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                     && (($dto->info['class'] ?? null) !== QueueLogJob::class)
                 ;
@@ -256,7 +271,7 @@ class LaravelHelperService extends DefaultService
             case RouteLogDto::class:
                 $config = ConfigEnum::RouteLog;
                 /** @var RouteLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
@@ -265,7 +280,7 @@ class LaravelHelperService extends DefaultService
                 $config = ConfigEnum::TelegramLog;
                 /** @var TelegramLogDto $dto */
                 $type = $dto->type;
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
                 ;
                 break;
@@ -273,7 +288,7 @@ class LaravelHelperService extends DefaultService
             case ViewLogDto::class:
                 $config = ConfigEnum::ViewLog;
                 /** @var ViewLogDto $dto */
-                $can = lhConfig($config, 'enabled')
+                $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
@@ -322,14 +337,14 @@ class LaravelHelperService extends DefaultService
         }
 
         return $tables[$table] = match (true) {
-            $table === lhConfig(ConfigEnum::ConsoleLog, 'table') => ConsoleLog::class,
-            $table === lhConfig(ConfigEnum::HttpLog, 'table') => HttpLog::class,
-            $table === lhConfig(ConfigEnum::ModelLog, 'table') => ModelLog::class,
-            $table === lhConfig(ConfigEnum::ProfilerLog, 'table') => ProfilerLog::class,
-            $table === lhConfig(ConfigEnum::QueryLog, 'table') => QueryLog::class,
-            $table === lhConfig(ConfigEnum::QueueLog, 'table') => QueueLog::class,
-            $table === lhConfig(ConfigEnum::RouteLog, 'table') => RouteLog::class,
-            $table === lhConfig(ConfigEnum::ViewLog, 'table') => ViewLog::class,
+            $table === $this->config(ConfigEnum::ConsoleLog, 'table') => ConsoleLog::class,
+            $table === $this->config(ConfigEnum::HttpLog, 'table') => HttpLog::class,
+            $table === $this->config(ConfigEnum::ModelLog, 'table') => ModelLog::class,
+            $table === $this->config(ConfigEnum::ProfilerLog, 'table') => ProfilerLog::class,
+            $table === $this->config(ConfigEnum::QueryLog, 'table') => QueryLog::class,
+            $table === $this->config(ConfigEnum::QueueLog, 'table') => QueueLog::class,
+            $table === $this->config(ConfigEnum::RouteLog, 'table') => RouteLog::class,
+            $table === $this->config(ConfigEnum::ViewLog, 'table') => ViewLog::class,
 
             default => null,
         };

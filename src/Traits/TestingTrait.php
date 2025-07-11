@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Config;
@@ -76,7 +77,7 @@ trait TestingTrait
         $this->setConfig();
 
         if (!$started) {
-            if (lhConfig(ConfigEnum::TestingLog, 'enabled')) {
+            if (Lh::config(ConfigEnum::TestingLog, 'enabled')) {
                 ApplicationDto::create(type: ApplicationTypeEnum::Testing, class: $this::class);
 
                 // Регистрируем функцию завершения тестов
@@ -88,7 +89,7 @@ trait TestingTrait
                 $migrationsHashPrevious = Storage::get(storage_path('framework/testing/migrations.hash'));
 
                 // Запускаем полную миграцию БД
-                if (lhConfig(ConfigEnum::TestingLog, 'database.fresh') || $migrationsHashCurrent !== $migrationsHashPrevious) {
+                if (Lh::config(ConfigEnum::TestingLog, 'database.fresh') || $migrationsHashCurrent !== $migrationsHashPrevious) {
                     $config = ConfigEnum::ModelLog;
                     Config::set("laravel-helper.{$config->value}.enabled", false);
 
@@ -96,7 +97,7 @@ trait TestingTrait
                     $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
 
                     // Запускаем сидеры
-                    if (lhConfig(ConfigEnum::TestingLog, 'database.seed')) {
+                    if (Lh::config(ConfigEnum::TestingLog, 'database.seed')) {
                         $this->artisan('db:seed', []);
                     }
 
@@ -104,8 +105,8 @@ trait TestingTrait
                 }
 
                 // Получаем пользователя для авторизации
-                if (!$user && $userData = array_filter(lhConfig(ConfigEnum::TestingLog, 'user') ?? [])) {
-                    $userClass = lhConfig(ConfigEnum::App, 'user');
+                if (!$user && $userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? [])) {
+                    $userClass = Lh::config(ConfigEnum::App, 'user');
                     $user = method_exists($userClass, 'factory')
                         ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
                         : $userClass::firstOrCreate($user);
@@ -180,7 +181,7 @@ trait TestingTrait
         Config::set('mail.default', env('MAIL_MAILER'));
         Config::set('telescope.enabled', env('TELESCOPE_ENABLED'));
 
-        $helperEnabled = lhConfig(ConfigEnum::TestingLog, 'helper_logs.enabled');
+        $helperEnabled = Lh::config(ConfigEnum::TestingLog, 'helper_logs.enabled');
         if ($helperEnabled !== null) {
             foreach ([
                 ConfigEnum::ConsoleLog,

@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 use Atlcom\LaravelHelper\Events\QueryCacheEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Carbon\Carbon;
 use FilesystemIterator;
 use Illuminate\Cache\ArrayStore;
@@ -49,10 +50,10 @@ class QueryCacheService extends DefaultService
 
     public function __construct()
     {
-        $this->driver = lhConfig(ConfigEnum::QueryCache, 'driver') ?: config('cache.default');
-        $this->exclude = lhConfig(ConfigEnum::QueryCache, 'exclude') ?? [];
-        $this->gzdeflateEnabled = lhConfig(ConfigEnum::QueryCache, 'gzdeflate.enabled') ?? false;
-        $this->gzdeflateLevel = lhConfig(ConfigEnum::QueryCache, 'gzdeflate.level') ?? -1;
+        $this->driver = Lh::config(ConfigEnum::QueryCache, 'driver') ?: config('cache.default');
+        $this->exclude = Lh::config(ConfigEnum::QueryCache, 'exclude') ?? [];
+        $this->gzdeflateEnabled = Lh::config(ConfigEnum::QueryCache, 'gzdeflate.enabled') ?? false;
+        $this->gzdeflateLevel = Lh::config(ConfigEnum::QueryCache, 'gzdeflate.level') ?? -1;
     }
 
 
@@ -216,7 +217,7 @@ class QueryCacheService extends DefaultService
 
                 $ttl = match (true) {
                     is_integer($ttl) => $ttl,
-                    is_null($ttl), $ttl === true => (int)lhConfig(ConfigEnum::QueryCache, 'ttl'),
+                    is_null($ttl), $ttl === true => (int)Lh::config(ConfigEnum::QueryCache, 'ttl'),
 
                     default => false,
                 };
@@ -294,7 +295,7 @@ class QueryCacheService extends DefaultService
 
                 // Если таблица не в игноре и теги не в исключении, то чистим кеш (иначе кеш не сохранялся)
                 if (
-                    app(LaravelHelperService::class)->notFoundIgnoreTables($tags)
+                    Lh::notFoundIgnoreTables($tags)
                     && !Hlp::arraySearchValues($tags, $this->exclude)
                 ) {
                     $this->flushCache($tags);
@@ -359,7 +360,7 @@ class QueryCacheService extends DefaultService
                     return Cache::driver($this->driver)->tags($tags)->has($key);
 
                 case FileStore::class:
-                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
+                    $path = rtrim(Lh::config(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -378,7 +379,7 @@ class QueryCacheService extends DefaultService
                     }
 
                     $ttl = match ($ttlSplit = Hlp::stringSplit($key, static::CACHE_TAGS_DELIMITER, $ttls[$ttlMask][0] ?? 0)) {
-                        'ttl_default' => (int)lhConfig(ConfigEnum::QueryCache, 'ttl'),
+                        'ttl_default' => (int)Lh::config(ConfigEnum::QueryCache, 'ttl'),
                         'ttl_not_set' => null,
 
                         default => Hlp::castToInt(Hlp::stringSplit($ttlSplit, '_', -1)),
@@ -465,7 +466,7 @@ class QueryCacheService extends DefaultService
                     return Cache::driver($this->driver)->tags($tags)->put($key, $value, $ttl ?: null);
 
                 case FileStore::class:
-                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
+                    $path = rtrim(Lh::config(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -544,7 +545,7 @@ class QueryCacheService extends DefaultService
                     break;
 
                 case FileStore::class:
-                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/')
+                    $path = rtrim(Lh::config(ConfigEnum::QueryCache, 'driver_file_path'), '/')
                         . '/' . Hlp::stringConcat(
                                 static::CACHE_TAGS_DELIMITER,
                                 Hlp::arrayDeleteValues($tags, ['ttl_*', 'hash_*']),
@@ -631,7 +632,7 @@ class QueryCacheService extends DefaultService
 
                 // CACHE_STORE=file
                 case FileStore::class:
-                    $path = rtrim(lhConfig(ConfigEnum::QueryCache, 'driver_file_path'), '/');
+                    $path = rtrim(Lh::config(ConfigEnum::QueryCache, 'driver_file_path'), '/');
 
                     if (!$path || !File::exists($path)) {
                         return;

@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Commands;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 
 /**
@@ -37,7 +38,7 @@ class HttpLogCleanupCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        $cleanup = $this->httpLogService->cleanup(lhConfig(ConfigEnum::HttpLog, 'cleanup_days'));
+        $cleanup = $this->httpLogService->cleanup(Lh::config(ConfigEnum::HttpLog, 'cleanup_days'));
 
         $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);

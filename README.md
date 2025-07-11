@@ -181,6 +181,42 @@ class ExampleRepository
 }
 ```
 
+##### ProfilerLog
+
+Логирование профилирования методов класса
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultController;
+
+class Example extends DefaultProfiler
+{
+	public function example() {}
+}
+
+new Example()->_example();
+
+// или
+
+class Example
+{
+	use ProfilerLogTrait;
+
+	public static function example() {}
+}
+
+Example::_example();
+```
+
+##### RouteLog
+
+Логирование зарегистрированных роутов в таблице helper_route_logs
+
+```php
+use Illuminate\Support\Facades\Route;
+
+Route::get('/example', [ExampleController::class, 'example']);
+```
+
 ##### QueryLog
 
 Логирование query запросов в таблице helper_query_logs
@@ -244,16 +280,6 @@ class ExampleJob extends DefaultJob
 // или
 
 dispatch((new ExampleJob())->withQueueLog());
-```
-
-##### QueueLog
-
-Логирование зарегистрированных роутов в таблице helper_route_logs
-
-```php
-use Illuminate\Support\Facades\Route;
-
-Route::get('/example', [ExampleController::class, 'example']);
 ```
 
 ##### ViewLog
@@ -322,32 +348,6 @@ class ExampleController extends DefaultController
 		return $this->withViewCache()->view(view: 'example', data: ['time' => now()], ignoreData: ['time']);
 	}
 }
-```
-
-##### ProfilerLog
-
-Логирование профилирования методов класса
-
-```php
-use Atlcom\LaravelHelper\Defaults\DefaultController;
-
-class Example extends DefaultProfiler
-{
-	public function example() {}
-}
-
-new Example()->_example();
-
-// или
-
-class Example
-{
-	use ProfilerLogTrait;
-
-	public static function example() {}
-}
-
-Example::_example();
 ```
 
 <hr style="border:1px solid black">
@@ -551,10 +551,11 @@ ConsoleLogEvent::class // Событие логирования консольн
 ExceptionEvent::class // Событие логирования исключений
 HttpLogEvent::class // Событие логирования http запросов
 ModelLogEvent::class // Событие логирования моделей
+ProfilerLogEvent::class // Событие логирования профилирования методов класса
+RouteLogEvent::class // Событие логирования роутов
 QueryCacheEvent::class // Событие кеширования query запросов
 QueryLogEvent::class // Событие логирования query запросов
 QueueLogEvent::class // Событие логирования очередей
-RouteLogEvent::class // Событие логирования роутов
 TelegramLogEvent::class // Событие логирования отправки сообщения в телеграм
 ViewCacheEvent::class // Событие кеширования рендеринга blade шаблонов
 ViewLogEvent::class // Событие логирования рендеринга blade шаблонов
@@ -567,6 +568,7 @@ ViewLogEvent::class // Событие логирования рендеринг�
 ##### Список вспомогательных функций
 
 ```php
+lhConfig() // Возвращает настройки хелпера
 isDebug() // Возвращает флаг окружения APP_DEBUG
 isDebugData() // Возвращает флаг окружения APP_DEBUG_DATA
 isDebugTrace() // Возвращает флаг окружения APP_DEBUG_TRACE

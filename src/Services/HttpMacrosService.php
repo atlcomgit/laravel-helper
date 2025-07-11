@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -22,26 +23,26 @@ class HttpMacrosService extends DefaultService
     public static function setMacros(): void
     {
         // Регистрация макроса запроса к localhost
-        !lhConfig(ConfigEnum::Http, 'localhost.enabled')
+        !Lh::config(ConfigEnum::Http, 'localhost.enabled')
             ?: Http::macro(
                 'localhost',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'localhost.url'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'localhost.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::Localhost))
             );
 
         // Регистрация макроса запроса к sms.ru
-        !lhConfig(ConfigEnum::Http, 'smsRu.enabled')
+        !Lh::config(ConfigEnum::Http, 'smsRu.enabled')
             ?: Http::macro(
                 'smsRu',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'smsRu.url'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'smsRu.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::SmsRu))
             );
 
         // Регистрация макроса запроса к mango-office.ru
-        !lhConfig(ConfigEnum::Http, 'mangoOfficeRu.enabled')
+        !Lh::config(ConfigEnum::Http, 'mangoOfficeRu.enabled')
             ?: Http::macro(
                 'mangoOfficeRu',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'mangoOfficeRu.url'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'mangoOfficeRu.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::MangoOfficeRu))
                     ->withOptions([
                         'curl' => [CURLOPT_FOLLOWLOCATION => true],
@@ -53,57 +54,57 @@ class HttpMacrosService extends DefaultService
             );
 
         // Регистрация макроса запроса к devline.ru
-        !lhConfig(ConfigEnum::Http, 'devlineRu.enabled')
+        !Lh::config(ConfigEnum::Http, 'devlineRu.enabled')
             ?: Http::macro(
                 'devlineRu',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'devlineRu.url.http'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'devlineRu.url.http'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::DevlineRu))
                     ->asJson()
                     ->acceptJson()
-                    ->timeout(lhConfig(ConfigEnum::Http, 'devlineRu.timeout'))
+                    ->timeout(Lh::config(ConfigEnum::Http, 'devlineRu.timeout'))
             );
 
         // Регистрация макроса запроса к rtsp.me
-        !lhConfig(ConfigEnum::Http, 'rtspMe.enabled')
+        !Lh::config(ConfigEnum::Http, 'rtspMe.enabled')
             ?: Http::macro(
                 'rtspMe',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'rtspMe.url'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'rtspMe.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::RtspMe))
                     ->asForm()
                     ->acceptJson()
-                    ->timeout(lhConfig(ConfigEnum::Http, 'rtspMe.timeout'))
+                    ->timeout(Lh::config(ConfigEnum::Http, 'rtspMe.timeout'))
             );
 
         // Регистрация макроса запроса к fcm.googleapis.com
-        !lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.enabled')
+        !Lh::config(ConfigEnum::Http, 'fcmGoogleApisCom.enabled')
             ?: Http::macro(
                 'fcmGoogleApisCom',
                 function () {
                     $client = new \Google\Client();
-                    $client->setAuthConfig(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.firebase_credentials'));
+                    $client->setAuthConfig(Lh::config(ConfigEnum::Http, 'fcmGoogleApisCom.firebase_credentials'));
                     $client->addScope(\Google\Service\FirebaseCloudMessaging::CLOUD_PLATFORM);
                     $token = $client->fetchAccessTokenWithAssertion()['access_token'];
-                    $projectId = lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.project_id');
+                    $projectId = Lh::config(ConfigEnum::Http, 'fcmGoogleApisCom.project_id');
 
-                    return Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.url'), '/') . "/projects/{$projectId}")
+                    return Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'fcmGoogleApisCom.url'), '/') . "/projects/{$projectId}")
                         ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::FcmGoogleApisCom))
                         ->withToken($token)
                         ->asJson()
                         ->acceptJson()
-                        ->timeout(lhConfig(ConfigEnum::Http, 'fcmGoogleApisCom.timeout'));
+                        ->timeout(Lh::config(ConfigEnum::Http, 'fcmGoogleApisCom.timeout'));
                 }
             );
 
         // Регистрация макроса запроса к api.telegram.org
-        !lhConfig(ConfigEnum::Http, 'telegramOrg.enabled')
+        !Lh::config(ConfigEnum::Http, 'telegramOrg.enabled')
             ?: Http::macro(
                 'telegramOrg',
-                fn () => Http::baseUrl(rtrim(lhConfig(ConfigEnum::Http, 'telegramOrg.url'), '/'))
+                fn () => Http::baseUrl(rtrim(Lh::config(ConfigEnum::Http, 'telegramOrg.url'), '/'))
                     ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::TelegramOrg))
                     ->asMultipart()
                     ->acceptJson()
-                    ->timeout(lhConfig(ConfigEnum::Http, 'telegramOrg.timeout'))
-                    ->connectTimeout(lhConfig(ConfigEnum::Http, 'telegramOrg.timeout'))
+                    ->timeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
+                    ->connectTimeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
             );
     }
 }

@@ -6,9 +6,9 @@ namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\RouteLogJob;
 use Atlcom\LaravelHelper\Models\RouteLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 
 /**
  * Dto лога роута
@@ -73,8 +73,8 @@ class RouteLogDto extends Dto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
-            (lhConfig(ConfigEnum::RouteLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+        if (Lh::canDispatch($this)) {
+            (Lh::config(ConfigEnum::RouteLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? RouteLogJob::dispatchSync($this)
                 : RouteLogJob::dispatch($this);
         }

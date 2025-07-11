@@ -8,9 +8,9 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\ProfilerLogJob;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
-use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Carbon\Carbon;
 use Throwable;
 
@@ -145,8 +145,8 @@ class ProfilerLogDto extends DefaultDto
      */
     public function dispatch()
     {
-        if (app(LaravelHelperService::class)->canDispatch($this)) {
-            (lhConfig(ConfigEnum::ProfilerLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+        if (Lh::canDispatch($this)) {
+            (Lh::config(ConfigEnum::ProfilerLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ProfilerLogJob::dispatchSync($this)
                 : ProfilerLogJob::dispatch($this);
             $this->isUpdated = true;

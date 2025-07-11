@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\TelegramLogEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\TelegramService;
 
 /**
@@ -21,7 +22,7 @@ class TelegramLogJob extends DefaultJob
         protected TelegramLogDto $dto,
         protected ?TelegramService $telegramService = null,
     ) {
-        $this->onQueue(lhConfig(ConfigEnum::TelegramLog, 'queue'));
+        $this->onQueue(Lh::config(ConfigEnum::TelegramLog, 'queue'));
         $this->telegramService ??= app(TelegramService::class);
     }
 

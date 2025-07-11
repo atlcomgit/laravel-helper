@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultJob;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\ViewLogEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 
 /**
@@ -18,7 +19,7 @@ class ViewLogJob extends DefaultJob
 
     public function __construct(protected ViewLogDto $dto)
     {
-        $this->onQueue(lhConfig(ConfigEnum::ViewLog, 'queue'));
+        $this->onQueue(Lh::config(ConfigEnum::ViewLog, 'queue'));
     }
 
 
