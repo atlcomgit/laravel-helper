@@ -1,6 +1,4 @@
-<?php 
-use Atlcom\LaravelHelper\Facades\Lh;
-?><?php
+<?php
 
 declare(strict_types=1);
 
@@ -9,6 +7,7 @@ namespace Atlcom\LaravelHelper\Services;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ConsoleLogRepository;
 
 /**
