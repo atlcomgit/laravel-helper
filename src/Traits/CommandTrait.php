@@ -17,6 +17,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
+/**
+ * Трейт для подключения логирования консольной команды
+ * 
+ * @mixin \Atlcom\LaravelHelper\Defaults\DefaultCommand
+ */
 trait CommandTrait
 {
     protected bool $isTesting;
@@ -183,7 +188,7 @@ trait CommandTrait
      */
     public function output(mixed $message = '', ?string $style = '', bool $withEol = false): void
     {
-        $message = __(Hlp::castToString($message));
+        $message = __(Hlp::castToString($message ?? ''));
 
         // $lines = explode(PHP_EOL, $message);
         // $lines = array_map(
@@ -213,7 +218,7 @@ trait CommandTrait
      */
     public function outputEol(mixed $message = '', ?string $style = ''): void
     {
-        $this->output(Hlp::castToString($message), $style, true);
+        $this->output(Hlp::castToString($message ?? ''), $style, true);
     }
 
 
@@ -225,7 +230,7 @@ trait CommandTrait
      */
     public function outputBold(mixed $message = ''): void
     {
-        $message = __(Hlp::castToString($message));
+        $message = __(Hlp::castToString($message ?? ''));
         $this->output($message, 'options=bold');
     }
 }
