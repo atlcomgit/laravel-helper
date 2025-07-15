@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Atlcom\LaravelHelper\Events;
 
 use Atlcom\LaravelHelper\Defaults\DefaultEvent;

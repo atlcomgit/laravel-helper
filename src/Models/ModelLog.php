@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Atlcom\LaravelHelper\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;

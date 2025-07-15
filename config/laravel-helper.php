@@ -213,7 +213,7 @@ return [
          */
     ConfigEnum::ProfilerLog->value => [
         // Флаг включения логов
-        'enabled' => (bool)env('HELPER_PROFILER_LOG_ENABLED', true),
+        'enabled' => (bool)env('HELPER_PROFILER_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('HELPER_PROFILER_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
@@ -355,7 +355,7 @@ return [
          */
     ConfigEnum::TelegramLog->value => [
         // Вкл/Выкл отправки в телеграм
-        'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ENABLED', true),
+        'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ENABLED', false),
         // Название очереди для логов
         'queue' => (string)env('HELPER_TELEGRAM_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
@@ -549,7 +549,7 @@ return [
          */
     ConfigEnum::ViewCache->value => [
         // Флаг включения кеша
-        'enabled' => (bool)env('HELPER_VIEW_CACHE_ENABLED', true),
+        'enabled' => (bool)env('HELPER_VIEW_CACHE_ENABLED', false),
         // Название драйвера кеша
         'driver' => (string)env('HELPER_VIEW_CACHE_DRIVER', env('CACHE_STORE', 'database')),
         // Сжимать данные кеша

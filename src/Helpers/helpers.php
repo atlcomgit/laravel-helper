@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;

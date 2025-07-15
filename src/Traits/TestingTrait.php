@@ -181,49 +181,52 @@ trait TestingTrait
         Config::set('mail.default', env('MAIL_MAILER'));
         Config::set('telescope.enabled', env('TELESCOPE_ENABLED'));
 
-        $helperEnabled = Lh::config(ConfigEnum::TestingLog, 'helper_logs.enabled');
-        if ($helperEnabled !== null) {
-            foreach ([
-                ConfigEnum::ConsoleLog,
-                ConfigEnum::HttpLog,
-                ConfigEnum::ModelLog,
-                ConfigEnum::ProfilerLog,
-                ConfigEnum::RouteLog,
-                ConfigEnum::QueryCache,
-                ConfigEnum::QueryLog,
-                ConfigEnum::QueueLog,
-                ConfigEnum::TelegramLog,
-                ConfigEnum::ViewCache,
-                ConfigEnum::ViewLog,
-            ] as $config) {
-                Config::set("laravel-helper.{$config->value}.enabled", $helperEnabled);
-            }
+        $helperTestingEnabled = Lh::config(ConfigEnum::TestingLog, 'enabled');
+        $helperLogsEnabled = $helperTestingEnabled && Lh::config(ConfigEnum::TestingLog, 'helper_logs.enabled');
+        foreach ([
+            ConfigEnum::ConsoleLog,
+            ConfigEnum::HttpLog,
+            ConfigEnum::ModelLog,
+            ConfigEnum::ProfilerLog,
+            ConfigEnum::RouteLog,
+            ConfigEnum::QueryCache,
+            ConfigEnum::QueryLog,
+            ConfigEnum::QueueLog,
+            ConfigEnum::TelegramLog,
+            ConfigEnum::ViewCache,
+            ConfigEnum::ViewLog,
+        ] as $config) {
+            Config::set("laravel-helper.{$config->value}.enabled", $helperLogsEnabled);
         }
 
-        ($databaseTesting = $connectionTesting['database'] ?: '')
-            ?: throw new WithoutTelegramException("Не задано название тестовой базы данных");
+        if ($helperTestingEnabled && Lh::config(ConfigEnum::TestingLog, 'database.fresh')) {
+            ($databaseTesting = $connectionTesting['database'] ?: '')
+                ?: throw new WithoutTelegramException(
+                    "Не задано название тестовой базы данных в database.connections.{$appEnv}.database",
+                );
 
-        switch (config("database.connections.{$connection}.driver")) {
-            case 'pgsql':
-                DB::connection($appEnv)->select(
-                    "SELECT 1 FROM pg_database WHERE datname = ?",
-                    [$databaseTesting],
-                )
-                    ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS \"$databaseTesting\"");
-                break;
+            switch (config("database.connections.{$connection}.driver")) {
+                case 'pgsql':
+                    DB::connection($appEnv)->select(
+                        "SELECT 1 FROM pg_database WHERE datname = ?",
+                        [$databaseTesting],
+                    )
+                        ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS \"$databaseTesting\"");
+                    break;
 
-            case 'mysql':
-                DB::connection($appEnv)->select(
-                    "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
-                    [$databaseTesting],
-                )
-                    ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS `$databaseTesting`");
-                break;
+                case 'mysql':
+                    DB::connection($appEnv)->select(
+                        "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
+                        [$databaseTesting],
+                    )
+                        ?: DB::connection($appEnv)->statement("CREATE DATABASE IF NOT EXISTS `$databaseTesting`");
+                    break;
 
-            case 'sqlite':
-                file_exists(storage_path("{$databaseTesting}.sqlite"))
-                    ?: touch(storage_path("{$databaseTesting}.sqlite"));
-                break;
+                case 'sqlite':
+                    file_exists(storage_path("{$databaseTesting}.sqlite"))
+                        ?: touch(storage_path("{$databaseTesting}.sqlite"));
+                    break;
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder;
