@@ -39,6 +39,9 @@ use Illuminate\Foundation\Auth\User;
  * @property ?string $response_message
  * @property ?array $response_headers
  * @property ?string $response_data
+ * @property ?string $cache_key
+ * @property bool $is_cached
+ * @property bool $is_from_cache
  * @property int|null $try_count
  * @property ?float $duration
  * @property ?int $size
@@ -78,6 +81,9 @@ class HttpLog extends DefaultModel
         'response_message' => 'string',
         'response_headers' => 'array',
         'response_data' => 'string',
+        'cache_key' => 'string',
+        'is_cached' => 'bool',
+        'is_from_cache' => 'bool',
         // 'try_count' => 'integer', - не нужно!
         'duration' => 'float',
         'size' => 'integer',

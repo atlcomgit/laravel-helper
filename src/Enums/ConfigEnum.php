@@ -17,6 +17,7 @@ enum ConfigEnum: string
     case Macros = 'macros';
     case Http = 'http';
     case ConsoleLog = 'console_log';
+    case HttpCache = 'http_cache';
     case HttpLog = 'http_log';
     case ModelLog = 'model_log';
     case ProfilerLog = 'profiler_log';
@@ -55,6 +56,7 @@ enum ConfigEnum: string
             self::Macros => 'Макрос',
             self::Http => 'Макрос http',
             self::ConsoleLog => 'Лог консольной команды',
+            self::HttpCache => 'Кеш http запроса',
             self::HttpLog => 'Лог http запроса',
             self::ModelLog => 'Лог изменения модели',
             self::ProfilerLog => 'Лог профилировщика',

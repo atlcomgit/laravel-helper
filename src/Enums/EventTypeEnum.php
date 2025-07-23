@@ -12,6 +12,9 @@ enum EventTypeEnum: string
     use HelperEnumTrait;
 
 
+    case GetHttpCache = 'get_http_cache';
+    case SetHttpCache = 'set_http_cache';
+    case FlushHttpCache = 'flush_http_cache';
     case GetQueryCache = 'get_query_cache';
     case SetQueryCache = 'set_query_cache';
     case FlushQueryCache = 'flush_query_cache';
@@ -40,6 +43,9 @@ enum EventTypeEnum: string
     public static function getLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
+            self::GetHttpCache => 'Получение http кеша',
+            self::SetHttpCache => 'Сохранение http кеша',
+            self::FlushHttpCache => 'Сброс http кеша',
             self::GetQueryCache => 'Получение query кеша',
             self::SetQueryCache => 'Сохранение query кеша',
             self::FlushQueryCache => 'Сброс query кеша',

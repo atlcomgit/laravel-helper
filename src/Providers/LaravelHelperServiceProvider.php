@@ -26,11 +26,14 @@ use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
 use Atlcom\LaravelHelper\Listeners\TestFinishedListener;
+use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 use Atlcom\LaravelHelper\Services\BuilderMacrosService;
+use Atlcom\LaravelHelper\Services\CacheService;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
+use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
@@ -101,7 +104,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // Регистрация сервисов
         $this->app->singleton(LaravelHelperService::class);
+        $this->app->singleton(CacheService::class);
         $this->app->singleton(ConsoleLogService::class);
+        $this->app->singleton(HttpCacheService::class);
         $this->app->singleton(HttpLogService::class);
         $this->app->singleton(ModelLogService::class);
         $this->app->singleton(ProfilerLogService::class);
@@ -139,7 +144,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Подключение макросов Str
         !Lh::config(ConfigEnum::Macros, 'str.enabled') ?: StrMacrosService::setMacros();
         // Подключение макросов Http
-        !Lh::config(ConfigEnum::Macros, 'http.enabled') ?: HttpMacrosService::setMacros();
+        !(Lh::config(ConfigEnum::Macros, 'http.enabled')  || Lh::config(ConfigEnum::HttpCache, 'enabled'))
+            ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
         !Lh::config(ConfigEnum::HttpLog, 'out.global') ?: Http::globalOptions([
@@ -184,7 +190,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 ]);
         }
 
-        /** @var Kernel $kernel */
+        /** @var \Illuminate\Foundation\Http\Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
 
         // Подключение middleware глобально
@@ -193,6 +199,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
         if (Lh::config(ConfigEnum::HttpLog, 'in.global')) {
             $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
             $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
+        }
+        if (Lh::config(ConfigEnum::HttpCache, 'global')) {
+            $kernel->prependMiddlewareToGroup('web', HttpCacheMiddleware::class);
+            $kernel->prependMiddlewareToGroup('api', HttpCacheMiddleware::class);
         }
 
         // Подключение логирования очередей

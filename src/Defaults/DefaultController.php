@@ -28,13 +28,39 @@ class DefaultController extends Controller
      * @param int|string|bool|null $seconds
      * @return static
      */
+    public function withCache(int|string|bool|null $seconds = null): static
+    {
+        return $this->withViewCache($seconds);
+    }
+
+
+    /**
+     * Устанавливает флаг кеширования рендеринга blade шаблонов
+     *
+     * @param int|string|bool|null $seconds
+     * @return static
+     */
     public function withViewCache(int|string|bool|null $seconds = null): static
     {
         $now = now()->setTime(0, 0, 0, 0);
-        !is_string($seconds) ?: $seconds = abs($now->copy()->modify(trim((string)$seconds, '- '))->diffInSeconds($now));
+        !is_string($seconds) ?: $seconds = (int)abs(
+            $now->copy()->modify(trim((string)$seconds, '- '))->diffInSeconds($now),
+        );
         $this->withViewCache = $seconds ?? true;
 
         return $this;
+    }
+
+
+    /**
+     * Устанавливает флаг логирования рендеринга blade шаблонов
+     *
+     * @param bool|null $enabled
+     * @return static
+     */
+    public function withLog(bool|null $enabled = null): static
+    {
+        return $this->withViewLog($enabled);
     }
 
 
@@ -59,18 +85,17 @@ class DefaultController extends Controller
      * @param array $data
      * @param array $mergeData
      * @param array $ignoreData - массив игнорируемых ключей в data при генерации ключа кеша
-     * @return string
+     * @return string|null
      */
     public function view(
         string $view,
         array $data = [],
         array $mergeData = [],
         array $ignoreData = [],
-    ): string {
+    ): ?string {
         try {
             $render = '';
             $dto = app(ViewLogService::class)->createViewLog(name: $view, withViewLog: $this->withViewLog);
-
 
             $render = (
                 Lh::config(ConfigEnum::ViewCache, 'enabled')
@@ -81,8 +106,14 @@ class DefaultController extends Controller
                     || ($this->withViewCache !== false && Lh::config(ConfigEnum::ViewCache, 'global'))
                 )
             )
-                ? app(ViewCacheService::class)
-                    ->remember($dto, $view, $data, $mergeData, $ignoreData, $this->withViewCache)
+                ? app(ViewCacheService::class)->viewCache(
+                    $dto,
+                    $view,
+                    $data,
+                    $mergeData,
+                    $ignoreData,
+                    $this->withViewCache,
+                )
                 : view($view, $data, $mergeData)->render();
 
             $dto->status = ViewLogStatusEnum::Success;
@@ -95,6 +126,7 @@ class DefaultController extends Controller
             ];
 
             throw $exception;
+
         } finally {
             app(ViewLogService::class)->updateViewLog($dto, $render);
         }

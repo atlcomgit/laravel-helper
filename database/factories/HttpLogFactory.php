@@ -44,6 +44,9 @@ class HttpLogFactory extends Factory
             'response_message' => fake()->text(190),
             'response_headers' => [],
             'response_data' => json_encode(['test' => true]),
+            'cache_key' => fake()->md5(),
+            'is_cached' => fake()->boolean(),
+            'is_from_cache' => fake()->boolean(),
             'duration' => null,
             'size' => null,
             'info' => null,
@@ -61,6 +64,20 @@ class HttpLogFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'user_id' => $user->id,
+        ]);
+    }
+
+
+    /**
+     * Задает статус выполнения http запроса
+     *
+     * @param HttpLogStatusEnum $status
+     * @return static
+     */
+    public function withStatus(HttpLogStatusEnum $status): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => $status->value,
         ]);
     }
 }

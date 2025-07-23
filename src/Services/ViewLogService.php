@@ -73,7 +73,7 @@ class ViewLogService extends DefaultService
      *
      * @return void
      */
-    public function updateViewLog(ViewLogDto $dto, string &$render): void
+    public function updateViewLog(ViewLogDto $dto, ?string &$render): void
     {
         $dto->render = $render;
         $dto->isUpdated = Lh::config(ConfigEnum::ViewLog, 'store_on_start');

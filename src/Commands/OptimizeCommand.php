@@ -9,12 +9,14 @@ use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
+use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
+use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -35,12 +37,14 @@ class OptimizeCommand extends DefaultCommand
 
     public function __construct(
         protected ConsoleLogService $consoleLogService,
+        protected HttpCacheService $httpCacheService,
         protected HttpLogService $httpLogService,
         protected ModelLogService $modelLogService,
         protected ProfilerLogService $profileLogService,
         protected QueryCacheService $queryCacheService,
         protected QueryLogService $queryLogService,
         protected QueueLogService $queueLogService,
+        protected ViewCacheService $viewCacheService,
         protected ViewLogService $viewLogService,
     ) {
         parent::__construct();
@@ -89,9 +93,14 @@ class OptimizeCommand extends DefaultCommand
         }
 
         if (Lh::config(ConfigEnum::Optimize, 'cache_clear.enabled')) {
-            if (Lh::config(ConfigEnum::QueryCache, 'enabled') || Lh::config(ConfigEnum::ViewCache, 'enabled')) {
-                Cache::flush();
+            if (
+                Lh::config(ConfigEnum::HttpCache, 'enabled')
+                || Lh::config(ConfigEnum::QueryCache, 'enabled')
+                || Lh::config(ConfigEnum::ViewCache, 'enabled')
+            ) {
+                $this->httpCacheService->flushHttpCacheAll();
                 $this->queryCacheService->flushQueryCacheAll();
+                $this->viewCacheService->flushViewCacheAll();
             }
         }
 

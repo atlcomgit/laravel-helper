@@ -8,7 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 
 /**
- * Dto события кеширования blade шаблона
+ * Dto события кеширования рендеринга blade шаблона
  */
 class ViewCacheEventDto extends DefaultDto
 {
@@ -19,5 +19,5 @@ class ViewCacheEventDto extends DefaultDto
     public ?array $mergeData;
     public ?array $ignoreData;
     public int|bool|null $ttl;
-    public mixed $render;
+    public ?string $render;
 }

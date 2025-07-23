@@ -6,31 +6,29 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\ViewCacheDto;
 use Atlcom\LaravelHelper\Dto\ViewCacheEventDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 use Atlcom\LaravelHelper\Events\ViewCacheEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Сервис кеширования рендеринга blade шаблонов
  */
 class ViewCacheService extends DefaultService
 {
+    protected CacheService $cacheService;
     protected string $driver = '';
     protected array $exclude = [];
-    protected bool $gzdeflateEnabled = false;
-    protected int $gzdeflateLevel = -1;
 
 
     public function __construct()
     {
+        $this->cacheService = app(CacheService::class);
         $this->driver = Lh::config(ConfigEnum::ViewCache, 'driver') ?: config('cache.default');
         $this->exclude = Lh::config(ConfigEnum::ViewCache, 'exclude') ?? [];
-        $this->gzdeflateEnabled = Lh::config(ConfigEnum::ViewCache, 'gzdeflate.enabled') ?? false;
-        $this->gzdeflateLevel = Lh::config(ConfigEnum::ViewCache, 'gzdeflate.level') ?? -1;
     }
 
 
@@ -81,117 +79,157 @@ class ViewCacheService extends DefaultService
      * @param array $mergeData
      * @param array $ignoreData
      * @param int|bool|null $ttl
-     * @return string
+     * @return string|null
      */
-    public function remember(
+    public function viewCache(
         ViewLogDto $dto,
         string $view,
         array $data = [],
         array $mergeData = [],
         array $ignoreData = [],
         int|bool|null $ttl = null,
-    ): string {
-        $gzdeflateEnabled = $this->gzdeflateEnabled;
-        $gzdeflateLevel = $this->gzdeflateLevel;
-
-        $render = static fn () => view($view, $data, $mergeData)->render();
+    ): ?string {
+        $render = static fn () => (view($view, $data, $mergeData)->render() ?: '');
 
         switch (true) {
             case $ttl === false:
             case in_array($view, $this->exclude):
-                $result = $render();
-                break;
+                return $render();
 
             default:
-                $result = $this->withoutTelescope(
-                    function () use (&$dto, &$view, &$data, &$mergeData, &$ignoreData, &$ttl, &$render) {
-                        $dto->cacheKey = $this->getTagTtl($ttl)
-                            . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData);
-
-                        if ($dto->isFromCache = Cache::driver($this->driver)->has($dto->cacheKey)) {
-                            $result = Cache::driver($this->driver)->get($dto->cacheKey, '');
-
-                            !(is_string($result) && $this->gzdeflateEnabled)
-                                ?: $result = (($tmp = @gzinflate($result)) === false) ? '' : $tmp;
-
-                            event(
-                                new ViewCacheEvent(
-                                    ViewCacheEventDto::create(
-                                        type: EventTypeEnum::GetViewCache,
-                                        key: $dto->cacheKey,
-                                        view: $view,
-                                        data: $data,
-                                        mergeData: $mergeData,
-                                        ignoreData: $ignoreData,
-                                        render: $result,
-                                    ),
-                                ),
-                            );
-
-                        } else {
-                            $result = $render();
-                            $cache = $this->gzdeflateEnabled
-                                ? $cache = gzdeflate($result, $this->gzdeflateLevel)
-                                : $result;
-
-                            match (true) {
-                                $ttl === 0 => Cache::driver($this->driver)->forever($dto->cacheKey, $cache),
-                                $ttl === true, is_null($ttl) => Cache::driver($this->driver)
-                                    ->set($dto->cacheKey, $cache, Lh::config(ConfigEnum::ViewCache, 'ttl')),
-
-                                default => Cache::driver($this->driver)->set($dto->cacheKey, $cache, $ttl),
-                            };
-
-                            $dto->isCached = true;
-
-                            event(
-                                new ViewCacheEvent(
-                                    ViewCacheEventDto::create(
-                                        type: EventTypeEnum::SetViewCache,
-                                        key: $dto->cacheKey,
-                                        view: $view,
-                                        data: $data,
-                                        mergeData: $mergeData,
-                                        ignoreData: $ignoreData,
-                                        ttl: $ttl,
-                                        render: $result,
-                                    ),
-                                ),
-                            );
-                        }
-
-                        $dto->cacheKey = Hlp::stringPadPrefix($dto->cacheKey, config('cache.prefix'));
-                        
-                        return $result;
-                    }
+                $viewCacheDto = ViewCacheDto::create(
+                    key: $dto->cacheKey = $this->getTagTtl($ttl)
+                    . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData),
+                    ttl: $this->cacheService->getCacheTtl($ttl),
+                    view: $view,
+                    data: $data,
+                    mergeData: $mergeData,
+                    ignoreData: $ignoreData,
                 );
-                break;
-        }
 
-        return $result;
+                if ($this->hasViewCache($viewCacheDto)) {
+                    $this->getViewCache($viewCacheDto);
+                    $dto->isFromCache = true;
+
+                    return $viewCacheDto->render;
+                }
+
+                $viewCacheDto->render = $render();
+                $this->setViewCache($viewCacheDto);
+                $dto->isCached = true;
+
+                return $viewCacheDto->render;
+        }
     }
 
 
-    /**
-     * Сбрасывает весь кеш рендеринга blade шаблонов
-     *
-     * @return void
-     */
-    public function flushViewCacheAll(): void
+    //?!? phpdoc
+    public function hasViewCache(ViewCacheDto $dto): bool
+    {
+        if (!$dto->key) {
+            return false;
+        }
+
+        return $this->cacheService->hasCache(ConfigEnum::ViewCache, [], $dto->key);
+    }
+
+
+    public function setViewCache(ViewCacheDto $dto): void
     {
         $this->withoutTelescope(
-            function () {
-                Cache::driver($this->driver)->flush();
+            function () use (&$dto) {
+                if (!$dto->key) {
+                    return;
+                }
+
+                ($dto->ttl === false)
+                    ?: $this->cacheService
+                        ->setCache(ConfigEnum::ViewCache, $dto->tags, $dto->key, $dto->render, $dto->ttl);
 
                 event(
                     new ViewCacheEvent(
                         ViewCacheEventDto::create(
-                            type: EventTypeEnum::FlushViewCache,
+                            type: EventTypeEnum::SetViewCache,
+                            tags: $dto->tags,
+                            key: $dto->key,
+                            ttl: $dto->ttl,
+                            view: $dto->view,
+                            data: $dto->data,
+                            mergeData: $dto->mergeData,
+                            ignoreData: $dto->ignoreData,
+                            render: $dto->render,
                         ),
                     ),
                 );
             }
         );
+    }
 
+
+    public function getViewCache(ViewCacheDto $dto): void
+    {
+        $this->withoutTelescope(
+            function () use (&$dto) {
+                if (!$dto->key) {
+                    return;
+                }
+
+                $dto->render = $this->cacheService->getCache(ConfigEnum::ViewCache, $dto->tags, $dto->key, null);
+
+                event(
+                    new ViewCacheEvent(
+                        ViewCacheEventDto::create(
+                            type: EventTypeEnum::GetViewCache,
+                            tags: $dto->tags,
+                            key: $dto->key,
+                            ttl: $dto->ttl,
+                            view: $dto->view,
+                            data: $dto->data,
+                            mergeData: $dto->mergeData,
+                            ignoreData: $dto->ignoreData,
+                            render: $dto->render,
+                        ),
+                    ),
+                );
+            }
+        );
+    }
+
+
+    public function flushViewCache(array $tags = [])
+    {
+        $this->withoutTelescope(
+            function () use (&$tags) {
+                $this->cacheService->flushCache(ConfigEnum::ViewCache, $tags);
+
+                event(
+                    new ViewCacheEvent(
+                        ViewCacheEventDto::create(
+                            type: EventTypeEnum::FlushViewCache,
+                            tags: $tags,
+                        ),
+                    ),
+                );
+            }
+        );
+    }
+
+
+    public function flushViewCacheAll()
+    {
+        $this->withoutTelescope(
+            function () {
+                $this->cacheService->flushCache(ConfigEnum::ViewCache, $tags = [ConfigEnum::ViewCache->value]);
+
+                event(
+                    new ViewCacheEvent(
+                        ViewCacheEventDto::create(
+                            type: EventTypeEnum::FlushViewCache,
+                            tags: $tags,
+                        ),
+                    ),
+                );
+            }
+        );
     }
 }

@@ -71,6 +71,12 @@ return new class extends Migration {
                 ->comment('Заголовки ответа на http запрос');
             $table->longText('response_data')->nullable(true)
                 ->comment('Тело ответа на http запрос');
+            $table->string('cache_key')->nullable(true)->index()
+                ->comment('Ключ кеша http запроса');
+            $table->boolean('is_cached')->nullable(false)
+                ->comment('Флаг сохранения http запроса в кеш');
+            $table->boolean('is_from_cache')->nullable(false)
+                ->comment('Флаг обращения http запроса в кеш');
             $table->integer('try_count')->nullable(true)->default(0)
                 ->comment('Количество попыток http запроса');
             $table->decimal('duration', 10, 3)->nullable(true)

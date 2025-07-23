@@ -57,7 +57,9 @@ trait QueryTrait
     public function withQueryCache(int|string|bool|null $seconds = null): static
     {
         $now = now()->setTime(0, 0, 0, 0);
-        !is_string($seconds) ?: $seconds = abs($now->copy()->modify(trim((string)$seconds, '- '))->diffInSeconds($now));
+        !is_string($seconds) ?: $seconds = (int)abs(
+            $now->copy()->modify(trim((string)$seconds, '- '))->diffInSeconds($now),
+        );
         $this->setQueryCache($seconds ?? true);
         ($seconds === false) ?: $this->setQueryCacheClass(null, true);
 

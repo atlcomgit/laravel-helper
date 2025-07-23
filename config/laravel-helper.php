@@ -121,6 +121,30 @@ return [
 
 
         /**
+         * HttpCache. Кеширование http запросов
+         */
+    ConfigEnum::HttpCache->value => [
+        // Флаг включения кеша
+        'enabled' => (bool)env('HELPER_HTTP_CACHE_ENABLED', false),
+        // Название драйвера кеша
+        'driver' => (string)env('HELPER_HTTP_CACHE_DRIVER', env('CACHE_STORE', 'database')),
+        // Название папки кеша для драйвера file
+        'driver_file_path' => (string)env('HELPER_HTTP_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/http')),
+        // Сжимать данные кеша
+        'gzdeflate' => [
+            'enabled' => (bool)env('HELPER_HTTP_CACHE_GZDEFLATE_ENABLED', true),
+            'level' => (int)env('HELPER_HTTP_CACHE_GZDEFLATE_LEVEL', 9),
+        ],
+        // Срок жизни ключа кеша по умолчанию
+        'ttl' => Hlp::castToInt(env('HELPER_HTTP_CACHE_TTL', 3600)),
+        // Исключения кеша, например ['key' => '...']
+        'exclude' => (array)(Hlp::envGet('HELPER_HTTP_CACHE_EXCLUDE', base_path('.env')) ?? []),
+        // Флаг включения кеширования рендеринга всех blade шаблонов
+        'global' => (bool)env('HELPER_HTTP_CACHE_GLOBAL', false),
+    ],
+
+
+    /**
          * HttpLog. Логирование http запросов
          */
     ConfigEnum::HttpLog->value => [
@@ -552,6 +576,8 @@ return [
         'enabled' => (bool)env('HELPER_VIEW_CACHE_ENABLED', false),
         // Название драйвера кеша
         'driver' => (string)env('HELPER_VIEW_CACHE_DRIVER', env('CACHE_STORE', 'database')),
+        // Название папки кеша для драйвера file
+        'driver_file_path' => (string)env('HELPER_VIEW_CACHE_DRIVER_FILE_PATH', storage_path('framework/cache/view')),
         // Сжимать данные кеша
         'gzdeflate' => [
             'enabled' => (bool)env('HELPER_VIEW_CACHE_GZDEFLATE_ENABLED', true),

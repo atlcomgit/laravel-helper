@@ -45,6 +45,9 @@ class HttpLogDto extends Dto
     public ?string $responseMessage;
     public ?array $responseHeaders;
     public ?string $responseData;
+    public ?string $cacheKey;
+    public bool $isCached;
+    public bool $isFromCache;
     public ?float $duration;
     public ?int $size;
     public ?array $info;
@@ -63,6 +66,8 @@ class HttpLogDto extends Dto
     {
         return [
             'userId' => user(returnOnlyId: true),
+            'isCached' => false,
+            'isFromCache' => false,
         ];
     }
 
@@ -104,6 +109,9 @@ class HttpLogDto extends Dto
                     'url' => $request->url(),
                     'requestHeaders' => $request->headers(),
                     'requestData' => $request->body(),
+                    'cacheKey' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
+                    'isCached' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_SET) ?? [])[0] ?? null,
+                    'isFromCache' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_GET) ?? [])[0] ?? null,
                 ],
 
                 default => [],
@@ -199,7 +207,7 @@ class HttpLogDto extends Dto
                     ],
 
                     default => [
-                        'responseData' => $response::class,
+                        'responseData' => is_object($response) ? $response::class : $response,
                         'status' => HttpLogStatusEnum::Failed,
                     ],
                 },
@@ -209,9 +217,11 @@ class HttpLogDto extends Dto
                     'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
                     'response_data_size' => Hlp::sizeBytesToString($size),
                 ],
+                'cacheKey' => $attributes['cacheKey'] ?? null,
+                'isCached' => $attributes['isCached'] ?? false,
+                'isFromCache' => $attributes['isFromCache'] ?? false,
                 'duration' => $duration ?? null,
                 'size' => $size,
-
             ]);
     }
 

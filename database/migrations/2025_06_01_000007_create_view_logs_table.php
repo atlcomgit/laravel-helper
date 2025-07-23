@@ -50,7 +50,7 @@ return new class extends Migration {
             $table->longText('render')->nullable(true)
                 ->comment('Результат рендеринга blade шаблона');
             $table->string('cache_key')->nullable(true)->index()
-                ->comment('Ключ кеша query запроса');
+                ->comment('Ключ кеша рендеринга blade шаблона');
             $table->boolean('is_cached')->nullable(false)
                 ->comment('Флаг сохранения рендеринга blade шаблона в кеш');
             $table->boolean('is_from_cache')->nullable(false)

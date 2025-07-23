@@ -41,6 +41,9 @@ class HttpLogMiddleware
         !static::$uuid
             ?: HttpLogDto::createByResponse(static::$uuid, $request, $response, [
                 'startAt' => static::$startAt,
+                'cacheKey' => HttpCacheMiddleware::$cacheKey,
+                'isCached' => HttpCacheMiddleware::$isCached,
+                'isFromCache' => HttpCacheMiddleware::$isFromCache,
             ])->dispatch()
         ;
     }

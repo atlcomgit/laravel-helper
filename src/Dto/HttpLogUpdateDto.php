@@ -25,6 +25,9 @@ class HttpLogUpdateDto extends Dto
     public ?string $responseMessage;
     public ?array $responseHeaders;
     public ?string $responseData;
+    public ?string $cacheKey;
+    public bool $isCached;
+    public bool $isFromCache;
     public ?float $duration;
     public ?int $size;
     public ?array $info;
@@ -41,6 +44,8 @@ class HttpLogUpdateDto extends Dto
     {
         return [
             'uuid' => uuid(),
+            'isCached' => false,
+            'isFromCache' => false,
         ];
     }
 

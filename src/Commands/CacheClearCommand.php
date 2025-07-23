@@ -7,7 +7,9 @@ namespace Atlcom\LaravelHelper\Commands;
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
+use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -22,8 +24,11 @@ class CacheClearCommand extends DefaultCommand
     protected ?bool $withTelegramLog = false;
 
 
-    public function __construct(protected QueryCacheService $queryCacheService)
-    {
+    public function __construct(
+        protected HttpCacheService $httpCacheService,
+        protected QueryCacheService $queryCacheService,
+        protected ViewCacheService $viewCacheService,
+    ) {
         parent::__construct();
     }
 
@@ -38,8 +43,9 @@ class CacheClearCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
+        !Lh::config(ConfigEnum::HttpCache, 'enabled') ?: $this->httpCacheService->flushHttpCacheAll();
         !Lh::config(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->flushQueryCacheAll();
-        !Lh::config(ConfigEnum::ViewCache, 'enabled') ?: Cache::flush();
+        !Lh::config(ConfigEnum::ViewCache, 'enabled') ?: $this->viewCacheService->flushViewCacheAll();
 
         return self::SUCCESS;
     }
