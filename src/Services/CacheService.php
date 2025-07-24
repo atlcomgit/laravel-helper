@@ -33,7 +33,12 @@ class CacheService extends DefaultService
     public const CACHE_TAGS_DELIMITER = '__';
 
 
-    //?!? phpdoc
+    /**
+     * Возвращает время жизни кеша
+     *
+     * @param int|string|bool|null|null $ttl
+     * @return bool|int|null
+     */
     public function getCacheTtl(int|string|bool|null $ttl = null): bool|int|null
     {
         $now = now()->setTime(0, 0, 0, 0);
@@ -49,7 +54,7 @@ class CacheService extends DefaultService
 
 
     /**
-     * Проверяет наличие query запроса в кеше
+     * Проверяет наличие ключа в кеше
      *
      * @param ConfigEnum $config
      * @param array|null $tags
@@ -154,7 +159,7 @@ class CacheService extends DefaultService
 
 
     /**
-     * Сохраняет query запрос в кеш
+     * Сохраняет ключ в кеше
      *
      * @param ConfigEnum $config
      * @param array|null $tags
@@ -239,7 +244,7 @@ class CacheService extends DefaultService
 
 
     /**
-     * Сохраняет query запрос в кеш
+     * Возвращает ключ из кеша
      *
      * @param ConfigEnum $config
      * @param array|null $tags
@@ -334,7 +339,7 @@ class CacheService extends DefaultService
 
 
     /**
-     * Удаляет кеш-ключи по маске для различных драйверов
+     * Удаляет ключи из кеша по маске для различных драйверов
      *
      * @param ConfigEnum $config
      * @param array $tags

@@ -123,7 +123,12 @@ class ViewCacheService extends DefaultService
     }
 
 
-    //?!? phpdoc
+    /**
+     * Проверяет наличие ключа рендеринга blade шаблона в кеше 
+     *
+     * @param ViewCacheDto $dto
+     * @return bool
+     */
     public function hasViewCache(ViewCacheDto $dto): bool
     {
         if (!$dto->key) {
@@ -134,6 +139,12 @@ class ViewCacheService extends DefaultService
     }
 
 
+    /**
+     * Сохраняет ключ рендеринга blade шаблона в кеше
+     *
+     * @param ViewCacheDto $dto
+     * @return void
+     */
     public function setViewCache(ViewCacheDto $dto): void
     {
         $this->withoutTelescope(
@@ -166,6 +177,12 @@ class ViewCacheService extends DefaultService
     }
 
 
+    /**
+     * Возвращает ключ рендеринга blade шаблона из кеша
+     *
+     * @param ViewCacheDto $dto
+     * @return void
+     */
     public function getViewCache(ViewCacheDto $dto): void
     {
         $this->withoutTelescope(
@@ -196,7 +213,13 @@ class ViewCacheService extends DefaultService
     }
 
 
-    public function flushViewCache(array $tags = [])
+    /**
+     * Удаляет ключи рендеринга blade шаблона из кеша по тегам
+     *
+     * @param array $tags
+     * @return void
+     */
+    public function flushViewCache(array $tags = []): void
     {
         $this->withoutTelescope(
             function () use (&$tags) {
@@ -215,7 +238,12 @@ class ViewCacheService extends DefaultService
     }
 
 
-    public function flushViewCacheAll()
+    /**
+     * Удаляет все ключи рендеринга blade шаблона из кеша
+     *
+     * @return void
+     */
+    public function flushViewCacheAll(): void
     {
         $this->withoutTelescope(
             function () {

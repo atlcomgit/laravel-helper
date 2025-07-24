@@ -44,7 +44,13 @@ class HttpCacheService extends DefaultService
     }
 
 
-    //?!? phpdoc
+    /**
+     * Регистрирует макросы для Http запроса PendingRequest
+     *
+     * @param PendingRequest $request
+     * @param int|string|bool|null|null $ttl
+     * @return PendingRequest
+     */
     public function setMacro(PendingRequest $request, int|string|bool|null $ttl = null): PendingRequest
     {
         $request->macro(
@@ -103,6 +109,17 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Отправляет http запрос с использованием кеша
+     *
+     * @param PendingRequest $request
+     * @param string $method
+     * @param string $url
+     * @param array|string|null|null $data
+     * @param int|string|bool|null|null $ttl
+     * @param mixed 
+     * @return ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null
+     */
     public function sendWithCache(
         PendingRequest $request,
         string $method,
@@ -163,6 +180,17 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Возвращает dto из http запроса
+     *
+     * @param RequestIn|RequestOut|PendingRequest $request
+     * @param string $method
+     * @param string $url
+     * @param array|string|null|null $data
+     * @param int|string|bool|null|null $ttl
+     * @param mixed 
+     * @return HttpCacheDto
+     */
     public function createHttpDto(
         RequestIn|RequestOut|PendingRequest $request,
         string $method,
@@ -238,6 +266,12 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Проверяет наличие ключа http запроса в кеше 
+     *
+     * @param HttpCacheDto $dto
+     * @return bool
+     */
     public function hasHttpCache(HttpCacheDto $dto): bool
     {
         if (!$dto->key) {
@@ -248,6 +282,12 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Сохраняет ключ http запроса в кеше
+     *
+     * @param HttpCacheDto $dto
+     * @return void
+     */
     public function setHttpCache(HttpCacheDto $dto): void
     {
         $this->withoutTelescope(
@@ -298,6 +338,12 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Возвращает ключ http запроса из кеша
+     *
+     * @param HttpCacheDto $dto
+     * @return void
+     */
     public function getHttpCache(HttpCacheDto $dto): void
     {
         $this->withoutTelescope(
@@ -328,7 +374,13 @@ class HttpCacheService extends DefaultService
     }
 
 
-    public function flushHttpCache(array $tags = [])
+    /**
+     * Удаляет ключи http запроса из кеша по тегам
+     *
+     * @param array $tags
+     * @return void
+     */
+    public function flushHttpCache(array $tags = []): void
     {
         $this->withoutTelescope(
             function () use (&$tags) {
@@ -347,6 +399,11 @@ class HttpCacheService extends DefaultService
     }
 
 
+    /**
+     * Удаляет все ключи http запроса из кеша
+     *
+     * @return void
+     */
     public function flushHttpCacheAll()
     {
         $this->withoutTelescope(
