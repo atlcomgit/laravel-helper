@@ -26,9 +26,9 @@ class HttpLogService extends DefaultService
     public const HTTP_HEADER_UUID = 'X-UUID';
     public const HTTP_HEADER_NAME = 'X-NAME';
     public const HTTP_HEADER_TIME = 'X-TIME';
-    public const HTTP_HEADER_CACHE_KEY = 'X-CHACHE-KEY';
-    public const HTTP_HEADER_CACHE_SET = 'X-CHACHE-SET';
-    public const HTTP_HEADER_CACHE_GET = 'X-CHACHE-GET';
+    public const HTTP_HEADER_CACHE_KEY = 'X-CACHE-KEY';
+    public const HTTP_HEADER_CACHE_SET = 'X-CACHE-SET';
+    public const HTTP_HEADER_CACHE_GET = 'X-CACHE-GET';
 
 
     /**

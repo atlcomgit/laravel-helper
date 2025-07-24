@@ -26,7 +26,12 @@ class HttpCacheMiddleware
     {
         if (static::$cacheEnabled = Lh::config(ConfigEnum::HttpCache, 'enabled')) {
             $httpCacheService = app(HttpCacheService::class);
-            $httpCacheDto = $httpCacheService->createHttpDto($request);
+            $httpCacheDto = $httpCacheService->createHttpDto(
+                request: $request,
+                method: $request->getMethod(),
+                url: $request->getUri(),
+                data: $request->getContent(),
+            );
 
             if (static::$cacheKey = $httpCacheDto->key) {
                 if ($httpCacheService->hasHttpCache($httpCacheDto)) {

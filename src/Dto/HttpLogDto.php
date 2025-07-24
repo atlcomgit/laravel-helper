@@ -110,8 +110,12 @@ class HttpLogDto extends Dto
                     'requestHeaders' => $request->headers(),
                     'requestData' => $request->body(),
                     'cacheKey' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
-                    'isCached' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_SET) ?? [])[0] ?? null,
-                    'isFromCache' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_GET) ?? [])[0] ?? null,
+                    'isCached' => Hlp::castToBool(
+                        ($request->header(HttpLogService::HTTP_HEADER_CACHE_SET) ?? [])[0] ?? null
+                    ),
+                    'isFromCache' => Hlp::castToBool(
+                        ($request->header(HttpLogService::HTTP_HEADER_CACHE_GET) ?? [])[0] ?? null
+                    ),
                 ],
 
                 default => [],
@@ -150,6 +154,8 @@ class HttpLogDto extends Dto
         ?array $attributes = null,
     ): static {
         $startAt = match (true) {
+            $response instanceof StreamedResponse => $attributes['startAt'] ?? null,
+            $response instanceof BinaryFileResponse => $attributes['startAt'] ?? null,
             $response instanceof ResponseIn => $attributes['startAt'] ?? null,
             $response instanceof ResponseOut => ($request->header(HttpLogService::HTTP_HEADER_TIME) ?? [])[0]
             ?? null,
@@ -157,14 +163,14 @@ class HttpLogDto extends Dto
             default => null,
         };
         $duration = $startAt ? Carbon::createFromTimestampMs($startAt)->diffInMilliseconds() / 1000 : 0;
-        $size = Str::length(
-            match (true) {
-                $response instanceof ResponseIn => $response->getContent(),
-                $response instanceof ResponseOut => $response->body(),
+        $size = match (true) {
+            $response instanceof StreamedResponse => Str::length($response->getContent()),
+            $response instanceof BinaryFileResponse => $response->getFile()->getSize(),
+            $response instanceof ResponseIn => Str::length($response->getContent()),
+            $response instanceof ResponseOut => Str::length($response->body()),
 
-                default => '',
-            },
-        );
+            default => 0,
+        };
 
         return ($dto = static::createByRequest($uuid, $request))
             ->merge([
@@ -217,9 +223,19 @@ class HttpLogDto extends Dto
                     'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
                     'response_data_size' => Hlp::sizeBytesToString($size),
                 ],
-                'cacheKey' => $attributes['cacheKey'] ?? null,
-                'isCached' => $attributes['isCached'] ?? false,
-                'isFromCache' => $attributes['isFromCache'] ?? false,
+                ...(isset($attributes['cacheKey']) ? ['cacheKey' => $attributes['cacheKey']] : []),
+                ...(isset($attributes['isCached'])
+                    ? [
+                        'isCached' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                            ? Hlp::castToBool($attributes['isCached'] ?? false)
+                            : false
+                    ]
+                    : []
+                ),
+                ...(isset($attributes['isFromCache'])
+                    ? ['isFromCache' => Hlp::castToBool($attributes['isFromCache'] ?? false)]
+                    : []
+                ),
                 'duration' => $duration ?? null,
                 'size' => $size,
             ]);

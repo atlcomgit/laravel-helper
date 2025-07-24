@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Dto;
 use ArgumentCountError;
 use Atlcom\Dto;
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultException;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Events\ExceptionEvent;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
@@ -372,7 +373,9 @@ class ExceptionDto extends Dto
 
             default =>
             "Ошибка: {$this->uuid}" . PHP_EOL
-            . 'Причина: ' . ((isDebug() || $this->isTelegram) ? $message : 'Непредвиденная ошибка') . PHP_EOL
+            . 'Причина: ' . (
+                (isDebug() || isTesting() || $this->isTelegram) ? $message : DefaultException::MESSAGE
+            ) . PHP_EOL
             . "Код: {$code}"
         };
         ;

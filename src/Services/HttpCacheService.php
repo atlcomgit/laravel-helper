@@ -10,8 +10,12 @@ use Atlcom\LaravelHelper\Dto\HttpCacheDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheEventDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
+use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Events\HttpCacheEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
+use GuzzleHttp\Psr7\Request as PsrRequest;
+use GuzzleHttp\Psr7\Response as PsrResponse;
+use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request as RequestIn;
@@ -41,42 +45,98 @@ class HttpCacheService extends DefaultService
 
 
     //?!? phpdoc
-    public function setMacro(PendingRequest $request, int|string|bool|null $ttl = null): void
+    public function setMacro(PendingRequest $request, int|string|bool|null $ttl = null): PendingRequest
     {
         $request->macro(
-            'get',
+            'getWithCache',
             fn (string $url, array|string|null $query = null)
-            => app(HttpCacheService::class)->sendRequest($request, $ttl, 'GET', $url, $query)
+            => app(HttpCacheService::class)->sendWithCache($request, $ttl, 'GET', $url, $query)
         );
         $request->macro(
-            'post',
+            'postWithCache',
             fn (string $url, $data = [])
-            => app(HttpCacheService::class)->sendRequest($request, $ttl, 'POST', $url, $data)
+            => app(HttpCacheService::class)->sendWithCache($request, $ttl, 'POST', $url, $data)
         );
+
+        return new class ($request, $ttl) extends PendingRequest {
+            public function __construct(
+                protected PendingRequest $pendingRequest,
+                protected int|string|bool|null $ttl = null,
+            ) {}
+
+
+            /**
+             * GET исходящий запрос
+             * @override
+             * @see parent::get()
+             *
+             * @param string $url
+             * @param array|null $query
+             * @return ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null
+             */
+            // #[Override()]
+            public function get(string $url, $query = null)
+            {
+                return app(HttpCacheService::class)
+                    ->sendWithCache($this->pendingRequest, 'GET', $url, $query, $this->ttl);
+            }
+
+
+            /**
+             * POST исходящий запрос
+             * @override
+             * @see parent::post()
+             *
+             * @param string $url
+             * @param array $data
+             * @return ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null
+             */
+            // #[Override()]
+            public function post(string $url, $data = [])
+            {
+                return app(HttpCacheService::class)
+                    ->sendWithCache($this->pendingRequest, 'POST', $url, $data, $this->ttl);
+            }
+
+
+        };
     }
 
 
-    public function sendRequest(
+    public function sendWithCache(
         PendingRequest $request,
         string $method,
-        int|string|bool|null $ttl = null,
         string $url,
         array|string|null $data = null,
+        int|string|bool|null $ttl = null,
     ): ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null {
-        $httpCacheDto = $this->createHttpDto($request, $ttl, $data);
+        $httpCacheDto = $this->createHttpDto($request, $method, $url, $data, $ttl);
 
         if ($httpCacheDto->key) {
             $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_KEY, $httpCacheDto->key);
             $httpCacheService = app(HttpCacheService::class);
 
             if ($httpCacheService->hasHttpCache($httpCacheDto)) {
-                $httpCacheService->getHttpCache($httpCacheDto);
+                $request->replaceHeaders(
+                    Hlp::arrayDeleteKeys(
+                        HttpLogService::getLogHeaders(HttpLogHeaderEnum::Unknown),
+                        [HttpLogService::HTTP_HEADER_NAME],
+                    ),
+                );
                 $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_GET, true);
 
-                event(new ResponseReceived($request->toPsrRequest(), $httpCacheDto->response));
+                $httpCacheService->getHttpCache($httpCacheDto);
+
+                $stream = Utils::streamFor($data);
+                $psrRequest = new PsrRequest($method, $url, $request->getOptions()['headers'] ?? [], $stream);
+                $clientRequest = new RequestOut($psrRequest);
+
+                event(new ResponseReceived($clientRequest, $httpCacheDto->response));
 
                 return $httpCacheDto->response;
             }
+
+            $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_SET, true);
         }
 
         $httpCacheDto->response = match ($method) {
@@ -86,8 +146,15 @@ class HttpCacheService extends DefaultService
             default => null,
         };
 
-        if ($httpCacheDto->key && $httpCacheDto->response->isSuccessful()) {
-            $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_SET, true);
+        $isSuccessful = match (true) {
+            $httpCacheDto->response instanceof ResponseIn => $httpCacheDto->response->isSuccessful(),
+            $httpCacheDto->response instanceof ResponseOut => $httpCacheDto->response->successful(),
+            $httpCacheDto->response instanceof BinaryFileResponse => $httpCacheDto->response->isSuccessful(),
+            $httpCacheDto->response instanceof StreamedResponse => $httpCacheDto->response->isSuccessful(),
+
+            default => false,
+        };
+        if ($httpCacheDto->key && $isSuccessful) {
             $httpCacheService->setHttpCache($httpCacheDto);
         }
 
@@ -98,37 +165,28 @@ class HttpCacheService extends DefaultService
 
     public function createHttpDto(
         RequestIn|RequestOut|PendingRequest $request,
-        int|string|bool|null $ttl = null,
+        string $method,
+        string $url,
         array|string|null $data = null,
+        int|string|bool|null $ttl = null,
     ): HttpCacheDto {
         $ttl = $this->cacheService->getCacheTtl($ttl);
+        $key = $this->getCacheKey($request, $method, $url, $data, $ttl);
 
-        return match (true) {
-            $ttl === false => HttpCacheDto::create(
-                key: null,
-                ttl: $ttl,
-            ),
-            $request instanceof RequestIn => HttpCacheDto::create(
-                key: $this->getCacheKey($request, $ttl),
-                ttl: $ttl,
-                requestHeaders: $request->headers->all(),
-                requestData: $data ?? $request->getContent(),
-            ),
-            $request instanceof RequestOut => HttpCacheDto::create(
-                key: $this->getCacheKey($request, $ttl),
-                ttl: $ttl,
-                requestHeaders: $request->headers(),
-                requestData: $data ?? $request->body(),
-            ),
-            $request instanceof PendingRequest => HttpCacheDto::create(
-                key: $this->getCacheKey($request, $ttl),
-                ttl: $ttl,
-                requestHeaders: $request->toPsrRequest()->getHeaders(),
-                requestData: $data ?? $request->toPsrRequest()->getBody()->getContents(),
-            ),
+        return HttpCacheDto::create(
+            key: $ttl === false ? null : $key,
+            ttl: $ttl,
+            requestMethod: $method,
+            requestUrl: $url,
+            requestHeaders: match (true) {
+                $request instanceof RequestIn => $request->headers->all(),
+                $request instanceof RequestOut => $request->headers(),
+                $request instanceof PendingRequest => $request->getOptions()['headers'] ?? [],
 
-            default => HttpCacheDto::create(),
-        };
+                default => [],
+            },
+            requestData: $data,
+        );
     }
 
 
@@ -138,8 +196,13 @@ class HttpCacheService extends DefaultService
      * @param RequestIn|RequestOut|PendingRequest $request
      * @return string
      */
-    public function getCacheKey(RequestIn|RequestOut|PendingRequest $request, int|bool|null $ttl = null): string
-    {
+    public function getCacheKey(
+        RequestIn|RequestOut|PendingRequest $request,
+        string $method,
+        string $url,
+        array|string|null $data = null,
+        int|bool|null $ttl = null,
+    ): string {
         $ttl = match (true) {
             is_null($ttl) || $ttl === 0 => 'ttl_not_set',
             is_integer($ttl) => "ttl_{$ttl}",
@@ -149,22 +212,28 @@ class HttpCacheService extends DefaultService
         };
 
         return "{$ttl}_" . Hlp::hashXxh128(
-            match (true) {
-                $request instanceof RequestIn => Str::lower($request->getMethod())
-                . $request->getUri()
-                . json_encode($request->headers->all(), Hlp::jsonFlags())
-                . $request->getContent(),
-                $request instanceof RequestOut => Str::lower($request->method())
-                . $request->url()
-                . json_encode($request->headers(), Hlp::jsonFlags())
-                . $request->body(),
-                $request instanceof PendingRequest => Str::lower($request->toPsrRequest()->getMethod())
-                . $request->toPsrRequest()->getUri()
-                . json_encode($request->toPsrRequest()->getHeaders(), Hlp::jsonFlags())
-                . $request->toPsrRequest()->getBody()->getContents(),
+            Str::lower($method)
+            . $url
+            . json(
+                Hlp::arrayDeleteKeys(
+                    match (true) {
+                        $request instanceof RequestIn => $request->headers->all(),
+                        $request instanceof RequestOut => $request->headers(),
+                        $request instanceof PendingRequest => $request->getOptions()['headers'] ?? [],
 
-                default => null,
-            },
+                        default => [],
+                    },
+                    [
+                        HttpLogService::HTTP_HEADER_UUID,
+                        HttpLogService::HTTP_HEADER_NAME,
+                        HttpLogService::HTTP_HEADER_TIME,
+                        HttpLogService::HTTP_HEADER_CACHE_KEY,
+                        HttpLogService::HTTP_HEADER_CACHE_SET,
+                        HttpLogService::HTTP_HEADER_CACHE_GET,
+                    ],
+                ),
+            )
+            . (is_array($data) ? json($data) : ($data ?? ''))
         );
     }
 
@@ -187,9 +256,29 @@ class HttpCacheService extends DefaultService
                     return;
                 }
 
+                $response = [
+                    'status' => $dto->response->getStatusCode(),
+                    'headers' => match (true) {
+                        $dto->response instanceof StreamedResponse => $dto->response->headers->all(),
+                        $dto->response instanceof BinaryFileResponse => $dto->response->headers->all(),
+                        $dto->response instanceof ResponseIn => $dto->response->headers->all(),
+                        $dto->response instanceof ResponseOut => $dto->response->getHeaders(),
+
+                        default => [],
+                    },
+                    'data' => match (true) {
+                        $dto->response instanceof StreamedResponse => '[' . $dto->response::class . ']',
+                        $dto->response instanceof BinaryFileResponse
+                        => '[' . $dto->response::class . ', ' . $dto->response->getFile()->getMimeType() . ']',
+                        $dto->response instanceof ResponseIn => Hlp::castToString($dto->response->getContent()),
+                        $dto->response instanceof ResponseOut => Hlp::castToString($dto->response->body()),
+
+                        default => null,
+                    },
+                ];
                 ($dto->ttl === false)
                     ?: $this->cacheService
-                        ->setCache(ConfigEnum::HttpCache, $dto->tags, $dto->key, $dto->response, $dto->ttl);
+                        ->setCache(ConfigEnum::HttpCache, $dto->tags, $dto->key, $response, $dto->ttl);
 
                 event(
                     new HttpCacheEvent(
@@ -198,19 +287,9 @@ class HttpCacheService extends DefaultService
                             tags: $dto->tags,
                             key: $dto->key,
                             ttl: $dto->ttl,
-                            responseCode: $dto->response->getStatusCode(),
-                            responseHeaders: match (true) {
-                                $dto->response instanceof StreamedResponse => $dto->response->headers->all(),
-                                $dto->response instanceof BinaryFileResponse => $dto->response->headers->all(),
-                                $dto->response instanceof ResponseIn => $dto->response->headers->all(),
-                                $dto->response instanceof ResponseOut => $dto->response->getHeaders(),
-                            },
-                            responseData: match (true) {
-                                $dto->response instanceof StreamedResponse => '[' . $dto->response::class . ']',
-                                $dto->response instanceof BinaryFileResponse => '[' . $dto->response::class . ', ' . $dto->response->getFile()->getMimeType() . ']',
-                                $dto->response instanceof ResponseIn => Hlp::castToString($dto->response->getContent()),
-                                $dto->response instanceof ResponseOut => Hlp::castToString($dto->response->body()),
-                            },
+                            responseCode: $response['status'],
+                            responseHeaders: $response['headers'],
+                            responseData: $response['data'],
                         ),
                     ),
                 );
@@ -227,7 +306,10 @@ class HttpCacheService extends DefaultService
                     return;
                 }
 
-                $dto->response = $this->cacheService->getCache(ConfigEnum::HttpCache, $dto->tags, $dto->key, null);
+                $response = $this->cacheService->getCache(ConfigEnum::HttpCache, $dto->tags, $dto->key, null);
+                $stream = Utils::streamFor($response['data']);
+                $psrResponse = new PsrResponse($response['status'], $response['headers'], $stream);
+                $dto->response = new ResponseOut($psrResponse);
 
                 event(
                     new HttpCacheEvent(
@@ -235,19 +317,9 @@ class HttpCacheService extends DefaultService
                             type: EventTypeEnum::GetHttpCache,
                             tags: $dto->tags,
                             key: $dto->key,
-                            responseCode: $dto->response->getStatusCode(),
-                            responseHeaders: match (true) {
-                                $dto->response instanceof StreamedResponse => $dto->response->headers->all(),
-                                $dto->response instanceof BinaryFileResponse => $dto->response->headers->all(),
-                                $dto->response instanceof ResponseIn => $dto->response->headers->all(),
-                                $dto->response instanceof ResponseOut => $dto->response->getHeaders(),
-                            },
-                            responseData: match (true) {
-                                $dto->response instanceof StreamedResponse => '[' . $dto->response::class . ']',
-                                $dto->response instanceof BinaryFileResponse => '[' . $dto->response::class . ', ' . $dto->response->getFile()->getMimeType() . ']',
-                                $dto->response instanceof ResponseIn => Hlp::castToString($dto->response->getContent()),
-                                $dto->response instanceof ResponseOut => Hlp::castToString($dto->response->body()),
-                            },
+                            responseCode: $response['status'],
+                            responseHeaders: $response['headers'],
+                            responseData: $response['data'],
                         ),
                     ),
                 );
