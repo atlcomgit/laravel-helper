@@ -384,55 +384,53 @@ return [
         'queue' => (string)env('HELPER_TELEGRAM_LOG_QUEUE', 'default'),
         // Запуск очереди синхронно
         'queue_dispatch_sync' => (bool)env('HELPER_TELEGRAM_LOG_QUEUE_DISPATCH_SYNC'),
-        // Токен бота
-        'token' => (string)env('HELPER_TELEGRAM_LOG_TOKEN'),
         // Настройка отправки логов информации
         'info' => [
             // Вкл/Выкл отправки информации
-            'enabled' => (bool)env('HELPER_TELEGRAM_INFO_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_INFO_ENABLED', true),
             // Telegram chat id для информации
-            'chat_id' => (string)env('HELPER_TELEGRAM_INFO_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_INFO_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
             // Токен бота для информации
-            'token' => (string)env('HELPER_TELEGRAM_INFO_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_LOG_INFO_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('HELPER_TELEGRAM_INFO_CACHE_TTL', '0 seconds'),
-            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_INFO_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_INFO_CACHE_TTL', '0 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_INFO_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов ошибок
         'error' => [
             // Вкл/Выкл отправки ошибок
-            'enabled' => (bool)env('HELPER_TELEGRAM_ERROR_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ERROR_ENABLED', true),
             // Telegram chat id для ошибок
-            'chat_id' => (string)env('HELPER_TELEGRAM_ERROR_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_ERROR_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
             // Токен бота для ошибок
-            'token' => (string)env('HELPER_TELEGRAM_ERROR_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_LOG_ERROR_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('HELPER_TELEGRAM_ERROR_CACHE_TTL', '5 minutes'),
-            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_ERROR_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_ERROR_CACHE_TTL', '5 minutes'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов предупреждений
         'warning' => [
             // Вкл/Выкл отправки предупреждений
-            'enabled' => (bool)env('HELPER_TELEGRAM_WARNING_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_WARNING_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => (string)env('HELPER_TELEGRAM_WARNING_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_WARNING_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
             // Токен бота для предупреждений
-            'token' => (string)env('HELPER_TELEGRAM_WARNING_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_LOG_WARNING_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('HELPER_TELEGRAM_WARNING_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_WARNING_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_WARNING_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов отладки
         'debug' => [
             // Вкл/Выкл отправки предупреждений
-            'enabled' => (bool)env('HELPER_TELEGRAM_DEBUG_ENABLED', true),
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_DEBUG_ENABLED', true),
             // Telegram chat id для предупреждений
-            'chat_id' => (string)env('HELPER_TELEGRAM_DEBUG_CHAT_ID'),
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
             // Токен бота для предупреждений
-            'token' => (string)env('HELPER_TELEGRAM_DEBUG_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            'token' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
-            'cache_ttl' => (string)env('HELPER_TELEGRAM_DEBUG_CACHE_TTL', '5 seconds'),
-            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_DEBUG_EXCLUDE', base_path('.env')) ?? []),
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_CACHE_TTL', '5 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
     ],
 
