@@ -144,7 +144,7 @@ trait QueryTrait
      */
     public function setModelLog(bool|null $enabled): void
     {
-        $this->withModelLog = $enabled ?? true;
+        $this->withModelLog = $enabled;
 
         if ($this instanceof EloquentBuilder) {
             $this->getQuery()->setModelLog($this->withModelLog);
@@ -1143,7 +1143,8 @@ trait QueryTrait
                 foreach ($models as $model) {
                     if ($model && $model instanceof Model) {
                         if (method_exists($model, 'isWithModelLog') && method_exists($model, 'withModelLog')) {
-                            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+                            (is_null($this->withModelLog) || !is_null($model->withModelLog))
+                                ?: $model->withModelLog = $this->withModelLog;
 
                             $observer->truncated($model);
 
