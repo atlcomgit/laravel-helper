@@ -38,7 +38,7 @@ return [
          */
     ConfigEnum::App->value => [
         // Версия настроек пакета laravel-helper
-        'version' => '1.02',
+        'version' => '1.03',
         // Флаг включения отладочной информации в response
         'debug' => (bool)env('APP_DEBUG', false),
         // Флаг включения отладочной информации в сообщение телеграм

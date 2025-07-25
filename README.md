@@ -8,7 +8,7 @@
 - Логирование запуска и выполнения очередей
 - Логирование зарегистрированных роутов и их использование
 - Логирование рендеринга blade шаблонов
-- Кеширование http запросов через PendingRequest
+- Кеширование http входящих и исходящих запросов через PendingRequest и HttpCacheMiddleware
 - Кеширование query запросов через Eloquent/Database/Connection
 - Кеширование рендеринга blade шаблонов
 - Обработка всех исключений с отправкой логов в телеграмм
@@ -25,13 +25,13 @@
 composer require atlcom/laravel-helper
 ```
 
-##### 2. Публикация настроек и миграций
+##### 2. Публикация настроек и миграций пакета
 
 ```bash
 php artisan vendor:publish --tag="laravel-helper"
 ```
 
-##### 3. Настройка параметров .env
+##### 3. Настройка параметров пакета в .env
 
 [/config/laravel-helper.php](/config/laravel-helper.php)
 
@@ -304,6 +304,28 @@ class ExampleController extends DefaultController
 
 ### Примеры кеширования
 
+##### HttpCache
+
+Кеширование входящих http запросов
+
+```php
+use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function (Request $request) {
+    return '';
+})->middleware(HttpCacheMiddleware::class);
+```
+
+Кеширование исходящий http запросов
+
+```php
+use Illuminate\Support\Facades\Http;
+
+Http::withCache()->get('https://timeapi.io/api/Time/current/zone?timeZone=UTC', []);
+Http::withCache()->post('https://timeapi.io/api/Time/current/zone?timeZone=UTC', []);
+```
+
 ##### QueryCache
 
 Кеширование query запросов
@@ -550,6 +572,7 @@ class ExampleTest extends DefaultTest
 ```php
 ConsoleLogEvent::class // Событие логирования консольных команд
 ExceptionEvent::class // Событие логирования исключений
+HttpCacheEvent::class // Событие кеширования http запросов
 HttpLogEvent::class // Событие логирования http запросов
 ModelLogEvent::class // Событие логирования моделей
 ProfilerLogEvent::class // Событие логирования профилирования методов класса
@@ -587,5 +610,5 @@ telescope() // Включает/Отключает логи telescope
 telegram() // Отправляет сообщение в телеграм
 user() // Возвращает модель авторизованного пользователя или null
 ip() // Возвращает ip адрес из запроса
-uuid() // Возвращает uuid
+uuid() // Возвращает uuid v7 или v4 (для более ранних версий Laravel)
 ```

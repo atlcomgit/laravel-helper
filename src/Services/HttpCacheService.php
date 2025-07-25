@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Dto\HttpCacheDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheEventDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
+use Atlcom\LaravelHelper\Enums\HttpCacheMethodEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Events\HttpCacheEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -32,14 +33,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class HttpCacheService extends DefaultService
 {
     protected CacheService $cacheService;
-    protected string $driver = '';
     protected array $exclude = [];
 
 
     public function __construct()
     {
         $this->cacheService = app(CacheService::class);
-        $this->driver = Lh::config(ConfigEnum::HttpCache, 'driver') ?: config('cache.default');
         $this->exclude = Lh::config(ConfigEnum::HttpCache, 'exclude') ?? [];
     }
 
@@ -56,12 +55,12 @@ class HttpCacheService extends DefaultService
         $request->macro(
             'getWithCache',
             fn (string $url, array|string|null $query = null)
-            => app(HttpCacheService::class)->sendWithCache($request, $ttl, 'GET', $url, $query)
+            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Get, $url, $query, $ttl)
         );
         $request->macro(
             'postWithCache',
             fn (string $url, $data = [])
-            => app(HttpCacheService::class)->sendWithCache($request, $ttl, 'POST', $url, $data)
+            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Post, $url, $data, $ttl)
         );
 
         return new class ($request, $ttl) extends PendingRequest {
@@ -84,7 +83,7 @@ class HttpCacheService extends DefaultService
             public function get(string $url, $query = null)
             {
                 return app(HttpCacheService::class)
-                    ->sendWithCache($this->pendingRequest, 'GET', $url, $query, $this->ttl);
+                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Get, $url, $query, $this->ttl);
             }
 
 
@@ -101,7 +100,7 @@ class HttpCacheService extends DefaultService
             public function post(string $url, $data = [])
             {
                 return app(HttpCacheService::class)
-                    ->sendWithCache($this->pendingRequest, 'POST', $url, $data, $this->ttl);
+                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Post, $url, $data, $this->ttl);
             }
 
 
@@ -113,7 +112,7 @@ class HttpCacheService extends DefaultService
      * Отправляет http запрос с использованием кеша
      *
      * @param PendingRequest $request
-     * @param string $method
+     * @param HttpCacheMethodEnum $method
      * @param string $url
      * @param array|string|null|null $data
      * @param int|string|bool|null|null $ttl
@@ -122,12 +121,12 @@ class HttpCacheService extends DefaultService
      */
     public function sendWithCache(
         PendingRequest $request,
-        string $method,
+        HttpCacheMethodEnum $method,
         string $url,
         array|string|null $data = null,
         int|string|bool|null $ttl = null,
     ): ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null {
-        $httpCacheDto = $this->createHttpDto($request, $method, $url, $data, $ttl);
+        $httpCacheDto = $this->createHttpDto($request, $method->value, $url, $data, $ttl);
 
         if ($httpCacheDto->key) {
             $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_KEY, $httpCacheDto->key);
@@ -145,7 +144,7 @@ class HttpCacheService extends DefaultService
                 $httpCacheService->getHttpCache($httpCacheDto);
 
                 $stream = Utils::streamFor($data);
-                $psrRequest = new PsrRequest($method, $url, $request->getOptions()['headers'] ?? [], $stream);
+                $psrRequest = new PsrRequest($method->value, $url, $request->getOptions()['headers'] ?? [], $stream);
                 $clientRequest = new RequestOut($psrRequest);
 
                 event(new ResponseReceived($clientRequest, $httpCacheDto->response));
@@ -157,8 +156,8 @@ class HttpCacheService extends DefaultService
         }
 
         $httpCacheDto->response = match ($method) {
-            'GET' => $request->get($url, $data),
-            'POST' => $request->post($url, $data),
+            HttpCacheMethodEnum::Get => $request->get($url, $data),
+            HttpCacheMethodEnum::Post => $request->post($url, $data),
 
             default => null,
         };
@@ -201,7 +200,7 @@ class HttpCacheService extends DefaultService
         $ttl = $this->cacheService->getCacheTtl($ttl);
         $key = $this->getCacheKey($request, $method, $url, $data, $ttl);
 
-        return HttpCacheDto::create(
+        $dto = HttpCacheDto::create(
             key: $ttl === false ? null : $key,
             ttl: $ttl,
             requestMethod: $method,
@@ -215,6 +214,12 @@ class HttpCacheService extends DefaultService
             },
             requestData: $data,
         );
+
+        if ($this->exclude && !app(LaravelHelperService::class)->canDispatch($dto)) {
+            $dto->key = null;
+        }
+
+        return $dto;
     }
 
 
@@ -327,6 +332,9 @@ class HttpCacheService extends DefaultService
                             tags: $dto->tags,
                             key: $dto->key,
                             ttl: $dto->ttl,
+                            requestMethod: $dto->requestMethod,
+                            requestUrl: $dto->requestUrl,
+                            requestData: $dto->requestData,
                             responseCode: $response['status'],
                             responseHeaders: $response['headers'],
                             responseData: $response['data'],
@@ -363,6 +371,9 @@ class HttpCacheService extends DefaultService
                             type: EventTypeEnum::GetHttpCache,
                             tags: $dto->tags,
                             key: $dto->key,
+                            requestMethod: $dto->requestMethod,
+                            requestUrl: $dto->requestUrl,
+                            requestData: $dto->requestData,
                             responseCode: $response['status'],
                             responseHeaders: $response['headers'],
                             responseData: $response['data'],

@@ -16,6 +16,9 @@ class HttpCacheEventDto extends DefaultDto
     public ?array $tags;
     public ?string $key;
     public int|bool|null $ttl;
+    public ?string $requestMethod;
+    public ?string $requestUrl;
+    public array|string|null $requestData = null;
     public int $responseCode = 0;
     public array $responseHeaders = [];
     public mixed $responseData;

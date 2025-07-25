@@ -20,14 +20,12 @@ use Atlcom\LaravelHelper\Facades\Lh;
 class ViewCacheService extends DefaultService
 {
     protected CacheService $cacheService;
-    protected string $driver = '';
     protected array $exclude = [];
 
 
     public function __construct()
     {
         $this->cacheService = app(CacheService::class);
-        $this->driver = Lh::config(ConfigEnum::ViewCache, 'driver') ?: config('cache.default');
         $this->exclude = Lh::config(ConfigEnum::ViewCache, 'exclude') ?? [];
     }
 

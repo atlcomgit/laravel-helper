@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
+use Atlcom\LaravelHelper\Dto\HttpCacheDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
@@ -218,6 +219,14 @@ class LaravelHelperService extends DefaultService
             case ConsoleLogDto::class:
                 $config = ConfigEnum::ConsoleLog;
                 /** @var ConsoleLogDto $dto */
+                $can = $this->config($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
+                ;
+                break;
+
+            case HttpCacheDto::class:
+                $config = ConfigEnum::HttpCache;
+                /** @var HttpCacheDto $dto */
                 $can = $this->config($config, 'enabled')
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
