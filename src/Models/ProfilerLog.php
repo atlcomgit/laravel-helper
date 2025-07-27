@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Модель: Лог консольной команды
  * 
  * @see \Atlcom\LaravelHelper\Dto\ProfilerLogDto
- * @see ./database/migrations/2025_05_30_000008_create_profiler_logs_table.php
+ * @see ./database/migrations/2025_06_01_000008_create_profiler_logs_table.php
  *
  * @property int $id
  * @property string $uuid

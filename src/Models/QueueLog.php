@@ -18,7 +18,7 @@ use Illuminate\Foundation\Auth\User;
  * Модель: Лог очереди
  * 
  * @see \Atlcom\LaravelHelper\Dto\QueueLogDto
- * @see ./database/migrations/2025_05_30_000002_create_queue_logs_table.php
+ * @see ./database/migrations/2025_06_01_000005_create_queue_logs_table.php
  *
  * @property int $id
  * @property string $uuid

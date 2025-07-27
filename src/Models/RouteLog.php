@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Модель: Лог роута
  * 
  * @see \Atlcom\LaravelHelper\Dto\RouteLogDto
- * @see ./database/migrations/2025_05_29_000001_create_route_logs_table.php
+ * @see ./database/migrations/2025_06_01_000006_create_route_logs_table.php
  *
  * @property int $id
  * @property string $method

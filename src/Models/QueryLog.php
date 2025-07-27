@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User;
  * Модель: Лог query запроса
  * 
  * @see \Atlcom\LaravelHelper\Dto\QueryLogDto
- * @see ./database/migrations/2025_06_06_000001_create_query_logs_table.php
+ * @see ./database/migrations/2025_06_01_000004_create_query_logs_table.php
  *
  * @property int $id
  * @property string $uuid

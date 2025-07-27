@@ -21,7 +21,7 @@ use Illuminate\Foundation\Auth\User;
  * @see \Atlcom\LaravelHelper\Dto\HttpLogCreateDto
  * @see \Atlcom\LaravelHelper\Dto\HttpLogUpdateDto
  * @see \Atlcom\LaravelHelper\Dto\HttpLogFailedDto
- * @see ./database/migrations/2025_05_26_000001_create_http_logs_table.php
+ * @see ./database/migrations/2025_06_01_000002_create_http_logs_table.php
  * 
  * @property int $id
  * @property string $uuid

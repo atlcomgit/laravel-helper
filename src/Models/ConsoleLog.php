@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Модель: Лог консольной команды
  * 
  * @see \Atlcom\LaravelHelper\Dto\ConsoleLogDto
- * @see ./database/migrations/2025_05_30_000001_create_console_logs_table.php
+ * @see ./database/migrations/2025_06_01_000001_create_console_logs_table.php
  *
  * @property int $id
  * @property string $uuid
@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @method static|Builder ofUuid(string $uuid)
  * @method static|Builder ofCommand(string $command)
- * @method static|Builder ofName(string $name)
+ * @method static|Builder ofName(string $name)s
  * @method static|Builder ofResult(int $result)
  * @method static|Builder ofStatus(ConsoleLogStatusEnum $status)
  * @mixin \Eloquent
