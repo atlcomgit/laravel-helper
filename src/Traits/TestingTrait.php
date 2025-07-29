@@ -90,7 +90,10 @@ trait TestingTrait
                 $migrationsHashPrevious = Storage::get(storage_path('framework/testing/migrations.hash'));
 
                 // Запускаем полную миграцию БД
-                if (Lh::config(ConfigEnum::TestingLog, 'database.fresh') || $migrationsHashCurrent !== $migrationsHashPrevious) {
+                if (
+                    Lh::config(ConfigEnum::TestingLog, 'database.fresh')
+                    || $migrationsHashCurrent !== $migrationsHashPrevious
+                ) {
                     $config = ConfigEnum::ModelLog;
                     Config::set("laravel-helper.{$config->value}.enabled", false);
 
