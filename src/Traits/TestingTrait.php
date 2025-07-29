@@ -14,6 +14,7 @@ use Atlcom\LaravelHelper\Providers\LaravelHelperServiceProvider;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -84,7 +85,7 @@ trait TestingTrait
                 // register_shutdown_function([static::class, 'onFinishTest']);
 
                 // Вычисляем хеш миграций
-                $migrations = DB::table('migrations')->get();
+                $migrations = Schema::hasTable('migrations') ? DB::table('migrations')->get() : [];
                 $migrationsHashCurrent = Hlp::hashXxh128(json($migrations));
                 $migrationsHashPrevious = Storage::get(storage_path('framework/testing/migrations.hash'));
 
