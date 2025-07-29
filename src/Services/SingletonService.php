@@ -27,14 +27,14 @@ class SingletonService
             return $result;
         }
 
-        $singletonClasses = Lh::config(ConfigEnum::App, 'singleton.classes');
+        $singletonClasses = Lh::config(ConfigEnum::App, 'singleton.classes', []);
         $appPath = app_path();
         $singletonFiles = [];
 
         foreach (File::allFiles($appPath) as $file) {
             $class = Lh::getClassFromFile($file);
 
-            if (!class_exists($class)) {
+            if (!$class || !class_exists($class)) {
                 continue;
             }
 
@@ -45,7 +45,7 @@ class SingletonService
             }
 
             foreach ($singletonClasses as $singletonClass) {
-                if ($reflection->isSubclassOf($singletonClass)) {
+                if ($singletonClass && $reflection->isSubclassOf($singletonClass)) {
                     $singletonFiles[] = $class;
                     $result[] = "✔ singleton {$class}";
                 }
@@ -72,14 +72,14 @@ class SingletonService
 
         $singletonPath = storage_path('framework/singleton.php');
 
-        if (!file_exists($singletonPath)) {
+        if (!$singletonPath || !file_exists($singletonPath)) {
             return;
         }
 
         $singletonFiles = require $singletonPath;
 
-        foreach ($singletonFiles as $singletonFile) {
-            !class_exists($singletonFile) ?: app()->singleton($singletonFile);
+        foreach ($singletonFiles ?? [] as $singletonFile) {
+            !($singletonFile && class_exists($singletonFile)) ?: app()->singleton($singletonFile);
         }
     }
 }
