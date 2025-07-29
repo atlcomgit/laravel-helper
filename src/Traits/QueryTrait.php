@@ -963,10 +963,11 @@ trait QueryTrait
                 if ($model && $model instanceof Model) {
                     if (
                         method_exists($model, 'isWithModelLog')
-                        && ($model->isWithModelLog() === true || $this->withModelLog === true)
+                        && ($model->withModelLog === true || $this->withModelLog === true)
                         && method_exists($model, 'withModelLog')
                     ) {
-                        is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+                        (is_null($this->withModelLog) || !is_null($model->withModelLog))
+                            ?: $model->withModelLog = $this->withModelLog;
 
                         match ($type) {
                             ModelLogTypeEnum::Create => $observer->created($model, $attributes),
@@ -987,6 +988,7 @@ trait QueryTrait
             }
 
             is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
+            $this->getQuery()->getConnection()->withModelLog(false);
         }
 
         if (
@@ -997,6 +999,7 @@ trait QueryTrait
                 || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
+            $withModelLog = $this->withModelLog;
             $observer = app(ModelLogObserver::class);
             $sql = sql($attributes, $bindings ?? []);
             $table = Hlp::arrayFirst(Hlp::sqlTables($attributes));
@@ -1087,7 +1090,8 @@ trait QueryTrait
                 foreach ($models as $model) {
                     if ($model && $model instanceof Model) {
                         if (method_exists($model, 'isWithModelLog') && method_exists($model, 'withModelLog')) {
-                            is_null($this->withModelLog) ?: $model->withModelLog = $this->withModelLog;
+                            (is_null($withModelLog) || !is_null($model->withModelLog))
+                                ?: $model->withModelLog = $withModelLog;
 
                             match ($type) {
                                 ModelLogTypeEnum::Create => $observer->created($model, $attributes),
@@ -1119,6 +1123,7 @@ trait QueryTrait
                 || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
+            $withModelLog = $this->withModelLog;
             $observer = app(ModelLogObserver::class);
 
             foreach ($attributes as $table) {
@@ -1143,8 +1148,8 @@ trait QueryTrait
                 foreach ($models as $model) {
                     if ($model && $model instanceof Model) {
                         if (method_exists($model, 'isWithModelLog') && method_exists($model, 'withModelLog')) {
-                            (is_null($this->withModelLog) || !is_null($model->withModelLog))
-                                ?: $model->withModelLog = $this->withModelLog;
+                            (is_null($withModelLog) || !is_null($model->withModelLog))
+                                ?: $model->withModelLog = $withModelLog;
 
                             $observer->truncated($model);
 

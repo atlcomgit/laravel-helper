@@ -1,6 +1,8 @@
 <?php
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultRepository;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -38,7 +40,7 @@ return [
          */
     ConfigEnum::App->value => [
         // Версия настроек пакета laravel-helper
-        'version' => '1.03',
+        'version' => '1.04',
         // Флаг включения отладочной информации в response
         'debug' => (bool)env('APP_DEBUG', false),
         // Флаг включения отладочной информации в сообщение телеграм
@@ -49,6 +51,16 @@ return [
         'debug_trace_vendor' => (bool)env('APP_DEBUG_TRACE_VENDOR', false),
         // Класс пользователя
         'user' => $userClass,
+        // Применение singleton для классов
+        'singleton' => [
+            // Флаг включения
+            'enabled' => (bool)env('HELPER_APP_SINGLETON_ENABLED', true),
+            // Список классов
+            'classes' => [
+                DefaultService::class,
+                DefaultRepository::class,
+            ],
+        ],
     ],
 
 

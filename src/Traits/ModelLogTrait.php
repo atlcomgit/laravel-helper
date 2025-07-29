@@ -38,6 +38,7 @@ trait ModelLogTrait
     {
         $query = static::query()->withModelLog($enabled);
         $query->getQuery()->withModelLog($enabled);
+        // $query->getQuery()->getConnection()->setQueryCache($enabled); not need
         $query->getModel()->setWithModelLogAttribute($enabled);
 
         return $query;
@@ -59,6 +60,17 @@ trait ModelLogTrait
 
 
     /**
+     * Возвращает флаг включения лога модели
+     *
+     * @return bool|null
+     */
+    public function getWithModelLogAttribute(): ?bool
+    {
+        return $this->withModelLog;
+    }
+
+
+    /**
      * Возвращает значение флага лога модели
      *
      * @return bool|null
@@ -68,7 +80,7 @@ trait ModelLogTrait
         return Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
-                    || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
+                || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             );
     }
 

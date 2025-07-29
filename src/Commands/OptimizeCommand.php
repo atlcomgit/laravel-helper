@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
+use Atlcom\LaravelHelper\Services\SingletonService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 use Illuminate\Support\Facades\Cache;
@@ -101,6 +102,12 @@ class OptimizeCommand extends DefaultCommand
                 $this->httpCacheService->flushHttpCacheAll();
                 $this->queryCacheService->flushQueryCacheAll();
                 $this->viewCacheService->flushViewCacheAll();
+            }
+        }
+
+        if ($singletons = SingletonService::optimize()) {
+            foreach ($singletons as $singleton) {
+                $this->outputEol($singleton, 'fg=green');
             }
         }
 

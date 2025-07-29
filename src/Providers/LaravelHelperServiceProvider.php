@@ -43,6 +43,7 @@ use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\RouteLogService;
+use Atlcom\LaravelHelper\Services\SingletonService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
 use Atlcom\LaravelHelper\Services\TelegramService;
@@ -123,6 +124,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app)); not need
         $this->app->bind('db.factory', fn ($app) => new ConnectionFactory($app));
+
+        SingletonService::register();
     }
 
 
