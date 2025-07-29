@@ -15,7 +15,7 @@ use ReflectionClass;
 class SingletonService
 {
     /**
-     * Кеширует классы singleton 
+     * Кеширует классы singleton
      *
      * @return array
      */
@@ -60,7 +60,7 @@ class SingletonService
 
 
     /**
-     * Регистрирует классы singleton 
+     * Регистрирует классы singleton
      *
      * @return void
      */
@@ -79,7 +79,7 @@ class SingletonService
         $singletonFiles = require $singletonPath;
 
         foreach ($singletonFiles as $singletonFile) {
-            app()->singleton($singletonFile);
+            !class_exists($singletonFile) ?: app()->singleton($singletonFile);
         }
     }
 }

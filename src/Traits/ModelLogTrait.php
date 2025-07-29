@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
+use Illuminate\Support\Facades\App;
 
 /**
  * Трейт для подключения логирования модели
@@ -93,7 +94,8 @@ trait ModelLogTrait
     protected static function bootModelLogTrait()
     {
         if (
-            Lh::config(ConfigEnum::ModelLog, 'enabled')
+            App::getFacadeApplication()
+            && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && property_exists(static::class, 'withModelLog')
             && static::class !== ModelLog::class
         ) {

@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Observers\QueryCacheObserver;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
+use Illuminate\Support\Facades\App;
 
 /**
  * Трейт для подключения кеширования модели
@@ -40,7 +41,7 @@ trait ModelCacheTrait
      */
     protected static function bootModelCacheTrait()
     {
-        if (Lh::config(ConfigEnum::QueryCache, 'enabled')) {
+        if (App::getFacadeApplication() && Lh::config(ConfigEnum::QueryCache, 'enabled')) {
             static::observe(QueryCacheObserver::class);
         }
     }
