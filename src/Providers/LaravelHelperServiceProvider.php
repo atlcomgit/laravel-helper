@@ -22,10 +22,12 @@ use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
+use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
+use Atlcom\LaravelHelper\Listeners\TelegramBotEventListener;
 use Atlcom\LaravelHelper\Listeners\TestFinishedListener;
 use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
@@ -47,7 +49,11 @@ use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\SingletonService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
-use Atlcom\LaravelHelper\Services\TelegramBotService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotChatService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotListenerService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotUserService;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
@@ -86,6 +92,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // Регистрация миграций
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        !Lh::config(ConfigEnum::TelegramBot, 'enabled')
+            ?: $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations_telegram_bot');
 
         // Публикация миграций
         $this->publishes([
@@ -96,7 +104,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
 
         // Регистрация роутов
-        $this->loadRoutesFrom(__DIR__.'/../../routes/api-telegram-bot.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/api-telegram-bot.php');
 
         // Регистрация обработчика исключений
         $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
@@ -121,6 +129,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(QueryCacheService::class);
         $this->app->singleton(QueryLogService::class);
         $this->app->singleton(TelegramApiService::class);
+        $this->app->singleton(TelegramBotChatService::class);
+        $this->app->singleton(TelegramBotUserService::class);
+        $this->app->singleton(TelegramBotMessageService::class);
+        $this->app->singleton(TelegramBotListenerService::class);
         $this->app->singleton(TelegramService::class);
         $this->app->singleton(TelegramBotService::class);
         $this->app->singleton(ViewCacheService::class);
@@ -146,6 +158,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
+        !Lh::config(ConfigEnum::TelegramBot, 'enabled')
+            ?: Event::listen(TelegramBotEvent::class, TelegramBotEventListener::class);
 
         // Подключение макросов Builder
         !(Lh::config(ConfigEnum::Macros, 'builder.enabled') || Lh::config(ConfigEnum::QueryCache, 'enabled'))
@@ -153,7 +167,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Подключение макросов Str
         !Lh::config(ConfigEnum::Macros, 'str.enabled') ?: StrMacrosService::setMacros();
         // Подключение макросов Http
-        !(Lh::config(ConfigEnum::Macros, 'http.enabled')  || Lh::config(ConfigEnum::HttpCache, 'enabled'))
+        !(Lh::config(ConfigEnum::Macros, 'http.enabled') || Lh::config(ConfigEnum::HttpCache, 'enabled'))
             ?: HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)

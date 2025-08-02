@@ -43,6 +43,8 @@ class ProfilerLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог профилирования метода класса';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

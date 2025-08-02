@@ -15,9 +15,10 @@ use Atlcom\LaravelHelper\Models\ProfilerLog;
  */
 class ProfilerLogRepository extends DefaultRepository
 {
-    public function __construct(private ?string $profilerLogClass = null)
-    {
-        $this->profilerLogClass ??= Lh::config(ConfigEnum::ProfilerLog, 'model') ?? ProfilerLog::class;
+    public function __construct(
+        /** @var ProfilerLog */ private ?string $model = null,
+    ) {
+        $this->model ??= Lh::config(ConfigEnum::ProfilerLog, 'model') ?? ProfilerLog::class;
     }
 
 
@@ -29,13 +30,12 @@ class ProfilerLogRepository extends DefaultRepository
      */
     public function create(ProfilerLogDto $dto): void
     {
-        $this->withoutTelescope(function () use ($dto) {
-            /** @var ProfilerLog $this->profilerLogClass */
-            $this->profilerLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->create($dto->toArray());
-        });
+                ->create($dto->toArray())
+        );
     }
 
 
@@ -47,14 +47,13 @@ class ProfilerLogRepository extends DefaultRepository
      */
     public function update(ProfilerLogDto $dto): void
     {
-        $this->withoutTelescope(function () use ($dto) {
-            /** @var ProfilerLog $this->profilerLogClass */
-            $this->profilerLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofUuid($dto->uuid)
-                ->update($dto->toArray());
-        });
+                ->update($dto->toArray())
+        );
     }
 
 
@@ -66,13 +65,12 @@ class ProfilerLogRepository extends DefaultRepository
      */
     public function cleanup(int $days): int
     {
-        return $this->withoutTelescope(function () use ($days) {
-            /** @var ProfilerLog $this->profilerLogClass */
-            return $this->profilerLogClass::query()
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereDate('created_at', '<=', now()->subDays($days))
-                ->delete();
-        });
+                ->delete()
+        );
     }
 }

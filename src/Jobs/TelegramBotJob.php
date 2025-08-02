@@ -9,7 +9,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
-use Atlcom\LaravelHelper\Services\TelegramBotService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
 
 /**
  * Задача отправки сообщений в бота телеграм через очередь

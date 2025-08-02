@@ -8,7 +8,10 @@ use Atlcom\LaravelHelper\Defaults\DefaultEvent;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotDto;
 
 /**
- * Событие отправки сообщения в бота телеграм
+ * Событие входящего/исходящего сообщения бота телеграм
+ * 
+ * Слушатели:
+ * @see \Atlcom\LaravelHelper\Listeners\TelegramBotEventListener
  */
 class TelegramBotEvent extends DefaultEvent
 {

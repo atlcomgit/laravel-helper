@@ -30,6 +30,9 @@ use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Models\TelegramBotChat;
+use Atlcom\LaravelHelper\Models\TelegramBotMessage;
+use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
@@ -71,11 +74,12 @@ class LaravelHelperService extends DefaultService
      * Возвращает название таблицы хелпера
      *
      * @param ConfigEnum $config
+     * @param string $suffix
      * @return string
      */
-    public function getTable(ConfigEnum $config): string
+    public function getTable(ConfigEnum $config, string $suffix = ''): string
     {
-        return $this->config($config, 'table');
+        return $this->config($config, Hlp::stringConcat('_', 'table', $suffix));
     }
 
 
@@ -132,6 +136,12 @@ class LaravelHelperService extends DefaultService
             && ($config[$param = ConfigEnum::QueueLog->value . 'cleanup_days'] ?? null)
 
             && ($config[$param = ConfigEnum::TelegramLog->value . 'queue'] ?? null)
+
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'table_chat'] ?? null)
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'table_user'] ?? null)
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'table_message'] ?? null)
 
         ) ?? throw new WithoutTelegramException("Не указан параметр в конфиге: laravel-helper.{$param}");
     }
@@ -195,6 +205,9 @@ class LaravelHelperService extends DefaultService
             $this->config(ConfigEnum::QueryLog, 'table'),
             $this->config(ConfigEnum::RouteLog, 'table'),
             $this->config(ConfigEnum::ViewLog, 'table'),
+            $this->config(ConfigEnum::TelegramBot, 'table_chat'),
+            $this->config(ConfigEnum::TelegramBot, 'table_user'),
+            $this->config(ConfigEnum::TelegramBot, 'table_message'),
             config('cache.stores.database.table', 'cache'),
             'pg_catalog.*',
             'pg_attrdef',
@@ -366,6 +379,9 @@ class LaravelHelperService extends DefaultService
             $table === $this->config(ConfigEnum::QueueLog, 'table') => QueueLog::class,
             $table === $this->config(ConfigEnum::RouteLog, 'table') => RouteLog::class,
             $table === $this->config(ConfigEnum::ViewLog, 'table') => ViewLog::class,
+            $table === $this->config(ConfigEnum::TelegramBot, 'table_chat') => TelegramBotChat::class,
+            $table === $this->config(ConfigEnum::TelegramBot, 'table_user') => TelegramBotUser::class,
+            $table === $this->config(ConfigEnum::TelegramBot, 'table_message') => TelegramBotMessage::class,
 
             default => null,
         };

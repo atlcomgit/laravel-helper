@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -56,7 +57,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
 
-            $table->comment('Лог профилирования метода класса');
+            $table->comment(ProfilerLog::COMMENT);
         });
     }
 

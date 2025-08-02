@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -68,7 +69,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
 
-            $table->comment('Лог рендеринга blade шаблона');
+            $table->comment(ViewLog::COMMENT);
         });
     }
 

@@ -12,6 +12,9 @@ use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Models\TelegramBotChat;
+use Atlcom\LaravelHelper\Models\TelegramBotMessage;
+use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Foundation\Auth\User;
 
@@ -40,7 +43,7 @@ return [
          */
     ConfigEnum::App->value => [
         // Версия настроек пакета laravel-helper
-        'version' => '1.04',
+        'version' => '1.05',
         // Флаг включения отладочной информации в response
         'debug' => (bool)env('APP_DEBUG', false),
         // Флаг включения отладочной информации в сообщение телеграм
@@ -387,7 +390,7 @@ return [
 
 
         /**
-         * TelegramLog. Логирование в телеграм
+         * TelegramBot. Телеграм бот
          */
     ConfigEnum::TelegramBot->value => [
         // Вкл/Выкл бота телеграм
@@ -404,6 +407,20 @@ return [
         'link' => (string)env('HELPER_TELEGRAM_BOT_LINK', ''),
         // Webhook бота телеграм
         'webhook' => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK', ''),
+        // Название соединения для записи данных бота
+        'connection' => (string)env('HELPER_TELEGRAM_BOT_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+        // Название таблицы для записи чатов телеграм бота
+        'table_chat' => (string)env('HELPER_TELEGRAM_BOT_TABLE_CHAT', 'helper_telegram_bot_chats'),
+        // Класс модели чатов телеграм бота
+        'model_chat' => TelegramBotChat::class,
+        // Название таблицы для записи пользователей телеграм бота
+        'table_user' => (string)env('HELPER_TELEGRAM_BOT_TABLE_USER', 'helper_telegram_bot_users'),
+        // Класс модели пользователей телеграм бота
+        'model_user' => TelegramBotUser::class,
+        // Название таблицы для записи сообщений телеграм бота
+        'table_message' => (string)env('HELPER_TELEGRAM_BOT_TABLE_MESSAGE', 'helper_telegram_bot_messages'),
+        // Класс модели сообщений телеграм бота
+        'model_message' => TelegramBotMessage::class,
     ],
 
 

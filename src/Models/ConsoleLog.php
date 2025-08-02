@@ -43,6 +43,8 @@ class ConsoleLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог консольных команд';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

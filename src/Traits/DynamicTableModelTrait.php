@@ -13,6 +13,9 @@ use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Atlcom\LaravelHelper\Models\QueueLog;
 use Atlcom\LaravelHelper\Models\RouteLog;
+use Atlcom\LaravelHelper\Models\TelegramBotChat;
+use Atlcom\LaravelHelper\Models\TelegramBotMessage;
+use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -60,13 +63,14 @@ trait DynamicTableModelTrait
      * Возвращает конструктор запроса с указанием соединения
      *
      * @param ConfigEnum $config
+     * @param string $suffix
      * @return Builder
      */
-    public static function queryFrom(ConfigEnum $config): Builder
+    public static function queryFrom(ConfigEnum $config, string $suffix = ''): Builder
     {
         return (new static())
             ->setConnection(Lh::getConnection($config))
-            ->setTable(Lh::getTable($config))
+            ->setTable(Lh::getTable($config, $suffix))
             ->newQuery();
     }
 
@@ -88,6 +92,9 @@ trait DynamicTableModelTrait
             QueryLog::class => static::queryFrom(ConfigEnum::QueryLog),
             QueueLog::class => static::queryFrom(ConfigEnum::QueueLog),
             ViewLog::class => static::queryFrom(ConfigEnum::ViewLog),
+            TelegramBotChat::class => static::queryFrom(ConfigEnum::TelegramBot, 'chat'),
+            TelegramBotUser::class => static::queryFrom(ConfigEnum::TelegramBot, 'user'),
+            TelegramBotMessage::class => static::queryFrom(ConfigEnum::TelegramBot, 'message'),
 
             default => parent::query(),
         };

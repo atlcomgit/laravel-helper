@@ -18,6 +18,7 @@ class TelegramBotInMessageDto extends DefaultDto
     public ?Collection $entities;
     public string $text;
     public Carbon $date;
+    public ?Carbon $editDate;
 
 
     /**
@@ -26,13 +27,14 @@ class TelegramBotInMessageDto extends DefaultDto
     protected function casts(): array
     {
         return [
-            'updateId' => 'integer',
+            'messageId' => 'integer',
             'from' => TelegramBotInFromDto::class,
             'chat' => TelegramBotInChatDto::class,
             'replyToMessage' => TelegramBotInMessageDto::class,
             'entities' => [TelegramBotInEntitiesDto::class],
             'text' => 'string',
             'date' => Carbon::class,
+            'editDate' => Carbon::class,
         ];
     }
 
@@ -45,6 +47,7 @@ class TelegramBotInMessageDto extends DefaultDto
         return [
             'messageId' => 'message_id',
             'replyToMessage' => 'reply_to_message',
+            'editDate' => 'edit_date',
         ];
     }
 }

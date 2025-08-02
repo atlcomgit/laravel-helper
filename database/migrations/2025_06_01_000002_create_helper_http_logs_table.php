@@ -7,6 +7,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Models\HttpLog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -89,7 +90,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
 
-            $table->comment('Лог http запросов');
+            $table->comment(HttpLog::COMMENT);
         });
     }
 

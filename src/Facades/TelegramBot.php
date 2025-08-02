@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Facades;
 
-use Atlcom\LaravelHelper\Services\TelegramBotService;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
 use Illuminate\Support\Facades\Facade;
 
 /**

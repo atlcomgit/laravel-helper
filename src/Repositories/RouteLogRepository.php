@@ -17,9 +17,10 @@ use Throwable;
  */
 class RouteLogRepository extends DefaultRepository
 {
-    public function __construct(private ?string $routeLogClass = null)
-    {
-        $this->routeLogClass ??= Lh::config(ConfigEnum::RouteLog, 'model') ?? RouteLog::class;
+    public function __construct(
+        /** @var RouteLog */ private ?string $model = null,
+    ) {
+        $this->model ??= Lh::config(ConfigEnum::RouteLog, 'model') ?? RouteLog::class;
     }
 
 
@@ -32,7 +33,7 @@ class RouteLogRepository extends DefaultRepository
     public function new(RouteLogDto $dto): RouteLog
     {
         return $this->withoutTelescope(
-            fn () => (new $this->routeLogClass($dto->toArray()))
+            fn () => (new $this->model($dto->toArray()))
                 ->setConnection(Lh::getConnection(ConfigEnum::RouteLog))
                 ->setTable(Lh::getTable(ConfigEnum::RouteLog))
         );
@@ -48,8 +49,7 @@ class RouteLogRepository extends DefaultRepository
     public function setExistOrCreate(RouteLogDto $dto): void
     {
         $this->withoutTelescope(function () use ($dto) {
-            /** @var RouteLog $routeLog */
-            $routeLog = $this->routeLogClass::query()
+            $routeLog = $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofMethod($dto->method)
@@ -72,8 +72,7 @@ class RouteLogRepository extends DefaultRepository
     public function setCountZero(RouteLogDto $dto): void
     {
         $this->withoutTelescope(function () use ($dto) {
-            /** @var RouteLog $routeLog */
-            $routeLog = $this->routeLogClass::query()
+            $routeLog = $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofMethod($dto->method)
@@ -96,7 +95,7 @@ class RouteLogRepository extends DefaultRepository
     {
         $this->withoutTelescope(function () use ($dto) {
             try {
-                $this->routeLogClass::query()
+                $this->model::query()
                     ->withoutQueryLog()
                     ->withoutQueryCache()
                     ->ofMethod($dto->method)
@@ -119,12 +118,12 @@ class RouteLogRepository extends DefaultRepository
      */
     public function setExistAll(bool $value): void
     {
-        $this->withoutTelescope(function () use ($value) {
-            $this->routeLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->update(['exist' => $value]);
-        });
+                ->update(['exist' => $value])
+        );
     }
 
 
@@ -135,12 +134,12 @@ class RouteLogRepository extends DefaultRepository
      */
     public function deleteNotExist(): void
     {
-        $this->withoutTelescope(function () {
-            $this->routeLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofExist(false)
-                ->delete();
-        });
+                ->delete()
+        );
     }
 }

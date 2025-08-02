@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Atlcom\LaravelHelper\Services;
+namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetWebhookDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
+use Atlcom\LaravelHelper\Services\TelegramApiService;
 
 /**
  * Сервис бота telegram

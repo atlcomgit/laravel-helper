@@ -43,6 +43,8 @@ class ModelLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог моделей';
+
     protected ?bool $withModelLog = false;
     public $guarded = ['id'];
     public $timestamps = false;

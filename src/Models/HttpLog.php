@@ -62,6 +62,8 @@ class HttpLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог http запросов';
+
     protected ?bool $withModelLog = false;
     protected $primaryKey = 'id';
     protected $guarded = ['id'];

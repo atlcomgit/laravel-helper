@@ -46,6 +46,7 @@ class TelegramBotInDto extends TelegramBotDto
     {
         return [
             'updateId' => 'update_id',
+            'message' => ['message', 'edited_message'],
         ];
     }
 }

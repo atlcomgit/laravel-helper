@@ -34,6 +34,8 @@ class RouteLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог роутов';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

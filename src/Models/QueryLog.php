@@ -43,6 +43,8 @@ class QueryLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог query запросов';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

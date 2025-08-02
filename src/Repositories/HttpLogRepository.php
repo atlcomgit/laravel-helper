@@ -17,9 +17,10 @@ use Atlcom\LaravelHelper\Models\HttpLog;
  */
 class HttpLogRepository extends DefaultRepository
 {
-    public function __construct(private ?string $httpLogClass = null)
-    {
-        $this->httpLogClass ??= Lh::config(ConfigEnum::HttpLog, 'model') ?? HttpLog::class;
+    public function __construct(
+        /** @var HttpLog */ private ?string $model = null,
+    ) {
+        $this->model ??= Lh::config(ConfigEnum::HttpLog, 'model') ?? HttpLog::class;
     }
 
 
@@ -31,13 +32,12 @@ class HttpLogRepository extends DefaultRepository
      */
     public function create(HttpLogCreateDto $dto): void
     {
-        $this->withoutTelescope(function () use ($dto) {
-            /** @var HttpLog $this->httpLogClass */
-            $this->httpLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->create($dto->toArray());
-        });
+                ->create($dto->toArray())
+        );
     }
 
 
@@ -49,14 +49,13 @@ class HttpLogRepository extends DefaultRepository
      */
     public function update(HttpLogUpdateDto|HttpLogFailedDto $dto): void
     {
-        $this->withoutTelescope(function () use ($dto) {
-            /** @var HttpLog $this->httpLogClass */
-            $this->httpLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofUuid($dto->uuid)
-                ->update($dto->toArray());
-        });
+                ->update($dto->toArray())
+        );
     }
 
 
@@ -68,13 +67,12 @@ class HttpLogRepository extends DefaultRepository
      */
     public function cleanup(int $days): int
     {
-        return $this->withoutTelescope(function () use ($days) {
-            /** @var HttpLog $this->httpLogClass */
-            return $this->httpLogClass::query()
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereDate('created_at', '<=', now()->subDays($days))
-                ->delete();
-        });
+                ->delete()
+        );
     }
 }

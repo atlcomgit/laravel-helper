@@ -52,6 +52,8 @@ class QueueLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог очередей';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

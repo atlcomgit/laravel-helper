@@ -45,6 +45,8 @@ class ViewLog extends DefaultModel
     use DynamicTableModelTrait;
 
 
+    public const COMMENT = 'Лог рендеринга blade шаблона';
+
     protected ?bool $withModelLog = false;
     protected $guarded = ['id'];
     protected $casts = [

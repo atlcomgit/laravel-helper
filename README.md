@@ -15,6 +15,7 @@
 - Внедрение Dto вместо Request в контроллеры, которое поддерживает: правила валидации, мутацию, маппинг, хуки при создании/изменении свойств
 - Регистрация singleton классов DefaultService и DefaultRepository
 - Профилирование методов класса на производительность и потребление памяти
+- Обработка сообщений телеграм бота
 
 <hr style="border:1px solid black">
 
@@ -581,6 +582,8 @@ RouteLogEvent::class // Событие логирования роутов
 QueryCacheEvent::class // Событие кеширования query запросов
 QueryLogEvent::class // Событие логирования query запросов
 QueueLogEvent::class // Событие логирования очередей
+TelegramBotEvent::class // Событие входящих/исходящих сообщений бота телеграм
+TelegramBotMessageEvent::class // Событие сохранения сообщений бота телеграм
 TelegramLogEvent::class // Событие логирования отправки сообщения в телеграм
 ViewCacheEvent::class // Событие кеширования рендеринга blade шаблонов
 ViewLogEvent::class // Событие логирования рендеринга blade шаблонов

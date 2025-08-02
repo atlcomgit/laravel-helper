@@ -16,9 +16,10 @@ use Illuminate\Support\Facades\DB;
  */
 class ConsoleLogRepository extends DefaultRepository
 {
-    public function __construct(private ?string $consoleLogClass = null)
-    {
-        $this->consoleLogClass ??= Lh::config(ConfigEnum::ConsoleLog, 'model') ?? ConsoleLog::class;
+    public function __construct(
+        /** @var ConsoleLog */ private ?string $model = null,
+    ) {
+        $this->model ??= Lh::config(ConfigEnum::ConsoleLog, 'model') ?? ConsoleLog::class;
     }
 
 
@@ -30,13 +31,12 @@ class ConsoleLogRepository extends DefaultRepository
      */
     public function create(ConsoleLogDto $dto): void
     {
-        $this->withoutTelescope(function () use ($dto) {
-            /** @var ConsoleLog $this->consoleLogClass */
-            $this->consoleLogClass::query()
+        $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->create($dto->toArray());
-        });
+                ->create($dto->toArray())
+        );
     }
 
 
@@ -49,8 +49,7 @@ class ConsoleLogRepository extends DefaultRepository
     public function update(ConsoleLogDto $dto): void
     {
         $this->withoutTelescope(function () use ($dto) {
-            /** @var ConsoleLog $this->consoleLogClass */
-            $this->consoleLogClass::query()
+            $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->ofUuid($dto->uuid)
@@ -74,13 +73,12 @@ class ConsoleLogRepository extends DefaultRepository
      */
     public function cleanup(int $days): int
     {
-        return $this->withoutTelescope(function () use ($days) {
-            /** @var ConsoleLog $this->consoleLogClass */
-            return $this->consoleLogClass::query()
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereDate('created_at', '<=', now()->subDays($days))
-                ->delete();
-        });
+                ->delete()
+        );
     }
 }

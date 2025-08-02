@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -40,7 +41,7 @@ return new class extends Migration {
             $table->index(['created_at', 'updated_at']);
             // $table->unique(['method', 'uri']);
 
-            $table->comment('Лог роутов');
+            $table->comment(RouteLog::COMMENT);
         });
     }
 

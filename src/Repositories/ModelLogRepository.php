@@ -15,9 +15,10 @@ use Atlcom\LaravelHelper\Models\ModelLog;
  */
 class ModelLogRepository extends DefaultRepository
 {
-    public function __construct(private ?string $modelLogClass = null)
-    {
-        $this->modelLogClass ??= Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
+    public function __construct(
+        /** @var ModelLog */ private ?string $model = null,
+    ) {
+        $this->model ??= Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
     }
 
 
@@ -30,11 +31,10 @@ class ModelLogRepository extends DefaultRepository
     public function create(ModelLogDto $dto): void
     {
         $this->withoutTelescope(function () use ($dto) {
-            /** @var ModelLog $this->modelLogClass */
-            $this->modelLogClass = Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
+            $this->model = Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
 
-            if ($dto->modelType !== $this->modelLogClass) {
-                $this->modelLogClass::query()
+            if ($dto->modelType !== $this->model) {
+                $this->model::query()
                     ->withoutQueryLog()
                     ->withoutQueryCache()
                     ->create($dto->toArray());
@@ -51,13 +51,12 @@ class ModelLogRepository extends DefaultRepository
      */
     public function cleanup(int $days): int
     {
-        return $this->withoutTelescope(function () use ($days) {
-            /** @var ModelLog $this->consoleLogClass */
-            return $this->modelLogClass::query()
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereDate('created_at', '<=', now()->subDays($days))
-                ->delete();
-        });
+                ->delete()
+        );
     }
 }
