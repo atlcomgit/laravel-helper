@@ -118,9 +118,9 @@ class QueueLogDto extends Dto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch(): void
+    public function dispatch(): static
     {
         if (
             Lh::canDispatch($this)
@@ -133,5 +133,7 @@ class QueueLogDto extends Dto
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

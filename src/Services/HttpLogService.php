@@ -135,7 +135,7 @@ class HttpLogService extends DefaultService
         !(
             $dto->type === HttpLogTypeEnum::Out
             && $dto->status === HttpLogStatusEnum::Failed
-            && !in_array($dto->name, [HttpLogHeaderEnum::Unknown->value])
+            && !in_array($dto->name, [HttpLogHeaderEnum::Unknown->value, HttpLogHeaderEnum::TelegramOrg->value])
         ) ?: telegram(
             [
                 'Описание' => 'Проблема в исходящем запросе',

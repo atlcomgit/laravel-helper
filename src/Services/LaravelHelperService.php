@@ -8,6 +8,7 @@ use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheDto;
@@ -55,7 +56,7 @@ class LaravelHelperService extends DefaultService
 
 
     /**
-     * Возвращает название соединения БД к таблице лога
+     * Возвращает название соединения БД к таблице хелпера
      *
      * @param ConfigEnum $config
      * @return string
@@ -67,7 +68,7 @@ class LaravelHelperService extends DefaultService
 
 
     /**
-     * Возвращает название таблицы лога
+     * Возвращает название таблицы хелпера
      *
      * @param ConfigEnum $config
      * @return string
@@ -303,7 +304,18 @@ class LaravelHelperService extends DefaultService
                 break;
 
             default:
-                $can = true;
+                switch (true) {
+                    case $dto instanceof TelegramBotOutDto:
+                        $config = ConfigEnum::TelegramBot;
+                        /** @var TelegramBotOutDto $dto */
+                        $can = $this->config($config, 'enabled')
+                            && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
+                        ;
+                        break;
+
+                    default:
+                        $can = true;
+                }
         }
 
         return $can;

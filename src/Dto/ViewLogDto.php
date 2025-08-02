@@ -132,9 +132,9 @@ class ViewLogDto extends Dto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch()
+    public function dispatch(): static
     {
         if (
             Lh::canDispatch($this)
@@ -147,5 +147,7 @@ class ViewLogDto extends Dto
                 ? ViewLogJob::dispatchSync($this)
                 : ViewLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

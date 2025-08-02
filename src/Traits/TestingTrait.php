@@ -70,6 +70,8 @@ trait TestingTrait
      */
     protected function setUp(): void
     {
+        echo PHP_EOL . class_basename($this->toString()) . ' ';
+        
         parent::setUp();
 
         static $started = false;

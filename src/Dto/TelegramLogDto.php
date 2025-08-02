@@ -158,14 +158,16 @@ class TelegramLogDto extends Dto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch()
+    public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
             (Lh::config(ConfigEnum::TelegramLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? TelegramLogJob::dispatchSync($this)
                 : TelegramLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

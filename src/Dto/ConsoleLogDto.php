@@ -154,9 +154,9 @@ class ConsoleLogDto extends Dto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch()
+    public function dispatch(): static
     {
         if (
             Lh::canDispatch($this)
@@ -169,5 +169,7 @@ class ConsoleLogDto extends Dto
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

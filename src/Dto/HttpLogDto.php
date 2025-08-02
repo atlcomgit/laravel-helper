@@ -245,14 +245,16 @@ class HttpLogDto extends Dto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch()
+    public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
             (Lh::config(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? HttpLogJob::dispatchSync($this)
                 : HttpLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

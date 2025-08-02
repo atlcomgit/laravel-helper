@@ -389,6 +389,27 @@ return [
         /**
          * TelegramLog. Логирование в телеграм
          */
+    ConfigEnum::TelegramBot->value => [
+        // Вкл/Выкл бота телеграм
+        'enabled' => (bool)env('HELPER_TELEGRAM_BOT_ENABLED', false),
+        // Название очереди для бота
+        'queue' => (string)env('HELPER_TELEGRAM_BOT_QUEUE', 'default'),
+        // Запуск очереди синхронно
+        'queue_dispatch_sync' => (bool)env('HELPER_TELEGRAM_BOT_QUEUE_DISPATCH_SYNC'),
+        // Токен бота телеграм
+        'token' => (string)env('HELPER_TELEGRAM_BOT_TOKEN', ''),
+        // Имя бота телеграм
+        'name' => (string)env('HELPER_TELEGRAM_BOT_NAME', ''),
+        // Ссылка на бота телеграм
+        'link' => (string)env('HELPER_TELEGRAM_BOT_LINK', ''),
+        // Webhook бота телеграм
+        'webhook' => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK', ''),
+    ],
+
+
+        /**
+         * TelegramLog. Логирование в телеграм
+         */
     ConfigEnum::TelegramLog->value => [
         // Вкл/Выкл отправки в телеграм
         'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ENABLED', false),

@@ -111,14 +111,16 @@ class ModelLogDto extends DefaultDto
     /**
      * Отправляет dto в очередь для сохранения лога
      *
-     * @return void
+     * @return static
      */
-    public function dispatch()
+    public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
             (Lh::config(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
                 ? ModelLogJob::dispatchSync($this)
                 : ModelLogJob::dispatch($this);
         }
+
+        return $this;
     }
 }

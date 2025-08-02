@@ -8,9 +8,11 @@ use ArgumentCountError;
 use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultException;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Events\ExceptionEvent;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
@@ -104,12 +106,17 @@ class ExceptionDto extends Dto
         );
 
         // Отправляем в телеграм, кроме указанных ошибок
+        $exclude = Lh::config(ConfigEnum::TelegramLog, TelegramTypeEnum::Error->value . '.exclude');
         if (
-            !in_array($exception::class, [
-                    // ModelNotFoundException::class,
-                MaxAttemptsExceededException::class,
-                '\League\OAuth2\Server\Exception\OAuthServerException',
-            ])
+            (
+                isLocal()
+                || !in_array($exception::class, [
+                        // ModelNotFoundException::class,
+                    MaxAttemptsExceededException::class,
+                    '\League\OAuth2\Server\Exception\OAuthServerException',
+                ])
+            )
+            && !(is_array($exclude) && in_array($exception::class, $exclude))
             && !is_subclass_of($exception, WithoutTelegramException::class)
             && !($exception instanceof WithoutTelegramException)
             && ($thisDto->code < 100 || $thisDto->code >= 400)

@@ -30,14 +30,15 @@ class TelegramApiService extends DefaultService
      * Проверяет ответ на успех
      *
      * @param Response $response
-     * @return void
+     * @return mixed
      */
-    public function checkResponse(Response $response): void
+    public function checkResponse(Response $response): mixed
     {
         $json = $response->json();
 
-        ($response->successful() && ($json['ok'] ?? false) === true)
-            ?: throw new WithoutTelegramException(
+        return ($response->successful() && ($json['ok'] ?? false) === true)
+            ? $json
+            : throw new WithoutTelegramException(
                 "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
                 $json['error_code'] ?? $response->getStatusCode() ?? 400,
             );
@@ -49,20 +50,22 @@ class TelegramApiService extends DefaultService
      *
      * @param string $botToken Токен Telegram-бота
      * @param string $chatId   ID чата или username (например, @username)
-     * @param string $message  Текст сообщения
+     * @param string $text     Текст сообщения
+     * @param string $parseMode
      * @param array  $options  Дополнительные параметры (например, parse_mode)
-     * @return array|null      Ответ Telegram API или null при ошибке
+     * @return mixed           Ответ Telegram API или null при ошибке
      */
     public function sendMessage(
         string $botToken,
         string $chatId,
-        string $message,
+        string $text,
+        string $parseMode = 'HTML',
         array $options = [],
-    ): ?array {
+    ): mixed {
         $response = $this->getHttp()->post("bot{$botToken}/sendMessage", [
             'chat_id' => $chatId,
-            'text' => $message,
-            'parse_mode' => 'HTML',
+            'text' => $text,
+            'parse_mode' => $parseMode,
             ...$options,
         ]);
 
@@ -76,17 +79,19 @@ class TelegramApiService extends DefaultService
      * @param string $botToken Токен Telegram-бота
      * @param string $chatId   ID чата или username (например, @username)
      * @param string $filePath Путь к файлу для отправки
-     * @param string $message  Текст сообщения (caption)
+     * @param string $caption  Текст сообщения (caption)
+     * @param string $parseMode
      * @param array  $options  Дополнительные параметры (например, parse_mode)
-     * @return array|null      Ответ Telegram API или null при ошибке
+     * @return mixed           Ответ Telegram API или null при ошибке
      */
     public function sendMessageWithFile(
         string $botToken,
         string $chatId,
         string $filePath,
-        string $message,
+        string $caption,
+        string $parseMode = 'HTML',
         array $options = [],
-    ): ?array {
+    ): mixed {
         file_exists($filePath)
             ?: throw new WithoutTelegramException("Ошибка отправки сообщения в телеграм: Файл не найден {$filePath}");
 
@@ -94,10 +99,21 @@ class TelegramApiService extends DefaultService
             ->attach('document', file_get_contents($filePath), basename($filePath))
             ->post("bot{$botToken}/sendDocument", [
                 'chat_id' => $chatId,
-                'caption' => $message,
-                'parse_mode' => 'HTML',
+                'caption' => $caption,
+                'parse_mode' => $parseMode,
                 ...$options,
             ]);
+
+        return $this->checkResponse($response);
+    }
+
+
+    public function setWebhook(string $botToken, string $url, array $options = []): mixed
+    {
+        $response = $this->getHttp()->post("bot{$botToken}/setWebhook", [
+            'url' => $url,
+            ...$options,
+        ]);
 
         return $this->checkResponse($response);
     }

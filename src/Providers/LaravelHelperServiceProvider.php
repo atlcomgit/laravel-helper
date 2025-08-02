@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteCacheCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\TelegramBotCommand;
 use Atlcom\LaravelHelper\Commands\ViewLogCleanupCommand;
 use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
@@ -46,6 +47,7 @@ use Atlcom\LaravelHelper\Services\RouteLogService;
 use Atlcom\LaravelHelper\Services\SingletonService;
 use Atlcom\LaravelHelper\Services\StrMacrosService;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
+use Atlcom\LaravelHelper\Services\TelegramBotService;
 use Atlcom\LaravelHelper\Services\TelegramService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
@@ -93,6 +95,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация фабрик
         $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
 
+        // Регистрация роутов
+        $this->loadRoutesFrom(__DIR__.'/../../routes/api-telegram-bot.php');
+
         // Регистрация обработчика исключений
         $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
         // $this->renderable(fn (Throwable $e, $request) => app(DefaultExceptionHandler::class)->render($request, $e)));
@@ -117,6 +122,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(QueryLogService::class);
         $this->app->singleton(TelegramApiService::class);
         $this->app->singleton(TelegramService::class);
+        $this->app->singleton(TelegramBotService::class);
         $this->app->singleton(ViewCacheService::class);
         $this->app->singleton(ViewLogService::class);
 
@@ -173,6 +179,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 QueueLogCleanupCommand::class,
                 QueryLogCleanupCommand::class,
                 ViewLogCleanupCommand::class,
+
+                TelegramBotCommand::class,
             ]);
 
             // Запуск команд по расписанию

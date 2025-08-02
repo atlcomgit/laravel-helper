@@ -25,6 +25,7 @@ enum ConfigEnum: string
     case QueryCache = 'query_cache';
     case QueryLog = 'query_log';
     case QueueLog = 'queue_log';
+    case TelegramBot = 'telegram_bot';
     case TelegramLog = 'telegram_log';
     case TestingLog = 'testing_log';
     case ViewCache = 'view_cache';
@@ -64,6 +65,7 @@ enum ConfigEnum: string
             self::QueryCache => 'Кеш query запроса',
             self::QueryLog => 'Лог query запроса',
             self::QueueLog => 'Лог очереди',
+            self::TelegramBot => 'Бот телеграм',
             self::TelegramLog => 'Лог телеграм сообщения',
             self::TestingLog => 'Лог тестирования',
             self::ViewCache => 'Кеш blade шаблона',
