@@ -35,6 +35,7 @@ use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 use Atlcom\LaravelHelper\Services\BuilderMacrosService;
 use Atlcom\LaravelHelper\Services\CacheService;
+use Atlcom\LaravelHelper\Services\CollectionMacrosService;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
@@ -166,6 +167,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
             ?: BuilderMacrosService::setMacros();
         // Подключение макросов Str
         !Lh::config(ConfigEnum::Macros, 'str.enabled') ?: StrMacrosService::setMacros();
+        // Подключение макросов Collection
+        !Lh::config(ConfigEnum::Macros, 'collection.enabled') ?: CollectionMacrosService::setMacros();
         // Подключение макросов Http
         !(Lh::config(ConfigEnum::Macros, 'http.enabled') || Lh::config(ConfigEnum::HttpCache, 'enabled'))
             ?: HttpMacrosService::setMacros();

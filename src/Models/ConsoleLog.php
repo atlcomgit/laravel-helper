@@ -74,24 +74,16 @@ class ConsoleLog extends DefaultModel
     }
 
 
-    /*
-     * ATTRIBUTES
-     */
+    /** ATTRIBUTES */
 
 
-    /*
-     * MUTATORS
-     */
+    /** MUTATORS */
 
 
-    /*
-     * RELATIONS
-     */
+    /** RELATIONS */
 
 
-    /*
-     * SCOPES
-     */
+    /** SCOPES */
 
 
     /**

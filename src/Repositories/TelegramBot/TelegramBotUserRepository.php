@@ -55,6 +55,7 @@ class TelegramBotUserRepository extends DefaultRepository
                     'user_name' => $dto->userName,
                     'phone' => $dto->phone,
                     'language' => $dto->language,
+                    'is_bot' => $dto->isBot,
                 ])
                 : $model = $this->model::query()
                     ->withoutQueryLog()
@@ -67,6 +68,7 @@ class TelegramBotUserRepository extends DefaultRepository
                         'phone' => $dto->phone,
                         'language' => $dto->language,
                         'is_ban' => $dto->isBan,
+                        'is_bot' => $dto->isBot,
                         'info' => $dto->info,
                     ]);
 

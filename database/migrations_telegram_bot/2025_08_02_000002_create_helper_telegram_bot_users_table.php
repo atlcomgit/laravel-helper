@@ -41,6 +41,8 @@ return new class extends Migration {
                 ->comment('Код локализации пользователя телеграм бота');
             $table->boolean('is_ban')->nullable(false)->index()
                 ->comment('Флаг бана пользователя телеграм бота');
+            $table->boolean('is_bot')->nullable(true)->index()
+                ->comment('Флаг бота');
             $table->jsonb('info')->nullable(true)
                 ->comment('Информация о пользователе телеграм бота');
 

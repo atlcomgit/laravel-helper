@@ -33,6 +33,17 @@ class TelegramBotInFromDto extends DefaultDto
     /**
      * @inheritDoc
      */
+    protected function defaults(): array
+    {
+        return [
+            'languageCode' => '',
+        ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
     protected function mappings(): array
     {
         return [

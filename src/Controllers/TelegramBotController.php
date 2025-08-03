@@ -8,6 +8,8 @@ use Atlcom\LaravelHelper\Defaults\DefaultController;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Webhook\TelegramBotWebhookResponseDto;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class TelegramBotController extends DefaultController
 {
@@ -17,10 +19,10 @@ class TelegramBotController extends DefaultController
      * @param TelegramBotInDto $dto
      * @return TelegramBotWebhookResponseDto
      */
-    public function webhook(TelegramBotInDto $dto): TelegramBotWebhookResponseDto
+    public function webhook(TelegramBotInDto $dto): Response|JsonResponse|TelegramBotWebhookResponseDto
     {
         event(new TelegramBotEvent($dto));
 
-        return TelegramBotWebhookResponseDto::create();
+        return response()->json(TelegramBotWebhookResponseDto::create($dto)->toArray());
     }
 }

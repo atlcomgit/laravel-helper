@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Database\Factories\TelegramBotUserFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -24,11 +27,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $user_name
  * @property ?string $phone
  * @property string $language
- * @property string $is_ban
+ * @property bool $is_ban
+ * @property ?bool $is_bot
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
+ * 
+ * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
+ * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
  * 
  * @mixin \Eloquent
  */
@@ -51,8 +58,18 @@ class TelegramBotUser extends DefaultModel
         'phone' => 'string',
         'language' => 'string',
         'is_ban' => 'boolean',
+        'is_bot' => 'boolean',
         'info' => 'array',
     ];
+
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setConnection(Lh::getConnection(ConfigEnum::TelegramBot));
+        $this->setTable(Lh::getTable(ConfigEnum::TelegramBot, 'user'));
+    }
 
 
     /**
@@ -67,24 +84,27 @@ class TelegramBotUser extends DefaultModel
     }
 
 
-    /*
-     * ATTRIBUTES
+    /** ATTRIBUTES */
+
+
+    /** MUTATORS */
+
+
+    /** RELATIONS */
+
+
+    /**
+     * Связь с сообщениями бота телеграм
+     *
+     * @return Relation
      */
+    public function telegramBotMessages(): Relation
+    {
+        return $this->hasMany(TelegramBotMessage::class, 'telegram_bot_user_id');
+    }
 
 
-    /*
-     * MUTATORS
-     */
-
-
-    /*
-     * RELATIONS
-     */
-
-
-    /*
-     * SCOPES
-     */
+    /** SCOPES */
 
 
     /**

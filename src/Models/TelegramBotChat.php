@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Database\Factories\TelegramBotChatFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -27,6 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
+ * 
+ * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
+ * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
  * 
  * @mixin \Eloquent
  */
@@ -51,6 +57,15 @@ class TelegramBotChat extends DefaultModel
     ];
 
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setConnection(Lh::getConnection(ConfigEnum::TelegramBot));
+        $this->setTable(Lh::getTable(ConfigEnum::TelegramBot, 'chat'));
+    }
+
+
     /**
      * @static
      * Возвращает экземпляр класса фабрики модели
@@ -63,24 +78,27 @@ class TelegramBotChat extends DefaultModel
     }
 
 
-    /*
-     * ATTRIBUTES
+    /** ATTRIBUTES */
+
+
+    /** MUTATORS */
+
+
+    /** RELATIONS */
+
+
+    /** SCOPES */
+
+
+    /**
+     * Связь с сообщениями бота телеграм
+     *
+     * @return Relation
      */
-
-
-    /*
-     * MUTATORS
-     */
-
-
-    /*
-     * RELATIONS
-     */
-
-
-    /*
-     * SCOPES
-     */
+    public function telegramBotMessages(): Relation
+    {
+        return $this->hasMany(TelegramBotMessage::class, 'telegram_bot_user_id');
+    }
 
 
     /**

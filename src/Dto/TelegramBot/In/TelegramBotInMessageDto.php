@@ -19,6 +19,7 @@ class TelegramBotInMessageDto extends DefaultDto
     public string $text;
     public Carbon $date;
     public ?Carbon $editDate;
+    public ?TelegramBotInReplyMarkupDto $replyMarkup;
 
 
     /**
@@ -35,6 +36,7 @@ class TelegramBotInMessageDto extends DefaultDto
             'text' => 'string',
             'date' => Carbon::class,
             'editDate' => Carbon::class,
+            'replyMarkup' => TelegramBotInReplyMarkupDto::class,
         ];
     }
 
@@ -48,6 +50,7 @@ class TelegramBotInMessageDto extends DefaultDto
             'messageId' => 'message_id',
             'replyToMessage' => 'reply_to_message',
             'editDate' => 'edit_date',
+            'replyMarkup' => 'reply_markup',
         ];
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
 /**
- * Сервис регистрации str макросов
+ * Сервис регистрации Str макросов
  */
 class StrMacrosService extends DefaultService
 {

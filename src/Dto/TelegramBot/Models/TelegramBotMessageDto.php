@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
@@ -18,8 +20,10 @@ class TelegramBotMessageDto extends DefaultDto
 {
     public ?int $id;
     public string $uuid;
+    public TelegramBotMessageTypeEnum $type;
+    public TelegramBotMessageStatusEnum $status;
     public int $externalMessageId;
-    public int $externalUpdateId;
+    public ?int $externalUpdateId;
     public int $telegramBotChatId;
     public int $telegramBotUserId;
     public ?int $telegramBotMessageId;

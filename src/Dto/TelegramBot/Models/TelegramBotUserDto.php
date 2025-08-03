@@ -23,6 +23,7 @@ class TelegramBotUserDto extends DefaultDto
     public ?string $phone;
     public string $language;
     public ?bool $isBan;
+    public ?bool $isBot;
     public ?array $info;
 
 
@@ -38,6 +39,7 @@ class TelegramBotUserDto extends DefaultDto
         return [
             'uuid' => uuid(),
             'isBan' => false,
+            'isBot' => null,
         ];
     }
 
@@ -57,6 +59,7 @@ class TelegramBotUserDto extends DefaultDto
             'userName' => 'user_name',
             'language' => 'languageCode',
             'isBan' => 'is_ban',
+            'isBot' => 'is_bot',
         ];
     }
 

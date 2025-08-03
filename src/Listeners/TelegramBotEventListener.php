@@ -7,8 +7,11 @@ namespace Atlcom\LaravelHelper\Listeners;
 use Atlcom\LaravelHelper\Defaults\DefaultListener;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotListenerService;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * Слушатель события входящих/исходящих сообщений телеграм бота
@@ -16,11 +19,13 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotListenerService;
  * События:
  * @see TelegramBotEvent
  */
-class TelegramBotEventListener extends DefaultListener
+class TelegramBotEventListener extends DefaultListener implements ShouldQueue
 {
     public function __construct(
         private TelegramBotListenerService $telegramBotListenerService,
-    ) {}
+    ) {
+        $this->queue = Lh::config(ConfigEnum::TelegramBot, 'queue');
+    }
 
 
     /**
@@ -31,9 +36,9 @@ class TelegramBotEventListener extends DefaultListener
      */
     public function __invoke(TelegramBotEvent $event): void
     {
-        match ($event->dto::class) {
-            TelegramBotInDto::class => $this->telegramBotListenerService->incoming($event->dto),
-            TelegramBotOutDto::class => $this->telegramBotListenerService->outgoing($event->dto),
+        match (true) {
+            $event->dto instanceof TelegramBotInDto => $this->telegramBotListenerService->incoming($event->dto),
+            $event->dto instanceof TelegramBotOutDto => $this->telegramBotListenerService->outgoing($event->dto),
         };
     }
 }

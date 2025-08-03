@@ -93,10 +93,15 @@ return [
             // Флаг включения макросов
             'enabled' => (bool)env('HELPER_BUILDER_MACROS_ENABLED', true),
         ],
-        // Макросы хелпера Str
+        // Макросы Str
         'str' => [
             // Флаг включения макросов
             'enabled' => (bool)env('HELPER_STR_MACROS_ENABLED', true),
+        ],
+        // Макросы Collection
+        'collection' => [
+            // Флаг включения макросов
+            'enabled' => (bool)env('HELPER_COLECTION_MACROS_ENABLED', true),
         ],
         // Макросы фасада Http
         'http' => [

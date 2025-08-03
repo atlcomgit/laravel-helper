@@ -42,7 +42,7 @@ class TelegramBotCommand extends DefaultCommand
         $command = $this->argument('cmd');
         switch ($command) {
             case 'setWebhook':
-                $dto = TelegramBotSetWebhookDto::create()->dispatch();
+                $dto = TelegramBotOutSetWebhookDto::create()->dispatch();
 
                 $this->telegramComment = "Установлен webhook: {$dto->url}";
                 break;

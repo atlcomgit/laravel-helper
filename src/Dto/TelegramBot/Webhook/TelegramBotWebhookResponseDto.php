@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Webhook;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInCallbackQueryDto;
 
 /**
  * Dto бота telegram
@@ -12,6 +13,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 class TelegramBotWebhookResponseDto extends DefaultDto
 {
     public bool $status;
+    public ?TelegramBotInCallbackQueryDto $callbackQuery;
 
 
     /**
@@ -22,5 +24,25 @@ class TelegramBotWebhookResponseDto extends DefaultDto
         return [
             'status' => true,
         ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerializing(array &$array): void
+    {
+        $this->onlyNotNull()
+            ->excludeKeys(['callbackQuery'])
+            ->includeArray([
+                ...(
+                    $this->callbackQuery
+                    ? [
+                        'method' => 'answerCallbackQuery',
+                        'callback_query_id' => $this->callbackQuery->id,
+                        'show_alert' => false,
+                    ]
+                    : []),
+            ]);
     }
 }

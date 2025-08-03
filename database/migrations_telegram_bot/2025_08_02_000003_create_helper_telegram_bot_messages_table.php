@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Illuminate\Database\Migrations\Migration;
@@ -28,6 +30,12 @@ return new class extends Migration {
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid сообщения телеграм бота');
+            $table->enum('type', TelegramBotMessageTypeEnum::enumValues())->nullable(false)->index()
+                ->default(TelegramBotMessageTypeEnum::getDefault())
+                ->comment('Тип сообщения телеграм бота');
+            $table->enum('status', TelegramBotMessageStatusEnum::enumValues())->nullable(false)->index()
+                ->default(TelegramBotMessageStatusEnum::getDefault())
+                ->comment('Статус сообщения телеграм бота');
             $table->bigInteger('external_message_id')->nullable(false)->index()
                 ->comment('Внешний Id сообщения телеграм бота');
             $table->bigInteger('external_update_id')->nullable(true)->index()

@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetWebhookDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
+use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
 
@@ -20,6 +21,12 @@ class TelegramBotService extends DefaultService
     public function __construct(private TelegramApiService $telegramApiService) {}
 
 
+    /**
+     * Отправка сообщения по переданному dto
+     *
+     * @param TelegramBotOutDto $dto
+     * @return void
+     */
     public function send(TelegramBotOutDto $dto): void
     {
         $dto->response = match ($dto::class) {
@@ -28,22 +35,31 @@ class TelegramBotService extends DefaultService
 
             default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
         };
+
+        event(new TelegramBotEvent($dto));
     }
 
 
-    public function sendMessage(TelegramBotOutSendMessageDto $dto): TelegramBotOutResponseDto
+    protected function sendMessage(TelegramBotOutSendMessageDto $dto): TelegramBotOutResponseDto
     {
         $json = $this->telegramApiService->sendMessage(
             botToken: $dto->token,
             chatId: $dto->chatId,
             text: $dto->text,
+            options: [
+                ...(
+                    ($dto->buttons && $dto->buttons->isNotEmpty())
+                    ? ['reply_markup' => json_encode(['inline_keyboard' => $dto->buttons->toArrayRecursive()])]
+                    : []
+                ),
+            ],
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
     }
 
 
-    public function setWebhook(TelegramBotOutSetWebhookDto $dto): TelegramBotOutResponseDto
+    protected function setWebhook(TelegramBotOutSetWebhookDto $dto): TelegramBotOutResponseDto
     {
         $json = $this->telegramApiService->setWebhook(
             botToken: $dto->token,

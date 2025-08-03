@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Database\Factories\TelegramBotMessageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -19,8 +24,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property string $uuid
+ * @property TelegramBotMessageTypeEnum $type
+ * @property TelegramBotMessageStatusEnum $status
  * @property int $external_message_id
- * @property int $external_update_id
+ * @property ?int $external_update_id
  * @property int $telegram_bot_chat_id
  * @property int $telegram_bot_user_id
  * @property ?int $telegram_bot_message_id
@@ -31,6 +38,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
+ * 
+ * @property-read TelegramBotChat $telegramBotChat
+ * @method Relation|TelegramBotChat telegramBotChat()
+ * @property-read TelegramBotUser $telegramBotUser
+ * @method Relation|TelegramBotUser telegramBotUser()
+ * @property-read TelegramBotMessage $telegramBotMessage
+ * @method Relation|TelegramBotMessage telegramBotMessage()
  * 
  * @mixin \Eloquent
  */
@@ -47,6 +61,8 @@ class TelegramBotMessage extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
+        'type' => TelegramBotMessageTypeEnum::class,
+        'status' => TelegramBotMessageStatusEnum::class,
         'external_message_id' => 'integer',
         'external_update_id' => 'integer',
         'telegram_bot_chat_id' => 'integer',
@@ -57,6 +73,15 @@ class TelegramBotMessage extends DefaultModel
         'edit_at' => 'datetime',
         'info' => 'array',
     ];
+
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setConnection(Lh::getConnection(ConfigEnum::TelegramBot));
+        $this->setTable(Lh::getTable(ConfigEnum::TelegramBot, 'message'));
+    }
 
 
     /**
@@ -71,24 +96,49 @@ class TelegramBotMessage extends DefaultModel
     }
 
 
-    /*
-     * ATTRIBUTES
+    /** ATTRIBUTES */
+
+
+    /** MUTATORS */
+
+
+    /** RELATIONS */
+
+
+    /**
+     * Связь с чатом бота телеграм
+     *
+     * @return Relation
      */
+    public function telegramBotChat(): Relation
+    {
+        return $this->belongsTo(TelegramBotChat::class, 'telegram_bot_chat_id');
+    }
 
 
-    /*
-     * MUTATORS
+    /**
+     * Связь с пользователем бота телеграм
+     *
+     * @return Relation
      */
+    public function telegramBotUser(): Relation
+    {
+        return $this->belongsTo(TelegramBotUser::class, 'telegram_bot_user_id');
+    }
 
 
-    /*
-     * RELATIONS
+    /**
+     * Связь с цитируемым сообщением бота телеграм
+     *
+     * @return Relation
      */
+    public function telegramBotMessage(): Relation
+    {
+        return $this->belongsTo(TelegramBotMessage::class, 'telegram_bot_message_id');
+    }
 
 
-    /*
-     * SCOPES
-     */
+    /** SCOPES */
 
 
     /**
@@ -101,6 +151,32 @@ class TelegramBotMessage extends DefaultModel
     public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
+    }
+
+
+    /**
+     * Фильтр по типу сообщения
+     *
+     * @param Builder $query
+     * @param TelegramBotMessageTypeEnum $type
+     * @return Builder
+     */
+    public function scopeOfType(Builder $query, TelegramBotMessageTypeEnum $type): Builder
+    {
+        return $query->where('type', $type);
+    }
+
+
+    /**
+     * Фильтр по статусу сообщения
+     *
+     * @param Builder $query
+     * @param TelegramBotMessageStatusEnum $status
+     * @return Builder
+     */
+    public function scopeOfStatus(Builder $query, TelegramBotMessageStatusEnum $status): Builder
+    {
+        return $query->where('status', $status);
     }
 
 
