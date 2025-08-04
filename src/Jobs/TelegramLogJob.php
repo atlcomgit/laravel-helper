@@ -9,7 +9,7 @@ use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\TelegramLogEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
-use Atlcom\LaravelHelper\Services\TelegramService;
+use Atlcom\LaravelHelper\Services\TelegramLogService;
 
 /**
  * Задача отправки сообщений в телеграм через очередь
@@ -22,10 +22,10 @@ class TelegramLogJob extends DefaultJob
 
     public function __construct(
         protected TelegramLogDto $dto,
-        protected ?TelegramService $telegramService = null,
+        protected ?TelegramLogService $telegramLogService = null,
     ) {
         $this->onQueue(Lh::config(ConfigEnum::TelegramLog, 'queue'));
-        $this->telegramService ??= app(TelegramService::class);
+        $this->telegramLogService ??= app(TelegramLogService::class);
     }
 
 
@@ -36,7 +36,7 @@ class TelegramLogJob extends DefaultJob
      */
     public function __invoke()
     {
-        $sendResult = $this->telegramService->sendMessage($this->dto);
+        $sendResult = $this->telegramLogService->sendMessage($this->dto);
 
         // Повторная попытка задачи
         if (isProd() && !$sendResult && $this->attempts() <= static::FAILED_REPEAT_COUNT) {

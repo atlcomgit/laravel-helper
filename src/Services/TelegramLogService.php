@@ -18,7 +18,7 @@ use Throwable;
 /**
  * Сервис отправки сообщений в telegram
  */
-final class TelegramService extends DefaultService
+final class TelegramLogService extends DefaultService
 {
     /** Максимальное количество частей сообщения */
     public const TELEGRAM_MESSAGE_MAX_COUNT = 10;
@@ -175,17 +175,18 @@ final class TelegramService extends DefaultService
 
                 . ($showSpoiler
                     ? "\n"
-                    . "<tg-spoiler>"
                     . "Проект: <b>{$appName}</b>\n"
                     . "Окружение: <b>{$appEnv}</b>\n"
-                    . ($branch ? "Ветка: <b>{$branch}</b>\n" : '')
-                    . ($ip ? "Адрес: <b>{$ip}</b>\n" : '')
-                    . ($userId ? "UserId: <b>{$userId}</b>\n" : '')
-                    . ($userEmail ? "Email: <b>{$userEmail}</b>\n" : '')
-                    . ($userPhone ? "Телефон: <b>{$userPhone}</b>\n" : '')
-                    . ($userName ? "Пользователь: <b>{$userName}</b>\n" : '')
-                    . "Время: <b>{$time}</b>\n"
                     . "Тип: <b>{$type}</b>\n"
+                    . "Время: <b>{$time}</b>\n"
+                    . "────────────────────\n"
+                    . "<tg-spoiler>"
+                    . '' . ($branch ? "Ветка: <b>{$branch}</b>\n" : '')
+                    . '' . ($ip ? "Адрес: <b>{$ip}</b>\n" : '')
+                    . '' . ($userId ? "UserId: <b>{$userId}</b>\n" : '')
+                    . '' . ($userEmail ? "Email: <b>{$userEmail}</b>\n" : '')
+                    . '' . ($userPhone ? "Телефон: <b>{$userPhone}</b>\n" : '')
+                    . '' . ($userName ? "Пользователь: <b>{$userName}</b>\n" : '')
                     . "</tg-spoiler>"
                     : ''
                 )

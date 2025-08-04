@@ -7,7 +7,6 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Illuminate\Support\Collection;
 
@@ -18,9 +17,75 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {
     public string $chatId;
     public string $text;
+    public ?string $slug;
 
     /** @var Collection<array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto> $buttons */
     public ?Collection $buttons;
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function defaults(): array
+    {
+        return [
+            ...parent::defaults(),
+            'text' => '',
+        ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function mappings(): array
+    {
+        return [
+            'chatId' => ['chatId', 'chat_id', 'telegramBotChat.external_chat_id', 'telegram_bot_chat.external_chat_id'],
+        ];
+    }
+
+
+    /**
+     * Добавляет слаг к сообщению
+     *
+     * @param string $slug
+     * @return static
+     */
+    public function addSlug(string $slug): static
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+
+    /**
+     * Добавляет текст к сообщению
+     *
+     * @param string $text
+     * @return static
+     */
+    public function addText(string $text): static
+    {
+        $this->text = Hlp::stringConcat(PHP_EOL, $this->text, $text);
+
+        return $this;
+    }
+
+
+    /**
+     * Добавляет текст к сообщению
+     *
+     * @param string $text
+     * @return static
+     */
+    public function replaceText(string $text): static
+    {
+        $this->text = $text;
+
+        return $this;
+    }
 
 
     /**
@@ -53,6 +118,23 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
         !isset($button['text']) ?: $buttons = [$buttons];
 
         $this->buttons->push($this->prepareButtons($buttons));
+
+        return $this;
+    }
+
+
+    /**
+     * Добавляет несколько кнопок к сообщению
+     *
+     * @param array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons
+     * @param mixed 
+     * @return static
+     */
+    public function replaceButtons(
+        array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons,
+    ): static {
+        $this->buttons = collect([]);
+        $this->addButtons($buttons);
 
         return $this;
     }

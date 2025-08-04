@@ -61,4 +61,15 @@ class TelegramBotOutDto extends TelegramBotDto
 
         return $this;
     }
+
+
+    /**
+     * Отправка сообщения в бот телеграм
+     *
+     * @return TelegramBotOutDto
+     */
+    public function send(): TelegramBotOutDto
+    {
+        return $this->dispatch();
+    }
 }

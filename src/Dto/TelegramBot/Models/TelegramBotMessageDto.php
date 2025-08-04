@@ -27,6 +27,7 @@ class TelegramBotMessageDto extends DefaultDto
     public int $telegramBotChatId;
     public int $telegramBotUserId;
     public ?int $telegramBotMessageId;
+    public ?string $slug;
     public string $text;
     public Carbon $sendAt;
     public ?Carbon $editAt;

@@ -54,6 +54,8 @@ return new class extends Migration {
                 ->onUpdate('cascade')->onDelete('restrict')
                 ->comment('Связь с цитируемым сообщением телеграм бота (replyTo)');
 
+            $table->text('slug')->nullable(true)->index()
+                ->comment('Слаг сообщения чата телеграм бота');
             $table->longText('text')->nullable(false)
                 ->comment('Текст сообщения чата телеграм бота');
             $table->dateTime('send_at')->nullable(false)->index()

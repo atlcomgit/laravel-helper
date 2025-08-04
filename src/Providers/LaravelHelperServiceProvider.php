@@ -55,7 +55,7 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotListenerService;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotUserService;
-use Atlcom\LaravelHelper\Services\TelegramService;
+use Atlcom\LaravelHelper\Services\TelegramLogService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 use Illuminate\Console\Events\CommandStarting;
@@ -134,7 +134,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(TelegramBotUserService::class);
         $this->app->singleton(TelegramBotMessageService::class);
         $this->app->singleton(TelegramBotListenerService::class);
-        $this->app->singleton(TelegramService::class);
+        $this->app->singleton(TelegramLogService::class);
         $this->app->singleton(TelegramBotService::class);
         $this->app->singleton(ViewCacheService::class);
         $this->app->singleton(ViewLogService::class);

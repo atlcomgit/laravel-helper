@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotChatDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotUserDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
@@ -31,15 +32,17 @@ class TelegramBotListenerService extends DefaultService
     {
         $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->message->chat))
             ->save();
+
         $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
             ->save();
+
         ($chatDto = TelegramBotMessageDto::create($dto->message, [
             'type' => TelegramBotMessageTypeEnum::Incoming,
             'status' => match (true) {
                 (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
                 (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
 
-                default => TelegramBotMessageStatusEnum::New,
+                default => TelegramBotMessageStatusEnum::New ,
             },
             'externalUpdateId' => $dto->updateId,
             'telegramBotChatId' => $telegramBotChat->id,
@@ -65,11 +68,14 @@ class TelegramBotListenerService extends DefaultService
     {
         $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->response->message->chat))
             ->save();
+
         $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->response->message->from))
             ->save();
+
         ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
             'type' => TelegramBotMessageTypeEnum::Outgoing,
-            'status' => TelegramBotMessageStatusEnum::New,
+            'status' => TelegramBotMessageStatusEnum::New ,
+            'slug' => $dto instanceof TelegramBotOutSendMessageDto ? $dto->slug : null,
             'externalUpdateId' => null,
             'telegramBotChatId' => $telegramBotChat->id,
             'telegramBotUserId' => $telegramBotUser->id,

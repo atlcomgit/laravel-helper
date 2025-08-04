@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $telegram_bot_chat_id
  * @property int $telegram_bot_user_id
  * @property ?int $telegram_bot_message_id
+ * @property ?string $slug
  * @property string $text
  * @property \Carbon\Carbon $send_at
  * @property ?\Carbon\Carbon $edit_at
@@ -68,6 +69,7 @@ class TelegramBotMessage extends DefaultModel
         'telegram_bot_chat_id' => 'integer',
         'telegram_bot_user_id' => 'integer',
         'telegram_bot_message_id' => 'integer',
+        'slug' => 'string',
         'text' => 'string',
         'send_at' => 'datetime',
         'edit_at' => 'datetime',
@@ -190,5 +192,18 @@ class TelegramBotMessage extends DefaultModel
     public function scopeOfExternalMessageId(Builder $query, int $externalMessageId): Builder
     {
         return $query->where('external_message_id', $externalMessageId);
+    }
+
+
+    /**
+     * Фильтр по slug
+     *
+     * @param Builder $query
+     * @param ?string $slug
+     * @return Builder
+     */
+    public function scopeOfSlug(Builder $query, ?string $slug): Builder
+    {
+        return $query->where('slug', $slug);
     }
 }

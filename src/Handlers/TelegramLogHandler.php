@@ -8,7 +8,7 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
-use Atlcom\LaravelHelper\Services\TelegramService;
+use Atlcom\LaravelHelper\Services\TelegramLogService;
 use DateInterval;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -34,7 +34,7 @@ class TelegramLogHandler extends AbstractProcessingHandler
                 ? json_encode($message, Hlp::jsonFlags() | JSON_PRETTY_PRINT)
                 : $record->message;
 
-            $maxSize = TelegramService::TELEGRAM_MESSAGE_MAX_COUNT * TelegramService::TELEGRAM_MESSAGE_MAX_LENGTH;
+            $maxSize = TelegramLogService::TELEGRAM_MESSAGE_MAX_COUNT * TelegramLogService::TELEGRAM_MESSAGE_MAX_LENGTH;
             if (Str::length($message) > $maxSize) {
                 return;
             }
