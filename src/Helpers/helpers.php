@@ -321,7 +321,7 @@ if (!function_exists('user')) {
      * Возвращает модель авторизованного пользователя или null
      * 
      * @param bool $returnOnlyId
-     * @return Authenticatable|App\Models\User|App\Models\User\User|int|string|null
+     * @return Authenticatable|App\Models\User|App\Models\User\User|App\Domains\Crm\Models\User|int|string|null
      */
     function user(bool $returnOnlyId = false): Authenticatable|int|string|null
     {

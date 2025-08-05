@@ -15,7 +15,7 @@ use Carbon\Carbon;
  */
 class TelegramLogDto extends Dto
 {
-    public string $chatId;
+    public string $externalChatId;
     public ?string $title;
     public ?string $message;
     public ?string $type;
@@ -39,7 +39,7 @@ class TelegramLogDto extends Dto
     protected function mappings(): array
     {
         return [
-            'chatId' => 'chat_id',
+            'externalChatId' => ['external_chat_id', 'chatId', 'chat_id'],
             'userId' => 'user_id',
             'timeStamp' => 'time_stamp',
             'debugData' => 'debug_data',

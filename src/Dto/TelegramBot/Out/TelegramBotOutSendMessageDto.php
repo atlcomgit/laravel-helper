@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
  */
 class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {
-    public string $chatId;
+    public string $externalChatId;
     public string $text;
     public ?string $slug;
 
@@ -41,7 +41,13 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
     protected function mappings(): array
     {
         return [
-            'chatId' => ['chatId', 'chat_id', 'telegramBotChat.external_chat_id', 'telegram_bot_chat.external_chat_id'],
+            'externalChatId' => [
+                'chatId',
+                'chat_id',
+                'telegramBotChat.external_chat_id',
+                'telegram_bot_chat.external_chat_id',
+                'external_chat_id',
+            ],
         ];
     }
 
@@ -68,7 +74,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
      */
     public function addText(string $text): static
     {
-        $this->text = Hlp::stringConcat(PHP_EOL, $this->text, $text);
+        $this->text = Hlp::stringConcat(PHP_EOL, $this->text, trim($text));
 
         return $this;
     }
@@ -82,7 +88,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
      */
     public function replaceText(string $text): static
     {
-        $this->text = $text;
+        $this->text = trim($text);
 
         return $this;
     }

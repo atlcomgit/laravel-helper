@@ -18,7 +18,10 @@ use Atlcom\LaravelHelper\Services\TelegramApiService;
  */
 class TelegramBotService extends DefaultService
 {
-    public function __construct(private TelegramApiService $telegramApiService) {}
+    public function __construct(
+        private TelegramApiService $telegramApiService,
+        private TelegramBotMessageService $telegramBotMessageService,
+    ) {}
 
 
     /**
@@ -29,12 +32,14 @@ class TelegramBotService extends DefaultService
      */
     public function send(TelegramBotOutDto $dto): void
     {
-        $dto->response = match ($dto::class) {
-            TelegramBotOutSendMessageDto::class => $this->sendMessage($dto),
-            TelegramBotOutSetWebhookDto::class => $this->setWebhook($dto),
+        $dto->response = $this->telegramBotMessageService->isDuplicateLastMessage($dto)
+            ? TelegramBotOutResponseDto::create(status: false, description: 'Повторное сообщение')
+            : match ($dto::class) {
+                TelegramBotOutSendMessageDto::class => $this->sendMessage($dto),
+                TelegramBotOutSetWebhookDto::class => $this->setWebhook($dto),
 
-            default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
-        };
+                default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
+            };
 
         event(new TelegramBotEvent($dto));
     }
@@ -48,7 +53,7 @@ class TelegramBotService extends DefaultService
             text: $dto->text,
             options: [
                 ...(
-                    ($dto->buttons && $dto->buttons->isNotEmpty())
+                    $dto?->buttons?->isNotEmpty()
                     ? ['reply_markup' => json_encode(['inline_keyboard' => $dto->buttons->toArrayRecursive()])]
                     : []
                 ),

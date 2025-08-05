@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Repositories\TelegramBot;
 
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -101,5 +102,25 @@ class TelegramBotMessageRepository extends DefaultRepository
 
             return $model;
         });
+    }
+
+
+    /**
+     * Возвращает последнее отправленное сообщение от бота
+     *
+     * @param TelegramBotOutSendMessageDto $dto
+     * @return TelegramBotMessage|null
+     */
+    public function getLastMessageOut(TelegramBotOutSendMessageDto $dto): ?TelegramBotMessage
+    {
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
+                ->ofType(TelegramBotMessageTypeEnum::Outgoing)
+                ->latest()
+                ->first()
+        );
     }
 }

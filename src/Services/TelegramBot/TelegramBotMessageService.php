@@ -7,6 +7,8 @@ namespace Atlcom\LaravelHelper\Services\TelegramBot;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Events\TelegramBotMessageEvent;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
@@ -44,5 +46,28 @@ class TelegramBotMessageService extends DefaultService
         event(new TelegramBotMessageEvent($model));
 
         return $model;
+    }
+
+
+    /**
+     * Проверяет отправляемое сообщение на дубликат последнего сообщения от бота
+     * Проверка на зацикливание ответа
+     *
+     * @param TelegramBotOutDto $dto
+     * @return bool
+     */
+    public function isDuplicateLastMessage(TelegramBotOutDto $dto): bool
+    {
+        if ($dto instanceof TelegramBotOutSendMessageDto) {
+            $lastMessage = $this->telegramBotMessageRepository->getLastMessageOut($dto);
+
+            return $lastMessage
+                && ($lastMessage->slug === $dto->slug)
+                && ($lastMessage->text === $dto->text)
+                && !array_diff_assoc($lastMessage->info['buttons'] ?? [], $dto->buttons->toArrayRecursive());
+        }
+
+        return false;
+
     }
 }
