@@ -121,9 +121,12 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
         $this->buttons ??= collect([]);
         !($buttons instanceof TelegramBotOutDataButtonCallbackDto) ?: $buttons = [$buttons];
         !($buttons instanceof TelegramBotOutDataButtonUrlDto) ?: $buttons = [$buttons];
-        !isset($button['text']) ?: $buttons = [$buttons];
+        !isset($buttons['text']) ?: $buttons = [$buttons];
 
-        $this->buttons->push($this->prepareButtons($buttons));
+        $buttons = $this->prepareButtons($buttons);
+        foreach ($buttons as $button) {
+            $this->buttons->push(is_array($button) ? $button : [$button]);
+        }
 
         return $this;
     }
@@ -158,7 +161,9 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
             fn ($button) => match (true) {
                 $button instanceof TelegramBotOutDataButtonCallbackDto => $button,
                 $button instanceof TelegramBotOutDataButtonUrlDto => $button,
-                is_array($button) && is_array(Hlp::arrayFirst($button)) => $this->prepareButtons($button),
+
+                is_array($button) && !is_scalar(Hlp::arrayFirst($button)) => $this->prepareButtons($button),
+
                 is_array($button) && isset($button['text']) && isset($button['callback'])
                 => TelegramBotOutDataButtonCallbackDto::create($button),
                 is_array($button) && isset($button['text']) && isset($button['callbackData'])

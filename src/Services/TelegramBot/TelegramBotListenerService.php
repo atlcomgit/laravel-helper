@@ -11,9 +11,13 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotUserDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Events\TelegramBotMessageEvent;
+use Atlcom\LaravelHelper\Facades\Lh;
+use Throwable;
 
 /**
  * @internal
@@ -32,33 +36,42 @@ class TelegramBotListenerService extends DefaultService
      */
     public function incoming(TelegramBotInDto $dto): void
     {
-        $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->message->chat))
-            ->save();
+        try {
+            $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->message->chat))
+                ->save();
 
-        $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
-            ->save();
+            $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
+                ->save();
 
-        $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [
-            'type' => TelegramBotMessageTypeEnum::Incoming,
-            'status' => match (true) {
-                (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
-                (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
+            $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [
+                'type' => TelegramBotMessageTypeEnum::Incoming,
+                'status' => match (true) {
+                    (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
+                    (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
 
-                default => TelegramBotMessageStatusEnum::New ,
-            },
-            'externalUpdateId' => $dto->updateId,
-            'telegramBotChatId' => $telegramBotChat->id,
-            'telegramBotUserId' => $telegramBotUser->id,
-            'telegramBotMessageId' => $dto->message->replyToMessage
-                ? $this->telegramBotMessageService->getByExternalMessageId($dto->message->replyToMessage)?->id
-                : null,
-            'info' => [
-                ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
-                ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
-            ],
-        ]))->save();
+                    default => TelegramBotMessageStatusEnum::New ,
+                },
+                'externalUpdateId' => $dto->updateId,
+                'telegramBotChatId' => $telegramBotChat->id,
+                'telegramBotUserId' => $telegramBotUser->id,
+                'telegramBotMessageId' => $dto->message->replyToMessage
+                    ? $this->telegramBotMessageService->getByExternalMessageId($dto->message->replyToMessage)?->id
+                    : null,
+                'info' => [
+                    ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
+                    ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
+                ],
+            ]))->save();
 
-        event(new TelegramBotMessageEvent($telegramBotMessage));
+            event(new TelegramBotMessageEvent($telegramBotMessage));
+
+        } catch (Throwable $exception) {
+            telegram([
+                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие' => 'Ошибка входящего сообщения бота телеграм',
+                'Сообщение' => $dto,
+            ], TelegramTypeEnum::Error);
+        }
     }
 
 
@@ -70,31 +83,40 @@ class TelegramBotListenerService extends DefaultService
      */
     public function outgoing(TelegramBotOutDto $dto): void
     {
-        if (!$dto->response->status) {
-            return;
+        try {
+            if (!$dto->response->status) {
+                return;
+            }
+
+            $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->response->message->chat))
+                ->save();
+
+            $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->response->message->from))
+                ->save();
+
+            $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
+                'type' => TelegramBotMessageTypeEnum::Outgoing,
+                'status' => TelegramBotMessageStatusEnum::New ,
+                'slug' => $dto instanceof TelegramBotOutSendMessageDto ? $dto->slug : null,
+                'externalUpdateId' => null,
+                'telegramBotChatId' => $telegramBotChat->id,
+                'telegramBotUserId' => $telegramBotUser->id,
+                'telegramBotMessageId' => $dto->response->message->replyToMessage
+                    ? $this->telegramBotMessageService->getByExternalMessageId($dto->response->message->replyToMessage)?->id
+                    : null,
+                'info' => [
+                    ...($dto->response->message?->replyMarkup?->buttons ? ['buttons' => $dto->response->message->replyMarkup->buttons] : []),
+                ],
+            ]))->save();
+
+            event(new TelegramBotMessageEvent($telegramBotMessage));
+
+        } catch (Throwable $exception) {
+            telegram([
+                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие' => 'Ошибка исходящего сообщения бота телеграм',
+                'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
+            ], TelegramTypeEnum::Error);
         }
-
-        $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->response->message->chat))
-            ->save();
-
-        $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->response->message->from))
-            ->save();
-
-        $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
-            'type' => TelegramBotMessageTypeEnum::Outgoing,
-            'status' => TelegramBotMessageStatusEnum::New ,
-            'slug' => $dto instanceof TelegramBotOutSendMessageDto ? $dto->slug : null,
-            'externalUpdateId' => null,
-            'telegramBotChatId' => $telegramBotChat->id,
-            'telegramBotUserId' => $telegramBotUser->id,
-            'telegramBotMessageId' => $dto->response->message->replyToMessage
-                ? $this->telegramBotMessageService->getByExternalMessageId($dto->response->message->replyToMessage)?->id
-                : null,
-            'info' => [
-                ...($dto->response->message?->replyMarkup?->buttons ? ['buttons' => $dto->response->message->replyMarkup->buttons] : []),
-            ],
-        ]))->save();
-
-        event(new TelegramBotMessageEvent($telegramBotMessage));
     }
 }

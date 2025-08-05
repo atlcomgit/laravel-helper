@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
+use Throwable;
 
 /**
  * @internal
@@ -33,16 +34,28 @@ class TelegramBotService extends DefaultService
      */
     public function send(TelegramBotOutDto $dto): void
     {
-        $dto->response = $this->telegramBotMessageService->isDuplicateLastMessage($dto)
-            ? TelegramBotOutResponseDto::create(status: false, description: 'Повторное сообщение')
-            : match ($dto::class) {
-                TelegramBotOutSendMessageDto::class => $this->sendMessage($dto),
-                TelegramBotOutSetWebhookDto::class => $this->setWebhook($dto),
+        try {
+            $dto->response = $this->telegramBotMessageService->isDuplicateLastMessage($dto)
+                ? TelegramBotOutResponseDto::create(
+                    status: false,
+                    description: 'Повторное сообщение',
+                )
+                : match ($dto::class) {
+                    TelegramBotOutSendMessageDto::class => $this->sendMessage($dto),
+                    TelegramBotOutSetWebhookDto::class => $this->setWebhook($dto),
 
-                default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
-            };
+                    default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
+                };
 
-        event(new TelegramBotEvent($dto));
+        } catch (Throwable $exception) {
+            $dto->response = TelegramBotOutResponseDto::create(
+                status: false,
+                description: $exception->getMessage(),
+            );
+
+        } finally {
+            event(new TelegramBotEvent($dto));
+        }
     }
 
 

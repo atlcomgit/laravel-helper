@@ -107,19 +107,19 @@ class TelegramBotMessageRepository extends DefaultRepository
 
 
     /**
-     * Возвращает последнее отправленное сообщение от бота
+     * Возвращает последнее сообщение бота
      *
      * @param TelegramBotOutSendMessageDto $dto
      * @return TelegramBotMessage|null
      */
-    public function getLastMessageOut(TelegramBotOutSendMessageDto $dto): ?TelegramBotMessage
+    public function getLastMessage(TelegramBotOutSendMessageDto $dto): ?TelegramBotMessage
     {
         return $this->withoutTelescope(
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
-                ->ofType(TelegramBotMessageTypeEnum::Outgoing)
+                // ->ofType(TelegramBotMessageTypeEnum::Outgoing) not need
                 ->latest()
                 ->first()
         );

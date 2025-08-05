@@ -9,6 +9,10 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
 
@@ -57,13 +61,19 @@ class TelegramBotMessageService extends DefaultService
     public function isDuplicateLastMessage(TelegramBotOutDto $dto): bool
     {
         if ($dto instanceof TelegramBotOutSendMessageDto) {
-            $lastMessage = $this->telegramBotMessageRepository->getLastMessageOut($dto);
-
-            return true;
-            return $lastMessage
-                && ($lastMessage->slug === $dto->slug)
-                && ($lastMessage->text === $dto->text)
+            $lastMessage = $this->telegramBotMessageRepository->getLastMessage($dto);
+            $result = $lastMessage
+                && ($lastMessage->type === TelegramBotMessageTypeEnum::Outgoing)
+                && ($lastMessage->slug === $dto->slug || strip_tags($lastMessage->text) === strip_tags($dto->text))
                 && !array_diff_assoc($lastMessage->info['buttons'] ?? [], $dto->buttons->toArrayRecursive());
+
+            !$result ?: telegram([
+                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие' => 'Повторное сообщение бота телеграм',
+                'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
+            ], TelegramTypeEnum::Warning);
+
+            return $result;
         }
 
         return false;
