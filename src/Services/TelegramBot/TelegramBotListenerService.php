@@ -48,6 +48,7 @@ class TelegramBotListenerService extends DefaultService
                 'status' => match (true) {
                     (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
                     (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
+                    (bool)$dto->message->editDate => TelegramBotMessageStatusEnum::Update,
 
                     default => TelegramBotMessageStatusEnum::New ,
                 },

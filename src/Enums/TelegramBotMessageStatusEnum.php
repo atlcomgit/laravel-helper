@@ -15,6 +15,7 @@ enum TelegramBotMessageStatusEnum: string
     case New = 'new';
     case Reply = 'reply';
     case Callback = 'callback';
+    case Update = 'update';
     case Delete = 'delete';
 
 
@@ -41,6 +42,7 @@ enum TelegramBotMessageStatusEnum: string
             self::New => 'Новое сообщение',
             self::Reply => 'Ответ на сообщение',
             self::Callback => 'Действие на сообщение',
+            self::Update => 'Редактирование сообщения',
             self::Delete => 'Удаление сообщения',
 
             default => null,
