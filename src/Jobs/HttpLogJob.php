@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования http запросов через очередь
  */
 class HttpLogJob extends DefaultJob

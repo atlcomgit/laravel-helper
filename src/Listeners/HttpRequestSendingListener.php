@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 
 /**
+ * @internal
  * @see \Illuminate\Http\Client\Events\RequestSending
  */
 class HttpRequestSendingListener extends DefaultListener

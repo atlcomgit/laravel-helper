@@ -28,6 +28,7 @@ use Illuminate\Http\Client\Response as ResponseOut;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
+ * @internal
  * Сервис кеширования http запросов
  */
 class HttpCacheService extends DefaultService

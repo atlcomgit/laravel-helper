@@ -20,6 +20,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 
 /**
+ * @internal
  * Сервис логирования очередей
  */
 class QueueLogService extends DefaultService

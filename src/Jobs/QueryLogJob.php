@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\QueryLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования query запросов через очередь
  */
 class QueryLogJob extends DefaultJob

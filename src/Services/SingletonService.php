@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use ReflectionClass;
 
 /**
+ * @internal
  * Сервис регистрации классов singleton
  */
 class SingletonService

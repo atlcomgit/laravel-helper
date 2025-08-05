@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ViewLog;
 
 /**
+ * @internal
  * Репозиторий логирования query запросов
  */
 class ViewLogRepository extends DefaultRepository

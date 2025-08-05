@@ -8,7 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultEvent;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 
 /**
- * Событие сохранения сообщения бота телеграм
+ * Событие сохранения сообщения бота телеграм в БД
  */
 class TelegramBotMessageEvent extends DefaultEvent
 {

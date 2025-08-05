@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 /**
+ * @internal
  * Dto отладочной информации исключений
  */
 class ExceptionDebugDto extends Dto

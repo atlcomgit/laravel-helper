@@ -14,6 +14,7 @@ use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
 
 /**
+ * @internal
  * Сервис бота telegram
  */
 class TelegramBotService extends DefaultService

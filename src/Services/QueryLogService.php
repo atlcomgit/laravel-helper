@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\QueryLogRepository;
 
 /**
+ * @internal
  * Сервис логирования query запросов
  */
 class QueryLogService extends DefaultService

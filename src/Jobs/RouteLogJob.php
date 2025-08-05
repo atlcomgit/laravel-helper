@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\RouteLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования роутов через очередь
  */
 class RouteLogJob extends DefaultJob

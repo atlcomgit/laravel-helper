@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ConsoleLogRepository;
 
 /**
+ * @internal
  * Сервис логирования консольных команд
  */
 class ConsoleLogService extends DefaultService

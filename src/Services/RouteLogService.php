@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /**
+ * @internal
  * Сервис логирования роутов
  */
 class RouteLogService extends DefaultService

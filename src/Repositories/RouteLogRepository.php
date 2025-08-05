@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
+ * @internal
  * Репозиторий логирования роутов
  */
 class RouteLogRepository extends DefaultRepository

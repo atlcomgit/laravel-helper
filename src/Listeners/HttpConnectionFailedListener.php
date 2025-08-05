@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 
 /**
+ * @internal
  * @see \Illuminate\Http\Client\Events\ConnectionFailed
  */
 class HttpConnectionFailedListener extends DefaultListener

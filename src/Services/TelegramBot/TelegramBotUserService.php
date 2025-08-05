@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotUserRepository;
 
 /**
+ * @internal
  * Сервис пользователя телеграм бота
  */
 class TelegramBotUserService extends DefaultService

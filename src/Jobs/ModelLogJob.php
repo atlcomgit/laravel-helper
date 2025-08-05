@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования моделей через очередь
  */
 class ModelLogJob extends DefaultJob

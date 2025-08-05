@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования профилирования методов класса через очередь
  */
 class ProfilerLogJob extends DefaultJob

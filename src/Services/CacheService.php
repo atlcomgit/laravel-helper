@@ -23,6 +23,7 @@ use SplFileInfo;
 use Throwable;
 
 /**
+ * @internal
  * Сервис кеширования
  */
 class CacheService extends DefaultService

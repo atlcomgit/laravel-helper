@@ -7,6 +7,10 @@ namespace Atlcom\LaravelHelper\Observers;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @internal
+ * Наблюдатель за моделями
+ */
 class ModelLogObserver
 {
     public function __construct(private ModelLogService $modelLogService) {}

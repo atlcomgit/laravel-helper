@@ -9,11 +9,11 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
-use Atlcom\LaravelHelper\Events\TelegramBotMessageEvent;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
 
 /**
+ * @internal
  * Сервис сообщения телеграм бота
  */
 class TelegramBotMessageService extends DefaultService
@@ -43,8 +43,6 @@ class TelegramBotMessageService extends DefaultService
     {
         $model = $this->telegramBotMessageRepository->updateOrCreate($dto);
 
-        event(new TelegramBotMessageEvent($model));
-
         return $model;
     }
 
@@ -61,6 +59,7 @@ class TelegramBotMessageService extends DefaultService
         if ($dto instanceof TelegramBotOutSendMessageDto) {
             $lastMessage = $this->telegramBotMessageRepository->getLastMessageOut($dto);
 
+            return true;
             return $lastMessage
                 && ($lastMessage->slug === $dto->slug)
                 && ($lastMessage->text === $dto->text)

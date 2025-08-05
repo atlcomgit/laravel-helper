@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
 use Carbon\Carbon;
 
 /**
+ * @internal
  * Dto сообщения в телеграм
  */
 class TelegramLogDto extends Dto

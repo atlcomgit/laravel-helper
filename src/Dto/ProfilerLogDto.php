@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Throwable;
 
 /**
+ * @internal
  * Dto профилирования методов класса
  */
 class ProfilerLogDto extends DefaultDto

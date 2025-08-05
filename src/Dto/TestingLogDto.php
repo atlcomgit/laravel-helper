@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Throwable;
 
 /**
+ * @internal
  * Dto тестирования
  */
 class TestingLogDto extends DefaultDto

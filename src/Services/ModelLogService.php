@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
 /**
+ * @internal
  * Сервис логирования моделей
  */
 class ModelLogService extends DefaultService

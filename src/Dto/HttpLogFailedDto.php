@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
+ * @internal
  * Dto ошибочного лога http запроса
  */
 class HttpLogFailedDto extends Dto

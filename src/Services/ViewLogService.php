@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ViewLogRepository;
 
 /**
+ * @internal
  * Сервис логирования рендеринга blade шаблонов
  */
 class ViewLogService extends DefaultService

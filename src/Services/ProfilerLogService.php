@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ProfilerLogRepository;
 
 /**
+ * @internal
  * Сервис логирования профилирования методов класса
  */
 class ProfilerLogService extends DefaultService

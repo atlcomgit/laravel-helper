@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Models\QueryLog;
 use Carbon\Carbon;
 
 /**
+ * @internal
  * Dto лога query запросов
  */
 class QueryLogDto extends Dto

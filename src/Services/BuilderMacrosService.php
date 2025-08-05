@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
+ * @internal
  * Сервис регистрации builder макросов
  */
 class BuilderMacrosService extends DefaultService

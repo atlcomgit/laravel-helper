@@ -16,6 +16,7 @@ use Psr\Log\LogLevel;
 use Throwable;
 
 /**
+ * @internal
  * Сервис отправки сообщений в telegram
  */
 final class TelegramLogService extends DefaultService

@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Jobs\RouteLogJob;
 use Atlcom\LaravelHelper\Models\RouteLog;
 
 /**
+ * @internal
  * Dto лога роута
  */
 class RouteLogDto extends Dto

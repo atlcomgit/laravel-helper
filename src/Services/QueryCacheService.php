@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
+ * @internal
  * Сервис кеширования query запросов
  */
 class QueryCacheService extends DefaultService

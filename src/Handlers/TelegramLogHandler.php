@@ -18,6 +18,7 @@ use Monolog\LogRecord;
 use Psr\Log\LogLevel;
 
 /**
+ * @internal
  * Обработчик логирования сообщений в телеграм
  */
 class TelegramLogHandler extends AbstractProcessingHandler

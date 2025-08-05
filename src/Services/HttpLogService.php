@@ -19,6 +19,7 @@ use Atlcom\LaravelHelper\Repositories\HttpLogRepository;
 use BackedEnum;
 
 /**
+ * @internal
  * Сервис логирования http запросов
  */
 class HttpLogService extends DefaultService

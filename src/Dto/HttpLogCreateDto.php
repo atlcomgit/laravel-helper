@@ -15,6 +15,7 @@ use Atlcom\LaravelHelper\Services\HttpLogService;
 use Illuminate\Support\Str;
 
 /**
+ * @internal
  * Dto создания лога http запроса
  */
 class HttpLogCreateDto extends Dto

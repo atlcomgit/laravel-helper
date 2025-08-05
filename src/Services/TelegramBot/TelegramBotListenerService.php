@@ -13,8 +13,10 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Events\TelegramBotMessageEvent;
 
 /**
+ * @internal
  * Сервис слушателя событий телеграм бота
  */
 class TelegramBotListenerService extends DefaultService
@@ -36,7 +38,7 @@ class TelegramBotListenerService extends DefaultService
         $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
             ->save();
 
-        ($chatDto = TelegramBotMessageDto::create($dto->message, [
+        $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [
             'type' => TelegramBotMessageTypeEnum::Incoming,
             'status' => match (true) {
                 (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
@@ -55,6 +57,8 @@ class TelegramBotListenerService extends DefaultService
                 ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
             ],
         ]))->save();
+
+        event(new TelegramBotMessageEvent($telegramBotMessage));
     }
 
 
@@ -66,13 +70,17 @@ class TelegramBotListenerService extends DefaultService
      */
     public function outgoing(TelegramBotOutDto $dto): void
     {
+        if (!$dto->response->status) {
+            return;
+        }
+
         $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->response->message->chat))
             ->save();
 
         $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->response->message->from))
             ->save();
 
-        ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
+        $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
             'type' => TelegramBotMessageTypeEnum::Outgoing,
             'status' => TelegramBotMessageStatusEnum::New ,
             'slug' => $dto instanceof TelegramBotOutSendMessageDto ? $dto->slug : null,
@@ -86,5 +94,7 @@ class TelegramBotListenerService extends DefaultService
                 ...($dto->response->message?->replyMarkup?->buttons ? ['buttons' => $dto->response->message->replyMarkup->buttons] : []),
             ],
         ]))->save();
+
+        event(new TelegramBotMessageEvent($telegramBotMessage));
     }
 }

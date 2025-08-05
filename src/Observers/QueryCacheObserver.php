@@ -7,6 +7,10 @@ namespace Atlcom\LaravelHelper\Observers;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @internal
+ * Наблюдатель за кешем моделей
+ */
 class QueryCacheObserver
 {
     public function __construct(private QueryCacheService $queryCacheService) {}

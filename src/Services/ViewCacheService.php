@@ -15,6 +15,7 @@ use Atlcom\LaravelHelper\Events\ViewCacheEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 
 /**
+ * @internal
  * Сервис кеширования рендеринга blade шаблонов
  */
 class ViewCacheService extends DefaultService

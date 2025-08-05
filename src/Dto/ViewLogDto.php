@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Models\ViewLog;
 use Carbon\Carbon;
 
 /**
+ * @internal
  * Dto лога рендеринга blade шаблонов
  */
 class ViewLogDto extends Dto

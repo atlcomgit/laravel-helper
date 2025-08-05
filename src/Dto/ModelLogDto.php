@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Models\ModelLog;
 use Carbon\Carbon;
 
 /**
+ * @internal
  * Dto лога модели
  */
 class ModelLogDto extends DefaultDto

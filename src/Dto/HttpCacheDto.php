@@ -13,6 +13,7 @@ use Illuminate\Http\Client\Response as ResponseOut;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
+ * @internal
  * Dto кеша http запроса
  */
 class HttpCacheDto extends DefaultDto

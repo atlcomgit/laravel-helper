@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\QueueLog;
 
 /**
+ * @internal
  * Репозиторий логирования очередей
  */
 class QueueLogRepository extends DefaultRepository

@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 
 /**
+ * @internal
  * Dto лога консольной команды
  * @method ConsoleLogDto output(?string $value)
  * @method ConsoleLogDto info(?array $value)

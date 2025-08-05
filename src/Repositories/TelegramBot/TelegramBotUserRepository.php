@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotUser;
 
 /**
+ * @internal
  * Репозиторий пользователя телеграм бота
  */
 class TelegramBotUserRepository extends DefaultRepository

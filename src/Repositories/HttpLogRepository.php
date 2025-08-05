@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\HttpLog;
 
 /**
+ * @internal
  * Репозиторий логирования http запросов
  */
 class HttpLogRepository extends DefaultRepository

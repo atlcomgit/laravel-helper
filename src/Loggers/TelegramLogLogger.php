@@ -9,6 +9,7 @@ use Monolog\Logger;
 use Atlcom\LaravelHelper\Handlers\TelegramLogHandler;
 
 /**
+ * @internal
  * Связь логирования с обработчиком
  */
 class TelegramLogLogger extends DefaultLogger

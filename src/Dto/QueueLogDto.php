@@ -15,6 +15,7 @@ use DateInterval;
 use DateTimeInterface;
 
 /**
+ * @internal
  * Dto лога очереди
  */
 class QueueLogDto extends Dto

@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 
 /**
+ * @internal
  * Dto кеша рендеринга blade шаблона
  */
 class ViewCacheDto extends DefaultDto

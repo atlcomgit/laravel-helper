@@ -33,6 +33,7 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
 /**
+ * @internal
  * Dto исключений
  */
 class ExceptionDto extends Dto

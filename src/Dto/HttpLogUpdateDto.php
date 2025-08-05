@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
+ * @internal
  * Dto обновления лога http запроса
  */
 class HttpLogUpdateDto extends Dto

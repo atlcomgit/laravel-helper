@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * @internal
  * Репозиторий логирования консольных команд
  */
 class ConsoleLogRepository extends DefaultRepository

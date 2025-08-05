@@ -14,6 +14,7 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotListenerService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
+ * @internal
  * Слушатель события входящих/исходящих сообщений телеграм бота
  * 
  * События:

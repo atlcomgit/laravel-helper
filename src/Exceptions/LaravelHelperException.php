@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Exceptions;
 use Atlcom\LaravelHelper\Defaults\DefaultException;
 
 /**
+ * @internal
  * Исключение пакета LaravelHelper
  */
 class LaravelHelperException extends DefaultException

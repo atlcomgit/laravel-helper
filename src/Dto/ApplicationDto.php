@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Carbon\Carbon;
 
 /**
+ * @internal
  * Dto приложения
  */
 class ApplicationDto extends DefaultDto

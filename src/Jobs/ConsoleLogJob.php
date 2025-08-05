@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования консольных команд через очередь
  */
 class ConsoleLogJob extends DefaultJob

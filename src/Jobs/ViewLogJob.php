@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ViewLogService;
 
 /**
+ * @internal
  * Задача сохранения логирования рендеринга blade шаблонов через очередь
  */
 class ViewLogJob extends DefaultJob

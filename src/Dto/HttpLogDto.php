@@ -23,6 +23,7 @@ use Illuminate\Http\Client\Response as ResponseOut;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
+ * @internal
  * Dto лога http запроса
  */
 class HttpLogDto extends Dto

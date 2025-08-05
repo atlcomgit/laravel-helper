@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInCallbackQueryDto;
 
 /**
+ * @internal
  * Dto бота telegram
  */
 class TelegramBotWebhookResponseDto extends DefaultDto

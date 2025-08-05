@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\TelegramLogService;
 
 /**
+ * @internal
  * Задача отправки сообщений в телеграм через очередь
  */
 class TelegramLogJob extends DefaultJob
