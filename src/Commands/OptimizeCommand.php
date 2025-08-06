@@ -19,7 +19,6 @@ use Atlcom\LaravelHelper\Services\QueueLogService;
 use Atlcom\LaravelHelper\Services\SingletonService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -28,7 +27,7 @@ use Illuminate\Support\Facades\Schema;
 class OptimizeCommand extends DefaultCommand
 {
     protected $signature = 'lh:optimize
-        {--schedule= : Запуск команды по расписанию }
+        {--schedule : Запуск команды по расписанию }
     ';
     protected $description = 'Оптимизация всех логов';
     protected $isolated = true;
@@ -64,6 +63,7 @@ class OptimizeCommand extends DefaultCommand
 
         $isSchedule = $this->hasOption('schedule') && Hlp::castToBool($this->option('schedule'));
 
+        // Очистка таблиц логов
         if (Lh::config(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
             $this->telegramComment = ['Env' => config('app.env')];
             $this->withTelegramLog = isLocal() || isProd();
@@ -93,6 +93,7 @@ class OptimizeCommand extends DefaultCommand
             $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
         }
 
+        // Очистка кеша
         if (Lh::config(ConfigEnum::Optimize, 'cache_clear.enabled')) {
             if (
                 Lh::config(ConfigEnum::HttpCache, 'enabled')
@@ -105,7 +106,8 @@ class OptimizeCommand extends DefaultCommand
             }
         }
 
-        if ($singletons = SingletonService::optimize()) {
+        // Запуск кеширования классов singleton
+        if (!$isSchedule && ($singletons = SingletonService::optimize())) {
             foreach ($singletons as $singleton) {
                 $this->outputEol($singleton, 'fg=green');
             }
