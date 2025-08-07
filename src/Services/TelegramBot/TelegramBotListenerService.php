@@ -114,7 +114,16 @@ class TelegramBotListenerService extends DefaultService
                     default => $dto->previousMessageId,
                 },
                 'info' => [
-                    ...($dto->response->message?->replyMarkup?->buttons ? ['buttons' => $dto->response->message->replyMarkup->buttons] : []),
+                    ...(
+                        $dto->response->message?->replyMarkup?->buttons
+                        ? ['buttons' => $dto->response->message->replyMarkup->buttons]
+                        : []
+                    ),
+                    ...(
+                        $dto->response->message?->replyMarkup?->keyboards
+                        ? ['keyboards' => $dto->response->message->replyMarkup->keyboards]
+                        : []
+                    ),
                 ],
             ]))->save();
 

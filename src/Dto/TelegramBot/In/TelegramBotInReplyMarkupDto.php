@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 class TelegramBotInReplyMarkupDto extends DefaultDto
 {
     public ?array $buttons;
+    public ?array $keyboards;
 
 
     /**
@@ -18,6 +19,7 @@ class TelegramBotInReplyMarkupDto extends DefaultDto
     {
         return [
             'buttons' => 'array',
+            'keyboards' => 'array',
         ];
     }
 
@@ -29,6 +31,7 @@ class TelegramBotInReplyMarkupDto extends DefaultDto
     {
         return [
             'buttons' => 'inline_keyboard',
+            'keyboards' => 'keyboard',
         ];
     }
 }
