@@ -13,11 +13,13 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotDto;
 
 /**
  * Dto бота telegram
+ * @method previousMessageId(?int $previousMessageId)
  */
 class TelegramBotOutDto extends TelegramBotDto
 {
     public string $token;
     public string $parseMode;
+    public ?int $previousMessageId;
     public ?TelegramBotOutResponseDto $response;
 
 

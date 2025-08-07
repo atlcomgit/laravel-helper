@@ -46,6 +46,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method Relation|TelegramBotUser telegramBotUser()
  * @property-read TelegramBotMessage $telegramBotMessage
  * @method Relation|TelegramBotMessage telegramBotMessage()
+ * @property-read TelegramBotMessage $previousMessage
+ * @method Relation|TelegramBotMessage previousMessage()
+ * 
+ * @method static|Builder ofUuid(string $uuid)
+ * @method static|Builder OfType(TelegramBotMessageTypeEnum $type)
+ * @method static|Builder ofStatus(TelegramBotMessageStatusEnum $status)
+ * @method static|Builder ofExternalMessageId(int $externalMessageId)
+ * @method static|Builder ofSlug(?string $slug)
  * 
  * @mixin \Eloquent
  */
@@ -137,6 +145,17 @@ class TelegramBotMessage extends DefaultModel
     public function telegramBotMessage(): Relation
     {
         return $this->belongsTo(TelegramBotMessage::class, 'telegram_bot_message_id');
+    }
+
+
+    /**
+     * Предыдущее сообщение
+     *
+     * @return Relation
+     */
+    public function previousMessage(): Relation
+    {
+        return $this->telegramBotMessage();
     }
 
 

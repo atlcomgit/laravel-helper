@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutMenuButtonDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
@@ -38,6 +42,18 @@ class TelegramBotMessageService extends DefaultService
 
 
     /**
+     * Возвращает последнее сообщение от бота
+     *
+     * @param TelegramBotInMessageDto $dto
+     * @return TelegramBotMessage|null
+     */
+    public function getPreviousMessageOutgoing(TelegramBotInMessageDto $dto): ?TelegramBotMessage
+    {
+        return $this->telegramBotMessageRepository->getPreviousMessageOutgoing($dto);
+    }
+
+
+    /**
      * Сохраняет сообщение телеграм бота
      *
      * @param TelegramBotMessageDto $dto
@@ -61,13 +77,18 @@ class TelegramBotMessageService extends DefaultService
     public function isDuplicateLastMessage(TelegramBotOutDto $dto): bool
     {
         if ($dto instanceof TelegramBotOutSendMessageDto) {
-            $lastMessage = $this->telegramBotMessageRepository->getLastMessage($dto);
-            $result = $lastMessage
-                && ($lastMessage->type === TelegramBotMessageTypeEnum::Outgoing)
-                && ($lastMessage->slug === $dto->slug || strip_tags($lastMessage->text) === strip_tags($dto->text))
-                && !array_diff_assoc($lastMessage->info['buttons'] ?? [], $dto->buttons->toArrayRecursive());
+            $lastMessageIn = $this->telegramBotMessageRepository->getById($dto->previousMessageId);
+            $lastMessageOut = $this->telegramBotMessageRepository->getLastMessageOutgoing($dto);
+            $result = $lastMessageOut
+                && !($lastMessageIn->text === '/start')
+                && ($lastMessageOut->type === TelegramBotMessageTypeEnum::Outgoing)
+                && (
+                    $lastMessageOut->slug === $dto->slug
+                    || strip_tags($lastMessageOut->text) === strip_tags($dto->text)
+                )
+                && !array_diff_assoc($lastMessageOut->info['buttons'] ?? [], $dto->buttons->toArrayRecursive());
 
-            !$result ?: telegram([
+            !($result && isLocal()) ?: telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Повторное сообщение бота отменено',
                 'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
@@ -78,5 +99,64 @@ class TelegramBotMessageService extends DefaultService
 
         return false;
 
+    }
+
+
+    /**
+     * Создает массив inline кнопок из dto
+     *
+     * @param array $buttons
+     * @return array
+     */
+    public function prepareButtons(array $buttons): array
+    {
+        $buttons = array_map(
+            fn ($button) => match (true) {
+                $button instanceof TelegramBotOutDataButtonCallbackDto => $button,
+                $button instanceof TelegramBotOutDataButtonUrlDto => $button,
+
+                is_array($button) && !is_scalar(Hlp::arrayFirst($button)) => $this->prepareButtons($button),
+
+                is_array($button) && isset($button['text']) && isset($button['callback'])
+                => TelegramBotOutDataButtonCallbackDto::create($button),
+                is_array($button) && isset($button['text']) && isset($button['callbackData'])
+                => TelegramBotOutDataButtonCallbackDto::create($button),
+                is_array($button) && isset($button['text']) && isset($button['callback_data'])
+                => TelegramBotOutDataButtonCallbackDto::create($button),
+                is_array($button) && isset($button['text']) && isset($button['url'])
+                => TelegramBotOutDataButtonUrlDto::create($button),
+
+                default => null,
+            },
+            $buttons,
+        );
+
+        return array_filter($buttons);
+    }
+
+
+    /**
+     * Создает массив keyboard кнопок из dto
+     *
+     * @param array $keyboards
+     * @return array
+     */
+    public function prepareKeyboards(array $keyboards): array
+    {
+        $keyboards = array_map(
+            fn ($keyboard) => match (true) {
+                $keyboard instanceof TelegramBotOutMenuButtonDto => $keyboard,
+
+                is_array($keyboard) && !is_scalar(Hlp::arrayFirst($keyboard)) => $this->prepareKeyboards($keyboard),
+
+                is_array($keyboard) && isset($keyboard['text'])
+                => TelegramBotOutMenuButtonDto::create($keyboard),
+
+                default => null,
+            },
+            $keyboards,
+        );
+
+        return array_filter($keyboards);
     }
 }

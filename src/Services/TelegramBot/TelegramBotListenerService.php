@@ -55,9 +55,14 @@ class TelegramBotListenerService extends DefaultService
                 'externalUpdateId' => $dto->updateId,
                 'telegramBotChatId' => $telegramBotChat->id,
                 'telegramBotUserId' => $telegramBotUser->id,
-                'telegramBotMessageId' => $dto->message->replyToMessage
-                    ? $this->telegramBotMessageService->getByExternalMessageId($dto->message->replyToMessage)?->id
-                    : null,
+                'telegramBotMessageId' => match (true) {
+                    (bool)$dto->message->replyToMessage => $this->telegramBotMessageService
+                        ->getByExternalMessageId($dto->message->replyToMessage)?->id,
+                    (bool)$dto->callbackQuery => $this->telegramBotMessageService
+                        ->getByExternalMessageId($dto->message)?->id,
+
+                    default => $this->telegramBotMessageService->getPreviousMessageOutgoing($dto->message)?->id,
+                },
                 'info' => [
                     ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
                     ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
@@ -102,9 +107,12 @@ class TelegramBotListenerService extends DefaultService
                 'externalUpdateId' => null,
                 'telegramBotChatId' => $telegramBotChat->id,
                 'telegramBotUserId' => $telegramBotUser->id,
-                'telegramBotMessageId' => $dto->response->message->replyToMessage
-                    ? $this->telegramBotMessageService->getByExternalMessageId($dto->response->message->replyToMessage)?->id
-                    : null,
+                'telegramBotMessageId' => match (true) {
+                    (bool)$dto->response->message->replyToMessage => $this->telegramBotMessageService
+                        ->getByExternalMessageId($dto->response->message->replyToMessage)?->id,
+
+                    default => $dto->previousMessageId,
+                },
                 'info' => [
                     ...($dto->response->message?->replyMarkup?->buttons ? ['buttons' => $dto->response->message->replyMarkup->buttons] : []),
                 ],

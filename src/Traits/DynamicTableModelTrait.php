@@ -79,7 +79,7 @@ trait DynamicTableModelTrait
      * Возвращает конструктор запроса
      * @see \Illuminate\Database\Eloquent\Model::query()
      *
-     * @return \Illuminate\Database\Eloquent\Builder<static>
+     * @return \Illuminate\Database\Eloquent\Builder<static>|static
      */
     public static function query()
     {

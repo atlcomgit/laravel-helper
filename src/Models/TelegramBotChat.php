@@ -34,6 +34,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
  * 
+ * @method static|Builder ofUuid(string $uuid)
+ * @method static|Builder ofExternalChatId(int $externalChatId)
+ * 
  * @mixin \Eloquent
  */
 class TelegramBotChat extends DefaultModel

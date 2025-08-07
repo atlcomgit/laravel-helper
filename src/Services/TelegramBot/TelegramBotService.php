@@ -67,8 +67,27 @@ class TelegramBotService extends DefaultService
             text: $dto->text,
             options: [
                 ...(
-                    $dto?->buttons?->isNotEmpty()
-                    ? ['reply_markup' => json_encode(['inline_keyboard' => $dto->buttons->toArrayRecursive()])]
+                    ($dto->buttons?->isNotEmpty() || $dto->keyboards?->isNotEmpty())
+                    ? [
+                        'reply_markup' => json_encode([
+                            ...($dto->removeKeyboard ? ['remove_keyboard' => true] : []),
+                            ...(
+                                $dto->buttons?->isNotEmpty()
+                                ? [
+                                    'inline_keyboard' => $dto->buttons->toArrayRecursive(),
+                                ]
+                                : []
+                            ),
+                            ...(
+                                $dto->keyboards?->isNotEmpty()
+                                ? [
+                                    'keyboard' => $dto->keyboards->toArrayRecursive(),
+                                    'resize_keyboard' => $dto->resizeKeyboard ?? true,
+                                ]
+                                : []
+                            ),
+                        ]),
+                    ]
                     : []
                 ),
             ],
