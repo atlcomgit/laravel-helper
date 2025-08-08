@@ -73,6 +73,8 @@ class TelegramBotService extends DefaultService
                 description: $exception->getMessage(),
             );
 
+            telegram($exception);
+
         } finally {
             event(new TelegramBotEvent($dto));
         }
@@ -133,7 +135,7 @@ class TelegramBotService extends DefaultService
         $options = $this->buildCommandOptions($dto->scope?->type->value, $dto->scope?->chatId, $dto->scope?->userId, $dto->language?->value);
         $json = $this->telegramApiService->setMyCommands(
             botToken: $dto->token,
-            commands: $dto->commands,
+            commands: $dto->commands->toArrayRecursive(),
             options: $options,
         );
 

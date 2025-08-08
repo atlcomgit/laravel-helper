@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotChatDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
@@ -90,7 +91,7 @@ class TelegramBotListenerService extends DefaultService
     public function outgoing(TelegramBotOutDto $dto): void
     {
         try {
-            if (!$dto->response->status) {
+            if (!$dto->response->status || !$dto->response->message) {
                 return;
             }
 
@@ -133,7 +134,8 @@ class TelegramBotListenerService extends DefaultService
             telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Ошибка исходящего сообщения бота телеграм',
-                'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
+                'Сообщение' => $dto,
+                'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);
         }
     }

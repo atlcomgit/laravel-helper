@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Commands;
 
 use Atlcom\LaravelHelper\Defaults\DefaultCommand;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataCommandDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetMyCommandsDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetWebhookDto;
 use Atlcom\LaravelHelper\Services\QueueLogService;
 
@@ -45,6 +47,17 @@ class TelegramBotCommand extends DefaultCommand
                 $dto = TelegramBotOutSetWebhookDto::create()->dispatch();
 
                 $this->telegramComment = "Установлен webhook: {$dto->url}";
+                break;
+
+            case 'setMyCommands':
+                $dto = TelegramBotOutSetMyCommandsDto::create()
+                    ->addCommand(
+                        TelegramBotOutDataCommandDto::create(command: '/start', description: 'Главное меню'),
+                    )
+                    ->dispatch();
+
+                $this->telegramComment = "Установлены команды: "
+                    . implode(', ', $dto->commands->pluck('commands')->toArrayRecursive());
                 break;
 
             default:

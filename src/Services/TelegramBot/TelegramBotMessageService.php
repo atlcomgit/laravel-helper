@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataCommandDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutMenuButtonDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
@@ -158,5 +159,31 @@ class TelegramBotMessageService extends DefaultService
         );
 
         return array_filter($keyboards);
+    }
+
+
+    /**
+     * Создает массив command кнопок из dto
+     *
+     * @param array $commands
+     * @return array
+     */
+    public function prepareCommands(array $commands): array
+    {
+        $commands = array_map(
+            fn ($command) => match (true) {
+                $command instanceof TelegramBotOutDataCommandDto => $command,
+
+                is_array($command) && !is_scalar(Hlp::arrayFirst($command)) => $this->prepareCommands($command),
+
+                is_array($command) && isset($command['command'])
+                => TelegramBotOutDataCommandDto::create($command),
+
+                default => null,
+            },
+            $commands,
+        );
+
+        return array_filter($commands);
     }
 }

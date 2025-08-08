@@ -52,11 +52,18 @@ class TelegramApiService extends DefaultService
      * @param string $method
      * @param array  $params
      * @param array  $files [fieldName => "/path/to/file"]
+     * @param bool   $json
      * @return mixed
      */
-    public function call(string $botToken, string $method, array $params = [], array $files = []): mixed
-    {
+    public function call(
+        string $botToken,
+        string $method,
+        array $params = [],
+        array $files = [],
+        bool $json = false,
+    ): mixed {
         $http = $this->getHttp();
+        !$json ?: $http->asJson();
 
         foreach ($files as $name => $path) {
             if (is_string($path) && is_file($path)) {
@@ -141,10 +148,15 @@ class TelegramApiService extends DefaultService
      */
     public function setMyCommands(string $botToken, array $commands, array $options = []): mixed
     {
-        return $this->call($botToken, 'setMyCommands', [
-            'commands' => $commands,
-            ...$options,
-        ]);
+        return $this->call(
+            botToken: $botToken,
+            method: 'setMyCommands',
+            params: [
+                'commands' => $commands,
+                ...$options,
+            ],
+            json: true,
+        );
     }
 
 
@@ -157,9 +169,12 @@ class TelegramApiService extends DefaultService
      */
     public function unsetMyCommands(string $botToken, array $options = []): mixed
     {
-        return $this->call($botToken, 'deleteMyCommands', [
-            ...$options,
-        ]);
+        return $this->call(
+            botToken: $botToken,
+            method: 'deleteMyCommands',
+            params: [...$options],
+            json: true,
+        );
     }
 
 
