@@ -1,6 +1,7 @@
 # Laravel Helper
 
 Класс помощник для Laravel добавляет функционал во фреймворк:
+
 - Логирование консольных команд
 - Логирование входящих/исходящих http запросов
 - Логирование изменения моделей, в том числе массовое изменение/удаление
@@ -566,6 +567,12 @@ class ExampleTest extends DefaultTest
 {
 }
 ```
+
+<hr style="border:1px solid black">
+
+### Примеры телеграм бота
+
+[Документация TelegramBot](docs/readme_telegram_bot_events.md)
 
 <hr style="border:1px solid black">
 
