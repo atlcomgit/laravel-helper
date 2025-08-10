@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotUserDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotMemberDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
@@ -77,6 +78,7 @@ class TelegramBotListenerService extends DefaultService
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Ошибка входящего сообщения бота телеграм',
                 'Сообщение' => $dto,
+                'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);
         }
     }
@@ -98,13 +100,18 @@ class TelegramBotListenerService extends DefaultService
             $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->response->message->chat))
                 ->save();
 
+            $telegramBotChatInfoStatus = $telegramBotChat->info['status'] ?? null;
+            if ($telegramBotChatInfoStatus === 'kicked') {
+                return;
+            }
+
             $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->response->message->from))
                 ->save();
 
             $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
                 'type' => TelegramBotMessageTypeEnum::Outgoing,
                 'status' => TelegramBotMessageStatusEnum::New ,
-                'slug' => $dto instanceof TelegramBotOutSendMessageDto ? $dto->slug : null,
+                'slug' => property_exists($dto, 'slug') ? $dto->slug : null,
                 'externalUpdateId' => null,
                 'telegramBotChatId' => $telegramBotChat->id,
                 'telegramBotUserId' => $telegramBotUser->id,
@@ -125,6 +132,11 @@ class TelegramBotListenerService extends DefaultService
                         ? ['keyboards' => $dto->response->message->replyMarkup->keyboards]
                         : []
                     ),
+                    ...(
+                        $dto->response->message?->video
+                        ? ['video' => $dto->response->message->video]
+                        : []
+                    ),
                 ],
             ]))->save();
 
@@ -134,6 +146,27 @@ class TelegramBotListenerService extends DefaultService
             telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Ошибка исходящего сообщения бота телеграм',
+                'Сообщение' => $dto,
+                'Exception' => Hlp::exceptionToArray($exception),
+            ], TelegramTypeEnum::Error);
+        }
+    }
+
+
+    public function member(TelegramBotMemberDto $dto): void
+    {
+        try {
+            $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->myChatMember->chat))
+                ->info([
+                    ...$telegramBotChat->info ?? [],
+                    'status' => $dto->myChatMember->newChatMember->status,
+                ])
+                ->save();
+
+        } catch (Throwable $exception) {
+            telegram([
+                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие' => 'Ошибка входящего информирования бота телеграм',
                 'Сообщение' => $dto,
                 'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);

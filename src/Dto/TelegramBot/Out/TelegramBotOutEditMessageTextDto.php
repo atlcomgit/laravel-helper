@@ -11,7 +11,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
  */
 class TelegramBotOutEditMessageTextDto extends TelegramBotOutDto
 {
-    public ?string $chatId;
+    public ?string $externalChatId;
     public ?int $messageId;
     public ?string $inlineMessageId;
     public string $text;

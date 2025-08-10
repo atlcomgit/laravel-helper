@@ -20,6 +20,9 @@ class TelegramBotInMessageDto extends DefaultDto
     public Carbon $date;
     public ?Carbon $editDate;
     public ?TelegramBotInReplyMarkupDto $replyMarkup;
+    public ?array $video;
+    public ?array $audio;
+    public ?array $photo;
 
 
     /**
@@ -44,10 +47,22 @@ class TelegramBotInMessageDto extends DefaultDto
     /**
      * @inheritDoc
      */
+    protected function defaults(): array
+    {
+        return [
+            'text' => '',
+        ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
     protected function mappings(): array
     {
         return [
             'messageId' => 'message_id',
+            'text' => ['text', 'reply_to_message', 'caption'],
             'replyToMessage' => 'reply_to_message',
             'editDate' => 'edit_date',
             'replyMarkup' => 'reply_markup',

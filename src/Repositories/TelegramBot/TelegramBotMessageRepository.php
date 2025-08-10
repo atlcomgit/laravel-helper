@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -63,7 +64,28 @@ class TelegramBotMessageRepository extends DefaultRepository
 
 
     /**
-     * Возвращает последнее исходящее сообщение бота по 
+     * Возвращает последнее сообщение бота
+     *
+     * @param TelegramBotOutDto $dto
+     * @return TelegramBotMessage|null
+     */
+    public function getLatestMessage(TelegramBotOutDto $dto): ?TelegramBotMessage
+    {
+        return $this->withoutTelescope(
+            fn () => property_exists($dto, 'externalChatId')
+            ? $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
+                ->orderByDesc('id')
+                ->first()
+            : null
+        );
+    }
+
+
+    /**
+     * Возвращает предыдущее исходящее сообщение бота по 
      *
      * @param TelegramBotInMessageDto $dto
      * @return TelegramBotMessage|null
@@ -86,13 +108,14 @@ class TelegramBotMessageRepository extends DefaultRepository
     /**
      * Возвращает последнее исходящее сообщение бота
      *
-     * @param TelegramBotOutSendMessageDto $dto
+     * @param TelegramBotOutDto $dto
      * @return TelegramBotMessage|null
      */
-    public function getLastMessageOutgoing(TelegramBotOutSendMessageDto $dto): ?TelegramBotMessage
+    public function getLastMessageOutgoing(TelegramBotOutDto $dto): ?TelegramBotMessage
     {
         return $this->withoutTelescope(
-            fn () => $this->model::query()
+            fn () => property_exists($dto, 'externalChatId')
+            ? $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
@@ -100,6 +123,7 @@ class TelegramBotMessageRepository extends DefaultRepository
                 ->whereNotIn('slug', ['', 'unknown', 'undefined', 'unrecognized', 'none', 'null'])
                 ->orderByDesc('id')
                 ->first()
+            : null
         );
     }
 

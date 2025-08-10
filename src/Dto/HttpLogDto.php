@@ -258,4 +258,41 @@ class HttpLogDto extends Dto
 
         return $this;
     }
+
+
+    /**
+     * @see parent::__serialize()
+     * @return array
+     */
+    public function __serialize(): array
+    {
+        $this->requestData = $this->removeMultipartBinary($this->requestData);
+        $this->responseData = $this->removeMultipartBinary($this->responseData);
+
+        return parent::__serialize();
+    }
+
+
+    /**
+     * Удаляет бинарные данные
+     *
+     * @param string|null $data
+     * @return string|null
+     */
+    private function removeMultipartBinary(?string $data): ?string
+    {
+        if (!$data || Hlp::regexpValidateJson($data)) {
+            return $data;
+        }
+
+        $data = mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+
+        return Hlp::stringCopy(
+            $data
+            ? mb_convert_encoding(preg_replace('/[\x00-\x08\x0A-\x0C\x0E-\x1F]/u', '', $data), 'UTF-8', 'auto')
+            : $data,
+            0,
+            2048,
+        );
+    }
 }

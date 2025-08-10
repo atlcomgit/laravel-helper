@@ -34,8 +34,8 @@ class TelegramBotInChatDto extends DefaultDto
     protected function mappings(): array
     {
         return [
-            'firstName' => 'first_name',
-            'userName' => 'username',
+            'firstName' => ['first_name', 'title'],
+            'userName' => ['username', 'title'],
         ];
     }
 }

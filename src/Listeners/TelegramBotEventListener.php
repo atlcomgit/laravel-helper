@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Listeners;
 
 use Atlcom\LaravelHelper\Defaults\DefaultListener;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotMemberDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
@@ -40,6 +41,7 @@ class TelegramBotEventListener extends DefaultListener implements ShouldQueue
         match (true) {
             $event->dto instanceof TelegramBotInDto => $this->telegramBotListenerService->incoming($event->dto),
             $event->dto instanceof TelegramBotOutDto => $this->telegramBotListenerService->outgoing($event->dto),
+            $event->dto instanceof TelegramBotMemberDto => $this->telegramBotListenerService->member($event->dto),
         };
     }
 }

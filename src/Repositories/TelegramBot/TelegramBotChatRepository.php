@@ -55,6 +55,10 @@ class TelegramBotChatRepository extends DefaultRepository
                     'name' => $dto->name,
                     'chat_name' => $dto->chatName,
                     'type' => $dto->type,
+                    'info' => [
+                        ...($model->info ?? []),
+                        ...($dto->info ?? []),
+                    ],
                 ])
                 : $model = $this->model::query()
                     ->withoutQueryLog()

@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
-use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
+use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
+use CURLFile;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -38,7 +39,7 @@ class TelegramApiService extends DefaultService
 
         return ($response->successful() && ($json['ok'] ?? false) === true)
             ? $json
-            : throw new WithoutTelegramException(
+            : throw new TelegramBotException(
                 "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
                 $json['error_code'] ?? $response->getStatusCode() ?? 400,
             );
@@ -66,7 +67,13 @@ class TelegramApiService extends DefaultService
         !$json ?: $http->asJson();
 
         foreach ($files as $name => $path) {
-            if (is_string($path) && is_file($path)) {
+            if ($path instanceof CURLFile) {
+                // Корректная отправка файла: читаем содержимое, используем basename
+                $filePath = $path->getFilename();
+                if (is_file($filePath)) {
+                    $http = $http->attach($name, file_get_contents($filePath), basename($filePath));
+                }
+            } elseif (is_string($path) && is_file($path)) {
                 $http = $http->attach($name, file_get_contents($path), basename($path));
             }
         }
@@ -123,7 +130,7 @@ class TelegramApiService extends DefaultService
         array $options = [],
     ): mixed {
         file_exists($filePath)
-            ?: throw new WithoutTelegramException("Ошибка отправки сообщения в телеграм: Файл не найден {$filePath}");
+            ?: throw new TelegramBotException("Ошибка отправки сообщения в телеграм: Файл не найден {$filePath}");
 
         $response = $this->getHttp()
             ->attach('document', file_get_contents($filePath), basename($filePath))
@@ -377,8 +384,14 @@ class TelegramApiService extends DefaultService
      * @param array      $options   Доп. параметры (reply_markup, caption_entities и пр.)
      * @return mixed                Ответ Telegram API
      */
-    public function sendPhoto(string $botToken, string|int $chatId, string $photo, ?string $caption = null, string $parseMode = 'HTML', array $options = []): mixed
-    {
+    public function sendPhoto(
+        string $botToken,
+        string|int $chatId,
+        string $photo,
+        ?string $caption = null,
+        string $parseMode = 'HTML',
+        array $options = [],
+    ): mixed {
         $files = [];
         $params = [
             'chat_id' => $chatId,
@@ -411,8 +424,14 @@ class TelegramApiService extends DefaultService
      * @param array       $options   Доп. параметры (duration, width, height и пр.)
      * @return mixed                 Ответ Telegram API
      */
-    public function sendVideo(string $botToken, string|int $chatId, string $video, ?string $caption = null, string $parseMode = 'HTML', array $options = []): mixed
-    {
+    public function sendVideo(
+        string $botToken,
+        string|int $chatId,
+        string|CURLFile $video,
+        ?string $caption = null,
+        string $parseMode = 'HTML',
+        array $options = [],
+    ): mixed {
         $files = [];
         $params = [
             'chat_id' => $chatId,
@@ -420,10 +439,13 @@ class TelegramApiService extends DefaultService
             ...$options,
         ];
 
-        if (is_file($video)) {
-            $files['video'] = $video;
+        // Варианты: CURLFile, локальный путь, либо file_id/URL
+        if ($video instanceof CURLFile) {
+            $files['video'] = $video; // обработается в call()
+        } elseif (is_string($video) && is_file($video)) {
+            $files['video'] = $video; // локальный файл
         } else {
-            $params['video'] = $video;
+            $params['video'] = $video; // URL или file_id
         }
 
         if ($caption !== null) {
@@ -445,8 +467,14 @@ class TelegramApiService extends DefaultService
      * @param array       $options   Доп. параметры (performer, title, thumbnail и пр.)
      * @return mixed                 Ответ Telegram API
      */
-    public function sendAudio(string $botToken, string|int $chatId, string $audio, ?string $caption = null, string $parseMode = 'HTML', array $options = []): mixed
-    {
+    public function sendAudio(
+        string $botToken,
+        string|int $chatId,
+        string $audio,
+        ?string $caption = null,
+        string $parseMode = 'HTML',
+        array $options = [],
+    ): mixed {
         $files = [];
         $params = [
             'chat_id' => $chatId,
@@ -479,8 +507,14 @@ class TelegramApiService extends DefaultService
      * @param array       $options   Доп. параметры (duration и пр.)
      * @return mixed                 Ответ Telegram API
      */
-    public function sendVoice(string $botToken, string|int $chatId, string $voice, ?string $caption = null, string $parseMode = 'HTML', array $options = []): mixed
-    {
+    public function sendVoice(
+        string $botToken,
+        string|int $chatId,
+        string $voice,
+        ?string $caption = null,
+        string $parseMode = 'HTML',
+        array $options = [],
+    ): mixed {
         $files = [];
         $params = [
             'chat_id' => $chatId,

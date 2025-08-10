@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotButtonTrait;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotKeyboardTrait;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
@@ -11,19 +13,80 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
  */
 class TelegramBotOutSendVideoDto extends TelegramBotOutDto
 {
-    public string|int $chatId;
+    use TelegramBotButtonTrait;
+    use TelegramBotKeyboardTrait;
+
+
+    public string $externalChatId;
     public string $video; // file_id | url | path to local file
     public ?string $caption;
-    public ?string $parseMode;
+    public ?string $slug;
     public ?array $options;
 
     protected function defaults(): array
     {
         return [
             ...parent::defaults(),
-            'caption' => null,
-            'parseMode' => 'HTML',
-            'options' => null,
+            'video' => '',
         ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function mappings(): array
+    {
+        return [
+            'externalChatId' => [
+                'chatId',
+                'chat_id',
+                'telegramBotChat.external_chat_id',
+                'telegram_bot_chat.external_chat_id',
+                'external_chat_id',
+            ],
+        ];
+    }
+
+
+    /**
+     * Добавляет слаг к сообщению
+     *
+     * @param string|null $slug
+     * @return static
+     */
+    public function setSlug(?string $slug): static
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+
+    /**
+     * Добавляет текст к сообщению
+     *
+     * @param string $caption
+     * @return static
+     */
+    public function setCaption(string $caption): static
+    {
+        $this->caption = trim($caption);
+
+        return $this;
+    }
+
+
+    /**
+     * Добавляет массив видео к сообщению
+     *
+     * @param string $video
+     * @return static
+     */
+    public function setVideo(string $video): static
+    {
+        $this->video = trim($video);
+
+        return $this;
     }
 }

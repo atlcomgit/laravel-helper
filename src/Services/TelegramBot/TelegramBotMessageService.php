@@ -12,13 +12,17 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallba
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataCommandDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutMenuButtonDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendAudioDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendPhotoDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendVideoDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
+use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotChatRepository;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
 
 /**
@@ -27,7 +31,10 @@ use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
  */
 class TelegramBotMessageService extends DefaultService
 {
-    public function __construct(private TelegramBotMessageRepository $telegramBotMessageRepository) {}
+    public function __construct(
+        private TelegramBotMessageRepository $telegramBotMessageRepository,
+        private TelegramBotChatRepository $telegramBotChatRepository,
+    ) {}
 
 
     /**
@@ -77,17 +84,37 @@ class TelegramBotMessageService extends DefaultService
      */
     public function isDuplicateLastMessage(TelegramBotOutDto $dto): bool
     {
-        if ($dto instanceof TelegramBotOutSendMessageDto) {
+        if (
+            in_array($dto::class, [
+                TelegramBotOutSendMessageDto::class,
+                TelegramBotOutSendAudioDto::class,
+                TelegramBotOutSendPhotoDto::class,
+                TelegramBotOutSendVideoDto::class,
+            ])
+        ) {
+            $lastMessage = $this->telegramBotMessageRepository->getLatestMessage($dto);
             $lastMessageIn = $this->telegramBotMessageRepository->getById($dto->previousMessageId);
             $lastMessageOut = $this->telegramBotMessageRepository->getLastMessageOutgoing($dto);
             $result = $lastMessageOut
                 && !($lastMessageIn->text === '/start')
                 && ($lastMessageOut->type === TelegramBotMessageTypeEnum::Outgoing)
                 && (
-                    $lastMessageOut->slug === $dto->slug
-                    || strip_tags($lastMessageOut->text) === strip_tags($dto->text)
+                    ($lastMessageOut->slug === $dto->slug)
+                    || ($lastMessage?->slug === $dto->slug)
+                    || (property_exists($dto, 'text') && strip_tags($lastMessageOut->text) === strip_tags($dto->text))
+                    || (property_exists($dto, 'caption') && strip_tags($lastMessageOut->text) === strip_tags($dto->caption))
                 )
-                && !array_diff_assoc($lastMessageOut->info['buttons'] ?? [], $dto->buttons->toArrayRecursive());
+                && !(
+                    array_diff_assoc(
+                        Hlp::arrayDot($lastMessageOut->info['buttons'] ?? []),
+                        Hlp::arrayDot($dto->buttons->toArrayRecursive()),
+                    )
+                    || array_diff_assoc(
+                        Hlp::arrayDot($lastMessageOut->info['keyboards'] ?? []),
+                        Hlp::arrayDot($dto->keyboards->toArrayRecursive()),
+                    )
+                )
+            ;
 
             !($result && isLocal()) ?: telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
@@ -99,7 +126,24 @@ class TelegramBotMessageService extends DefaultService
         }
 
         return false;
+    }
 
+
+    /**
+     * Проверяет статус чата отправляемого сообщения на блокировку
+     *
+     * @param TelegramBotOutDto $dto
+     * @return bool
+     */
+    public function isKickedChat(TelegramBotOutDto $dto): bool
+    {
+        if ($dto instanceof TelegramBotOutSendMessageDto) {
+            $telegramBotChat = $this->telegramBotChatRepository->getByExternalChatId((int)$dto->externalChatId);
+
+            return ($telegramBotChat?->info['status'] ?? null) === 'kicked';
+        }
+
+        return false;
     }
 
 

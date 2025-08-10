@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 
-use Atlcom\Hlp;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutMenuButtonDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotButtonTrait;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotKeyboardTrait;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
-use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
-use Illuminate\Support\Collection;
 
 /**
  * Dto бота telegram
@@ -21,18 +17,13 @@ use Illuminate\Support\Collection;
  */
 class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {
+    use TelegramBotButtonTrait;
+    use TelegramBotKeyboardTrait;
+
+
     public string $externalChatId;
     public string $text;
     public ?string $slug;
-
-    /** @var Collection<array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto> $buttons */
-    public ?Collection $buttons;
-
-    /** @var Collection<array|TelegramBotOutMenuButtonDto> $keyboards */
-    public ?Collection $keyboards;
-    public ?bool $resizeKeyboard;
-    public ?bool $oneTimeKeyboard;
-    public ?bool $removeKeyboard;
 
 
     /**
@@ -103,112 +94,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
      */
     public function addText(string $text): static
     {
-        $this->text = Hlp::stringConcat(PHP_EOL, ltrim($this->text), $text);
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет несколько inline кнопок к сообщению
-     *
-     * @param array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons
-     * @return static
-     */
-    public function setButtons(
-        array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons,
-    ): static {
-        $this->buttons = collect([]);
-        $this->addButtons($buttons);
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет inline кнопку к сообщению
-     *
-     * @param TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $button
-     * @return static
-     */
-    public function addButton(TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $button): static
-    {
-        $this->addButtons([$button]);
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет несколько inline кнопок к сообщению
-     *
-     * @param array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons
-     * @return static
-     */
-    public function addButtons(
-        array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons,
-    ): static {
-        $this->buttons ??= collect([]);
-        !($buttons instanceof TelegramBotOutDataButtonCallbackDto) ?: $buttons = [$buttons];
-        !($buttons instanceof TelegramBotOutDataButtonUrlDto) ?: $buttons = [$buttons];
-        !isset($buttons['text']) ?: $buttons = [$buttons];
-
-        $buttons = app(TelegramBotMessageService::class)->prepareButtons($buttons);
-
-        foreach ($buttons as $button) {
-            $this->buttons->push(is_array($button) ? $button : [$button]);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет несколько keyboard кнопок к сообщению
-     *
-     * @param array|TelegramBotOutMenuButtonDto $keyboards
-     * @return static
-     */
-    public function setKeyboards(array|TelegramBotOutMenuButtonDto $keyboards): static
-    {
-        $this->keyboards = collect([]);
-        $this->addKeyboards($keyboards);
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет keyboard кнопку к сообщению
-     *
-     * @param TelegramBotOutMenuButtonDto $keyboard
-     * @return static
-     */
-    public function addKeyboard(TelegramBotOutMenuButtonDto $keyboard): static
-    {
-        $this->addKeyboards([$keyboard]);
-
-        return $this;
-    }
-
-
-    /**
-     * Добавляет несколько keyboard кнопок к сообщению
-     *
-     * @param array|TelegramBotOutMenuButtonDto $keyboards
-     * @return static
-     */
-    public function addKeyboards(array|TelegramBotOutMenuButtonDto $keyboards): static
-    {
-        $this->keyboards ??= collect([]);
-        !($keyboards instanceof TelegramBotOutMenuButtonDto) ?: $keyboards = [$keyboards];
-        !isset($keyboards['text']) ?: $keyboards = [$keyboards];
-
-        $keyboards = app(TelegramBotMessageService::class)->prepareKeyboards($keyboards);
-
-        foreach ($keyboards as $keyboard) {
-            $this->keyboards->push(is_array($keyboard) ? $keyboard : [$keyboard]);
-        }
+        $this->text .= PHP_EOL . $text;
 
         return $this;
     }

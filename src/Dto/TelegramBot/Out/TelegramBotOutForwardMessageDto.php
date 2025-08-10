@@ -11,7 +11,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
  */
 class TelegramBotOutForwardMessageDto extends TelegramBotOutDto
 {
-    public string|int $chatId;
+    public string|int $externalChatId;
     public string|int $fromChatId;
     public int $messageId;
     public ?bool $disableNotification;
