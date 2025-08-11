@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 
@@ -56,6 +57,9 @@ class TelegramBotOutResponseDto extends DefaultDto
     {
         $result = $array['result'] ?? null;
         $array['result'] = (bool)$result;
-        !(is_array($result) && !isset($array['message'])) ?: $array['message'] = $result;
+        !(is_array($result) && !isset($array['message'])) ?: $array['message'] = [
+            ...Hlp::objectToArrayRecursive($array),
+            ...$result,
+        ];
     }
 }

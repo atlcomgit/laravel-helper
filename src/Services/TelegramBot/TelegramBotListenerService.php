@@ -123,8 +123,18 @@ class TelegramBotListenerService extends DefaultService
                 },
                 'info' => [
                     ...(
+                        $dto->response->message?->buttons
+                        ? ['buttons' => $dto->response->message->buttons]
+                        : []
+                    ),
+                    ...(
                         $dto->response->message?->replyMarkup?->buttons
                         ? ['buttons' => $dto->response->message->replyMarkup->buttons]
+                        : []
+                    ),
+                    ...(
+                        $dto->response->message?->keyboards
+                        ? ['keyboards' => $dto->response->message->keyboards]
                         : []
                     ),
                     ...(
