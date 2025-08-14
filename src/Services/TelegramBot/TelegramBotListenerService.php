@@ -43,6 +43,17 @@ class TelegramBotListenerService extends DefaultService
                 ->save();
 
             $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
+                ->merge([
+                    ...(
+                        $dto->message->contact
+                        ? [
+                            'info' => [
+                                'phone' => $dto->message->contact->phoneNumber,
+                            ],
+                        ]
+                        : []
+                    ),
+                ])
                 ->save();
 
             $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [

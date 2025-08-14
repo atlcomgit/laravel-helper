@@ -80,7 +80,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
      */
     public function setText(string $text): static
     {
-        $this->text = trim($text);
+        $this->text = $text;
 
         return $this;
     }

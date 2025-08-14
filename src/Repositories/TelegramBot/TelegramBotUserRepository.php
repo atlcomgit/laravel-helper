@@ -57,6 +57,16 @@ class TelegramBotUserRepository extends DefaultRepository
                     'phone' => $dto->phone,
                     'language' => $dto->language,
                     'is_bot' => $dto->isBot,
+                    ...(
+                        (is_null($model->info) && is_null($dto->info))
+                        ? []
+                        : [
+                            'info' => [
+                                ...($model->info ?? []),
+                                ...($dto->info ?? []),
+                            ],
+                        ]
+                    ),
                 ])
                 : $model = $this->model::query()
                     ->withoutQueryLog()

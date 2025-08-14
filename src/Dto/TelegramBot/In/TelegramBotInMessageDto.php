@@ -13,6 +13,7 @@ class TelegramBotInMessageDto extends DefaultDto
     public int $messageId;
     public TelegramBotInFromDto $from;
     public TelegramBotInChatDto $chat;
+    public ?TelegramBotInContactDto $contact;
     public ?TelegramBotInMessageDto $replyToMessage;
     /** @var Collection<TelegramBotInEntitiesDto> */
     public ?Collection $entities;
@@ -36,6 +37,7 @@ class TelegramBotInMessageDto extends DefaultDto
             'messageId' => 'integer',
             'from' => TelegramBotInFromDto::class,
             'chat' => TelegramBotInChatDto::class,
+            'contact' => TelegramBotInContactDto::class,
             'replyToMessage' => TelegramBotInMessageDto::class,
             'entities' => [TelegramBotInEntitiesDto::class],
             'text' => 'string',
@@ -64,7 +66,7 @@ class TelegramBotInMessageDto extends DefaultDto
     {
         return [
             'messageId' => 'message_id',
-            'text' => ['text', 'reply_to_message', 'caption'],
+            'text' => ['text', '--reply_to_message', 'caption'],
             'replyToMessage' => 'reply_to_message',
             'editDate' => 'edit_date',
             'replyMarkup' => 'reply_markup',

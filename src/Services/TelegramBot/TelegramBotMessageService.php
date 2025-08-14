@@ -8,6 +8,7 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutContactButtonDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataCommandDto;
@@ -191,11 +192,15 @@ class TelegramBotMessageService extends DefaultService
         $keyboards = array_map(
             fn ($keyboard) => match (true) {
                 $keyboard instanceof TelegramBotOutMenuButtonDto => $keyboard,
+                $keyboard instanceof TelegramBotOutContactButtonDto => $keyboard,
 
                 is_array($keyboard) && !is_scalar(Hlp::arrayFirst($keyboard)) => $this->prepareKeyboards($keyboard),
 
                 is_array($keyboard) && isset($keyboard['text'])
                 => TelegramBotOutMenuButtonDto::create($keyboard),
+
+                is_array($keyboard) && isset($keyboard['requestContact'])
+                => TelegramBotOutContactButtonDto::create($keyboard),
 
                 default => null,
             },

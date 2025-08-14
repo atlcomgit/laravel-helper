@@ -56,6 +56,7 @@ trait TelegramBotKeyboardTrait
     {
         $this->keyboards ??= collect([]);
         !($keyboards instanceof TelegramBotOutMenuButtonDto) ?: $keyboards = [$keyboards];
+        !($keyboards instanceof TelegramBotOutContactButtonDto) ?: $keyboards = [$keyboards];
         !isset($keyboards['text']) ?: $keyboards = [$keyboards];
 
         $keyboards = app(TelegramBotMessageService::class)->prepareKeyboards($keyboards);
