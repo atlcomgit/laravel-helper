@@ -1,14 +1,12 @@
-## Инструкции для ИИ-агента Copilot по пакету (atlcom/laravel-helper)
+# Инструкции для ИИ-агента Copilot по пакету (atlcom/laravel-helper)
 
 Назначение: пакет Laravel, добавляющий логирование, кеширование, контроллеры на DTO, профайлер и инструменты Telegram-бота. Используйте готовые базовые классы, сервисы, события, макросы и флаги конфига — не изобретайте заново.
 
-## Локализация
-- Добавлять описание в phpdoc для всех методов и классов на русском языке, после описания добавлять пустую строку и далее описание аргументов.
-- Добавлять комментарии к блокам кода на русском языке.
-- Выводить текст в консоль и UI на русском языке.
+## Общая инструкция для ИИ-агентов
+[AI_GUIDELINES.md](https://github.com/atlcomgit/laravel-helper/blob/master/AI_GUIDELINES.md)
 
 ## Архитектура и ключевые модули
-- Пакет: Laravel 12 (PHP 8.2+), Redis.
+- Пакет: Laravel (10+), (PHP 8.2+), Redis.
 
 ## Крупная архитектура
 - Провайдер `src/Providers/LaravelHelperServiceProvider.php` связывает всё: мержит конфиг, грузит миграции/фабрики/роуты, регистрирует singletons, middleware, слушателей событий, консольные команды и макросы (Http/Builder/Str/Collection).
@@ -32,7 +30,6 @@
 
 ## Рабочие процессы
 - Установка в приложение: `composer require atlcom/laravel-helper` → `php artisan vendor:publish --tag="laravel-helper"` → настроить `.env` → `php artisan migrate` → `php artisan optimize`.
-- Тесты (package mode): Orchestra Testbench; запуск `vendor/bin/phpunit` (см. `phpunit.xml.dist`). Тесты класть в `tests/Feature|Unit` с PSR-4 `Atlcom\\LaravelHelper\\Tests\\`.
 - Миграции: автозагрузка пакета + публикация с тегом `laravel-helper` при встраивании.
 
 ## Интеграции
@@ -49,25 +46,3 @@
 ## Примечания для агентов
 - Держитесь принципа “config-first” и проводки через провайдер. Не обходите хелперы и макросы. Для контроллеров — DTO и базовые Default* классы.
 
-## Расширение классов (extends)
-- Классы консольных команд `src/Console/Commands/*` должны расширять класс `src/Defaults/DefaultCommand`.
-- Классы контроллеров `src/Http/Controllers/*` должны расширять класс `src/Defaults/DefaultController`.
-- Классы dto `src/Dto/*` должны расширять класс `src/Defaults/DefaultDto`.
-- Классы событий `src/Events/*` должны расширять класс `src/Defaults/DefaultEvent`.
-- Классы исключений `src/Exceptions/*` должны расширять класс `src/Defaults/DefaultException`.
-- Классы задач `src/Jobs/*` должны расширять класс `src/Defaults/DefaultJob`.
-- Классы слушателей `src/Listeners/*` должны расширять класс `src/Defaults/DefaultListener`.
-- Классы логгеров `src/Loggers/*` должны расширять класс `src/Defaults/DefaultLogger`.
-- Классы моделей `src/Models/*` должны расширять класс `src/Defaults/DefaultModel`.
-- Классы репозиториев `src/Http/Repositories/*` должны расширять класс `src/Defaults/DefaultRepository`.
-- Классы запросов `src/Http/Requests/*` должны расширять класс `src/Defaults/DefaultRequest`.
-- Классы ресурсов `src/Http/Resources/*` должны расширять класс `src/Defaults/DefaultResources`.
-- Классы сервисов `src/Http/Services/*` должны расширять класс `src/Defaults/DefaultService`.
-- Классы тестов `tests/*` должны расширять класс `src/Defaults/DefaultTest`.
-
-## Стиль php кода
-- Придерживаться `PSR-12`.
-- Длина строк кода не должна превышать `120 символов`.
-- Добавляй в php файлы в самом начале `declare(strict_types=1);` отделяя пустыми строками до и после.
-- По возможности используй интерполяцию переменных в строках, вместо конкатинации.
-- По возможности используй стрелочные функции и добавляй к ним `static fn () => *`, если внутри не используется `$this`.
