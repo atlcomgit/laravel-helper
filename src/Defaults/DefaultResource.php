@@ -20,7 +20,7 @@ abstract class DefaultResource extends JsonResource
     public function with(Request $request)
     {
         return [
-            ...((isLocal() || isDebug())
+            ...((isLocal() || isDev() || isDebug())
                 ? ['Resource' => class_basename($this)]
                 : []
             ),

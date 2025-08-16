@@ -117,7 +117,7 @@ class ModelLogDto extends DefaultDto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? ModelLogJob::dispatchSync($this)
                 : ModelLogJob::dispatch($this);
         }

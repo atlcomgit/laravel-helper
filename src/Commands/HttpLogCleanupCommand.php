@@ -40,7 +40,7 @@ class HttpLogCleanupCommand extends DefaultCommand
 
         $cleanup = $this->httpLogService->cleanup(Lh::config(ConfigEnum::HttpLog, 'cleanup_days'));
 
-        $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
+        $this->telegramLog = (isLocal() || isDev() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);
 
         $this->outputEol($this->telegramComment, 'fg=green');

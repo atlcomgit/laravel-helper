@@ -38,7 +38,7 @@ class RouteLogCleanupCommand extends DefaultCommand
 
         $cleanup = $this->routeLogService->cleanup();
 
-        $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
+        $this->telegramLog = (isLocal() || isDev() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Зарегистрировано ' . Hlp::stringPlural($cleanup, ['роутов', 'роут', 'роута']);
 
         $this->outputEol($this->telegramComment, 'fg=green');

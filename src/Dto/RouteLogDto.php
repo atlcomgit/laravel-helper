@@ -75,7 +75,7 @@ class RouteLogDto extends Dto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::RouteLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::RouteLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? RouteLogJob::dispatchSync($this)
                 : RouteLogJob::dispatch($this);
         }

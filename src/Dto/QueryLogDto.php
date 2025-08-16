@@ -133,7 +133,7 @@ class QueryLogDto extends Dto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::QueryLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::QueryLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? QueryLogJob::dispatchSync($this)
                 : QueryLogJob::dispatch($this);
         }

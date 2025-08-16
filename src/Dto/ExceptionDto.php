@@ -78,7 +78,7 @@ class ExceptionDto extends Dto
                 Hlp::stringReplace(Hlp::stringConcat(', ', $exception->errorInfo), [PHP_EOL => ' ']),
                 ' ',
             ),
-            ValidationException::class => (isDebug() || isLocal() || isTesting())
+            ValidationException::class => (isDebug() || isLocal() || isDev() || isTesting())
             ? Hlp::stringConcat(': ', Hlp::cacheRuntimeGet('ValidationRequest'), $exception->getMessage())
             : $exception->getMessage(),
 
@@ -111,6 +111,7 @@ class ExceptionDto extends Dto
         if (
             (
                 isLocal()
+                || isDev()
                 || !in_array($exception::class, [
                         // ModelNotFoundException::class,
                     MaxAttemptsExceededException::class,
@@ -338,7 +339,7 @@ class ExceptionDto extends Dto
         $this->mappingKeys($this->mappings())
             ->onlyNotNull()
             ->serializeKeys(true)
-            ->excludeKeys((isDebug() || $this->isTelegram || isLocal()) ? [] : ['exception'])
+            ->excludeKeys((isDebug() || $this->isTelegram || isLocal() || isDev()) ? [] : ['exception'])
             ->excludeKeys((isDebug() || $this->isTelegram) ? [] : ['isDebug'])
             ->excludeKeys((isDebug() || isDebugTrace() || $this->isTelegram) ? [] : ['debugInfo'])
             ->excludeKeys(['isTelegram'])

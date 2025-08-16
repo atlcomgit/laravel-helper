@@ -18,6 +18,7 @@ enum HttpLogMethodEnum: string
     case Patch = 'patch';
     case Delete = 'delete';
     case Options = 'options';
+    case Head = 'head';
 
 
     /**

@@ -251,7 +251,7 @@ class HttpLogDto extends Dto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::HttpLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? HttpLogJob::dispatchSync($this)
                 : HttpLogJob::dispatch($this);
         }

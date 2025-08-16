@@ -117,7 +117,7 @@ class TelegramBotMessageService extends DefaultService
                 )
             ;
 
-            !($result && isLocal()) ?: telegram([
+            !($result && (isLocal() || isDev())) ?: telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Повторное сообщение бота отменено',
                 'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),

@@ -164,7 +164,7 @@ class TelegramLogDto extends Dto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::TelegramLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::TelegramLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? TelegramLogJob::dispatchSync($this)
                 : TelegramLogJob::dispatch($this);
         }

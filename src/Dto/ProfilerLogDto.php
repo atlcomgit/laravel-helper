@@ -147,7 +147,7 @@ class ProfilerLogDto extends DefaultDto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::ProfilerLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ProfilerLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? ProfilerLogJob::dispatchSync($this)
                 : ProfilerLogJob::dispatch($this);
             $this->isUpdated = true;

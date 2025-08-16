@@ -56,7 +56,7 @@ class TelegramBotOutDto extends TelegramBotDto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::TelegramBot, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::TelegramBot, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? TelegramBotJob::dispatchSync($this)
                 : TelegramBotJob::dispatch($this);
         }

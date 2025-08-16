@@ -144,7 +144,7 @@ class ViewLogDto extends Dto
                 || ($this->withViewLog !== false && Lh::config(ConfigEnum::ViewLog, 'global'))
             )
         ) {
-            (Lh::config(ConfigEnum::ViewLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ViewLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? ViewLogJob::dispatchSync($this)
                 : ViewLogJob::dispatch($this);
         }

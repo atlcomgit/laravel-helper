@@ -40,7 +40,7 @@ class QueryLogCleanupCommand extends DefaultCommand
 
         $cleanup = $this->queryLogService->cleanup(Lh::config(ConfigEnum::QueryLog, 'cleanup_days'));
 
-        $this->telegramLog = (isLocal() || isProd()) && $cleanup > 0;
+        $this->telegramLog = (isLocal() || isDev() || isProd()) && $cleanup > 0;
         $this->telegramComment = 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']);
 
         $this->outputEol($this->telegramComment, 'fg=green');

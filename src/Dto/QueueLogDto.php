@@ -130,7 +130,7 @@ class QueueLogDto extends Dto
                 || ($this->withQueueLog !== false && Lh::config(ConfigEnum::QueueLog, 'global'))
             )
         ) {
-            (Lh::config(ConfigEnum::QueueLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::QueueLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? QueueLogJob::dispatchSync($this)
                 : QueueLogJob::dispatch($this);
         }

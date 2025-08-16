@@ -166,7 +166,7 @@ class ConsoleLogDto extends Dto
                 || ($this->withConsoleLog !== false && Lh::config(ConfigEnum::ConsoleLog, 'global'))
             )
         ) {
-            (Lh::config(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isTesting()))
+            (Lh::config(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }

@@ -66,7 +66,7 @@ class OptimizeCommand extends DefaultCommand
         // Очистка таблиц логов
         if (Lh::config(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
             $this->telegramComment = ['Env' => config('app.env')];
-            $this->withTelegramLog = isLocal() || isProd();
+            $this->withTelegramLog = isLocal() || isDev() || isProd();
 
             foreach ([
                 ['config' => ConfigEnum::ConsoleLog, 'service' => $this->consoleLogService],

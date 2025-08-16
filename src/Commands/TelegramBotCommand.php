@@ -65,7 +65,7 @@ class TelegramBotCommand extends DefaultCommand
 
         }
 
-        $this->telegramLog = isLocal() || isProd();
+        $this->telegramLog = isLocal() || isDev() || isProd();
 
         $this->outputEol($this->telegramComment, 'fg=green');
 

@@ -76,7 +76,7 @@ class ExampleCommand extends DefaultCommand
 
 		// ...
 
-		$this->telegramLog = isLocal() || isProd();
+		$this->telegramLog = isLocal() || isDev() || isProd();
 		$this->telegramComment = 'Комментарий';
 
 		return self::SUCCESS;
@@ -608,8 +608,8 @@ isDebug() // Возвращает флаг окружения APP_DEBUG
 isDebugData() // Возвращает флаг окружения APP_DEBUG_DATA
 isDebugTrace() // Возвращает флаг окружения APP_DEBUG_TRACE
 isLocal() // Проверяет на локальное окружение
-isTesting() // Проверяет на тестовое окружение
 isDev() // Проверяет на dev окружение
+isTesting() // Проверяет на тестовое окружение
 isProd() // Проверяет на боевое окружение
 isCommand() // Проверяет на запуск приложения из консольной команды
 isHttp() // Проверяет на запуск приложения из http запроса

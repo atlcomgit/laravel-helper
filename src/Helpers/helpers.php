@@ -96,6 +96,21 @@ if (!function_exists('isLocal')) {
 }
 
 
+if (!function_exists('isDev')) {
+    /**
+     * Проверяет на dev окружение
+     *
+     * @return bool
+     */
+    function isDev(): bool
+    {
+        return in_array(config('app.env', null), ['develop', 'dev']);
+    }
+} else {
+    throw new LaravelHelperException('Laravel_helper: Функция isDev() уже определена в приложении');
+}
+
+
 if (!function_exists('isTesting')) {
     /**
      * Проверяет на тестовое окружение
@@ -109,21 +124,6 @@ if (!function_exists('isTesting')) {
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция isTesting() уже определена в приложении');
-}
-
-
-if (!function_exists('isDev')) {
-    /**
-     * Проверяет на dev окружение
-     *
-     * @return bool
-     */
-    function isDev(): bool
-    {
-        return in_array(config('app.env', null), ['develop', 'dev']);
-    }
-} else {
-    throw new LaravelHelperException('Laravel_helper: Функция isDev() уже определена в приложении');
 }
 
 
