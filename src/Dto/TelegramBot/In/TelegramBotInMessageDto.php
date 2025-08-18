@@ -21,6 +21,7 @@ class TelegramBotInMessageDto extends DefaultDto
     public Carbon $date;
     public ?Carbon $editDate;
     public ?TelegramBotInReplyMarkupDto $replyMarkup;
+    // public ?TelegramBotInWebAppDto $webAppData;
     public ?array $buttons;
     public ?array $keyboards;
     public ?array $video;

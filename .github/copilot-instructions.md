@@ -3,7 +3,7 @@
 Назначение: пакет Laravel, добавляющий логирование, кеширование, контроллеры на DTO, профайлер и инструменты Telegram-бота. Используйте готовые базовые классы, сервисы, события, макросы и флаги конфига — не изобретайте заново.
 
 ## Общая инструкция для ИИ-агентов
-[AI_GUIDELINES.md](https://github.com/atlcomgit/laravel-helper/blob/master/AI_GUIDELINES.md)
+[AI_MANIFEST.md](https://github.com/atlcomgit/laravel-helper/blob/master/AI_MANIFEST.md)
 
 ## Архитектура и ключевые модули
 - Пакет: Laravel (10+), (PHP 8.2+), Redis.
