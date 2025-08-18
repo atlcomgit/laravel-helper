@@ -236,4 +236,20 @@ trait ModelTrait
             default => [],
         };
     }
+
+
+    /**
+     * Возвращает приведение к типу свойства модели
+     *
+     * @param string $attribute
+     * @param mixed|null $value
+     * @return mixed
+     */
+    public function getCastedAttribute(string $attribute, mixed $value = null): mixed
+    {
+        return (array_key_exists($attribute, $this->getCasts())
+            ? $this->castAttribute($attribute, $value ?? $this->getAttributes()[$attribute] ?? null)
+            : $value
+        ) ?? $this->$attribute ?? null;
+    }
 }

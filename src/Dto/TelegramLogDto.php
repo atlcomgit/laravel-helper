@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\TelegramLogJob;
@@ -147,8 +148,8 @@ class TelegramLogDto extends Dto
                     'server' => request()->server(),
                     'cookies' => request()->cookies?->all(),
                     'headers' => request()->headers?->all(),
-                    'params' => request()->all(),
-                    'files' => request()?->files->all(),
+                    'params' => Hlp::objectToArrayRecursive(request()->all()),
+                    'files' => Hlp::objectToArrayRecursive(request()?->files->all()),
                 ]
             ),
             'time' => Carbon::now()->format('d.m.Y в H:i:s'),

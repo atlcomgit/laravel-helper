@@ -245,7 +245,11 @@ class ModelLogService extends DefaultService
         foreach (($model->getAttributes() ?: $attributes) ?? [] as $attribute => $newValue) {
             $oldValue = $model->getOriginal($attribute);
             $newValue = (!is_null($attributes) && array_key_exists($attribute, $attributes))
-                ? $attributes[$attribute]
+                ? (
+                    method_exists($model, 'getCastedAttribute')
+                    ? $model->getCastedAttribute($attribute, $attributes[$attribute])
+                    : $attributes[$attribute]
+                )
                 : $model->$attribute;
 
             if (!in_array($attribute, $modelLogExcludeAttributes) && $this->hasDifference($oldValue, $newValue)) {

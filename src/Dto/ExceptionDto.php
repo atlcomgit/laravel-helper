@@ -65,12 +65,14 @@ class ExceptionDto extends Dto
     public static function createFromException(Throwable $exception, ?Request $request = null): static
     {
         // Формируем dto об ошибке
-        $code = $exception->getCode() ?: match ($exception::class) {
-            HttpException::class => $exception->getStatusCode(),
-            HttpResponseException::class => $exception->getResponse()->getStatusCode(),
+        (($code = $exception->getCode()) >= 100)
+            ?: $code = match ($exception::class) {
+                HttpException::class => $exception->getStatusCode(),
+                HttpResponseException::class => $exception->getResponse()->getStatusCode(),
+                'League\OAuth2\Server\Exception\OAuthServerException' => $exception->getHttpStatusCode(),
 
-            default => 0,
-        };
+                default => 0,
+            };
         $message = match ($exception::class) {
             HttpResponseException::class => json_decode($exception->getResponse()->getContent())?->message
             ?: ($exception->getResponse()::$statusTexts[$exception->getResponse()->getStatusCode()] ?? ''),
@@ -115,7 +117,7 @@ class ExceptionDto extends Dto
                 || !in_array($exception::class, [
                         // ModelNotFoundException::class,
                     MaxAttemptsExceededException::class,
-                    '\League\OAuth2\Server\Exception\OAuthServerException',
+                    'League\OAuth2\Server\Exception\OAuthServerException',
                 ])
             )
             && !(is_array($exclude) && in_array($exception::class, $exclude))

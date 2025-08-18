@@ -104,6 +104,7 @@ class ModelLogDto extends DefaultDto
     protected function onSerializing(array &$array): void
     {
         $this->onlyKeys(ModelLog::getModelKeys())
+            ->serializeKeys(['attributes', 'changes'])
             ->mappingKeys($this->mappings())
             ->onlyNotNull();
     }
