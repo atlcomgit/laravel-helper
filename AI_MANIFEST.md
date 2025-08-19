@@ -73,6 +73,65 @@
   - между методами класса и функциями;
   - между свойствами класса и методами.
 
+## Миграции
+- Используй `foreignId` или `foreignUuid` для связанных полей.
+- Используй индексы для полей с типом: `int`, `bool`, `enum`, `uuid`.
+- Названия таблиц бери из модели `Model::getTableName()`.
+- Комментарий к таблице делай как `Model::COMMENT`.
+- Подключай поля timestamps и softDeletes и создай к ним индексы.
+- Перед созданием новой таблицы используй удаление существующей таблицы `dropIfExists`.
+- Перед изменением существующей таблицы используй проверку на существование таблицы `hasTable`.
+
+Пример:
+```php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @see \App\Domains\Devline\Models\VideoCameraWatcher
+ * @see VideoCameraWatcherDto
+ */
+return new class extends Migration {
+    public function up()
+    {
+        Schema::dropIfExists(Model::getTableName());
+
+        Schema::create(Model::getTableName(), static function (Blueprint $table) {
+            $table->id();
+            $table->comment(Model::getTableComment());
+
+            $table->foreignId('user_id')->nullable(false)->index()
+                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade')
+                ->comment('...');
+
+            $table->foreignUuid('user_uuid')->nullable(true)->index()
+                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade')
+                ->comment('...');
+
+            $table->string('name')->nullable(true)
+                ->comment('...');
+            $table->enum('type', ModelTypeEnum::getValues())->nullable(false)->index()
+                ->default(ModelTypeEnum::getDefault())
+                ->comment('...');
+
+            $table->timestamps();
+            $table->softDeletes();
+            $table->index(['created_at']);
+            $table->index(['updated_at']);
+            $table->index(['deleted_at']);
+        });
+    }
+
+
+    public function down()
+    {
+        Schema::dropIfExists(Model::getTableName());
+    }
+};
+```
+
+
 ### Запуск консольных команд
 - Запуск консольных команд через `make artisan *`.
 
@@ -107,20 +166,21 @@
 Пример:
 
 ```php
+<?php
 
 declare(strict_types=1);
 
 namespace App\Services;
 
 class ExampleService
-/**
- * Тест метода сервиса
- * @see \App\Services\ExampleService::exampleMethod()
- *
- * @return void
- */
-#[Test]
-public function exampleMethod(): void { /* ... */ }
+    /**
+     * Тест метода сервиса
+     * @see \App\Services\ExampleService::exampleMethod()
+     *
+     * @return void
+     */
+    #[Test]
+    public function exampleMethod(): void { /* ... */ }
 ```
 
 ## Документация по пакетам

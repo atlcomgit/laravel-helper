@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;

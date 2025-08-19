@@ -35,6 +35,22 @@ trait ModelTrait
 
 
     /**
+     * Возвращает описание таблицы
+     *
+     * @return string
+     */
+    public static function getTableComment(): string
+    {
+        return match (true) {
+            property_exists(static::class, 'comment') => (new static)->comment,
+            defined(static::class . '::COMMENT') => static::COMMENT,
+
+            default => '',
+        };
+    }
+
+
+    /**
      * Возвращает имя первичного ключа
      *
      * @return string

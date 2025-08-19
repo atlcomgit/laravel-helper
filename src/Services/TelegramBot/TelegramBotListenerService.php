@@ -9,7 +9,6 @@ use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotChatDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotUserDto;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotInDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotMemberDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
@@ -174,6 +173,12 @@ class TelegramBotListenerService extends DefaultService
     }
 
 
+    /**
+     * Обрабатывает входящие информационное сообщения телеграм бота и сохраняет в БД
+     *
+     * @param TelegramBotMemberDto $dto
+     * @return void
+     */
     public function member(TelegramBotMemberDto $dto): void
     {
         try {
