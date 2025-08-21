@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultDto;
 class TelegramBotInCallbackQueryDto extends DefaultDto
 {
     public string $id;
+    public TelegramBotInFromDto $from;
     public string $data;
 
 
@@ -19,6 +20,7 @@ class TelegramBotInCallbackQueryDto extends DefaultDto
     {
         return [
             'id' => 'string',
+            'from' => TelegramBotInFromDto::class,
             'data' => 'string',
         ];
     }

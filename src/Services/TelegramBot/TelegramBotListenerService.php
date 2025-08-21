@@ -41,7 +41,9 @@ class TelegramBotListenerService extends DefaultService
             $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->message->chat))
                 ->save();
 
-            $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->message->from))
+            $telegramBotUser = (
+            $userDto = TelegramBotUserDto::create($dto->callbackQuery?->from ?? $dto->message->from)
+            )
                 ->merge([
                     ...(
                         $dto->message->contact

@@ -98,16 +98,16 @@ return new class extends Migration {
         Schema::dropIfExists(Model::getTableName());
 
         Schema::create(Model::getTableName(), static function (Blueprint $table) {
-            $table->id();
             $table->comment(Model::getTableComment());
+            $table->id();
 
             $table->foreignId('user_id')->nullable(false)->index()
-                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade')
-                ->comment('...');
+                ->comment('...')
+                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade');
 
             $table->foreignUuid('user_uuid')->nullable(true)->index()
-                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade')
-                ->comment('...');
+                ->comment('...')
+                ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade');
 
             $table->string('name')->nullable(true)
                 ->comment('...');
@@ -117,9 +117,8 @@ return new class extends Migration {
 
             $table->timestamps();
             $table->softDeletes();
+            
             $table->index(['created_at']);
-            $table->index(['updated_at']);
-            $table->index(['deleted_at']);
         });
     }
 
