@@ -13,8 +13,9 @@ class TelegramBotOutForwardMessageDto extends TelegramBotOutDto
 {
     public string|int $externalChatId;
     public string|int $fromChatId;
-    public int $messageId;
+    public int $externalMessageId;
     public ?bool $disableNotification;
+
 
     protected function defaults(): array
     {

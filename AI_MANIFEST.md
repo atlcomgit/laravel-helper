@@ -187,3 +187,4 @@ class ExampleService
 - Используй документацию для вспомогательных функций [Hlp](https://github.com/atlcomgit/helper), примеры в [тестах](https://github.com/atlcomgit/helper/tree/master/tests).
 - Используй документацию для [Dto](https://github.com/atlcomgit/dto), примеры в [тестах](https://github.com/atlcomgit/dto/tree/master/tests/Examples).
 - Используй документацию для [Lh](https://github.com/atlcomgit/laravel-helper).
+- Используй context7

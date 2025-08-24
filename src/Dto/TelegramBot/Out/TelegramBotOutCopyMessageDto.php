@@ -13,9 +13,10 @@ class TelegramBotOutCopyMessageDto extends TelegramBotOutDto
 {
     public string|int $externalChatId;
     public string|int $fromChatId;
-    public int $messageId;
+    public int $externalMessageId;
     public ?string $caption;
     public ?string $parseMode;
+
 
     protected function defaults(): array
     {

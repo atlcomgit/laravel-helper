@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInDeletedMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetMyCommandsDto;
@@ -14,6 +15,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetWebhookDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutForwardMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutCopyMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutDeleteMessageDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutDeleteMessagesDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutEditMessageTextDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendPhotoDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendVideoDto;
@@ -70,6 +72,7 @@ class TelegramBotService extends DefaultService
                         TelegramBotOutForwardMessageDto::class => $this->forwardMessage($dto),
                         TelegramBotOutCopyMessageDto::class => $this->copyMessage($dto),
                         TelegramBotOutDeleteMessageDto::class => $this->deleteMessage($dto),
+                        TelegramBotOutDeleteMessagesDto::class => $this->deleteMessages($dto),
                         TelegramBotOutEditMessageTextDto::class => $this->editMessageText($dto),
                         TelegramBotOutSendPhotoDto::class => $this->sendPhoto($dto),
                         TelegramBotOutSendVideoDto::class => $this->sendVideo($dto),
@@ -275,7 +278,7 @@ class TelegramBotService extends DefaultService
             botToken: $dto->token,
             chatId: $dto->externalChatId,
             fromChatId: $dto->fromChatId,
-            messageId: $dto->messageId,
+            messageId: $dto->externalMessageId,
             options: array_filter([
                 'disable_notification' => $dto->disableNotification,
             ], static fn ($v) => $v !== null),
@@ -297,7 +300,7 @@ class TelegramBotService extends DefaultService
             botToken: $dto->token,
             chatId: $dto->externalChatId,
             fromChatId: $dto->fromChatId,
-            messageId: $dto->messageId,
+            messageId: $dto->externalMessageId,
             options: array_filter([
                 'caption' => $dto->caption,
                 'parse_mode' => $dto->parseMode,
@@ -319,10 +322,45 @@ class TelegramBotService extends DefaultService
         $json = $this->telegramApiService->deleteMessage(
             botToken: $dto->token,
             chatId: $dto->externalChatId,
-            messageId: $dto->messageId,
+            messageId: $dto->externalMessageId,
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
+    }
+
+
+    /**
+     * Пакетное удаление сообщений
+     *
+     * @param TelegramBotOutDeleteMessagesDto $dto
+     * @return TelegramBotOutResponseDto
+     */
+    public function deleteMessages(TelegramBotOutDeleteMessagesDto $dto): TelegramBotOutResponseDto
+    {
+        $deletedMessages = [];
+
+        foreach ($dto->externalMessageIds as $externalMessageId) {
+            try {
+                $deletedMessageDto = TelegramBotInDeletedMessageDto::create(externalMessageId: $externalMessageId);
+
+                $json = $this->telegramApiService->deleteMessage(
+                    botToken: $dto->token,
+                    chatId: $dto->externalChatId,
+                    messageId: $externalMessageId,
+                );
+
+                $deletedMessageDto->status = true;
+
+            } catch (Throwable $exception) {
+                $deletedMessageDto->status = $exception->getCode() === 400;
+                $deletedMessageDto->statusMessage = $exception->getMessage();
+
+            } finally {
+                $deletedMessages[] = $deletedMessageDto;
+            }
+        }
+
+        return TelegramBotOutResponseDto::create($dto, ['status' => true, 'deletedMessages' => $deletedMessages]);
     }
 
 

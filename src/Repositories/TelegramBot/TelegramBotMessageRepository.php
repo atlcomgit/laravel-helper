@@ -7,12 +7,13 @@ namespace Atlcom\LaravelHelper\Repositories\TelegramBot;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotMessageDto;
-use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @internal
@@ -39,6 +40,7 @@ class TelegramBotMessageRepository extends DefaultRepository
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
+                // ->withTrashed()
                 ->find($messageId)
         );
     }
@@ -56,9 +58,69 @@ class TelegramBotMessageRepository extends DefaultRepository
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
+                // ->withTrashed()
                 ->ofExternalMessageId($externalMessageId)
                 ->when($type, static fn ($q, $v) => $q->ofType($v))
                 ->first()
+        );
+    }
+
+
+    /**
+     * Возвращает коллекцию сообщений по внешним external_message_id
+     *
+     * @param array<int> $externalMessageIds
+     * @param bool $withTrashed
+     * @return Collection<TelegramBotMessage>
+     */
+    public function getByExternalMessageIds(array $externalMessageIds, bool $withTrashed = false): Collection
+    {
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereIn('external_message_id', $externalMessageIds)
+                // ->when($withTrashed, static fn ($q) => $q->withTrashed())
+                ->get()
+        );
+    }
+
+
+    /**
+     * Возвращает коллекцию сообщений по внешним external_message_id
+     *
+     * @param array<int> $ids
+     * @param bool $withTrashed
+     * @return Collection<TelegramBotMessage>
+     */
+    public function getByIds(array $ids, bool $withTrashed = false): Collection
+    {
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereIn('id', $ids)
+                // ->when($withTrashed, static fn ($q) => $q->withTrashed())
+                ->get()
+        );
+    }
+
+
+    /**
+     * Удаляет сообщения по внешним external_message_id
+     *
+     * @param array<int> $externalMessageIds
+     * @return int
+     */
+    public function deleteByExternalMessageIds(array $externalMessageIds): int
+    {
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereIn('external_message_id', $externalMessageIds)
+                ->where('status', '!=', TelegramBotMessageStatusEnum::Delete)
+                ->update(['status' => TelegramBotMessageStatusEnum::Delete/*, 'deleted_at' => now()*/])
         );
     }
 
@@ -76,6 +138,7 @@ class TelegramBotMessageRepository extends DefaultRepository
             ? $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
+                // ->withTrashed()
                 ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
                 ->orderByDesc('id')
                 ->first()
@@ -96,6 +159,7 @@ class TelegramBotMessageRepository extends DefaultRepository
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
+                // ->withTrashed()
                 ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->chat->id))
                 ->ofType(TelegramBotMessageTypeEnum::Outgoing)
                 ->whereNotIn('slug', ['', 'unknown', 'undefined', 'unrecognized', 'none', 'null'])
@@ -118,6 +182,7 @@ class TelegramBotMessageRepository extends DefaultRepository
             ? $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
+                // ->withTrashed()
                 ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $dto->externalChatId))
                 ->ofType(TelegramBotMessageTypeEnum::Outgoing)
                 ->whereNotIn('slug', ['', 'unknown', 'undefined', 'unrecognized', 'none', 'null'])

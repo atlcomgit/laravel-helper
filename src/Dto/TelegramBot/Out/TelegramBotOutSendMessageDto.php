@@ -11,9 +11,9 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 /**
  * Dto бота telegram
  * 
- * @method resizeKeyboard()
- * @method oneTimeKeyboard()
- * @method removeKeyboard()
+ * @method TelegramBotOutSendMessageDto resizeKeyboard(bool $value)
+ * @method TelegramBotOutSendMessageDto oneTimeKeyboard(bool $value)
+ * @method TelegramBotOutSendMessageDto removeKeyboard(bool $value)
  */
 class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {

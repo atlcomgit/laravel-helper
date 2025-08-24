@@ -12,5 +12,5 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 class TelegramBotOutDeleteMessageDto extends TelegramBotOutDto
 {
     public string|int $externalChatId;
-    public int $messageId;
+    public int $externalMessageId;
 }

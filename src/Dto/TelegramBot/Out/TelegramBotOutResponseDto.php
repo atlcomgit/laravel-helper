@@ -17,6 +17,8 @@ class TelegramBotOutResponseDto extends DefaultDto
     public ?bool $result;
     public ?string $description;
     public ?TelegramBotInMessageDto $message;
+    /** @var \Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInDeletedMessageDto[] $deletedMessages */
+    public ?array $deletedMessages;
 
 
     /**
@@ -34,6 +36,7 @@ class TelegramBotOutResponseDto extends DefaultDto
 
                 default => null,
             },
+            'deletedMessages' => 'array',
         ];
     }
 

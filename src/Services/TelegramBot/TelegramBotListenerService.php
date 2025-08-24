@@ -106,6 +106,8 @@ class TelegramBotListenerService extends DefaultService
     {
         try {
             if (!$dto->response->status || !$dto->response->message) {
+                !$dto->response->deletedMessages ?: $this->deleting($dto->response->deletedMessages);
+
                 return;
             }
 
@@ -198,6 +200,22 @@ class TelegramBotListenerService extends DefaultService
                 'Сообщение' => $dto,
                 'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);
+        }
+    }
+
+
+    /**
+     * Обрабатывает удаление сообщений телеграм бота
+     *
+     * @param \Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInDeletedMessageDto[] $deletedMessages
+     * @return void
+     */
+    public function deleting(array $deletedMessages): void
+    {
+        $telegramBotMessages = $this->telegramBotMessageService->deleteMessages($deletedMessages);
+
+        foreach ($telegramBotMessages as $telegramBotMessage) {
+            event(new TelegramBotMessageEvent($telegramBotMessage));
         }
     }
 }

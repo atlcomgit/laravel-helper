@@ -25,6 +25,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotChatRepository;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @internal
@@ -97,7 +98,7 @@ class TelegramBotMessageService extends DefaultService
             $lastMessageIn = $this->telegramBotMessageRepository->getById($dto->previousMessageId);
             $lastMessageOut = $this->telegramBotMessageRepository->getLastMessageOutgoing($dto);
             $result = $lastMessageOut
-                && !($lastMessageIn->text === '/start')
+                && !($lastMessageIn?->text === '/start')
                 && ($lastMessageOut->type === TelegramBotMessageTypeEnum::Outgoing)
                 && (
                     ($lastMessageOut->slug === $dto->slug)
@@ -117,7 +118,7 @@ class TelegramBotMessageService extends DefaultService
                 )
             ;
 
-            !($result && (isLocal() || isDev())) ?: telegram([
+            !(false && $result && (isLocal() || isDev())) ?: telegram([
                 'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
                 'Событие' => 'Повторное сообщение бота отменено',
                 'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
@@ -234,5 +235,24 @@ class TelegramBotMessageService extends DefaultService
         );
 
         return array_filter($commands);
+    }
+
+
+    /**
+     * Удаляет сообщения и возвращает коллекцию удаленных сообщений
+     *
+     * @param array $deletedMessages
+     * @return Collection<TelegramBotMessage>
+     */
+    public function deleteMessages(array $deletedMessages): Collection
+    {
+        $externalMessageIds = collect($deletedMessages)->where('status', true)->pluck('externalMessageId')->toArray();
+        $telegramBotMessages = (
+            $externalMessageIds && $this->telegramBotMessageRepository->deleteByExternalMessageIds($externalMessageIds)
+        )
+            ? $this->telegramBotMessageRepository->getByExternalMessageIds($externalMessageIds, true)
+            : collect();
+
+        return $telegramBotMessages;
     }
 }

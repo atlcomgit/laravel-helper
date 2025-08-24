@@ -138,7 +138,7 @@ class ExampleService extends DefaultService
 
 ##### ModelLog
 
-Логирование изменений модели в таблице helper_model_logs
+Логирование изменений модели в таблице helper_model_logs (withModelLog)
 
 ```php
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
@@ -223,7 +223,7 @@ Route::get('/example', [ExampleController::class, 'example']);
 
 ##### QueryLog
 
-Логирование query запросов в таблице helper_query_logs
+Логирование query запросов в таблице helper_query_logs (withQueryLog или withLog)
 
 ```php
 use Atlcom\Hlp;
@@ -263,7 +263,7 @@ class ExampleRepository extends DefaultRepository
 
 ##### QueueLog
 
-Логирование очередей в таблице helper_queue_logs
+Логирование очередей в таблице helper_queue_logs (withQueueLog или withLog)
 
 ```php
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
@@ -288,7 +288,7 @@ dispatch((new ExampleJob())->withQueueLog());
 
 ##### ViewLog
 
-Логирование рендеринга blade шаблонов в таблице helper_view_logs
+Логирование рендеринга blade шаблонов в таблице helper_view_logs (withViewLog или withLog)
 
 ```php
 use Atlcom\LaravelHelper\Defaults\DefaultController;
@@ -309,7 +309,7 @@ class ExampleController extends DefaultController
 
 ##### HttpCache
 
-Кеширование входящих http запросов
+Кеширование входящих http запросов (withCache)
 
 ```php
 use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
@@ -331,7 +331,7 @@ Http::withCache()->post('https://timeapi.io/api/Time/current/zone?timeZone=UTC',
 
 ##### QueryCache
 
-Кеширование query запросов
+Кеширование query запросов (withQueryCache или withCache)
 
 ```php
 use Atlcom\Hlp;
@@ -362,7 +362,7 @@ class ExampleRepository extends DefaultRepository
 
 ##### ViewCache
 
-Кеширование рендеринга blade шаблонов
+Кеширование рендеринга blade шаблонов (withViewCache или withCache)
 
 ```php
 use Atlcom\LaravelHelper\Defaults\DefaultController;
