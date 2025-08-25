@@ -203,8 +203,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
             // Запуск команд по расписанию
             $this->app->booted(function () {
                 $schedule = $this->app->make(Schedule::class);
-                $schedule->command(OptimizeCommand::class, ['--telegram' => true, '--schedule' => true])
-                    ->dailyAt('03:00');
+                $schedule->command(OptimizeCommand::class, ['--telegram', '--schedule'])->dailyAt('03:00');
             });
 
             // Запуск команд при выполнении artisan optimize
