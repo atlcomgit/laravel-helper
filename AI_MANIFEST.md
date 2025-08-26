@@ -162,6 +162,7 @@ return new class extends Migration {
 - Названия классов тестов должны быть в `PascalCase`.
 - Названия методов тестов должны быть в `camelCase` и начинаться с полного названия тестируемого метода.
 - Добавляй `PHPDoc` для методов в тестах.
+- Используй по возможности генерацию данных через `fake`.
 - Запуск: `make phpunit *`. Конфигурация — `phpunit.xml` (ENV=testing, драйверы: cache/session=array, queue=sync, mail=array, storage=local).
 - Дополнительные папки тестов: `tests/Unit/**`, `tests/Feature/**`. Моки — `tests/Mock/**`.
 
