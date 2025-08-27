@@ -17,11 +17,20 @@ use Illuminate\Support\Facades\App;
  * @property-read bool $isCached
  * @property-read bool $isFromCache
  * 
- * @method static|EloquentBuilder withQueryCache(int|bool|null $seconds = null)
- * @method static|EloquentBuilder withQueryLog(?bool $enabled = null)
- * @method static|EloquentBuilder setCached(bool $value)
- * @method static|EloquentBuilder setFromCached(bool $value)
- * @method static|EloquentBuilder flushCache()
+ * @method self|EloquentBuilder withQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder withCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder withoutQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder withoutCache(int|bool|null $seconds = null)
+ * 
+ * @method self|EloquentBuilder withQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder withLog(?bool $enabled = null)
+ * @method self|EloquentBuilder withoutQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder withoutLog(?bool $enabled = null)
+ * 
+ * @method self|EloquentBuilder setCached(bool $value)
+ * @method self|EloquentBuilder setFromCached(bool $value)
+ * @method self|EloquentBuilder flushCache()
+ * 
  * @method bool isCached()
  * @method bool isFromCached()
  * 

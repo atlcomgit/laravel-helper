@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Трейт для подключения динамических таблиц к модели
+ * 
+ * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
  */
 trait DynamicTableModelTrait
 {

@@ -28,8 +28,17 @@ use Throwable;
  * 
  * @template TModel of \Illuminate\Database\Eloquent\Model
  * @template TValue
- * @method static|EloquentBuilder|QueryBuilder withQueryCache(int|bool|null $seconds = null)
- * @method static|EloquentBuilder|QueryBuilder withQueryLog(?bool $enabled = null)
+ * 
+ * @method self|EloquentBuilder|QueryBuilder withQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder withCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder withoutQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder withoutCache(int|bool|null $seconds = null)
+ * 
+ * @method self|EloquentBuilder|QueryBuilder withQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder withLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder withoutQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder withoutLog(?bool $enabled = null)
+ * 
  * @mixin \Illuminate\Database\Eloquent\Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @mixin Connection
