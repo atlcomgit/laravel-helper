@@ -35,10 +35,4 @@ enum TelegramBotLanguageEnum: string
             default => null,
         };
     }
-
-
-    public function label(): ?string
-    {
-        return self::getLabel($this);
-    }
 }

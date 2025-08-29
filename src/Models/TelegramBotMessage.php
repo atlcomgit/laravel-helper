@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Resources\Json\JsonResource;
+use UnitEnum;
 
 /**
  * Модель: Сообщение телеграм бота
@@ -85,6 +87,9 @@ class TelegramBotMessage extends DefaultModel
     ];
 
 
+    /** CONFIG */
+
+
     public function __construct()
     {
         parent::__construct();
@@ -106,6 +111,19 @@ class TelegramBotMessage extends DefaultModel
     }
 
 
+    /**
+     * Общий ресурс модели
+     *
+     * @param UnitEnum|string|null $structure
+     * @return JsonResource
+     */
+    public function toResource(UnitEnum|string|null $structure = null): JsonResource
+    {
+        // return TelegramBotMessageResource::make($this)->setStructure($structure);
+        return parent::toResource($structure);
+    }
+
+
     /** ATTRIBUTES */
 
 
@@ -116,7 +134,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Связь с чатом бота телеграм
+     * Отношение: Связь с чатом бота телеграм
      *
      * @return Relation
      */
@@ -127,7 +145,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Связь с пользователем бота телеграм
+     * Отношение: Связь с пользователем бота телеграм
      *
      * @return Relation
      */
@@ -138,7 +156,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Связь с цитируемым сообщением бота телеграм
+     * Отношение: Связь с цитируемым сообщением бота телеграм
      *
      * @return Relation
      */
@@ -149,7 +167,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Предыдущее сообщение
+     * Отношение: Предыдущее сообщение
      *
      * @return Relation
      */
@@ -163,7 +181,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Фильтр по uuid
+     * Фильтр: по uuid
      *
      * @param Builder $query
      * @param string $uuid
@@ -176,7 +194,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Фильтр по типу сообщения
+     * Фильтр: по типу сообщения
      *
      * @param Builder $query
      * @param TelegramBotMessageTypeEnum $type
@@ -189,7 +207,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Фильтр по статусу сообщения
+     * Фильтр: по статусу сообщения
      *
      * @param Builder $query
      * @param TelegramBotMessageStatusEnum $status
@@ -202,7 +220,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Фильтр по external_message_id
+     * Фильтр: по external_message_id
      *
      * @param Builder $query
      * @param int $externalMessageId
@@ -215,7 +233,7 @@ class TelegramBotMessage extends DefaultModel
 
 
     /**
-     * Фильтр по slug
+     * Фильтр: по slug
      *
      * @param Builder $query
      * @param ?string $slug

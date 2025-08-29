@@ -7,7 +7,6 @@ namespace Atlcom\LaravelHelper\Traits;
 use Atlcom\LaravelHelper\Enums\ModelConfigFilesEnum;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 use Exception;
 
@@ -222,35 +221,6 @@ trait ModelTrait
             array_keys($model->getCasts()),
             array_keys($model->getModelCasts()),
         );
-    }
-
-
-    /**
-     * [Description for toResource]
-     *
-     * @param string|BackedEnum|null $resourceClass
-     * @return JsonResource
-     */
-    // #[Override()]
-    public function toResource(string|BackedEnum|null $resourceClass = null): JsonResource
-    {
-        static::$resource = $resourceClass;
-
-        return parent::toResource();
-    }
-
-
-    // #[Override()]
-    public static function guessResourceName(): array
-    {
-        $configResources = static::getModelConfig(static::class)[ModelConfigFilesEnum::ModelConfigResources->value];
-
-        return match (true) {
-            is_string(static::$resource) => $configResources[static::$resource] ?? [],
-            static::$resource instanceof BackedEnum => $configResources[static::$resource->value] ?? [],
-
-            default => [],
-        };
     }
 
 

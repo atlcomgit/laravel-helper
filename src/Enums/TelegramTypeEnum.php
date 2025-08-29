@@ -48,15 +48,4 @@ enum TelegramTypeEnum: string
             default => null,
         };
     }
-
-
-    /**
-     * Возвращает описание ключа
-     *
-     * @return string|null
-     */
-    public function label(): ?string
-    {
-        return self::getLabel($this);
-    }
 }

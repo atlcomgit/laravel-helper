@@ -66,7 +66,8 @@ abstract class DefaultDto extends Dto implements Arrayable
     // #[Override()]
     public function rules(): array
     {
-        return [];
+        return parent::rules();
+        ;
     }
 
 

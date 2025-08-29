@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
 
 /**
@@ -25,5 +28,15 @@ class CollectionMacrosService extends DefaultService
                 'toArrayRecursive',
                 fn () => /** @var Collection $this */ Hlp::objectToArrayRecursive($this)
             );
+
+        Collection::macro('toResource', fn (?string $structure)
+            => JsonResource::collection(
+                $this->map(static fn (mixed $item) => match (true) {
+                    $item instanceof DefaultModel => $item->toResource($structure),
+                    $item instanceof Model => $item->toArray(),
+
+                    default => $item,
+                }),
+            ));
     }
 }

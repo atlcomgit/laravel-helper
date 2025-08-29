@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Resources\Json\JsonResource;
+use UnitEnum;
 
 /**
  * Модель: Чат телеграм бота
@@ -60,6 +62,9 @@ class TelegramBotChat extends DefaultModel
     ];
 
 
+    /** CONFIG */
+
+
     public function __construct()
     {
         parent::__construct();
@@ -81,6 +86,19 @@ class TelegramBotChat extends DefaultModel
     }
 
 
+    /**
+     * Общий ресурс модели
+     *
+     * @param UnitEnum|string|null $structure
+     * @return JsonResource
+     */
+    public function toResource(UnitEnum|string|null $structure = null): JsonResource
+    {
+        // return TelegramBotChatResource::make($this)->setStructure($structure);
+        return parent::toResource($structure);
+    }
+
+
     /** ATTRIBUTES */
 
 
@@ -90,11 +108,8 @@ class TelegramBotChat extends DefaultModel
     /** RELATIONS */
 
 
-    /** SCOPES */
-
-
     /**
-     * Связь с сообщениями бота телеграм
+     * Отношение: Связь с сообщениями бота телеграм
      *
      * @return Relation
      */
@@ -104,8 +119,11 @@ class TelegramBotChat extends DefaultModel
     }
 
 
+    /** SCOPES */
+
+
     /**
-     * Фильтр по uuid
+     * Фильтр: по uuid
      *
      * @param Builder $query
      * @param string $uuid
@@ -118,7 +136,7 @@ class TelegramBotChat extends DefaultModel
 
 
     /**
-     * Фильтр по external_chat_id
+     * Фильтр: по external_chat_id
      *
      * @param Builder $query
      * @param int $externalChatId

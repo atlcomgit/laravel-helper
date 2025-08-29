@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\LaravelHelper\Traits\ModelCacheTrait;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
+use Atlcom\LaravelHelper\Traits\ModelResourceTrait;
 use Atlcom\LaravelHelper\Traits\ModelTrait;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,5 +21,6 @@ abstract class DefaultModel extends Model
     use ModelLogTrait;
     use ModelCacheTrait;
     use ModelTrait;
+    use ModelResourceTrait;
     // use ModelHasFilesTrait;
 }

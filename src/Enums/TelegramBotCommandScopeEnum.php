@@ -47,10 +47,4 @@ enum TelegramBotCommandScopeEnum: string
             default => null,
         };
     }
-
-
-    public function label(): ?string
-    {
-        return self::getLabel($this);
-    }
 }

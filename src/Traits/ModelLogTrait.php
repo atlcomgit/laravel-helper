@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\App;
  * @property bool|null $withModelLog
  * @property-read array $modelLogExcludeAttributes
  * @property-read array $modelLogHiddenAttributes
+ * 
  * @mixin \Atlcom\LaravelHelper\Defaults\DefaultModel
  */
 trait ModelLogTrait
