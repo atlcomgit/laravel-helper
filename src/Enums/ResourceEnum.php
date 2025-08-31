@@ -17,6 +17,7 @@ enum ResourceEnum: string
 
     case Default = 'default';
     case Index = 'index';
+    case Form = 'form';
     case Create = 'create';
     case Read = 'read';
     case Update = 'update';
@@ -45,6 +46,7 @@ enum ResourceEnum: string
         return match ($enum) {
             self::Default => 'Ресурс по умолчанию',
             self::Index => 'Ресурс для таблицы',
+            self::Form => 'Ресурс для формы записи',
             self::Create => 'Ресурс для создания записи',
             self::Read => 'Ресурс для чтения записи',
             self::Update => 'Ресурс для обновления записи',

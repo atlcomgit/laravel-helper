@@ -29,15 +29,15 @@ use Throwable;
  * @template TModel of \Illuminate\Database\Eloquent\Model
  * @template TValue
  * 
- * @method self|EloquentBuilder|QueryBuilder withQueryCache(int|bool|null $seconds = null)
- * @method self|EloquentBuilder|QueryBuilder withCache(int|bool|null $seconds = null)
- * @method self|EloquentBuilder|QueryBuilder withoutQueryCache(int|bool|null $seconds = null)
- * @method self|EloquentBuilder|QueryBuilder withoutCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withoutQueryCache(int|bool|null $seconds = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withoutCache(int|bool|null $seconds = null)
  * 
- * @method self|EloquentBuilder|QueryBuilder withQueryLog(?bool $enabled = null)
- * @method self|EloquentBuilder|QueryBuilder withLog(?bool $enabled = null)
- * @method self|EloquentBuilder|QueryBuilder withoutQueryLog(?bool $enabled = null)
- * @method self|EloquentBuilder|QueryBuilder withoutLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withoutQueryLog(?bool $enabled = null)
+ * @method self|EloquentBuilder|QueryBuilder|TModel withoutLog(?bool $enabled = null)
  * 
  * @mixin \Illuminate\Database\Eloquent\Builder
  * @mixin \Illuminate\Database\Query\Builder
