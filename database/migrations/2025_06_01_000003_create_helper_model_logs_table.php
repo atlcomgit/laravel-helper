@@ -44,7 +44,7 @@ return new class extends Migration {
             $table->string('model_id')->nullable(true)->index()
                 ->comment('id логируемой записи');
             $table->enum('type', ModelLogTypeEnum::enumValues())->nullable(false)->index()
-                ->default(ModelLogTypeEnum::getDefault())
+                ->default(ModelLogTypeEnum::enumDefault())
                 ->comment('Тип логирования');
             $table->jsonb('attributes')->nullable(false)
                 ->comment('Текущие атрибуты логируемой записи');

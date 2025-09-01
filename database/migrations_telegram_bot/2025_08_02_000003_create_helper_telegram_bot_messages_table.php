@@ -31,10 +31,10 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid сообщения телеграм бота');
             $table->enum('type', TelegramBotMessageTypeEnum::enumValues())->nullable(false)->index()
-                ->default(TelegramBotMessageTypeEnum::getDefault())
+                ->default(TelegramBotMessageTypeEnum::enumDefault())
                 ->comment('Тип сообщения телеграм бота');
             $table->enum('status', TelegramBotMessageStatusEnum::enumValues())->nullable(false)->index()
-                ->default(TelegramBotMessageStatusEnum::getDefault())
+                ->default(TelegramBotMessageStatusEnum::enumDefault())
                 ->comment('Статус сообщения телеграм бота');
             $table->bigInteger('external_message_id')->nullable(false)->index()
                 ->comment('Внешний Id сообщения телеграм бота');

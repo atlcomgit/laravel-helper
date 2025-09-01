@@ -53,7 +53,7 @@ return new class extends Migration {
             $table->boolean('is_from_cache')->nullable(false)
                 ->comment('Флаг обращения query запроса в кеш');
             $table->enum('status', QueryLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(QueryLogStatusEnum::getDefault())
+                ->default(QueryLogStatusEnum::enumDefault())
                 ->comment('Статус выполнения query запроса');
             $table->decimal('duration', 10, 3)->nullable(true)
                 ->comment('Время выполнения query запроса');

@@ -46,13 +46,13 @@ return new class extends Migration {
 
             $table->string('name')->nullable(true)->index();
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()
-                ->default(HttpLogTypeEnum::getDefault())
+                ->default(HttpLogTypeEnum::enumDefault())
                 ->comment('Тип http запроса');
             $table->enum('method', HttpLogMethodEnum::enumValues())->nullable(false)->index()
-                ->default(HttpLogMethodEnum::getDefault())
+                ->default(HttpLogMethodEnum::enumDefault())
                 ->comment('Метод http запроса');
             $table->enum('status', HttpLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(HttpLogStatusEnum::getDefault())
+                ->default(HttpLogStatusEnum::enumDefault())
                 ->comment('Статус http запроса');
             $table->string('ip')->nullable(true)->index()
                 ->comment('Ip адрес http запроса');

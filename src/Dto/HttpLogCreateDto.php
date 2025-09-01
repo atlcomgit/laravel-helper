@@ -58,7 +58,7 @@ class HttpLogCreateDto extends Dto
     {
         return [
             'uuid' => uuid(),
-            'status' => HttpLogStatusEnum::getDefault(),
+            'status' => HttpLogStatusEnum::enumDefault(),
             'isCached' => false,
             'isFromCache' => false,
         ];

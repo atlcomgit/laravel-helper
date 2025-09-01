@@ -50,7 +50,7 @@ class QueryLogDto extends Dto
             'userId' => user(returnOnlyId: true),
             'isCached' => false,
             'isFromCache' => false,
-            'status' => QueryLogStatusEnum::getDefault(),
+            'status' => QueryLogStatusEnum::enumDefault(),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
             'isUpdated' => false,

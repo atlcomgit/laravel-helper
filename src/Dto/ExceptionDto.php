@@ -109,6 +109,7 @@ class ExceptionDto extends Dto
         );
 
         // Отправляем в телеграм, кроме указанных ошибок
+        $uri = TelegramLogDto::getMethod() . ' ' . TelegramLogDto::getUri();
         $exclude = Lh::config(ConfigEnum::TelegramLog, TelegramTypeEnum::Error->value . '.exclude');
         if (
             (
@@ -123,6 +124,7 @@ class ExceptionDto extends Dto
             && !(is_array($exclude) && in_array($exception::class, $exclude))
             && !is_subclass_of($exception, WithoutTelegramException::class)
             && !($exception instanceof WithoutTelegramException)
+            && ($uri !== 'CLI Standard input code')
             && ($thisDto->code < 100 || $thisDto->code >= 400)
         ) {
             $route = ($request ??= request())?->route();

@@ -39,7 +39,7 @@ return new class extends Migration {
             $table->jsonb('arguments')->nullable(true)
                 ->comment('Аргументы метода');
             $table->enum('status', ProfilerLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(ProfilerLogStatusEnum::getDefault())
+                ->default(ProfilerLogStatusEnum::enumDefault())
                 ->comment('Статус выполнения метода');
             $table->longText('result')->nullable(true)
                 ->comment('Результат метода');

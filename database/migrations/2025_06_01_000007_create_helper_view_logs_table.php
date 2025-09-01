@@ -57,7 +57,7 @@ return new class extends Migration {
             $table->boolean('is_from_cache')->nullable(false)
                 ->comment('Флаг обращения рендеринга blade шаблона в кеш');
             $table->enum('status', ViewLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(ViewLogStatusEnum::getDefault())
+                ->default(ViewLogStatusEnum::enumDefault())
                 ->comment('Статус выполнения рендеринга blade шаблона');
             $table->decimal('duration', 10, 3)->nullable(true)
                 ->comment('Время выполнения рендеринга blade шаблона');

@@ -61,16 +61,16 @@
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.10",
+            "version": "v1.23.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "5913cb9feae736827213f14ce951c59b3d6ff967"
+                "reference": "e13be5de7f0d08266a156b6292cf10227372e089"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/5913cb9feae736827213f14ce951c59b3d6ff967",
-                "reference": "5913cb9feae736827213f14ce951c59b3d6ff967",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/e13be5de7f0d08266a156b6292cf10227372e089",
+                "reference": "e13be5de7f0d08266a156b6292cf10227372e089",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.10"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.12"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-08-22T08:52:58+00:00"
+            "time": "2025-09-01T04:12:15+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -3983,16 +3983,16 @@
         },
         {
             "name": "orchestra/testbench-core",
-            "version": "v9.16.0",
+            "version": "v9.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestral/testbench-core.git",
-                "reference": "471f1aa6a607b7280dca066f1b160ce70450e163"
+                "reference": "7e129b7cf7d8c8b854545f0410dd138ff1318c85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/orchestral/testbench-core/zipball/471f1aa6a607b7280dca066f1b160ce70450e163",
-                "reference": "471f1aa6a607b7280dca066f1b160ce70450e163",
+                "url": "https://api.github.com/repos/orchestral/testbench-core/zipball/7e129b7cf7d8c8b854545f0410dd138ff1318c85",
+                "reference": "7e129b7cf7d8c8b854545f0410dd138ff1318c85",
                 "shasum": ""
             },
             "require": {
@@ -4073,7 +4073,7 @@
                 "issues": "https://github.com/orchestral/testbench/issues",
                 "source": "https://github.com/orchestral/testbench-core"
             },
-            "time": "2025-08-12T23:55:23+00:00"
+            "time": "2025-09-01T00:08:55+00:00"
         },
         {
             "name": "orchestra/workbench",

@@ -43,7 +43,7 @@ return new class extends Migration {
             $table->longText('exception')->nullable(true)
                 ->comment('Исключение консольной команды');
             $table->enum('status', ConsoleLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(ConsoleLogStatusEnum::getDefault())
+                ->default(ConsoleLogStatusEnum::enumDefault())
                 ->comment('Статус выполнения консольной команды');
             $table->decimal('duration', 10, 3)->nullable(true)
                 ->comment('Время выполнения команды');

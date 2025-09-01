@@ -23,7 +23,7 @@ enum ApplicationTypeEnum: string
      *
      * @return mixed
      */
-    public static function getDefault(): mixed
+    public static function enumDefault(): mixed
     {
         return null;
     }
@@ -35,7 +35,7 @@ enum ApplicationTypeEnum: string
      * @param BackedEnum|null $enum
      * @return string|null
      */
-    public static function getLabel(?BackedEnum $enum): ?string
+    public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
             self::Command => 'Консольная команда',

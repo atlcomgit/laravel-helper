@@ -52,7 +52,7 @@ class ViewLogDto extends Dto
             'userId' => user(returnOnlyId: true),
             'isCached' => false,
             'isFromCache' => false,
-            'status' => ViewLogStatusEnum::getDefault(),
+            'status' => ViewLogStatusEnum::enumDefault(),
 
             'withViewLog' => false,
             'startTime' => (string)now()->getTimestampMs(),

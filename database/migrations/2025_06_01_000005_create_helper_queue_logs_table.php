@@ -59,7 +59,7 @@ return new class extends Migration {
             $table->integer('attempts')->nullable(true)
                 ->comment('Попытка запуска очереди');
             $table->enum('status', QueueLogStatusEnum::enumValues())->nullable(false)->index()
-                ->default(QueueLogStatusEnum::getDefault())
+                ->default(QueueLogStatusEnum::enumDefault())
                 ->comment('Статус выполнения очереди');
             $table->longText('exception')->nullable(true)
                 ->comment('Исключение очереди');

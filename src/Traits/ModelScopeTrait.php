@@ -34,7 +34,7 @@ trait ModelScopeTrait
                     /** @var SortScopeDto $sortDto */
                     !$sortDto->field ?: $query->orderBy(
                         $sortDto->field,
-                        (SortDirectionEnum::enumFrom($sortDto->direction) ?: SortDirectionEnum::getDefault())->value,
+                        (SortDirectionEnum::enumFrom($sortDto->direction) ?: SortDirectionEnum::enumDefault())->value,
                     );
                 }
             });

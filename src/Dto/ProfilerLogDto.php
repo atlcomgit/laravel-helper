@@ -67,7 +67,7 @@ class ProfilerLogDto extends DefaultDto
     {
         return [
             'uuid' => uuid(),
-            'status' => ProfilerLogStatusEnum::getDefault(),
+            'status' => ProfilerLogStatusEnum::enumDefault(),
             'count' => 0,
 
             'isUpdated' => false,

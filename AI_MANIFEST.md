@@ -135,7 +135,7 @@ return new class extends Migration {
             $table->string('name')->nullable(true)
                 ->comment('...');
             $table->enum('type', ModelTypeEnum::getValues())->nullable(false)->index()
-                ->default(ModelTypeEnum::getDefault())
+                ->default(ModelTypeEnum::enumDefault())
                 ->comment('...');
 
             $table->timestamps();

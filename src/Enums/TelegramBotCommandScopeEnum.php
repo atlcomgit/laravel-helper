@@ -28,13 +28,13 @@ enum TelegramBotCommandScopeEnum: string
     /**
      * Значение по умолчанию
      */
-    public static function getDefault(): mixed
+    public static function enumDefault(): mixed
     {
         return self::Default ->value;
     }
 
 
-    public static function getLabel(?BackedEnum $enum): ?string
+    public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
             self::Default => 'По умолчанию',

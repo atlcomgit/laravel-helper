@@ -19,13 +19,13 @@ enum TelegramBotLanguageEnum: string
     case Uk = 'uk';
     case De = 'de';
 
-    public static function getDefault(): mixed
+    public static function enumDefault(): mixed
     {
         return self::En->value;
     }
 
 
-    public static function getLabel(?BackedEnum $enum): ?string
+    public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
             self::Ru => 'Русский',

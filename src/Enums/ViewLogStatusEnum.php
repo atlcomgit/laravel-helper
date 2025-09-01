@@ -22,7 +22,7 @@ enum ViewLogStatusEnum: string
      *
      * @return mixed
      */
-    public static function getDefault(): mixed
+    public static function enumDefault(): mixed
     {
         return self::Process->value;
     }
@@ -34,7 +34,7 @@ enum ViewLogStatusEnum: string
      * @param BackedEnum|null $enum
      * @return string|null
      */
-    public static function getLabel(?BackedEnum $enum): ?string
+    public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
             self::Process => 'В процессе',

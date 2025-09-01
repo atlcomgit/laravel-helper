@@ -52,7 +52,7 @@ class QueueLogDto extends Dto
         return [
             'userId' => user(returnOnlyId: true),
             'attempts' => 0,
-            'status' => QueueLogStatusEnum::getDefault(),
+            'status' => QueueLogStatusEnum::enumDefault(),
 
             'withQueueLog' => false,
             'isUpdated' => false,
