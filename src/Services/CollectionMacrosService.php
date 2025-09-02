@@ -37,6 +37,7 @@ class CollectionMacrosService extends DefaultService
                 /** @var Collection $this */
                 $this->map(static fn (mixed $item) => match (true) {
                     $item instanceof DefaultModel => $item->toResource($structure),
+                    method_exists($item, 'toResource') => $item->toResource($structure),
                     $item instanceof Model => $item->toArray(),
 
                     default => $item,

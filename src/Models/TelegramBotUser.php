@@ -47,7 +47,6 @@ use UnitEnum;
 class TelegramBotUser extends DefaultModel
 {
     use SoftDeletes;
-    use HasFactory;
     use DynamicTableModelTrait;
 
 
