@@ -30,7 +30,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Atlcom\\LaravelHelper\\": "src"
+            "Atlcom\\LaravelHelper\\": "src/",
+            "Atlcom\\LaravelHelper\\Database\\Factories\\": "database/factories/"
         },
         "files":[
             "src/Helpers/helpers.php"

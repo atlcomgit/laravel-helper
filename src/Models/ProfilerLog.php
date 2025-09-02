@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\ProfilerLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\ProfilerLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -14,15 +14,20 @@ use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов query запросов
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<QueryLog>
+ * @extends Factory<QueryLog>
  */
 class QueryLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<QueryLog>
+     */
     protected $model = QueryLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

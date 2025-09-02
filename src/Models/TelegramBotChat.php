@@ -8,7 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\TelegramBotChatFactory;
+use Atlcom\LaravelHelper\Database\Factories\TelegramBotChatFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;

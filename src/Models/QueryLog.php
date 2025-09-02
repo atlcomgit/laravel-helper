@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\QueryLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\QueryLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;

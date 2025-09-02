@@ -6,7 +6,7 @@ namespace Atlcom\LaravelHelper\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\RouteLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\RouteLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Models\ModelLog;
@@ -10,15 +10,20 @@ use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов моделей
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<ModelLog>
+ * @extends Factory<ModelLog>
  */
 class ModelLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<ModelLog>
+     */
     protected $model = ModelLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

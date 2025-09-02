@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
@@ -8,12 +8,21 @@ use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Atlcom\LaravelHelper\Models\TelegramBotMessage>
+ * Фабрика
+ * @extends Factory<TelegramBotMessage>
  */
 class TelegramBotMessageFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<TelegramBotMessage>
+     */
+    protected $model = TelegramBotMessage::class;
+
+
+    /**
+     * Задает состояние свойств модели по умолчанию
      *
      * @return array<string, mixed>
      */
@@ -35,6 +44,26 @@ class TelegramBotMessageFactory extends Factory
             'edit_at' => fake()->randomElement([null, fake()->dateTime()]),
             'info' => fake()->randomElement([null, []]),
         ];
+    }
+
+
+    /**
+     * Конфигурация хуков фабрики
+     *
+     * @return static
+     */
+    public function configure(): static
+    {
+        return $this
+            ->afterMaking(function (TelegramBotMessage $model) {
+                // Здесь ещё нет записи в БД — можно принудительно задать guarded поля
+                $model->forceFill($this->definition());
+            })
+            ->afterCreating(function (TelegramBotMessage $model) {
+                // Здесь запись уже есть; можно выполнить пост-инициализацию
+                // Пример: вычисление агрегатов или логирование
+                // $model->refresh();
+            });
     }
 
 

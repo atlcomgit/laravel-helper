@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\ViewLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\ViewLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;

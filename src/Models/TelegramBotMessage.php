@@ -10,7 +10,7 @@ use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\TelegramBotMessageFactory;
+use Atlcom\LaravelHelper\Database\Factories\TelegramBotMessageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;

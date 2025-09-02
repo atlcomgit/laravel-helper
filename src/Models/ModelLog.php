@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\ModelLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\ModelLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

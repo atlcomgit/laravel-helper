@@ -95,7 +95,9 @@ class TelegramBotMessageService extends DefaultService
             ])
         ) {
             $lastMessage = $this->telegramBotMessageRepository->getLatestMessage($dto);
-            $lastMessageIn = $this->telegramBotMessageRepository->getById($dto->previousMessageId);
+            $lastMessageIn = $dto->previousMessageId
+                ? $this->telegramBotMessageRepository->getById($dto->previousMessageId)
+                : null;
             $lastMessageOut = $this->telegramBotMessageRepository->getLastMessageOutgoing($dto);
             $result = $lastMessageOut
                 && !($lastMessageIn?->text === '/start')

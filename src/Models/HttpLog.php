@@ -9,7 +9,7 @@ use Atlcom\LaravelHelper\Enums\HttpLogMethodEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\HttpLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\HttpLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User;

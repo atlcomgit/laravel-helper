@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Models\ViewLog;
@@ -9,15 +9,20 @@ use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов рендеринга blade шаблонов
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<ViewLog>
+ * @extends Factory<ViewLog>
  */
 class ViewLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<ViewLog>
+     */
     protected $model = ViewLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

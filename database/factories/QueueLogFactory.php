@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Models\QueueLog;
@@ -9,15 +9,20 @@ use Illuminate\Foundation\Auth\User;
 
 /**
  * Фабрика логов очередей
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<QueueLog>
+ * @extends Factory<QueueLog>
  */
 class QueueLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<QueueLog>
+     */
     protected $model = QueueLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

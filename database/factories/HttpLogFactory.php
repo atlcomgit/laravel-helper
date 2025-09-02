@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogMethodEnum;
@@ -13,15 +13,20 @@ use Illuminate\Support\Str;
 
 /**
  * Фабрика логов http запросов
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<HttpLog>
+ * @extends Factory<HttpLog>
  */
 class HttpLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<HttpLog>
+     */
     protected $model = HttpLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

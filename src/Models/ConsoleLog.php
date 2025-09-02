@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\ConsoleLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\ConsoleLogFactory;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

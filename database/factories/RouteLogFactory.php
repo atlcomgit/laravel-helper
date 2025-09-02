@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Models\RouteLog;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -8,15 +8,20 @@ use Illuminate\Support\Str;
 
 /**
  * Фабрика логов роутов
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<RouteLog>
+ * @extends Factory<RouteLog>
  */
 class RouteLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<RouteLog>
+     */
     protected $model = RouteLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -8,15 +8,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Фабрика логов консольных команд
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<ConsoleLog>
+ * @extends Factory<ConsoleLog>
  */
 class ConsoleLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<ConsoleLog>
+     */
     protected $model = ConsoleLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */

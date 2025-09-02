@@ -7,7 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
-use Database\Factories\QueueLogFactory;
+use Atlcom\LaravelHelper\Database\Factories\QueueLogFactory;
 use DateInterval;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Atlcom\LaravelHelper\Database\Factories;
 
 use Atlcom\LaravelHelper\Enums\ProfilerLogStatusEnum;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
@@ -8,15 +8,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Фабрика логов консольных команд
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<ProfilerLog>
+ * @extends Factory<ProfilerLog>
  */
 class ProfilerLogFactory extends Factory
 {
+    /**
+     * Связанная с фабрикой модель
+     *
+     * @var class-string<ProfilerLog>
+     */
     protected $model = ProfilerLog::class;
 
 
     /**
-     * Возвращает массив с данными для новой записи
+     * Задает состояние свойств модели по умолчанию
      * 
      * @return array<string, mixed>
      */
