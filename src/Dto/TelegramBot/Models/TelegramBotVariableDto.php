@@ -5,33 +5,24 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
-use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
-use Atlcom\LaravelHelper\Models\TelegramBotMessage;
-use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
-use Carbon\Carbon;
+use Atlcom\LaravelHelper\Models\TelegramBotVariable;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotVariableService;
 use Override;
 
 /**
- * Dto модели пользователя телеграм бота
+ * Dto модели переменной чата телеграм бота
  */
-class TelegramBotMessageDto extends DefaultDto
+class TelegramBotVariableDto extends DefaultDto
 {
     public ?int $id;
     public string $uuid;
-    public int $externalMessageId;
-    public ?int $externalUpdateId;
     public int $telegramBotChatId;
-    public int $telegramBotUserId;
     public ?int $telegramBotMessageId;
     public TelegramBotMessageTypeEnum $type;
-    public TelegramBotMessageStatusEnum $status;
-    public ?string $slug;
-    public string $text;
-    public Carbon $sendAt;
-    public ?Carbon $editAt;
-    public ?array $info;
+    public string $name;
+    public mixed $value;
 
 
     /**
@@ -58,12 +49,7 @@ class TelegramBotMessageDto extends DefaultDto
     #[Override()]
     protected function mappings(): array
     {
-        return [
-            'externalMessageId' => 'messageId',
-            'externalUpdateId' => 'updateId',
-            'sendAt' => 'date',
-            'editAt' => 'editDate',
-        ];
+        return [];
     }
 
 
@@ -76,7 +62,7 @@ class TelegramBotMessageDto extends DefaultDto
     #[Override()]
     protected function casts(): array
     {
-        return TelegramBotMessage::getModelCasts();
+        return TelegramBotVariable::getModelCasts();
     }
 
 
@@ -92,18 +78,18 @@ class TelegramBotMessageDto extends DefaultDto
         $this->serializeKeys(true)
             ->onlyNotNull()
             ->mappingKeys($this->mappings())
-            ->for(TelegramBotMessage::class);
+            ->for(TelegramBotVariable::class);
     }
 
 
     /**
      * Сохраняет пользователя телеграм бота в БД
      *
-     * @return TelegramBotMessage
+     * @return TelegramBotVariable
      */
-    public function save(): TelegramBotMessage
+    public function save(): TelegramBotVariable
     {
-        return app(TelegramBotMessageService::class)->save($this)
-            ?: TelegramBotException::except('Ошибка сохранения сообщения в БД');
+        return app(TelegramBotVariableService::class)->save($this)
+            ?: TelegramBotException::except('Ошибка сохранения переменной чата в БД');
     }
 }

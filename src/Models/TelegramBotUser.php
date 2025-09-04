@@ -10,7 +10,6 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotUserFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -101,6 +100,17 @@ class TelegramBotUser extends DefaultModel
     {
         // return TelegramBotUserResource::make($this)->setStructure($structure);
         return parent::toResource($structure);
+    }
+
+
+    /**
+     * Возвращает название таблицы модели
+     *
+     * @return string
+     */
+    public static function getTableName(): string
+    {
+        return Lh::getTable(ConfigEnum::TelegramBot, 'user');
     }
 
 

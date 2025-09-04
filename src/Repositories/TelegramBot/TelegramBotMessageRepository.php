@@ -204,12 +204,12 @@ class TelegramBotMessageRepository extends DefaultRepository
         return $this->withoutTelescope(function () use ($dto) {
             ($model = $this->getByExternalMessageId($dto->externalMessageId, $dto->type))
                 ? $model->update([
-                    'status' => $dto->status,
                     'external_message_id' => $dto->externalMessageId,
                     'external_update_id' => $dto->externalUpdateId,
                     'telegram_bot_chat_id' => $dto->telegramBotChatId,
                     'telegram_bot_user_id' => $dto->telegramBotUserId,
                     'telegram_bot_message_id' => $dto->telegramBotMessageId,
+                    'status' => $dto->status,
                     ...($dto->slug ? ['slug' => $dto->slug] : []),
                     'text' => $dto->text,
                     'send_at' => $dto->sendAt,
@@ -233,13 +233,13 @@ class TelegramBotMessageRepository extends DefaultRepository
                     ->withoutQueryCache()
                     ->create([
                         'uuid' => $dto->uuid,
-                        'type' => $dto->type,
-                        'status' => $dto->status,
                         'external_message_id' => $dto->externalMessageId,
                         'external_update_id' => $dto->externalUpdateId,
                         'telegram_bot_chat_id' => $dto->telegramBotChatId,
                         'telegram_bot_user_id' => $dto->telegramBotUserId,
                         'telegram_bot_message_id' => $dto->telegramBotMessageId,
+                        'type' => $dto->type,
+                        'status' => $dto->status,
                         'slug' => $dto->slug,
                         'text' => $dto->text,
                         'send_at' => $dto->sendAt,

@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Commands\QueryLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\QueueLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\RouteCacheCommand;
 use Atlcom\LaravelHelper\Commands\RouteLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\SwaggerCommand;
 use Atlcom\LaravelHelper\Commands\TelegramBotCommand;
 use Atlcom\LaravelHelper\Commands\ViewLogCleanupCommand;
 use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
@@ -187,6 +188,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
                 OptimizeCommand::class,
                 CacheClearCommand::class,
                 RouteCacheCommand::class,
+                SwaggerCommand::class,
 
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,

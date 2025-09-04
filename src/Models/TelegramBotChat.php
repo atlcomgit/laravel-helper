@@ -10,7 +10,6 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotChatFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -35,6 +34,8 @@ use UnitEnum;
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
+ * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotVariable> $telegramBotVariables
+ * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotVariable> telegramBotVariables()
  * 
  * @method static|Builder ofUuid(string $uuid)
  * @method static|Builder ofExternalChatId(int $externalChatId)
@@ -98,6 +99,17 @@ class TelegramBotChat extends DefaultModel
     }
 
 
+    /**
+     * Возвращает название таблицы модели
+     *
+     * @return string
+     */
+    public static function getTableName(): string
+    {
+        return Lh::getTable(ConfigEnum::TelegramBot, 'chat');
+    }
+
+
     /** ATTRIBUTES */
 
 
@@ -114,7 +126,18 @@ class TelegramBotChat extends DefaultModel
      */
     public function telegramBotMessages(): Relation
     {
-        return $this->hasMany(TelegramBotMessage::class, 'telegram_bot_user_id');
+        return $this->hasMany(TelegramBotMessage::class, 'telegram_bot_chat_id');
+    }
+
+
+    /**
+     * Отношение: Связь с переменными чата бота телеграм
+     *
+     * @return Relation
+     */
+    public function telegramBotVariables(): Relation
+    {
+        return $this->hasMany(TelegramBotVariable::class, 'telegram_bot_chat_id');
     }
 
 

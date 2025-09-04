@@ -2,25 +2,24 @@
 
 namespace Atlcom\LaravelHelper\Database\Factories;
 
-use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
-use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotVariableTypeEnum;
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
-use Atlcom\LaravelHelper\Models\TelegramBotUser;
+use Atlcom\LaravelHelper\Models\TelegramBotVariable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Фабрика
- * @extends Factory<TelegramBotMessage>
+ * @extends Factory<TelegramBotVariable>
  */
-class TelegramBotMessageFactory extends Factory
+class TelegramBotVariableFactory extends Factory
 {
     /**
      * Связанная с фабрикой модель
      *
-     * @var class-string<TelegramBotMessage>
+     * @var class-string<TelegramBotVariable>
      */
-    protected $model = TelegramBotMessage::class;
+    protected $model = TelegramBotVariable::class;
 
 
     /**
@@ -31,23 +30,15 @@ class TelegramBotMessageFactory extends Factory
     public function definition(): array
     {
         $telegramBotChat = TelegramBotChat::inRandomOrder()->first();
-        $telegramBotUser = TelegramBotUser::inRandomOrder()->first();
         $telegramBotMessage = TelegramBotMessage::inRandomOrder()->first();
 
         return [
             'uuid' => uuid(),
-            'external_message_id' => fake()->randomNumber(),
-            'external_update_id' => fake()->randomNumber(),
             'telegram_bot_chat_id' => $telegramBotChat?->id,
-            'telegram_bot_user_id' => $telegramBotUser?->id,
             'telegram_bot_message_id' => $telegramBotMessage?->id,
-            'type' => TelegramBotMessageTypeEnum::enumRandom(),
-            'status' => TelegramBotMessageStatusEnum::enumRandom(),
-            'slug' => fake()->slug(),
-            'text' => fake()->sentence(),
-            'send_at' => fake()->dateTime(),
-            'edit_at' => fake()->randomElement([null, fake()->dateTime()]),
-            'info' => fake()->randomElement([null, []]),
+            'type' => TelegramBotVariableTypeEnum::enumRandom(),
+            'name' => fake()->slug(),
+            'value' => fake()->sentence(),
         ];
     }
 
@@ -60,11 +51,11 @@ class TelegramBotMessageFactory extends Factory
     public function configure(): static
     {
         return $this
-            ->afterMaking(function (TelegramBotMessage $model) {
+            ->afterMaking(function (TelegramBotVariable $model) {
                 // Здесь ещё нет записи в БД — можно принудительно задать guarded поля
                 $model->forceFill($this->definition());
             })
-            ->afterCreating(function (TelegramBotMessage $model) {
+            ->afterCreating(function (TelegramBotVariable $model) {
                 // Здесь запись уже есть; можно выполнить пост-инициализацию
                 // Пример: вычисление агрегатов или логирование
                 // $model->refresh();
@@ -82,20 +73,6 @@ class TelegramBotMessageFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'telegram_bot_chat_id' => $telegramBotChat?->id,
-        ]);
-    }
-
-
-    /**
-     * Задает связь с пользователем телеграм бота
-     *
-     * @param TelegramBotUser|null $telegramBotUser
-     * @return static
-     */
-    public function withTelegramBotUser(?TelegramBotChat $telegramBotUser): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'telegram_bot_user_id' => $telegramBotUser?->id,
         ]);
     }
 

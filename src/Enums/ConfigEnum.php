@@ -16,6 +16,7 @@ enum ConfigEnum: string
     case Optimize = 'optimize';
     case Macros = 'macros';
     case Http = 'http';
+    case Swagger = 'swagger';
     case ConsoleLog = 'console_log';
     case HttpCache = 'http_cache';
     case HttpLog = 'http_log';
@@ -56,6 +57,7 @@ enum ConfigEnum: string
             self::Optimize => 'Оптимизация',
             self::Macros => 'Макрос',
             self::Http => 'Макрос http',
+            self::Swagger => 'Генератор swagger',
             self::ConsoleLog => 'Лог консольной команды',
             self::HttpCache => 'Кеш http запроса',
             self::HttpLog => 'Лог http запроса',

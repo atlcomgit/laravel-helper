@@ -15,6 +15,7 @@ use Atlcom\LaravelHelper\Models\RouteLog;
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Models\TelegramBotUser;
+use Atlcom\LaravelHelper\Models\TelegramBotVariable;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Foundation\Auth\User;
 
@@ -164,7 +165,7 @@ return [
     ],
 
 
-    /**
+        /**
          * HttpLog. Логирование http запросов
          */
     ConfigEnum::HttpLog->value => [
@@ -425,7 +426,11 @@ return [
         // Название таблицы для записи сообщений телеграм бота
         'table_message' => (string)env('HELPER_TELEGRAM_BOT_TABLE_MESSAGE', 'helper_telegram_bot_messages'),
         // Класс модели сообщений телеграм бота
-        'model_message' => TelegramBotMessage::class,
+        'model_message' => TelegramBotVariable::class,
+        // Название таблицы для записи переменных чата телеграм бота
+        'table_variable' => (string)env('HELPER_TELEGRAM_BOT_TABLE_VARIABLE', 'helper_telegram_bot_variables'),
+        // Класс модели переменных чата телеграм бота
+        'model_variable' => TelegramBotVariable::class,
     ],
 
 
@@ -666,5 +671,47 @@ return [
             'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
             'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
         ],
+    ],
+
+
+        /**
+         * Swagger. Генератор API документации
+         */
+    ConfigEnum::Swagger->value => [
+        // Основная информация
+        'title' => env('HELPER_SWAGGER_TITLE', env('APP_NAME', 'Swagger')),
+        'version' => env('HELPER_SWAGGER_VERSION', '1.0.0'),
+        'description' => env('HELPER_SWAGGER_DESCRIPTION', 'Автоматически сгенерированная документация OpenAPI'),
+
+        // Куда писать результат
+        'output' => env('HELPER_SWAGGER_OUTPUT', base_path('storage/app/swagger/swagger.json')),
+
+        // Серверы (можно дополнять через ENV)
+        'servers' => [
+            [
+                'url' => env('HELPER_SWAGGER_SERVER_URL', env('APP_URL', 'http://localhost')),
+                'description' => env('HELPER_SWAGGER_SERVER_DESCRIPTION', 'Основной сервер'),
+            ],
+        ],
+
+        // Параметры сканирования
+        'scan' => [
+            // Список файлов роутов для обязательного подключения (указываем абсолютные пути)
+            'routes' => (array)(Hlp::envGet('HELPER_SWAGGER_ROUTES', base_path('.env')) ?? [
+                base_path('routes/api-auth.php'),
+                base_path('routes/api.php'),
+            ]),
+            // Папка с контроллерами, только из неё берём
+            'controllers_path' => env('HELPER_SWAGGER_CONTROLLERS_PATH', base_path('app')),
+            // Папка с тестами контроллеров для динамического извлечения моделей/путей
+            'test_controllers_path' => env('HELPER_SWAGGER_TEST_CONTROLLERS_PATH', base_path('tests/Unit/Controllers')),
+        ],
+
+        // Очищать ли снапшоты после успешной генерации swagger
+        'cleanup_snapshots' => env('HELPER_SWAGGER_SNAPSHOTS_CLEANUP', true),
+        // Папка снапшотов
+        'snapshots_path' => env('HELPER_SWAGGER_SNAPSHOTS_PATH', storage_path('app/swagger/snapshots')),
+        // Файл тест для снапшотов
+        'snapshots_test_file' => 'tests/Feature/SwaggerSnapshots/SwaggerSnapshotsTest.php',
     ],
 ];

@@ -12,7 +12,6 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotMessageFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,13 +25,13 @@ use UnitEnum;
  *
  * @property int $id
  * @property string $uuid
- * @property TelegramBotMessageTypeEnum $type
- * @property TelegramBotMessageStatusEnum $status
  * @property int $external_message_id
  * @property ?int $external_update_id
  * @property int $telegram_bot_chat_id
  * @property int $telegram_bot_user_id
  * @property ?int $telegram_bot_message_id
+ * @property TelegramBotMessageTypeEnum $type
+ * @property TelegramBotMessageStatusEnum $status
  * @property ?string $slug
  * @property string $text
  * @property \Carbon\Carbon $send_at
@@ -71,13 +70,13 @@ class TelegramBotMessage extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
-        'type' => TelegramBotMessageTypeEnum::class,
-        'status' => TelegramBotMessageStatusEnum::class,
         'external_message_id' => 'integer',
         'external_update_id' => 'integer',
         'telegram_bot_chat_id' => 'integer',
         'telegram_bot_user_id' => 'integer',
         'telegram_bot_message_id' => 'integer',
+        'type' => TelegramBotMessageTypeEnum::class,
+        'status' => TelegramBotMessageStatusEnum::class,
         'slug' => 'string',
         'text' => 'string',
         'send_at' => 'datetime',
@@ -120,6 +119,17 @@ class TelegramBotMessage extends DefaultModel
     {
         // return TelegramBotMessageResource::make($this)->setStructure($structure);
         return parent::toResource($structure);
+    }
+
+
+    /**
+     * Возвращает название таблицы модели
+     *
+     * @return string
+     */
+    public static function getTableName(): string
+    {
+        return Lh::getTable(ConfigEnum::TelegramBot, 'message');
     }
 
 

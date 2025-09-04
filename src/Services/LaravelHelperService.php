@@ -48,13 +48,13 @@ class LaravelHelperService extends DefaultService
      * Возвращает конфиг по типу лога
      *
      * @param ConfigEnum $configType
-     * @param string $configName
+     * @param string|null $configName
      * @param mixed|null $default
      * @return mixed
      */
-    public function config(ConfigEnum $configType, string $configName, mixed $default = null): mixed
+    public function config(ConfigEnum $configType, ?string $configName = null, mixed $default = null): mixed
     {
-        return config("laravel-helper.{$configType->value}.{$configName}", $default);
+        return config("laravel-helper.{$configType->value}" . ($configName ? ".{$configName}" : ''), $default);
     }
 
 

@@ -30,29 +30,30 @@ return new class extends Migration {
 
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid сообщения телеграм бота');
-            $table->enum('type', TelegramBotMessageTypeEnum::enumValues())->nullable(false)->index()
-                ->default(TelegramBotMessageTypeEnum::enumDefault())
-                ->comment('Тип сообщения телеграм бота');
-            $table->enum('status', TelegramBotMessageStatusEnum::enumValues())->nullable(false)->index()
-                ->default(TelegramBotMessageStatusEnum::enumDefault())
-                ->comment('Статус сообщения телеграм бота');
             $table->bigInteger('external_message_id')->nullable(false)->index()
                 ->comment('Внешний Id сообщения телеграм бота');
             $table->bigInteger('external_update_id')->nullable(true)->index()
                 ->comment('Внешний Id обновления сообщения телеграм бота');
 
             $table->foreignId('telegram_bot_chat_id')->nullable(false)->index()
+                ->comment('Связь с пользователем телеграм бота')
                 ->references('id')->on(Lh::getTable($config, 'chat'))
-                ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Связь с пользователем телеграм бота');
+                ->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('telegram_bot_user_id')->nullable(false)->index()
+                ->comment('Связь с чатом телеграм бота')
                 ->references('id')->on(Lh::getTable($config, 'user'))
-                ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Связь с чатом телеграм бота');
+                ->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('telegram_bot_message_id')->nullable(true)->index()
+                ->comment('Связь с цитируемым сообщением телеграм бота (replyTo)')
                 ->references('id')->on(Lh::getTable($config, 'message'))
-                ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Связь с цитируемым сообщением телеграм бота (replyTo)');
+                ->onUpdate('cascade')->onDelete('restrict');
+
+            $table->enum('type', TelegramBotMessageTypeEnum::enumValues())->nullable(false)->index()
+                ->default(TelegramBotMessageTypeEnum::enumDefault())
+                ->comment('Тип сообщения телеграм бота');
+            $table->enum('status', TelegramBotMessageStatusEnum::enumValues())->nullable(false)->index()
+                ->default(TelegramBotMessageStatusEnum::enumDefault())
+                ->comment('Статус сообщения телеграм бота');
 
             $table->text('slug')->nullable(true)->index()
                 ->comment('Слаг сообщения чата телеграм бота');
