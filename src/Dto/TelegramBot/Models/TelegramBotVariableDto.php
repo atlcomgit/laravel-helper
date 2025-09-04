@@ -13,6 +13,7 @@ use Override;
 
 /**
  * Dto модели переменной чата телеграм бота
+ * @see TelegramBotVariable
  */
 class TelegramBotVariableDto extends DefaultDto
 {
@@ -21,6 +22,7 @@ class TelegramBotVariableDto extends DefaultDto
     public int $telegramBotChatId;
     public ?int $telegramBotMessageId;
     public TelegramBotVariableTypeEnum $type;
+    public string $group;
     public string $name;
     public mixed $value;
 
@@ -36,6 +38,7 @@ class TelegramBotVariableDto extends DefaultDto
     {
         return [
             'uuid' => uuid(),
+            'group' => 'default',
         ];
     }
 

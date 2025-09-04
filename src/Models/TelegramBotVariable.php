@@ -28,7 +28,8 @@ use UnitEnum;
  * @property int $telegram_bot_chat_id
  * @property ?int $telegram_bot_message_id
  * @property TelegramBotVariableTypeEnum $type
- * @property ?string $name
+ * @property string $group
+ * @property string $name
  * @property mixed $value
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
@@ -42,6 +43,7 @@ use UnitEnum;
  * @method self|Builder ofUuid(string $uuid)
  * @method self|Builder ofTelegramBotChatId(int $telegramBotChatId)
  * @method self|Builder ofType(TelegramBotVariableTypeEnum $type)
+ * @method self|Builder ofGroup(string $group)
  * @method self|Builder ofName(string $name)
  * 
  * @mixin \Eloquent
@@ -61,6 +63,7 @@ class TelegramBotVariable extends DefaultModel
         'type' => TelegramBotVariableTypeEnum::class,
         'telegram_bot_chat_id' => 'integer',
         'telegram_bot_message_id' => 'integer',
+        'group' => 'string',
         'name' => 'string',
         'value' => 'json',
     ];
@@ -202,7 +205,20 @@ class TelegramBotVariable extends DefaultModel
 
 
     /**
-     * Фильтр: по slug
+     * Фильтр: по группе переменной
+     *
+     * @param Builder $query
+     * @param string $group
+     * @return Builder
+     */
+    public function scopeOfGroup(Builder $query, string $group): Builder
+    {
+        return $query->where('group', $group);
+    }
+
+
+    /**
+     * Фильтр: по имени переменной
      *
      * @param Builder $query
      * @param string $name

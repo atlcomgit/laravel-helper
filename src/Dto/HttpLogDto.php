@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  * @internal
  * Dto лога http запроса
+ * @see \Atlcom\LaravelHelper\Models\HttpLog
  */
 class HttpLogDto extends Dto
 {

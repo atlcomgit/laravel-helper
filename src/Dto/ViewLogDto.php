@@ -15,6 +15,7 @@ use Carbon\Carbon;
 /**
  * @internal
  * Dto лога рендеринга blade шаблонов
+ * @see ViewLog
  */
 class ViewLogDto extends Dto
 {

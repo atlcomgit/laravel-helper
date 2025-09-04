@@ -17,6 +17,7 @@ use DateTimeInterface;
 /**
  * @internal
  * Dto лога очереди
+ * @see QueueLog
  */
 class QueueLogDto extends Dto
 {

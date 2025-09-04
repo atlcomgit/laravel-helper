@@ -17,6 +17,7 @@ use Throwable;
 /**
  * @internal
  * Dto профилирования методов класса
+ * @see ProfilerLog
  */
 class ProfilerLogDto extends DefaultDto
 {

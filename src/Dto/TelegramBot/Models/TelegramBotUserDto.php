@@ -12,6 +12,7 @@ use Override;
 
 /**
  * Dto модели пользователя телеграм бота
+ * @see TelegramBotUser
  */
 class TelegramBotUserDto extends DefaultDto
 {

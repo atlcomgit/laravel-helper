@@ -15,6 +15,7 @@ use Carbon\Carbon;
 /**
  * @internal
  * Dto лога модели
+ * @see ModelLog
  */
 class ModelLogDto extends DefaultDto
 {

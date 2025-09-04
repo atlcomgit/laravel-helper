@@ -16,9 +16,7 @@ use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotVariableRepository;
  */
 class TelegramBotVariableService extends DefaultService
 {
-    public function __construct(
-        private TelegramBotVariableRepository $telegramBotVariableRepository,
-    ) {}
+    public function __construct(private TelegramBotVariableRepository $telegramBotVariableRepository) {}
 
 
     /**
@@ -39,12 +37,16 @@ class TelegramBotVariableService extends DefaultService
      * Возвращает значение переменной чата телеграм бота
      *
      * @param TelegramBotMessage $message
+     * @param string $group
      * @param string $name
      * @return mixed
      */
-    public function getVariable(TelegramBotMessage $message, string $name): mixed
+    public function getVariable(TelegramBotMessage $message, string $group, string $name): mixed
     {
-        return $message->telegramBotChat?->telegramBotVariables?->where('name', $name)->first()?->value;
+        return $message->telegramBotChat?->telegramBotVariables
+            ->where('group', $group)
+            ->where('name', $name)
+            ->first()?->value;
     }
 
 
@@ -52,18 +54,23 @@ class TelegramBotVariableService extends DefaultService
      * Устанавливает значение переменной чата телеграм бота
      *
      * @param TelegramBotMessage $message
+     * @param string $group
      * @param string $name
      * @param mixed $value
      * @return TelegramBotVariable
      */
-    public function setVariable(TelegramBotMessage $message, string $name, mixed $value): TelegramBotVariable
+    public function setVariable(TelegramBotMessage $message, string $group, string $name, mixed $value): TelegramBotVariable
     {
         // Удаляем переменную чата для истории
-        $message->telegramBotChat?->telegramBotVariables?->where('name', $name)->first()?->delete();
+        $message->telegramBotChat?->telegramBotVariables
+            ->where('group', $group)
+            ->where('name', $name)
+            ->first()?->delete();
 
         return $telegramBotVariableDto = TelegramBotVariableDto::create(
             telegramBotChatId: $message->telegramBotChat->id,
             telegramBotMessageId: $message->id,
+            group: $group,
             name: $name,
             value: $value,
         )->save();

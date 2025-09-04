@@ -45,15 +45,21 @@ class TelegramBotVariableRepository extends DefaultRepository
      * Возвращает сообщение по внешнему external_message_id
      *
      * @param int $externalMessageId
+     * @param string $group
+     * @param string $name
      * @return TelegramBotVariable|null
      */
-    public function getByTelegramBotChatIdAndName(int $telegramBotChatId, string $name): ?TelegramBotVariable
-    {
+    public function getByTelegramBotChatIdAndGroupAndName(
+        int $telegramBotChatId,
+        string $group,
+        string $name,
+    ): ?TelegramBotVariable {
         return $this->withoutTelescope(
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
                 ->where('telegram_bot_chat_id', $telegramBotChatId)
+                ->where('group', $group)
                 ->where('name', $name)
                 ->first()
         );
@@ -69,7 +75,7 @@ class TelegramBotVariableRepository extends DefaultRepository
     public function updateOrCreate(TelegramBotVariableDto $dto): TelegramBotVariable
     {
         return $this->withoutTelescope(function () use ($dto) {
-            ($model = $this->getByTelegramBotChatIdAndName($dto->telegramBotChatId, $dto->name))
+            ($model = $this->getByTelegramBotChatIdAndGroupAndName($dto->telegramBotChatId, $dto->group, $dto->name))
                 ? $model->update([
                     'telegram_bot_message_id' => $dto->telegramBotMessageId,
                     'type' => $dto->type,

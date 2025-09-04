@@ -43,7 +43,9 @@ return new class extends Migration {
                 ->default(TelegramBotVariableTypeEnum::enumDefault())
                 ->comment('Тип переменной телеграм бота');
 
-            $table->text('name')->nullable(false)->index()
+            $table->string('group')->nullable(false)->index()
+                ->comment('Группа переменной чата телеграм бота');
+            $table->string('name')->nullable(false)->index()
                 ->comment('Имя переменной чата телеграм бота');
             $table->longText('value')->nullable(true)
                 ->comment('Значение переменной чата телеграм бота');

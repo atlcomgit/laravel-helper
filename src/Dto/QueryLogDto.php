@@ -15,6 +15,7 @@ use Carbon\Carbon;
 /**
  * @internal
  * Dto лога query запросов
+ * @see QueryLog
  */
 class QueryLogDto extends Dto
 {

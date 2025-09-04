@@ -142,6 +142,102 @@ return [
 
 
         /**
+         * Http Macro. Макросы исходящих http запросов через фасад Http
+         */
+    ConfigEnum::Http->value => [
+        // Сервис localhost
+        'localhost' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_LOCALHOST_ENABLED', true),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
+        ],
+        // Сервис sms.ru
+        'smsRu' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_SMSRU_ENABLED', false),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_SMSRU_URL', 'https://sms.ru'),
+            // Ключ api
+            'api_key' => (string)env('HELPER_HTTP_SMSRU_API_KEY'),
+            // Номер отправителя сообщений
+            'from' => (string)env('HELPER_HTTP_SMSRU_FROM'),
+            // Номер получателя сообщений
+            'to' => (string)env('HELPER_HTTP_SMSRU_TO'),
+            // Флаг включения отправки ip адреса клиента
+            'send_ip_address' => (bool)env('HELPER_HTTP_SMSRU_SEND_IP_ADDRESS', false),
+        ],
+        // Сервис mango-office.ru
+        'mangoOfficeRu' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_MANGOOFFICERU_ENABLED', false),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
+            // Ключ api
+            'api_key' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_KEY', ''),
+            // Дополнительная соль для формирования подписи
+            'api_salt' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_SALT', ''),
+            // Токен вебхука для входящих запросов от сервиса
+            'webhook_token' => (string)env('HELPER_HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
+        ],
+        // Сервис mango-devline.ru
+        'devlineRu' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_DEVLINERU_ENABLED', false),
+            // Url адрес для запросов api
+            'url' => [
+                // Url адрес для формирования http ссылки видео-потока камеры
+                'http' => (string)env('HELPER_HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
+                // Url адрес для формирования rtsp ссылки видео-потока
+                'rtsp' => (string)env('HELPER_HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
+            ],
+            'timeout' => (int)env('HELPER_HTTP_DEVLINERU_TIMEOUT', 10),
+
+            'authorization' => (string)env('HELPER_HTTP_DEVLINERU_AUTHORIZATION', ''),
+        ],
+        // Сервис rtsp.me
+        'rtspMe' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_RTSPME_ENABLED', false),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_RTSPME_URL', 'https://rtsp.me'),
+            // Таймаут подключения api к сервису
+            'timeout' => (int)env('HELPER_HTTP_RTSPME_TIMEOUT', 10),
+            // Креды авторизации api
+            'auth' => [
+                // Адрес электронной почты
+                'email' => (string)env('HELPER_HTTP_RTSPME_EMAIL'),
+                // Пароль
+                'password' => (string)env('HELPER_HTTP_RTSPME_PASSWORD'),
+            ],
+            'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
+        ],
+        // Сервис FCM Google API
+        'fcmGoogleApisCom' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
+            // Креды авторизации api
+            'firebase_credentials' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
+            // Идентификатор проекта fcm
+            'project_id' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
+            // Таймаут подключения api к сервису
+            'timeout' => (int)env('HELPER_HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
+        ],
+        // Сервис Telegram API
+        'telegramOrg' => [
+            // Флаг включения макроса
+            'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
+            // Url адрес для запросов api
+            'url' => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
+            // Таймаут подключения api к сервису
+            'timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 10),
+        ],
+    ],
+
+
+        /**
          * HttpCache. Кеширование http запросов
          */
     ConfigEnum::HttpCache->value => [
@@ -396,6 +492,48 @@ return [
 
 
         /**
+         * Swagger. Генератор API документации
+         */
+    ConfigEnum::Swagger->value => [
+        // Основная информация
+        'title' => env('HELPER_SWAGGER_TITLE', env('APP_NAME', 'Swagger')),
+        'version' => env('HELPER_SWAGGER_VERSION', '1.0.0'),
+        'description' => env('HELPER_SWAGGER_DESCRIPTION', 'Автоматически сгенерированная документация OpenAPI'),
+
+        // Куда писать результат
+        'output' => env('HELPER_SWAGGER_OUTPUT', base_path('storage/app/swagger/swagger.json')),
+
+        // Серверы (можно дополнять через ENV)
+        'servers' => [
+            [
+                'url' => env('HELPER_SWAGGER_SERVER_URL', env('APP_URL', 'http://localhost')),
+                'description' => env('HELPER_SWAGGER_SERVER_DESCRIPTION', 'Основной сервер'),
+            ],
+        ],
+
+        // Параметры сканирования
+        'scan' => [
+            // Список файлов роутов для обязательного подключения (указываем абсолютные пути)
+            'routes' => (array)(Hlp::envGet('HELPER_SWAGGER_ROUTES', base_path('.env')) ?? [
+                base_path('routes/api-auth.php'),
+                base_path('routes/api.php'),
+            ]),
+            // Папка с контроллерами, только из неё берём
+            'controllers_path' => env('HELPER_SWAGGER_CONTROLLERS_PATH', base_path('app')),
+            // Папка с тестами контроллеров для динамического извлечения моделей/путей
+            'test_controllers_path' => env('HELPER_SWAGGER_TEST_CONTROLLERS_PATH', base_path('tests/Unit/Controllers')),
+        ],
+
+        // Очищать ли снапшоты после успешной генерации swagger
+        'cleanup_snapshots' => env('HELPER_SWAGGER_SNAPSHOTS_CLEANUP', true),
+        // Папка снапшотов
+        'snapshots_path' => env('HELPER_SWAGGER_SNAPSHOTS_PATH', storage_path('app/swagger/snapshots')),
+        // Файл тест для снапшотов
+        'snapshots_test_file' => 'tests/Feature/SwaggerSnapshots/SwaggerSnapshotsTest.php',
+    ],
+
+
+        /**
          * TelegramBot. Телеграм бот
          */
     ConfigEnum::TelegramBot->value => [
@@ -495,97 +633,26 @@ return [
     ],
 
         /**
-         * Http Macro. Макросы исходящих http запросов через фасад Http
+         * TestingLog. Авто-тестирование
          */
-    ConfigEnum::Http->value => [
-        // Сервис localhost
-        'localhost' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_LOCALHOST_ENABLED', true),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
-        ],
-        // Сервис sms.ru
-        'smsRu' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_SMSRU_ENABLED', false),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_SMSRU_URL', 'https://sms.ru'),
-            // Ключ api
-            'api_key' => (string)env('HELPER_HTTP_SMSRU_API_KEY'),
-            // Номер отправителя сообщений
-            'from' => (string)env('HELPER_HTTP_SMSRU_FROM'),
-            // Номер получателя сообщений
-            'to' => (string)env('HELPER_HTTP_SMSRU_TO'),
-            // Флаг включения отправки ip адреса клиента
-            'send_ip_address' => (bool)env('HELPER_HTTP_SMSRU_SEND_IP_ADDRESS', false),
-        ],
-        // Сервис mango-office.ru
-        'mangoOfficeRu' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_MANGOOFFICERU_ENABLED', false),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_MANGOOFFICERU_URL', 'https://app.mango-office.ru/vpbx/'),
-            // Ключ api
-            'api_key' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_KEY', ''),
-            // Дополнительная соль для формирования подписи
-            'api_salt' => (string)env('HELPER_HTTP_MANGOOFFICERU_API_SALT', ''),
-            // Токен вебхука для входящих запросов от сервиса
-            'webhook_token' => (string)env('HELPER_HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
-        ],
-        // Сервис mango-devline.ru
-        'devlineRu' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_DEVLINERU_ENABLED', false),
-            // Url адрес для запросов api
-            'url' => [
-                // Url адрес для формирования http ссылки видео-потока камеры
-                'http' => (string)env('HELPER_HTTP_DEVLINERU_HTTP_URL', 'http://btAAAAA.loc.devline.tv:XXXX'),
-                // Url адрес для формирования rtsp ссылки видео-потока
-                'rtsp' => (string)env('HELPER_HTTP_DEVLINERU_RTSP_URL', 'rtsp://btAAAAA.loc.devline.tv:YYYY'),
-            ],
-            'timeout' => (int)env('HELPER_HTTP_DEVLINERU_TIMEOUT', 10),
+    ConfigEnum::TestingLog->value => [
+        // Флаг включения логов
+        'enabled' => (bool)env('HELPER_TESTING_LOG_ENABLED', true),
 
-            'authorization' => (string)env('HELPER_HTTP_DEVLINERU_AUTHORIZATION', ''),
+        'helper_logs' => [
+            // Флаг включения логов
+            'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', false),
         ],
-        // Сервис rtsp.me
-        'rtspMe' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_RTSPME_ENABLED', false),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_RTSPME_URL', 'https://rtsp.me'),
-            // Таймаут подключения api к сервису
-            'timeout' => (int)env('HELPER_HTTP_RTSPME_TIMEOUT', 10),
-            // Креды авторизации api
-            'auth' => [
-                // Адрес электронной почты
-                'email' => (string)env('HELPER_HTTP_RTSPME_EMAIL'),
-                // Пароль
-                'password' => (string)env('HELPER_HTTP_RTSPME_PASSWORD'),
-            ],
-            'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
+
+        // Пользователь для тестов
+        'user' => [
+            'email' => (string)env('HELPER_TESTING_LOG_USER_EMAIL', 'testing@test.ru'),
         ],
-        // Сервис FCM Google API
-        'fcmGoogleApisCom' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_URL', 'https://fcm.googleapis.com/v1/'),
-            // Креды авторизации api
-            'firebase_credentials' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_CREDENTIALS', ''),
-            // Идентификатор проекта fcm
-            'project_id' => (string)env('HELPER_HTTP_FCMGOOGLEAPISCOM_FIREBASE_PROJECT', ''),
-            // Таймаут подключения api к сервису
-            'timeout' => (int)env('HELPER_HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
-        ],
-        // Сервис Telegram API
-        'telegramOrg' => [
-            // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
-            // Url адрес для запросов api
-            'url' => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
-            // Таймаут подключения api к сервису
-            'timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 10),
+        // Настройка тестовой базы данных
+        'database' => [
+            'name' => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
+            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
+            'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
         ],
     ],
 
@@ -647,71 +714,5 @@ return [
         'exclude' => (array)(Hlp::envGet('HELPER_VIEW_CACHE_EXCLUDE', base_path('.env')) ?? []),
         // Флаг включения кеширования рендеринга всех blade шаблонов
         'global' => (bool)env('HELPER_VIEW_CACHE_GLOBAL', false),
-    ],
-
-        /**
-         * TestingLog. Авто-тестирование
-         */
-    ConfigEnum::TestingLog->value => [
-        // Флаг включения логов
-        'enabled' => (bool)env('HELPER_TESTING_LOG_ENABLED', true),
-
-        'helper_logs' => [
-            // Флаг включения логов
-            'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', false),
-        ],
-
-        // Пользователь для тестов
-        'user' => [
-            'email' => (string)env('HELPER_TESTING_LOG_USER_EMAIL', 'testing@test.ru'),
-        ],
-        // Настройка тестовой базы данных
-        'database' => [
-            'name' => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
-            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
-            'seed' => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
-        ],
-    ],
-
-
-        /**
-         * Swagger. Генератор API документации
-         */
-    ConfigEnum::Swagger->value => [
-        // Основная информация
-        'title' => env('HELPER_SWAGGER_TITLE', env('APP_NAME', 'Swagger')),
-        'version' => env('HELPER_SWAGGER_VERSION', '1.0.0'),
-        'description' => env('HELPER_SWAGGER_DESCRIPTION', 'Автоматически сгенерированная документация OpenAPI'),
-
-        // Куда писать результат
-        'output' => env('HELPER_SWAGGER_OUTPUT', base_path('storage/app/swagger/swagger.json')),
-
-        // Серверы (можно дополнять через ENV)
-        'servers' => [
-            [
-                'url' => env('HELPER_SWAGGER_SERVER_URL', env('APP_URL', 'http://localhost')),
-                'description' => env('HELPER_SWAGGER_SERVER_DESCRIPTION', 'Основной сервер'),
-            ],
-        ],
-
-        // Параметры сканирования
-        'scan' => [
-            // Список файлов роутов для обязательного подключения (указываем абсолютные пути)
-            'routes' => (array)(Hlp::envGet('HELPER_SWAGGER_ROUTES', base_path('.env')) ?? [
-                base_path('routes/api-auth.php'),
-                base_path('routes/api.php'),
-            ]),
-            // Папка с контроллерами, только из неё берём
-            'controllers_path' => env('HELPER_SWAGGER_CONTROLLERS_PATH', base_path('app')),
-            // Папка с тестами контроллеров для динамического извлечения моделей/путей
-            'test_controllers_path' => env('HELPER_SWAGGER_TEST_CONTROLLERS_PATH', base_path('tests/Unit/Controllers')),
-        ],
-
-        // Очищать ли снапшоты после успешной генерации swagger
-        'cleanup_snapshots' => env('HELPER_SWAGGER_SNAPSHOTS_CLEANUP', true),
-        // Папка снапшотов
-        'snapshots_path' => env('HELPER_SWAGGER_SNAPSHOTS_PATH', storage_path('app/swagger/snapshots')),
-        // Файл тест для снапшотов
-        'snapshots_test_file' => 'tests/Feature/SwaggerSnapshots/SwaggerSnapshotsTest.php',
     ],
 ];

@@ -12,6 +12,7 @@ use Override;
 
 /**
  * Dto модели чата телеграм бота
+ * @see TelegramBotChat
  * 
  * @method TelegramBotChatDto info(?array $info)
  */

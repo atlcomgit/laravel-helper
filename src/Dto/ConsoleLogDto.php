@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Schema;
 /**
  * @internal
  * Dto лога консольной команды
+ * @see ConsoleLog
+ * 
  * @method ConsoleLogDto output(?string $value)
  * @method ConsoleLogDto info(?array $value)
  */

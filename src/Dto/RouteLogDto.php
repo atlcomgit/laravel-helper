@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Models\RouteLog;
 /**
  * @internal
  * Dto лога роута
+ * @see RouteLog
  */
 class RouteLogDto extends Dto
 {
