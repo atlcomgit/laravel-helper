@@ -38,8 +38,8 @@ use UnitEnum;
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
  * 
- * @method static|Builder ofUuid(string $uuid)
- * @method static|Builder ofExternalUserId(int $externalUserId)
+ * @method self|Builder ofUuid(string $uuid)
+ * @method self|Builder ofExternalUserId(int $externalUserId)
  * 
  * @mixin \Eloquent
  */

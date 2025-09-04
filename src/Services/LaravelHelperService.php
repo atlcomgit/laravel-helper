@@ -142,6 +142,7 @@ class LaravelHelperService extends DefaultService
             && ($config[$param = ConfigEnum::TelegramBot->value . 'table_chat'] ?? null)
             && ($config[$param = ConfigEnum::TelegramBot->value . 'table_user'] ?? null)
             && ($config[$param = ConfigEnum::TelegramBot->value . 'table_message'] ?? null)
+            && ($config[$param = ConfigEnum::TelegramBot->value . 'table_variable'] ?? null)
 
         ) ?? throw new WithoutTelegramException("Не указан параметр в конфиге: laravel-helper.{$param}");
     }

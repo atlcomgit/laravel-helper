@@ -426,7 +426,7 @@ return [
         // Название таблицы для записи сообщений телеграм бота
         'table_message' => (string)env('HELPER_TELEGRAM_BOT_TABLE_MESSAGE', 'helper_telegram_bot_messages'),
         // Класс модели сообщений телеграм бота
-        'model_message' => TelegramBotVariable::class,
+        'model_message' => TelegramBotMessage::class,
         // Название таблицы для записи переменных чата телеграм бота
         'table_variable' => (string)env('HELPER_TELEGRAM_BOT_TABLE_VARIABLE', 'helper_telegram_bot_variables'),
         // Класс модели переменных чата телеграм бота

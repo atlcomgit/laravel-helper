@@ -8,7 +8,6 @@ use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotVariableDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
-use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Models\TelegramBotVariable;
 
 /**
@@ -46,7 +45,7 @@ class TelegramBotVariableRepository extends DefaultRepository
      * Возвращает сообщение по внешнему external_message_id
      *
      * @param int $externalMessageId
-     * @return TelegramBotMessage|null
+     * @return TelegramBotVariable|null
      */
     public function getByTelegramBotChatIdAndName(int $telegramBotChatId, string $name): ?TelegramBotVariable
     {

@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Models\RouteLog;
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Models\TelegramBotUser;
+use Atlcom\LaravelHelper\Models\TelegramBotVariable;
 use Atlcom\LaravelHelper\Models\ViewLog;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -97,6 +98,7 @@ trait DynamicTableModelTrait
             TelegramBotChat::class => static::queryFrom(ConfigEnum::TelegramBot, 'chat'),
             TelegramBotUser::class => static::queryFrom(ConfigEnum::TelegramBot, 'user'),
             TelegramBotMessage::class => static::queryFrom(ConfigEnum::TelegramBot, 'message'),
+            TelegramBotVariable::class => static::queryFrom(ConfigEnum::TelegramBot, 'variable'),
 
             default => parent::query(),
         };

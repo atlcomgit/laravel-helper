@@ -39,9 +39,10 @@ use UnitEnum;
  * @property-read TelegramBotMessage $telegramBotMessage
  * @method Relation|TelegramBotMessage telegramBotMessage()
  * 
- * @method static|Builder ofUuid(string $uuid)
- * @method static|Builder OfType(TelegramBotVariableTypeEnum $type)
- * @method static|Builder ofName(string $name)
+ * @method self|Builder ofUuid(string $uuid)
+ * @method self|Builder ofTelegramBotChatId(int $telegramBotChatId)
+ * @method self|Builder ofType(TelegramBotVariableTypeEnum $type)
+ * @method self|Builder ofName(string $name)
  * 
  * @mixin \Eloquent
  */
@@ -171,6 +172,19 @@ class TelegramBotVariable extends DefaultModel
     public function scopeOfUuid(Builder $query, string $uuid): Builder
     {
         return $query->where('uuid', $uuid);
+    }
+
+
+    /**
+     * Фильтр: по uuid
+     *
+     * @param Builder $query
+     * @param int $telegramBotChatId
+     * @return Builder
+     */
+    public function scopeOfTelegramBotChatId(Builder $query, int $telegramBotChatId): Builder
+    {
+        return $query->where('telegram_bot_chat_id', $telegramBotChatId);
     }
 
 

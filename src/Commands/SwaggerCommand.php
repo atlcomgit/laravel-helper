@@ -60,12 +60,13 @@ class SwaggerCommand extends DefaultCommand
         $cfg['version'] = $this->option('api-version') ?: $cfg['version'];
         $cfg['description'] = $this->option('description') ?: $cfg['description'];
 
-        $this->info('Генерация OpenAPI...');
+        $this->outputEol('Генерация OpenAPI...', 'fg=green');
 
         // Авто-генерация снапшотов перед сборкой через make phpunit (если тест существует)
         $snapshotTestPath = base_path($cfg['snapshots_test_file']);
+        
         if (is_file($snapshotTestPath)) {
-            $this->info('Запуск генерации снапшотов (make phpunit)...');
+            $this->outputEol('Запуск генерации снапшотов (make phpunit)...', 'fg=green');
 
             // Предпочитаем make phpunit, fallback на прямой phpunit
             $makeCmd = 'make phpunit FILTER=SwaggerSnapshotsTest FILE=' . $cfg['snapshots_test_file'];
@@ -73,19 +74,21 @@ class SwaggerCommand extends DefaultCommand
 
             // Если make отсутствует или упал — пробуем прямой вызов
             if ($rc !== 0) {
-                $this->warn("make phpunit завершился с кодом {$rc}, пробую vendor/bin/phpunit");
+                $this->outputEol("make phpunit завершился с кодом {$rc}, пробую vendor/bin/phpunit", 'fg=gray');
+
                 $directCmd = base_path('vendor/bin/phpunit') . ' --filter=SwaggerSnapshotsTest ' . $cfg['snapshots_test_file'];
                 $out = [];
                 exec("{$directCmd} 2>&1", $out, $rc);
             }
 
             if ($rc !== 0) {
-                $this->warn("Снапшоты не сгенерированы (код {$rc}). Продолжаю без снапшотов.");
+                $this->outputEol("Снапшоты не сгенерированы (код {$rc}). Продолжаю без снапшотов.", 'fg=gray');
+
                 if (!empty($out)) {
-                    $this->line(collect($out)->take(20)->implode("\n"));
+                    $this->outputEol(collect($out)->take(20)->implode("\n"));
                 }
             } else {
-                $this->info('Снапшоты обновлены.');
+                $this->outputEol('Снапшоты обновлены.', 'fg=green');
             }
         }
         $service = app(SwaggerService::class);
@@ -96,7 +99,7 @@ class SwaggerCommand extends DefaultCommand
         }
         file_put_contents($cfg['output'], json_encode($openapi, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
-        $this->info("Swagger файл сгенерирован: {$cfg['output']}");
+        $this->outputEol("Swagger файл сгенерирован: {$cfg['output']}", 'fg=green');
 
         // Очистка снапшотов, если включено
         if (($cfg['cleanup_snapshots'] ?? false) === true) {
@@ -105,7 +108,8 @@ class SwaggerCommand extends DefaultCommand
                 foreach (glob("{$snapDir}/*.json") as $f) {
                     @unlink($f);
                 }
-                $this->info('Снапшоты удалены после генерации.');
+
+                $this->outputEol('Снапшоты удалены после генерации.', 'fg=green');
             }
         }
 

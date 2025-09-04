@@ -37,8 +37,8 @@ use UnitEnum;
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotVariable> $telegramBotVariables
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotVariable> telegramBotVariables()
  * 
- * @method static|Builder ofUuid(string $uuid)
- * @method static|Builder ofExternalChatId(int $externalChatId)
+ * @method self|Builder ofUuid(string $uuid)
+ * @method self|Builder ofExternalChatId(int $externalChatId)
  * 
  * @mixin \Eloquent
  */

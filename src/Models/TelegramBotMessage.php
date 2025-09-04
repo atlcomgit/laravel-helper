@@ -50,11 +50,11 @@ use UnitEnum;
  * @property-read TelegramBotMessage $previousMessage
  * @method Relation|TelegramBotMessage previousMessage()
  * 
- * @method static|Builder ofUuid(string $uuid)
- * @method static|Builder OfType(TelegramBotMessageTypeEnum $type)
- * @method static|Builder ofStatus(TelegramBotMessageStatusEnum $status)
- * @method static|Builder ofExternalMessageId(int $externalMessageId)
- * @method static|Builder ofSlug(?string $slug)
+ * @method self|Builder ofUuid(string $uuid)
+ * @method self|Builder ofType(TelegramBotMessageTypeEnum $type)
+ * @method self|Builder ofStatus(TelegramBotMessageStatusEnum $status)
+ * @method self|Builder ofExternalMessageId(int $externalMessageId)
+ * @method self|Builder ofSlug(?string $slug)
  * 
  * @mixin \Eloquent
  */

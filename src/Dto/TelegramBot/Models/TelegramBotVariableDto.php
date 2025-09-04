@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Models;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
-use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
+use Atlcom\LaravelHelper\Enums\TelegramBotVariableTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Models\TelegramBotVariable;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotVariableService;
@@ -20,7 +20,7 @@ class TelegramBotVariableDto extends DefaultDto
     public string $uuid;
     public int $telegramBotChatId;
     public ?int $telegramBotMessageId;
-    public TelegramBotMessageTypeEnum $type;
+    public TelegramBotVariableTypeEnum $type;
     public string $name;
     public mixed $value;
 
@@ -63,6 +63,27 @@ class TelegramBotVariableDto extends DefaultDto
     protected function casts(): array
     {
         return TelegramBotVariable::getModelCasts();
+    }
+
+
+    /**
+     * @inheritDoc
+     * @see parent::onFilling()
+     */
+    protected function onFilling(array &$array): void
+    {
+        $value = $array['type'] ?? null;
+        $array['type'] ??= match (true) {
+            is_null($value) => TelegramBotVariableTypeEnum::Null,
+            is_bool($value) => TelegramBotVariableTypeEnum::Boolean,
+            is_integer($value) => TelegramBotVariableTypeEnum::Integer,
+            is_float($value) => TelegramBotVariableTypeEnum::Float,
+            is_string($value) => TelegramBotVariableTypeEnum::String,
+            is_array($value) => TelegramBotVariableTypeEnum::Array ,
+            is_object($value) => TelegramBotVariableTypeEnum::Object,
+
+            default => null,
+        };
     }
 
 

@@ -12,6 +12,7 @@ enum TelegramBotVariableTypeEnum: string
     use HelperEnumTrait;
 
 
+    case Null = 'null';
     case Boolean = 'boolean';
     case Integer = 'integer';
     case Float = 'float';
@@ -40,6 +41,7 @@ enum TelegramBotVariableTypeEnum: string
     public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
+            self::Null => 'Null значение',
             self::Boolean => 'Логическое значение',
             self::Integer => 'Целое значение',
             self::Float => 'Вещественное значение',
