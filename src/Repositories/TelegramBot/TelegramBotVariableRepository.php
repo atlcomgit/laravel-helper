@@ -79,6 +79,7 @@ class TelegramBotVariableRepository extends DefaultRepository
                 ? $model->update([
                     'telegram_bot_message_id' => $dto->telegramBotMessageId,
                     'type' => $dto->type,
+                    'group' => $dto->group,
                     'value' => $dto->value,
                 ])
                 : $model = $this->model::query()
@@ -89,6 +90,7 @@ class TelegramBotVariableRepository extends DefaultRepository
                         'telegram_bot_chat_id' => $dto->telegramBotChatId,
                         'telegram_bot_message_id' => $dto->telegramBotMessageId,
                         'type' => $dto->type,
+                        'group' => $dto->group,
                         'name' => $dto->name,
                         'value' => $dto->value,
                     ]);

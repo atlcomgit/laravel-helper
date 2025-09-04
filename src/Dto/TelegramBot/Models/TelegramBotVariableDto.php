@@ -75,18 +75,8 @@ class TelegramBotVariableDto extends DefaultDto
      */
     protected function onFilling(array &$array): void
     {
-        $value = $array['type'] ?? null;
-        $array['type'] ??= match (true) {
-            is_null($value) => TelegramBotVariableTypeEnum::Null,
-            is_bool($value) => TelegramBotVariableTypeEnum::Boolean,
-            is_integer($value) => TelegramBotVariableTypeEnum::Integer,
-            is_float($value) => TelegramBotVariableTypeEnum::Float,
-            is_string($value) => TelegramBotVariableTypeEnum::String,
-            is_array($value) => TelegramBotVariableTypeEnum::Array ,
-            is_object($value) => TelegramBotVariableTypeEnum::Object,
-
-            default => null,
-        };
+        $value = $array['value'] ?? null;
+        $array['type'] ??= TelegramBotVariableTypeEnum::getType($value);
     }
 
 

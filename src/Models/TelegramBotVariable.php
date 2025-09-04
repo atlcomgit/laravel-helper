@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Models;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotVariableFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
@@ -65,7 +66,7 @@ class TelegramBotVariable extends DefaultModel
         'telegram_bot_message_id' => 'integer',
         'group' => 'string',
         'name' => 'string',
-        'value' => 'json',
+        'value' => 'string',
     ];
 
 
@@ -125,11 +126,11 @@ class TelegramBotVariable extends DefaultModel
      *
      * @return Attribute
      */
-    public function attrValue(): Attribute
+    public function value(): Attribute
     {
         return Attribute::make(
-            get: static fn ($value, $attributes) => json_decode($value),
-            set: static fn ($value, $attributes) => json_encode($value),
+            get: fn ($value, $attributes) => TelegramBotVariableTypeEnum::getValue($this->type, $value),
+            set: static fn ($value, $attributes) => is_string($value) ? $value : Hlp::castToJson($value),
         );
     }
 
