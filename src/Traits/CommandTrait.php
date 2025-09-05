@@ -153,7 +153,7 @@ trait CommandTrait
                     'Время' => $duration,
                     'Память' => $memory,
                     ...(!is_null($this->telegramComment) ? ['Комментарий' => $this->telegramComment] : []),
-                ], TelegramTypeEnum::Info);
+                ], TelegramTypeEnum::Debug);
             }
 
             $this->consoleLogDto->info($info)->store(true);
