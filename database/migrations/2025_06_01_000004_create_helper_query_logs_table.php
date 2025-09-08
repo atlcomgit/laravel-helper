@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueryLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\QueryLog;
+use Atlcom\LaravelHelper\Services\MigrationService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -30,17 +31,7 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid query запроса');
 
-            $userTableName = Lh::config(ConfigEnum::QueryLog, 'user.table_name');
-            $userPrimaryKeyName = Lh::config(ConfigEnum::QueryLog, 'user.primary_key');
-            $userPrimaryKeyType = Lh::config(ConfigEnum::QueryLog, 'user.primary_type');
-
-            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
-                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
-                $table->foreign('user_id')
-                    ->references($userPrimaryKeyName)->on($userTableName)
-                    ->onUpdate('cascade')->onDelete('restrict')
-                    ->comment('Id пользователя');
-            }
+            app(MigrationService::class)->addForeignUser($table);
 
             $table->string('name')->nullable(true)->index()
                 ->comment('Название query запроса');

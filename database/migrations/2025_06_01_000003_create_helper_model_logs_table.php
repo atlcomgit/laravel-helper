@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Atlcom\LaravelHelper\Services\MigrationService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -27,17 +28,7 @@ return new class extends Migration {
         Schema::connection($connection)->create($table, function (Blueprint $table) {
             $table->id();
 
-            $userTableName = Lh::config(ConfigEnum::ModelLog, 'user.table_name');
-            $userPrimaryKeyName = Lh::config(ConfigEnum::ModelLog, 'user.primary_key');
-            $userPrimaryKeyType = Lh::config(ConfigEnum::ModelLog, 'user.primary_type');
-
-            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
-                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
-                $table->foreign('user_id')
-                    ->references($userPrimaryKeyName)->on($userTableName)
-                    ->onUpdate('cascade')->onDelete('restrict')
-                    ->comment('Id пользователя');
-            }
+            app(MigrationService::class)->addForeignUser($table);
 
             $table->string('model_type')->nullable(false)->index()
                 ->comment('Класс логируемой модели');

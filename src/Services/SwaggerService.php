@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use ReflectionClass;
@@ -16,7 +17,7 @@ use Throwable;
 /**
  * Сервис генерации OpenAPI (swagger) по роутам, контроллерам, DTO и ресурсам
  */
-class SwaggerService
+class SwaggerService extends DefaultService
 {
     /**
      * Генерирует массив спецификации OpenAPI

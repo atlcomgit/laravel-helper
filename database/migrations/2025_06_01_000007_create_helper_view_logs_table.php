@@ -6,6 +6,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ViewLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ViewLog;
+use Atlcom\LaravelHelper\Services\MigrationService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -30,17 +31,7 @@ return new class extends Migration {
             $table->uuid('uuid')->nullable(false)->index()
                 ->comment('Uuid рендеринга blade шаблона');
 
-            $userTableName = Lh::config(ConfigEnum::ViewLog, 'user.table_name');
-            $userPrimaryKeyName = Lh::config(ConfigEnum::ViewLog, 'user.primary_key');
-            $userPrimaryKeyType = Lh::config(ConfigEnum::ViewLog, 'user.primary_type');
-
-            if ($userTableName && $userPrimaryKeyName && $userPrimaryKeyType) {
-                $table->addColumn($userPrimaryKeyType, 'user_id')->nullable(true)->index();
-                $table->foreign('user_id')
-                    ->references($userPrimaryKeyName)->on($userTableName)
-                    ->onUpdate('cascade')->onDelete('restrict')
-                    ->comment('Id пользователя');
-            }
+            app(MigrationService::class)->addForeignUser($table);
 
             $table->string('name')->nullable(false)->index()
                 ->comment('Название blade шаблона');

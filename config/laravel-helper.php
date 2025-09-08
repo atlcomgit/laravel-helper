@@ -31,12 +31,7 @@ $userTableName = (string)$user->getTable();
 // Первичный ключ в таблице пользователей
 $userPrimaryKeyName = (string)$user->getKeyName();
 // Тип первичного ключа в таблице пользователей
-$userPrimaryKeyType = (string)match ($user->getKeyType()) {
-    'int', 'integer' => 'bigInteger',
-    'string', 'uuid' => 'uuid',
-
-    default => 'text',
-};
+$userPrimaryKeyType = (string)$user->getKeyType();
 
 return [
         /**
