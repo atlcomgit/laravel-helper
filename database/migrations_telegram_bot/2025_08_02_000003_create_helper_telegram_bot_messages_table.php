@@ -55,7 +55,7 @@ return new class extends Migration {
                 ->default(TelegramBotMessageStatusEnum::enumDefault())
                 ->comment('Статус сообщения телеграм бота');
 
-            $table->text('slug')->nullable(true)->index()
+            $table->string('slug')->nullable(true)->index()
                 ->comment('Слаг сообщения чата телеграм бота');
             $table->longText('text')->nullable(false)
                 ->comment('Текст сообщения чата телеграм бота');
