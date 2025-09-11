@@ -47,7 +47,7 @@ class ModelLogRepository extends DefaultRepository
 
                 $columns = array_keys($data);
                 $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-                $columnsSql = implode(', ', array_map(static fn (string $c): string => "`$c`", $columns));
+                $columnsSql = implode(', ', $columns);
 
                 DB::connection($connection)
                     ->statement(
