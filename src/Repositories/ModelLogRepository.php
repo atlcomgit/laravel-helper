@@ -9,6 +9,8 @@ use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ModelLog;
+use Carbon\Carbon;
+use DB;
 
 /**
  * @internal
@@ -35,10 +37,23 @@ class ModelLogRepository extends DefaultRepository
             $this->model = Lh::config(ConfigEnum::ModelLog, 'model') ?? ModelLog::class;
 
             if ($dto->modelType !== $this->model) {
-                $this->model::query()
-                    ->withoutQueryLog()
-                    ->withoutQueryCache()
-                    ->create($dto->toArray());
+                $config = ConfigEnum::ModelLog;
+                $connection = Lh::getConnection($config);
+                $table = Lh::getTable($config);
+                $data = $dto->serializeKeys(['type'])->toArray();
+                $data['created_at'] = $data['created_at'] instanceof Carbon
+                    ? $data['created_at']->toDateTimeString()
+                    : (string)$data['created_at'];
+
+                $columns = array_keys($data);
+                $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+                $columnsSql = implode(', ', array_map(static fn (string $c): string => "`$c`", $columns));
+
+                DB::connection($connection)
+                    ->statement(
+                        "insert into {$table} ({$columnsSql}) values ({$placeholders})",
+                        array_values($data),
+                    );
             }
         });
     }

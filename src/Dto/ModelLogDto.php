@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogTypeEnum;
@@ -112,6 +113,17 @@ class ModelLogDto extends DefaultDto
 
 
     /**
+     * @inheritDoc
+     */
+    // #[Override()]
+    protected function onSerialized(array &$array): void
+    {
+        $array['attributes'] = Hlp::castToString($array['attributes'] ?? []);
+        $array['changes'] = Hlp::castToString($array['changes'] ?? null);
+    }
+
+
+    /**
      * Отправляет dto в очередь для сохранения лога
      *
      * @return static
@@ -119,7 +131,7 @@ class ModelLogDto extends DefaultDto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
+            (Lh::config(ConfigEnum::ModelLog, 'queue_dispatch_sync') ?? isTesting())
                 ? ModelLogJob::dispatchSync($this)
                 : ModelLogJob::dispatch($this);
         }

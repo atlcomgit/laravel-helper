@@ -39,7 +39,7 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::create([
             'modelType' => $model::class,
-            'modelId' => $model->{$primaryKey}
+            'modelId' => (string)$model->{$primaryKey}
                 ?? (
                     (is_null($attributes) || !$primaryKey)
                     ? null
@@ -74,7 +74,7 @@ class ModelLogService extends DefaultService
             'changes' => null,
         ]);
 
-        $dto->dispatch();
+        !$dto->modelId ?: Hlp::cacheRuntime($dto->getHash(), static fn () => $dto->dispatch());
     }
 
 

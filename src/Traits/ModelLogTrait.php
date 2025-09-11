@@ -94,13 +94,14 @@ trait ModelLogTrait
      */
     protected static function bootModelLogTrait()
     {
-        if (
-            App::getFacadeApplication()
-            && Lh::config(ConfigEnum::ModelLog, 'enabled')
-            && property_exists(static::class, 'withModelLog')
-            && static::class !== ModelLog::class
-        ) {
-            static::observe(ModelLogObserver::class);
-        }
+        // not need
+        // if (
+        //     App::getFacadeApplication()
+        //     && Lh::config(ConfigEnum::ModelLog, 'enabled')
+        //     && property_exists(static::class, 'withModelLog')
+        //     && static::class !== ModelLog::class
+        // ) {
+        //     static::observe(ModelLogObserver::class);
+        // }
     }
 }

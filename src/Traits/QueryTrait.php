@@ -641,7 +641,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
+            $result = (false && !isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -696,7 +696,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
+            $result = (false && !isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -760,7 +760,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
+            $result = (false && !isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -831,7 +831,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
+            $result = (false && !isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -891,7 +891,7 @@ trait QueryTrait
 
                 return $result;
             };
-            $result = (!isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
+            $result = (false && !isTesting() && DB::transactionLevel() === 0) ? DB::transaction($callback) : $callback();
 
             $status = true;
 
@@ -1045,7 +1045,11 @@ trait QueryTrait
             if ($modelClass) {
                 switch ($type) {
                     case ModelLogTypeEnum::Create:
-                        $models = [(new $modelClass())->fill($attributes)];
+                        $primaryKey = (new $modelClass())->getKeyName();
+                        $model = (new $modelClass())->fill($attributes);
+                        $modelId = $this->getLastInsertId();
+                        $model->{$primaryKey} = $model->getKeyType() === 'int' ? (int)$modelId : (string)$modelId;
+                        $models = [$model];
                         break;
 
                     default:
