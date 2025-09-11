@@ -26,6 +26,7 @@ use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotChatRepository;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
 use Illuminate\Database\Eloquent\Collection;
+use UnitEnum;
 
 /**
  * @internal
@@ -163,6 +164,7 @@ class TelegramBotMessageService extends DefaultService
             fn ($button) => match (true) {
                 $button instanceof TelegramBotOutDataButtonCallbackDto => $button,
                 $button instanceof TelegramBotOutDataButtonUrlDto => $button,
+                $button instanceof UnitEnum && method_exists($button, 'button') => $button->button(),
 
                 is_array($button) && !is_scalar(Hlp::arrayFirst($button)) => $this->prepareButtons($button),
 
@@ -196,6 +198,7 @@ class TelegramBotMessageService extends DefaultService
             fn ($keyboard) => match (true) {
                 $keyboard instanceof TelegramBotOutMenuButtonDto => $keyboard,
                 $keyboard instanceof TelegramBotOutContactButtonDto => $keyboard,
+                $keyboard instanceof UnitEnum && method_exists($keyboard, 'keyboard') => $keyboard->keyboard(),
 
                 is_array($keyboard) && !is_scalar(Hlp::arrayFirst($keyboard)) => $this->prepareKeyboards($keyboard),
 

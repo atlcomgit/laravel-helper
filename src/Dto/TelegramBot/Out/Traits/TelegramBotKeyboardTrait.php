@@ -7,10 +7,11 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutMenuButtonDto;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
 use Illuminate\Support\Collection;
+use UnitEnum;
 
 trait TelegramBotKeyboardTrait
 {
-    /** @var Collection<array|TelegramBotOutMenuButtonDto> $keyboards */
+    /** @var Collection<array|TelegramBotOutMenuButtonDto|UnitEnum> $keyboards */
     public ?Collection $keyboards;
     public ?bool $resizeKeyboard;
     public ?bool $oneTimeKeyboard;
@@ -20,10 +21,10 @@ trait TelegramBotKeyboardTrait
     /**
      * Добавляет несколько keyboard кнопок к сообщению
      *
-     * @param array|TelegramBotOutMenuButtonDto $keyboards
+     * @param array|TelegramBotOutMenuButtonDto|UnitEnum $keyboards
      * @return static
      */
-    public function setKeyboards(array|TelegramBotOutMenuButtonDto $keyboards): static
+    public function setKeyboards(array|TelegramBotOutMenuButtonDto|UnitEnum $keyboards): static
     {
         $this->keyboards = collect([]);
         $this->addKeyboards($keyboards);
@@ -49,14 +50,15 @@ trait TelegramBotKeyboardTrait
     /**
      * Добавляет несколько keyboard кнопок к сообщению
      *
-     * @param array|TelegramBotOutMenuButtonDto $keyboards
+     * @param array|TelegramBotOutMenuButtonDto|UnitEnum $keyboards
      * @return static
      */
-    public function addKeyboards(array|TelegramBotOutMenuButtonDto $keyboards): static
+    public function addKeyboards(array|TelegramBotOutMenuButtonDto|UnitEnum $keyboards): static
     {
         $this->keyboards ??= collect([]);
         !($keyboards instanceof TelegramBotOutMenuButtonDto) ?: $keyboards = [$keyboards];
         !($keyboards instanceof TelegramBotOutContactButtonDto) ?: $keyboards = [$keyboards];
+        !($keyboards instanceof UnitEnum && method_exists($keyboards, 'button')) ?: $keyboards = [$keyboards->keyboard()];
         !isset($keyboards['text']) ?: $keyboards = [$keyboards];
 
         $keyboards = app(TelegramBotMessageService::class)->prepareKeyboards($keyboards);

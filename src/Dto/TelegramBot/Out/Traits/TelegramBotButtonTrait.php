@@ -8,10 +8,11 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallba
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonUrlDto;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotMessageService;
 use Illuminate\Support\Collection;
+use UnitEnum;
 
 trait TelegramBotButtonTrait
 {
-    /** @var Collection<array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto> $buttons */
+    /** @var Collection<array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto|UnitEnum> $buttons */
     public ?Collection $buttons;
 
 
@@ -34,10 +35,10 @@ trait TelegramBotButtonTrait
     /**
      * Добавляет inline кнопку к сообщению
      *
-     * @param TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $button
+     * @param TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto|UnitEnum $button
      * @return static
      */
-    public function addButton(TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $button): static
+    public function addButton(TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto|UnitEnum $button): static
     {
         $this->addButtons([$button]);
 
@@ -48,15 +49,16 @@ trait TelegramBotButtonTrait
     /**
      * Добавляет несколько inline кнопок к сообщению
      *
-     * @param array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons
+     * @param array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto|UnitEnum $buttons
      * @return static
      */
     public function addButtons(
-        array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto $buttons,
+        array|TelegramBotOutDataButtonCallbackDto|TelegramBotOutDataButtonUrlDto|UnitEnum $buttons,
     ): static {
         $this->buttons ??= collect([]);
         !($buttons instanceof TelegramBotOutDataButtonCallbackDto) ?: $buttons = [$buttons];
         !($buttons instanceof TelegramBotOutDataButtonUrlDto) ?: $buttons = [$buttons];
+        !($buttons instanceof UnitEnum && method_exists($buttons, 'button')) ?: $buttons = [$buttons->button()];
         !isset($buttons['text']) ?: $buttons = [$buttons];
 
         $buttons = app(TelegramBotMessageService::class)->prepareButtons($buttons);
