@@ -18,6 +18,8 @@ enum ResourceEnum: string
     case Default = 'default';
     case Index = 'index';
     case Form = 'form';
+    case FormCreate = 'form_create';
+    case FormUpdate = 'form_update';
     case Create = 'create';
     case Read = 'read';
     case Update = 'update';
@@ -47,6 +49,8 @@ enum ResourceEnum: string
             self::Default => 'Ресурс по умолчанию',
             self::Index => 'Ресурс для таблицы',
             self::Form => 'Ресурс для формы записи',
+            self::FormCreate => 'Ресурс для формы добавления записи',
+            self::FormUpdate => 'Ресурс для формы обновления записи',
             self::Create => 'Ресурс для создания записи',
             self::Read => 'Ресурс для чтения записи',
             self::Update => 'Ресурс для обновления записи',
