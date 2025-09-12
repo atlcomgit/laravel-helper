@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "atlcom/dto",
-            "version": "v2.75.7",
+            "version": "v2.75.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/dto.git",
-                "reference": "f3990f0f32d0717c525d1f61813c7f6a1d0993d3"
+                "reference": "083a7b23b7686c964070b6dc4be34f1040bc6041"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/f3990f0f32d0717c525d1f61813c7f6a1d0993d3",
-                "reference": "f3990f0f32d0717c525d1f61813c7f6a1d0993d3",
+                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/083a7b23b7686c964070b6dc4be34f1040bc6041",
+                "reference": "083a7b23b7686c964070b6dc4be34f1040bc6041",
                 "shasum": ""
             },
             "require": {
@@ -49,7 +49,7 @@
             "description": "Atlcom DTO library",
             "support": {
                 "issues": "https://github.com/atlcomgit/dto/issues",
-                "source": "https://github.com/atlcomgit/dto/tree/v2.75.7"
+                "source": "https://github.com/atlcomgit/dto/tree/v2.75.8"
             },
             "funding": [
                 {
@@ -57,7 +57,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-09-09T11:47:48+00:00"
+            "time": "2025-09-09T12:24:15+00:00"
         },
         {
             "name": "atlcom/helper",
