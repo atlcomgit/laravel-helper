@@ -8,7 +8,7 @@
     "packages": [
         {
             "name": "atlcom/dto",
-            "version": "v2.75.8",
+            "version": "v2.75.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/dto.git",
@@ -49,7 +49,7 @@
             "description": "Atlcom DTO library",
             "support": {
                 "issues": "https://github.com/atlcomgit/dto/issues",
-                "source": "https://github.com/atlcomgit/dto/tree/v2.75.8"
+                "source": "https://github.com/atlcomgit/dto/tree/v2.75.9"
             },
             "funding": [
                 {
@@ -61,16 +61,16 @@
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.13",
+            "version": "v1.23.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "f88d61699eec344a8239e833c528522bdde51a1c"
+                "reference": "aa92b5b7cdbc1dd05cc27a00190a4f15f60f8654"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/f88d61699eec344a8239e833c528522bdde51a1c",
-                "reference": "f88d61699eec344a8239e833c528522bdde51a1c",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/aa92b5b7cdbc1dd05cc27a00190a4f15f60f8654",
+                "reference": "aa92b5b7cdbc1dd05cc27a00190a4f15f60f8654",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.13"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.14"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-09-09T17:07:25+00:00"
+            "time": "2025-09-18T04:49:48+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -4660,16 +4660,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.54",
+            "version": "10.5.55",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "b1dbbaaf96106b76d500b9d3db51f9b01f6a3589"
+                "reference": "4b2d546b336876bd9562f24641b08a25335b06b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/b1dbbaaf96106b76d500b9d3db51f9b01f6a3589",
-                "reference": "b1dbbaaf96106b76d500b9d3db51f9b01f6a3589",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4b2d546b336876bd9562f24641b08a25335b06b6",
+                "reference": "4b2d546b336876bd9562f24641b08a25335b06b6",
                 "shasum": ""
             },
             "require": {
@@ -4690,7 +4690,7 @@
                 "phpunit/php-timer": "^6.0.0",
                 "sebastian/cli-parser": "^2.0.1",
                 "sebastian/code-unit": "^2.0.0",
-                "sebastian/comparator": "^5.0.3",
+                "sebastian/comparator": "^5.0.4",
                 "sebastian/diff": "^5.1.1",
                 "sebastian/environment": "^6.1.0",
                 "sebastian/exporter": "^5.1.2",
@@ -4741,7 +4741,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.54"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.55"
             },
             "funding": [
                 {
@@ -4765,7 +4765,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-11T06:19:38+00:00"
+            "time": "2025-09-14T06:19:20+00:00"
         },
         {
             "name": "psr/container",
