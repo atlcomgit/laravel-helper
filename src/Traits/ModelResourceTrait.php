@@ -8,6 +8,7 @@ use Atlcom\Hlp;
 use BackedEnum;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use UnitEnum;
 
@@ -30,6 +31,13 @@ trait ModelResourceTrait
     }
 
 
+    /**
+     * Подготавливает значения атрибутов модели к использованию в HTML-формах с учётом casts.
+     * Преобразует даты, булевы значения, коллекции, JSON и т.п. к форматам, удобным для отображения и редактирования.
+     *
+     * @param self $model
+     * @return array
+     */
     public static function getModelCastsToForm(self $model): array
     {
         return array_map(
@@ -41,7 +49,33 @@ trait ModelResourceTrait
 
                 default => $item,
             },
-            Hlp::arrayDeleteKeys($model::getModelCasts(), ['deleted_at'])
+            Hlp::arrayDeleteKeys($model::getModelCasts(), ['deleted_at']),
         );
+    }
+
+
+    /**
+     * Возвращает метки (человеко-читаемые названия) для модели.
+     * Используется для генерации названий в интерфейсе, админ-панели и сообщениях.
+     *
+     * @param string $columnId
+     * @param string $columnName
+     * @param string|null $columnComment
+     * @param mixed 
+     * @return Collection<static>
+     */
+    public static function getModelLabels(
+        string $columnId = 'id',
+        string $columnName = 'name',
+        ?string $columnComment = null,
+    ): Collection {
+        return static::query()
+            ->select([
+                "{$columnName} as label",
+                "{$columnId} as value",
+                ...($columnComment ? ["{$columnComment} as comment"] : []),
+            ])
+            ->limit(1000)
+            ->get();
     }
 }
