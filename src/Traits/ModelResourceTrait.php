@@ -68,6 +68,7 @@ trait ModelResourceTrait
         string $columnId = 'id',
         string $columnName = 'name',
         ?string $columnComment = null,
+        int|bool|null $withCache = null,
     ): Collection {
         return static::query()
             ->select([
@@ -76,6 +77,7 @@ trait ModelResourceTrait
                 ...($columnComment ? ["{$columnComment} as comment"] : []),
             ])
             ->limit(1000)
+            ->withCache($withCache)
             ->get();
     }
 }

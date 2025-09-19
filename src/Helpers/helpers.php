@@ -333,7 +333,7 @@ if (!function_exists('user')) {
         }
 
         $functionRunning = true;
-        $user = Hlp::cacheRuntime('helpers' . __FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
+        $user = Hlp::cacheRuntime('helpers:' . __FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
             try {
                 $user = isTesting()
                     ? ($returnOnlyId ? auth()->id() : auth()->user())
