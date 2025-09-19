@@ -333,17 +333,19 @@ if (!function_exists('user')) {
         }
 
         $functionRunning = true;
-        $user = Hlp::cacheRuntime('helpers:' . __FUNCTION__ . $returnOnlyId, static function () use ($returnOnlyId) {
+        $cacheKey = 'helpers:' . __FUNCTION__ . $returnOnlyId;
+        $user = Hlp::cacheRuntimeGet($cacheKey);
+
+        if (!$user || isTesting()) {
             try {
                 $user = isTesting()
                     ? ($returnOnlyId ? auth()->id() : auth()->user())
                     : (request()->bearerToken() ? ($returnOnlyId ? auth()->id() : auth()->user()) : null);
+                !$user ?: Hlp::cacheRuntimeSet($cacheKey, $user);
             } catch (Throwable $e) {
                 $user = null;
             }
-
-            return $user;
-        }, !isTesting());
+        }
         $functionRunning = false;
 
         return $user;
