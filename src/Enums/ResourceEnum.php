@@ -24,6 +24,7 @@ enum ResourceEnum: string
     case Read = 'read';
     case Update = 'update';
     case Delete = 'delete';
+    case Patch = 'patch';
     case Short = 'short';
 
 
@@ -56,6 +57,7 @@ enum ResourceEnum: string
             self::Read => 'Ресурс для чтения записи',
             self::Update => 'Ресурс для обновления записи',
             self::Delete => 'Ресурс для удаления записи',
+            self::Patch => 'Ресурс для изменения свойства записи',
             self::Short => 'Ресурс для укороченной записи',
 
             default => null,
