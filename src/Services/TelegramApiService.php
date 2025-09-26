@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
+use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use CURLFile;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -39,7 +40,7 @@ class TelegramApiService extends DefaultService
 
         return ($response->successful() && ($json['ok'] ?? false) === true)
             ? $json
-            : throw new TelegramBotException(
+            : throw new WithoutTelegramException(
                 "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
                 $json['error_code'] ?? $response->getStatusCode() ?? 400,
             );

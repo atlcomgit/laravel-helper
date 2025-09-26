@@ -35,7 +35,7 @@ class TelegramBotInChatDto extends DefaultDto
     {
         return [
             'firstName' => ['first_name', 'title'],
-            'userName' => ['username', 'title'],
+            'userName' => ['username', 'title', 'first_name'],
         ];
     }
 }
