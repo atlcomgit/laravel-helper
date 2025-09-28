@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\EventTypeEnum;
 use Atlcom\LaravelHelper\Enums\HttpCacheMethodEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
+use Atlcom\LaravelHelper\Enums\HttpLogTypeEnum;
 use Atlcom\LaravelHelper\Events\HttpCacheEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use GuzzleHttp\Psr7\Request as PsrRequest;
@@ -204,6 +205,10 @@ class HttpCacheService extends DefaultService
         $dto = HttpCacheDto::create(
             key: $ttl === false ? null : $key,
             ttl: $ttl,
+            type: match (true) {
+                $request instanceof RequestIn => HttpLogTypeEnum::In,
+                $request instanceof RequestOut => HttpLogTypeEnum::Out,
+            },
             requestMethod: $method,
             requestUrl: $url,
             requestHeaders: match (true) {
@@ -362,9 +367,16 @@ class HttpCacheService extends DefaultService
                 }
 
                 $response = $this->cacheService->getCache(ConfigEnum::HttpCache, $dto->tags, $dto->key, null);
-                $stream = Utils::streamFor($response['data']);
-                $psrResponse = new PsrResponse($response['status'], $response['headers'], $stream);
-                $dto->response = new ResponseOut($psrResponse);
+
+                if ($dto->type === HttpLogTypeEnum::In) {
+                    $dto->response = response($response['data'], $response['status'], $response['headers']);
+                }
+
+                if ($dto->type === HttpLogTypeEnum::Out) {
+                    $stream = Utils::streamFor($response['data']);
+                    $psrResponse = new PsrResponse($response['status'], $response['headers'], $stream);
+                    $dto->response = new ResponseOut($psrResponse);
+                }
 
                 event(
                     new HttpCacheEvent(
