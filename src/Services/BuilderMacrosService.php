@@ -93,14 +93,14 @@ class BuilderMacrosService extends DefaultService
                 /** @var bool|null $enabled */
                 return $this->withModelLog($enabled);
             };
-            EloquentBuilder::macro('withLog', $withModelLogEloquentBuilderMacro);
+            // EloquentBuilder::macro('withLog', $withModelLogEloquentBuilderMacro);
             EloquentBuilder::macro('withModelLog', $withModelLogEloquentBuilderMacro);
 
             $withoutModelLogEloquentBuilderMacro = function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
                 return $this->withModelLog(false);
             };
-            EloquentBuilder::macro('withoutLog', $withoutModelLogEloquentBuilderMacro);
+            // EloquentBuilder::macro('withoutLog', $withoutModelLogEloquentBuilderMacro);
             EloquentBuilder::macro('withoutModelLog', $withoutModelLogEloquentBuilderMacro);
 
             $withModelLogQueryBuilderMacro = function (bool|null $enabled = null) {
@@ -108,14 +108,14 @@ class BuilderMacrosService extends DefaultService
                 /** @var bool|null $enabled */
                 return $this->withModelLog($enabled);
             };
-            QueryBuilder::macro('withLog', $withModelLogQueryBuilderMacro);
+            // QueryBuilder::macro('withLog', $withModelLogQueryBuilderMacro);
             QueryBuilder::macro('withModelLog', $withModelLogQueryBuilderMacro);
 
             $withoutModelLogQueryBuilderMacro = function () {
                 /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
                 return $this->withModelLog(false);
             };
-            QueryBuilder::macro('withoutLog', $withoutModelLogQueryBuilderMacro);
+            // QueryBuilder::macro('withoutLog', $withoutModelLogQueryBuilderMacro);
             QueryBuilder::macro('withoutModelLog', $withoutModelLogQueryBuilderMacro);
         }
 
