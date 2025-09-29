@@ -71,7 +71,7 @@ trait TestingTrait
     protected function setUp(): void
     {
         echo PHP_EOL . class_basename($this->toString()) . ' ';
-        
+
         parent::setUp();
 
         static $started = false;
@@ -87,9 +87,10 @@ trait TestingTrait
                 // register_shutdown_function([static::class, 'onFinishTest']);
 
                 // Вычисляем хеш миграций
+                $appEnv = config('app.env');
                 $migrations = Schema::hasTable('migrations') ? DB::table('migrations')->get() : [];
                 $migrationsHashCurrent = Hlp::hashXxh128(json($migrations));
-                $migrationsHashPrevious = Storage::get(storage_path('framework/testing/migrations.hash'));
+                $migrationsHashPrevious = Storage::get(storage_path("framework/testing/migrations_{$appEnv}.hash"));
 
                 // Запускаем полную миграцию БД
                 if (
@@ -111,11 +112,11 @@ trait TestingTrait
                 }
 
                 // Получаем пользователя для авторизации
-                if (!$user && $userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? [])) {
+                if (!$user && ($userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? []))) {
                     $userClass = Lh::config(ConfigEnum::App, 'user');
                     $user = method_exists($userClass, 'factory')
-                        ? $userClass::where($user)->first() ?? $userClass::factory()->create($userData)
-                        : $userClass::firstOrCreate($user);
+                        ? $userClass::where($userData)->first() ?? $userClass::factory()->create($userData)
+                        : $userClass::firstOrCreate($userData);
                 }
             }
 
