@@ -447,6 +447,8 @@ return [
         'exclude' => (array)(Hlp::envGet('HELPER_QUERY_LOG_EXCLUDE', base_path('.env')) ?? []),
         // Флаг включения логирования всех query запросов
         'global' => (bool)env('HELPER_QUERY_LOG_GLOBAL', false),
+        // Логирование query запроса при превышении установленного времени (в миллисекундах, 0 - отключено)
+        'exceed_duration' => (int)env('HELPER_QUERY_LOG_EXCEED_DURATION', 0),
     ],
 
 

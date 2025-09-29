@@ -297,15 +297,22 @@ trait QueryTrait
     protected function createQueryLog(EloquentBuilder|QueryBuilder|string $builder): array
     {
         $result = [];
+        $exceedDuration = 0;
 
         if (
-            !Lh::config(ConfigEnum::QueryLog, 'enabled')
+            !($enabled = Lh::config(ConfigEnum::QueryLog, 'enabled'))
             || !(
                 $this->withQueryLog === true
                 || ($this->withQueryLog !== false && Lh::config(ConfigEnum::QueryLog, 'global'))
             )
         ) {
-            return $result;
+            // Лог запроса выключен, проверяем время превышения
+            $exceedDuration = (int)Lh::config(ConfigEnum::QueryLog, 'timer_exceed');
+
+            // Если сервис лога запросов выключен или время превышения не задано, то выходим
+            if (!$enabled || $exceedDuration <= 0) {
+                return $result;
+            }
         }
 
         $this->setQueryLogClass($this::class);
@@ -344,11 +351,12 @@ trait QueryTrait
                         ]
                         : []
                     ),
+                    'exceed_duration' => $exceedDuration,
                 ],
             );
 
             if (Lh::canDispatch($dto)) {
-                !Lh::config(ConfigEnum::QueryLog, 'store_on_start') ?: $dto->dispatch();
+                !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && !$exceedDuration) ?: $dto->dispatch();
                 $result[] = $dto;
             }
         }
@@ -404,7 +412,13 @@ trait QueryTrait
                 },
             ];
 
-            $dto->dispatch();
+            // Установленное время превышения запроса
+            $exceedDuration = $dto->info['exceed_duration'] ?: 0;
+
+            // Если включен лог запроса или запрос превысил установленное время
+            if (!$exceedDuration || (int)($dto->duration * 1000) >= $exceedDuration) {
+                $dto->dispatch();
+            }
         }
     }
 
