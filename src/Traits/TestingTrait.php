@@ -206,6 +206,9 @@ trait TestingTrait
             Config::set("laravel-helper.{$config->value}.enabled", $helperLogsEnabled);
         }
 
+        $config = ConfigEnum::HttpLog;
+        Config::set("laravel-helper.{$config->value}.in.enabled", false);
+
         if ($helperTestingEnabled && Lh::config(ConfigEnum::TestingLog, 'database.fresh')) {
             ($databaseTesting = $connectionTesting['database'] ?: '')
                 ?: throw new WithoutTelegramException(
