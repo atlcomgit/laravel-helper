@@ -310,7 +310,7 @@ trait QueryTrait
             $exceedDurationMs = Lh::config(ConfigEnum::QueryLog, 'exceed_duration_ms') ?? false;
 
             // Если сервис лога запросов выключен или время превышения не задано, то выходим
-            if (!$enabled || $exceedDurationMs === false) {
+            if (!$enabled || !is_numeric($exceedDurationMs)) {
                 return $result;
             }
         }
@@ -351,12 +351,12 @@ trait QueryTrait
                         ]
                         : []
                     ),
-                    'exceed_duration_ms' => $exceedDurationMs,
+                    'exceed_duration_ms' => is_numeric($exceedDurationMs) ? (int)$exceedDurationMs : false,
                 ],
             );
 
             if (Lh::canDispatch($dto)) {
-                !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && ($exceedDurationMs === false))
+                !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && !is_numeric($exceedDurationMs))
                     ?: $dto->dispatch();
                 $result[] = $dto;
             }
@@ -417,7 +417,7 @@ trait QueryTrait
             $exceedDurationMs = $dto->info['exceed_duration_ms'] ?? false;
 
             // Если включен лог запроса или запрос превысил установленное время
-            if ($exceedDurationMs === false || (int)($dto->duration * 1000) >= $exceedDurationMs) {
+            if (!is_numeric($exceedDurationMs) || (int)($dto->duration * 1000) >= (int)$exceedDurationMs) {
                 $dto->dispatch();
             }
         }
