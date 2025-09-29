@@ -297,7 +297,7 @@ trait QueryTrait
     protected function createQueryLog(EloquentBuilder|QueryBuilder|string $builder): array
     {
         $result = [];
-        $exceedDuration = 0;
+        $exceedDurationMs = false;
 
         if (
             !($enabled = Lh::config(ConfigEnum::QueryLog, 'enabled'))
@@ -307,10 +307,10 @@ trait QueryTrait
             )
         ) {
             // Лог запроса выключен, проверяем время превышения
-            $exceedDuration = (int)Lh::config(ConfigEnum::QueryLog, 'timer_exceed');
+            $exceedDurationMs = Lh::config(ConfigEnum::QueryLog, 'exceed_duration_ms') ?? false;
 
             // Если сервис лога запросов выключен или время превышения не задано, то выходим
-            if (!$enabled || $exceedDuration <= 0) {
+            if (!$enabled || $exceedDurationMs === false) {
                 return $result;
             }
         }
@@ -351,12 +351,13 @@ trait QueryTrait
                         ]
                         : []
                     ),
-                    'exceed_duration' => $exceedDuration,
+                    'exceed_duration_ms' => $exceedDurationMs,
                 ],
             );
 
             if (Lh::canDispatch($dto)) {
-                !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && !$exceedDuration) ?: $dto->dispatch();
+                !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && ($exceedDurationMs === false))
+                    ?: $dto->dispatch();
                 $result[] = $dto;
             }
         }
@@ -413,10 +414,10 @@ trait QueryTrait
             ];
 
             // Установленное время превышения запроса
-            $exceedDuration = $dto->info['exceed_duration'] ?: 0;
+            $exceedDurationMs = $dto->info['exceed_duration_ms'] ?? false;
 
             // Если включен лог запроса или запрос превысил установленное время
-            if (!$exceedDuration || (int)($dto->duration * 1000) >= $exceedDuration) {
+            if ($exceedDurationMs === false || (int)($dto->duration * 1000) >= $exceedDurationMs) {
                 $dto->dispatch();
             }
         }
