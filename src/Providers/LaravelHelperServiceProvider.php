@@ -74,6 +74,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -225,14 +226,19 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Подключение middleware глобально
         $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
         $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
-        if (Lh::config(ConfigEnum::HttpLog, 'in.global')) {
-            $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
-            $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
-        }
+
         if (Lh::config(ConfigEnum::HttpCache, 'global')) {
             $kernel->prependMiddlewareToGroup('web', HttpCacheMiddleware::class);
             $kernel->prependMiddlewareToGroup('api', HttpCacheMiddleware::class);
         }
+        if (Lh::config(ConfigEnum::HttpLog, 'in.global')) {
+            $kernel->prependMiddlewareToGroup('web', HttpLogMiddleware::class);
+            $kernel->prependMiddlewareToGroup('api', HttpLogMiddleware::class);
+        }
+
+        // Регистрация alias
+        Route::aliasMiddleware('withCache', HttpCacheMiddleware::class);
+        Route::aliasMiddleware('withLog', HttpLogMiddleware::class);
 
         // Подключение логирования очередей
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));

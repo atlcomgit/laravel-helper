@@ -46,7 +46,8 @@ class CacheService extends DefaultService
 
         return match (true) {
             is_integer($ttl) => $ttl,
-            is_null($ttl), $ttl === true => (int)Lh::config(ConfigEnum::HttpCache, 'ttl'),
+            $ttl === false, $ttl === 'false' => false,
+            is_null($ttl), $ttl === true, $ttl === 'true' => (int)Lh::config(ConfigEnum::HttpCache, 'ttl'),
             is_string($ttl) => (int)abs($now->copy()->modify(trim((string)$ttl, '- '))->diffInSeconds($now)),
 
             default => false,

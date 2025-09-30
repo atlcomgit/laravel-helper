@@ -22,7 +22,7 @@ class HttpCacheMiddleware
     public static bool $isFromCache = false;
 
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, ?string $ttl = null)
     {
         if (static::$cacheEnabled = Lh::config(ConfigEnum::HttpCache, 'enabled')) {
             $httpCacheService = app(HttpCacheService::class);
@@ -31,6 +31,7 @@ class HttpCacheMiddleware
                 method: $request->getMethod(),
                 url: $request->getUri(),
                 data: $request->getContent(),
+                ttl: $ttl,
             );
 
             if (static::$cacheKey = $httpCacheDto->key) {
