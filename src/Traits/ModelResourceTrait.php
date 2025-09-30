@@ -55,6 +55,28 @@ trait ModelResourceTrait
 
 
     /**
+     * Возвращает список записей для заполнения выбираемого поля в форме.
+     * Используется для генерации названий в интерфейсе, админ-панели и сообщениях.
+     *
+     * @param string $columnId
+     * @param string $columnName
+     * @param string|null $columnComment
+     * @param mixed 
+     * @return Collection<static>
+     */
+    public static function getModelItemsForForm(
+        string $columnId = null,
+        string $columnName = 'name',
+        ?string $columnComment = null,
+        int|bool|null $withCache = null,
+    ): Collection {
+        $columnId ??= method_exists(static::class, 'getPrimaryKeyName') ? static::getPrimaryKeyName() : 'id';
+
+        return static::getModelLabels($columnId, $columnName, $columnComment, $withCache);
+    }
+
+
+    /**
      * Возвращает метки (человеко-читаемые названия) для модели.
      * Используется для генерации названий в интерфейсе, админ-панели и сообщениях.
      *
