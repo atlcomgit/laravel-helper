@@ -6,6 +6,8 @@ use Atlcom\Dto;
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Dto\ApplicationDto;
 use Atlcom\LaravelHelper\Dto\ExceptionDto;
+use Atlcom\LaravelHelper\Dto\HttpCacheConfigDto;
+use Atlcom\LaravelHelper\Dto\HttpLogConfigDto;
 use Atlcom\LaravelHelper\Enums\ApplicationTypeEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
@@ -387,4 +389,30 @@ if (!function_exists('uuid')) {
     }
 } else {
     throw new LaravelHelperException('Laravel_helper: Функция uuid() уже определена в приложении');
+}
+
+
+if (!function_exists('withHttpCache')) {
+    /**
+     * Возвращает кабинет запроса
+     *
+     * @return string
+     */
+    function withHttpCache(?HttpCacheConfigDto $dto = null): string
+    {
+        return Hlp::stringConcat(':', 'withHttpCache', $dto->toJson());
+    }
+}
+
+
+if (!function_exists('withHttpLog')) {
+    /**
+     * Возвращает кабинет запроса
+     *
+     * @return string
+     */
+    function withHttpLog(?HttpLogConfigDto $dto = null): string
+    {
+        return Hlp::stringConcat(':', 'withHttpLog', $dto->toJson());
+    }
 }

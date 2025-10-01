@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\HttpCacheConfigDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheEventDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
@@ -49,26 +50,26 @@ class HttpCacheService extends DefaultService
      * Регистрирует макросы для Http запроса PendingRequest
      *
      * @param PendingRequest $request
-     * @param int|string|bool|null|null $ttl
+     * @param ?HttpCacheConfigDto $config
      * @return PendingRequest
      */
-    public function setMacro(PendingRequest $request, int|string|bool|null $ttl = null): PendingRequest
+    public function setMacro(PendingRequest $request, ?HttpCacheConfigDto $config = null): PendingRequest
     {
         $request->macro(
             'getWithCache',
             fn (string $url, array|string|null $query = null)
-            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Get, $url, $query, $ttl)
+            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Get, $url, $query, $config)
         );
         $request->macro(
             'postWithCache',
             fn (string $url, $data = [])
-            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Post, $url, $data, $ttl)
+            => app(HttpCacheService::class)->sendWithCache($request, HttpCacheMethodEnum::Post, $url, $data, $config)
         );
 
-        return new class ($request, $ttl) extends PendingRequest {
+        return new class ($request, $config) extends PendingRequest {
             public function __construct(
                 protected PendingRequest $pendingRequest,
-                protected int|string|bool|null $ttl = null,
+                protected ?HttpCacheConfigDto $config = null,
             ) {}
 
 
@@ -85,7 +86,7 @@ class HttpCacheService extends DefaultService
             public function get(string $url, $query = null)
             {
                 return app(HttpCacheService::class)
-                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Get, $url, $query, $this->ttl);
+                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Get, $url, $query, $this->config);
             }
 
 
@@ -102,7 +103,7 @@ class HttpCacheService extends DefaultService
             public function post(string $url, $data = [])
             {
                 return app(HttpCacheService::class)
-                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Post, $url, $data, $this->ttl);
+                    ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Post, $url, $data, $this->config);
             }
 
 
@@ -116,8 +117,8 @@ class HttpCacheService extends DefaultService
      * @param PendingRequest $request
      * @param HttpCacheMethodEnum $method
      * @param string $url
-     * @param array|string|null|null $data
-     * @param int|string|bool|null|null $ttl
+     * @param array|string|null $data
+     * @param ?HttpCacheConfigDto $config
      * @param mixed 
      * @return ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null
      */
@@ -126,9 +127,9 @@ class HttpCacheService extends DefaultService
         HttpCacheMethodEnum $method,
         string $url,
         array|string|null $data = null,
-        int|string|bool|null $ttl = null,
+        ?HttpCacheConfigDto $config = null,
     ): ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null {
-        $httpCacheDto = $this->createHttpDto($request, $method->value, $url, $data, $ttl);
+        $httpCacheDto = $this->createHttpDto($request, $method->value, $url, $data, $config);
 
         if ($httpCacheDto->key) {
             $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_KEY, $httpCacheDto->key);
@@ -187,9 +188,8 @@ class HttpCacheService extends DefaultService
      * @param RequestIn|RequestOut|PendingRequest $request
      * @param string $method
      * @param string $url
-     * @param array|string|null|null $data
-     * @param int|string|bool|null|null $ttl
-     * @param mixed 
+     * @param array|string|null $data
+     * @param ?HttpCacheConfigDto $config
      * @return HttpCacheDto
      */
     public function createHttpDto(
@@ -197,10 +197,10 @@ class HttpCacheService extends DefaultService
         string $method,
         string $url,
         array|string|null $data = null,
-        int|string|bool|null $ttl = null,
+        ?HttpCacheConfigDto $config = null,
     ): HttpCacheDto {
-        $ttl = $this->cacheService->getCacheTtl($ttl);
-        $key = $this->getCacheKey($request, $method, $url, $data, $ttl);
+        $ttl = $this->cacheService->getCacheTtl(config: $config);
+        $key = $this->getCacheKey($request, $method, $url, $data, $config);
 
         $dto = HttpCacheDto::create(
             key: $ttl === false ? null : $key,
@@ -240,39 +240,52 @@ class HttpCacheService extends DefaultService
         string $method,
         string $url,
         array|string|null $data = null,
-        int|bool|null $ttl = null,
+        ?HttpCacheConfigDto $config = null,
     ): string {
+        $now = now()->setTime(0, 0, 0, 0);
+        $ttl = $config?->ttl;
         $ttl = match (true) {
             is_null($ttl) || $ttl === 0 => 'ttl_not_set',
+            $ttl === true, $ttl === 'true' => 'ttl_default',
+            $ttl === false, $ttl === 'false' => 'ttl_disabled',
             is_integer($ttl) => "ttl_{$ttl}",
+            is_numeric($ttl) => "ttl_{" . (int)$ttl . "}",
+            is_string($ttl) => "ttl_{" . (int)abs($now->copy()->modify(trim((string)$ttl, '+- '))->diffInSeconds($now)) . "}",
             is_bool($ttl) => "ttl_default",
 
             default => '',
         };
 
+        $headers = match (true) {
+            $request instanceof RequestIn => $request->headers->all(),
+            $request instanceof RequestOut => $request->headers(),
+            $request instanceof PendingRequest => $request->getOptions()['headers'] ?? [],
+
+            default => [],
+        };
+        $data = is_array($data) ? json($data) : ($data ?? '');
+
+        $method = Hlp::stringReplace($method, $config->ignoreHashMethods ?? []);
+        $url = Hlp::stringReplace($url, $config->ignoreHashUrls ?? []);
+        $headers = Hlp::arrayDeleteKeys($headers, $config->ignoreHashHeaders ?? []);
+        $headers = Hlp::arrayDeleteValues($headers, $config->ignoreHashHeaders ?? []);
+        $data = Hlp::stringReplace($data, $config->ignoreHashData ?? []);
+
         return "{$ttl}_" . Hlp::hashXxh128(
             Str::lower($method)
             . $url
             . json(
-                Hlp::arrayDeleteKeys(
-                    match (true) {
-                        $request instanceof RequestIn => $request->headers->all(),
-                        $request instanceof RequestOut => $request->headers(),
-                        $request instanceof PendingRequest => $request->getOptions()['headers'] ?? [],
-
-                        default => [],
-                    },
-                    [
-                        HttpLogService::HTTP_HEADER_UUID,
-                        HttpLogService::HTTP_HEADER_NAME,
-                        HttpLogService::HTTP_HEADER_TIME,
-                        HttpLogService::HTTP_HEADER_CACHE_KEY,
-                        HttpLogService::HTTP_HEADER_CACHE_SET,
-                        HttpLogService::HTTP_HEADER_CACHE_GET,
-                    ],
-                ),
+                Hlp::arrayDeleteKeys($headers, [
+                    HttpLogService::HTTP_HEADER_UUID,
+                    HttpLogService::HTTP_HEADER_NAME,
+                    HttpLogService::HTTP_HEADER_TIME,
+                    HttpLogService::HTTP_HEADER_CACHE_KEY,
+                    HttpLogService::HTTP_HEADER_CACHE_SET,
+                    HttpLogService::HTTP_HEADER_CACHE_GET,
+                ]),
+                Hlp::jsonFlags(),
             )
-            . (is_array($data) ? json($data) : ($data ?? ''))
+            . $data
         );
     }
 

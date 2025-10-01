@@ -237,8 +237,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         }
 
         // Регистрация alias
-        Route::aliasMiddleware('withCache', HttpCacheMiddleware::class);
-        Route::aliasMiddleware('withLog', HttpLogMiddleware::class);
+        Route::aliasMiddleware('withHttpCache', HttpCacheMiddleware::class);
+        Route::aliasMiddleware('withHttpLog', HttpLogMiddleware::class);
 
         // Подключение логирования очередей
         Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));

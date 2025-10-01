@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\HttpCacheConfigDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -37,12 +38,14 @@ class CacheService extends DefaultService
     /**
      * Возвращает время жизни кеша
      *
-     * @param int|string|bool|null|null $ttl
+     * @param int|string|bool|null $ttl
+     * @param ?HttpCacheConfigDto $config
      * @return bool|int|null
      */
-    public function getCacheTtl(int|string|bool|null $ttl = null): bool|int|null
+    public function getCacheTtl(int|string|bool|null $ttl = null, ?HttpCacheConfigDto $config = null): bool|int|null
     {
         $now = now()->setTime(0, 0, 0, 0);
+        $ttl ??= $config?->ttl;
 
         return match (true) {
             is_integer($ttl) => $ttl,

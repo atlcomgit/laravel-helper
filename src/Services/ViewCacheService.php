@@ -99,7 +99,7 @@ class ViewCacheService extends DefaultService
                 $viewCacheDto = ViewCacheDto::create(
                     key: $dto->cacheKey = $this->getTagTtl($ttl)
                     . '_' . $this->getCacheKey($view, $data, $mergeData, $ignoreData),
-                    ttl: $this->cacheService->getCacheTtl($ttl),
+                    ttl: $this->cacheService->getCacheTtl(ttl: $ttl),
                     view: $view,
                     data: $data,
                     mergeData: $mergeData,
