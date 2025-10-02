@@ -57,7 +57,7 @@ class TelegramBotCommand extends DefaultCommand
                     ->dispatch();
 
                 $this->telegramComment = "Установлены команды: "
-                    . implode(', ', $dto->commands->pluck('commands')->toArrayRecursive());
+                    . implode(', ', $dto->commands?->pluck('command')->toArrayRecursive() ?? []);
                 break;
 
             default:
