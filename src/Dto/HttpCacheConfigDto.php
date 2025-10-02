@@ -39,4 +39,13 @@ class HttpCacheConfigDto extends DefaultDto
     public ?array $ignoreHashHeaders = null;
     /** @var string[] */
     public ?array $ignoreHashData = null;
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerializing(array &$array): void
+    {
+        $this->onlyFilled();
+    }
 }

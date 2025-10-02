@@ -400,7 +400,7 @@ if (!function_exists('withHttpCache')) {
      */
     function withHttpCache(?HttpCacheConfigDto $dto = null): string
     {
-        return Hlp::stringConcat(':', 'withHttpCache', $dto->toJson());
+        return Hlp::stringConcat(':', 'withHttpCache', Hlp::cryptEncode($dto, 'cache'));
     }
 }
 
@@ -413,6 +413,6 @@ if (!function_exists('withHttpLog')) {
      */
     function withHttpLog(?HttpLogConfigDto $dto = null): string
     {
-        return Hlp::stringConcat(':', 'withHttpLog', $dto->toJson());
+        return Hlp::stringConcat(':', 'withHttpLog', Hlp::cryptEncode($dto, 'log'));
     }
 }

@@ -27,9 +27,7 @@ class HttpCacheMiddleware
     public function handle(Request $request, Closure $next, ?string $httpCacheConfigDtoJson = null)
     {
         if (static::$cacheEnabled = Lh::config(ConfigEnum::HttpCache, 'enabled')) {
-            $config = HttpCacheConfigDto::create(
-                Hlp::regexpValidateJson($httpCacheConfigDtoJson) ? $httpCacheConfigDtoJson : '{}'
-            );
+            $config = Hlp::cryptDecode($httpCacheConfigDtoJson, 'cache') ?: HttpCacheConfigDto::create();
 
             $method = $request->getMethod();
             $url = $request->getUri();

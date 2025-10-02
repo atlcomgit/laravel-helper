@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "atlcom/dto",
-            "version": "v2.75.10",
+            "version": "v2.75.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/dto.git",
-                "reference": "b98880f742d5374378ef597329d59c28ba6a03b6"
+                "reference": "a60adbd64629b7c4ce601e41b9e32a9ff8cdf050"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/b98880f742d5374378ef597329d59c28ba6a03b6",
-                "reference": "b98880f742d5374378ef597329d59c28ba6a03b6",
+                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/a60adbd64629b7c4ce601e41b9e32a9ff8cdf050",
+                "reference": "a60adbd64629b7c4ce601e41b9e32a9ff8cdf050",
                 "shasum": ""
             },
             "require": {
@@ -49,7 +49,7 @@
             "description": "Atlcom DTO library",
             "support": {
                 "issues": "https://github.com/atlcomgit/dto/issues",
-                "source": "https://github.com/atlcomgit/dto/tree/v2.75.10"
+                "source": "https://github.com/atlcomgit/dto/tree/v2.75.12"
             },
             "funding": [
                 {
@@ -57,20 +57,20 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-09-24T04:27:57+00:00"
+            "time": "2025-09-30T09:50:44+00:00"
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.15",
+            "version": "v1.23.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "78bd7c37f14619ce9d5f69e8560c6afedd591553"
+                "reference": "a5f16ec457f16e14e6a9dda5a5e3b6c79f6412ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/78bd7c37f14619ce9d5f69e8560c6afedd591553",
-                "reference": "78bd7c37f14619ce9d5f69e8560c6afedd591553",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/a5f16ec457f16e14e6a9dda5a5e3b6c79f6412ee",
+                "reference": "a5f16ec457f16e14e6a9dda5a5e3b6c79f6412ee",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.15"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.16"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-09-28T08:29:58+00:00"
+            "time": "2025-10-02T05:18:47+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -2062,16 +2062,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.46.0",
+            "version": "v11.46.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "2c6d85f22d08123ad45aa3a6726b16f06e68eecd"
+                "reference": "5fd457f807570a962a53b403b1346efe4cc80bb8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/2c6d85f22d08123ad45aa3a6726b16f06e68eecd",
-                "reference": "2c6d85f22d08123ad45aa3a6726b16f06e68eecd",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/5fd457f807570a962a53b403b1346efe4cc80bb8",
+                "reference": "5fd457f807570a962a53b403b1346efe4cc80bb8",
                 "shasum": ""
             },
             "require": {
@@ -2273,7 +2273,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-09-08T21:54:34+00:00"
+            "time": "2025-09-30T14:51:32+00:00"
         },
         {
             "name": "laravel/pail",
@@ -3871,16 +3871,16 @@
         },
         {
             "name": "orchestra/sidekick",
-            "version": "v1.2.14",
+            "version": "v1.2.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/orchestral/sidekick.git",
-                "reference": "0f7d1d96d390e7bf9118f280dfae74b8b2fb0a00"
+                "reference": "2b165b602f56bbe05a5116fbfd76e4eb4986d1c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/orchestral/sidekick/zipball/0f7d1d96d390e7bf9118f280dfae74b8b2fb0a00",
-                "reference": "0f7d1d96d390e7bf9118f280dfae74b8b2fb0a00",
+                "url": "https://api.github.com/repos/orchestral/sidekick/zipball/2b165b602f56bbe05a5116fbfd76e4eb4986d1c4",
+                "reference": "2b165b602f56bbe05a5116fbfd76e4eb4986d1c4",
                 "shasum": ""
             },
             "require": {
@@ -3893,7 +3893,7 @@
                 "laravel/framework": "^10.48.29|^11.44.7|^12.1.1|^13.0",
                 "laravel/pint": "^1.4",
                 "mockery/mockery": "^1.5.1",
-                "orchestra/testbench-core": "^8.37.0|^9.14.0|^10.0|^11.0",
+                "orchestra/testbench-core": "^8.37.0|^9.14.0|^10.2.0|^11.0",
                 "phpstan/phpstan": "^2.1.14",
                 "phpunit/phpunit": "^10.0|^11.0|^12.0",
                 "symfony/process": "^6.0|^7.0"
@@ -3922,9 +3922,9 @@
             "description": "Packages Toolkit Utilities and Helpers for Laravel",
             "support": {
                 "issues": "https://github.com/orchestral/sidekick/issues",
-                "source": "https://github.com/orchestral/sidekick/tree/v1.2.14"
+                "source": "https://github.com/orchestral/sidekick/tree/v1.2.16"
             },
-            "time": "2025-08-06T23:54:27+00:00"
+            "time": "2025-10-01T22:10:05+00:00"
         },
         {
             "name": "orchestra/testbench",
@@ -4660,16 +4660,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.57",
+            "version": "10.5.58",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "8e7598bbb17bb5cd80728f4831d3f83223d3a6b3"
+                "reference": "e24fb46da450d8e6a5788670513c1af1424f16ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/8e7598bbb17bb5cd80728f4831d3f83223d3a6b3",
-                "reference": "8e7598bbb17bb5cd80728f4831d3f83223d3a6b3",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e24fb46da450d8e6a5788670513c1af1424f16ca",
+                "reference": "e24fb46da450d8e6a5788670513c1af1424f16ca",
                 "shasum": ""
             },
             "require": {
@@ -4741,7 +4741,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.57"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.58"
             },
             "funding": [
                 {
@@ -4765,7 +4765,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-24T06:30:38+00:00"
+            "time": "2025-09-28T12:04:46+00:00"
         },
         {
             "name": "psr/container",

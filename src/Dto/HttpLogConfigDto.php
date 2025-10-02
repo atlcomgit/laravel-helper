@@ -25,4 +25,13 @@ class HttpLogConfigDto extends DefaultDto
     public ?array $disableCacheQueries = null;
     /** @var string[] */
     public ?array $disableCacheData = null;
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerializing(array &$array): void
+    {
+        $this->onlyFilled();
+    }
 }

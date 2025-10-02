@@ -26,9 +26,7 @@ class HttpLogMiddleware
     {
         $dto = null;
         if (Lh::config(ConfigEnum::HttpLog, 'enabled') && Lh::config(ConfigEnum::HttpLog, 'in.enabled')) {
-            $config = HttpLogConfigDto::create(
-                Hlp::regexpValidateJson($httpLogConfigDtoJson) ? $httpLogConfigDtoJson : '{}'
-            );
+            $config = Hlp::cryptDecode($httpLogConfigDtoJson, 'log') ?: HttpLogConfigDto::create();
 
             $method = $request->getMethod();
             $url = $request->getUri();
