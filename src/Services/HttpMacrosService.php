@@ -27,7 +27,10 @@ class HttpMacrosService extends DefaultService
             // Регистрация макроса кеширования http запроса
             $withHttpCacheMacro = function (int|string|bool|null $seconds = null) {
                 /** @var PendingRequest $this */
-                return app(HttpCacheService::class)->setMacro($this, $seconds);
+                return Lh::config(ConfigEnum::Macros, 'http.enabled')
+                    && Lh::config(ConfigEnum::HttpCache, 'enabled')
+                    ? app(HttpCacheService::class)->setMacro($this, $seconds)
+                    : $this;
             };
             PendingRequest::macro('withCache', $withHttpCacheMacro);
             PendingRequest::macro('withHttpCache', $withHttpCacheMacro);

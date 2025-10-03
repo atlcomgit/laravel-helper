@@ -10,7 +10,6 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Консольная команда cache:clear (очистка кеша laravel-helper)

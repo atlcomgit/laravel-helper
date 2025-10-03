@@ -29,7 +29,6 @@ use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
 use Atlcom\LaravelHelper\Listeners\TelegramBotEventListener;
-use Atlcom\LaravelHelper\Listeners\TestFinishedListener;
 use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
@@ -168,19 +167,19 @@ class LaravelHelperServiceProvider extends ServiceProvider
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
+
+        // Подключение событий телеграм бота
         !Lh::config(ConfigEnum::TelegramBot, 'enabled')
             ?: Event::listen(TelegramBotEvent::class, TelegramBotEventListener::class);
 
         // Подключение макросов Builder
-        !(Lh::config(ConfigEnum::Macros, 'builder.enabled') || Lh::config(ConfigEnum::QueryCache, 'enabled'))
-            ?: BuilderMacrosService::setMacros();
+        BuilderMacrosService::setMacros();
         // Подключение макросов Str
-        !Lh::config(ConfigEnum::Macros, 'str.enabled') ?: StrMacrosService::setMacros();
+        StrMacrosService::setMacros();
         // Подключение макросов Collection
-        !Lh::config(ConfigEnum::Macros, 'collection.enabled') ?: CollectionMacrosService::setMacros();
+        CollectionMacrosService::setMacros();
         // Подключение макросов Http
-        !(Lh::config(ConfigEnum::Macros, 'http.enabled') || Lh::config(ConfigEnum::HttpCache, 'enabled'))
-            ?: HttpMacrosService::setMacros();
+        HttpMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
         !Lh::config(ConfigEnum::HttpLog, 'out.global') ?: Http::globalOptions([

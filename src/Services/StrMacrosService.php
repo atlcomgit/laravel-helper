@@ -6,6 +6,8 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 
@@ -21,6 +23,10 @@ class StrMacrosService extends DefaultService
      */
     public static function setMacros(): void
     {
+        if (!Lh::config(ConfigEnum::Macros, 'str.enabled')) {
+            return;
+        }
+
         if (method_exists(Hlp::class, 'intervalBetween')) {
             /**
              * @see \Tests\Unit\Helpers\StrMacrosTest::inInterval()
