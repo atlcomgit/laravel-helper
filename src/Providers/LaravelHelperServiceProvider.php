@@ -143,8 +143,15 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         $this->app->singleton(ModelLogObserver::class);
 
-        // $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app)); not need
-        $this->app->bind('db.factory', fn ($app) => new ConnectionFactory($app));
+        // Регистрация обработчика соединений
+        if (
+            Lh::config(ConfigEnum::QueryCache, 'enabled')
+            || Lh::config(ConfigEnum::QueryLog, 'enabled')
+            || Lh::config(ConfigEnum::ModelLog, 'enabled')
+        ) {
+            // $this->app->singleton('db.factory', fn ($app) => new ConnectionFactory($app)); not need
+            $this->app->bind('db.factory', fn ($app) => new ConnectionFactory($app));
+        }
 
         SingletonService::register();
     }

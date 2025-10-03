@@ -38,10 +38,12 @@ trait ModelLogTrait
      */
     public static function withModelLog(?bool $enabled = null): EloquentBuilder
     {
-        $query = static::query()->withModelLog($enabled);
-        $query->getQuery()->withModelLog($enabled);
-        // $query->getQuery()->getConnection()->setQueryCache($enabled); not need
-        $query->getModel()->setWithModelLogAttribute($enabled);
+        if (Lh::config(ConfigEnum::ModelLog, 'enabled')) {
+            $query = static::query()->withModelLog($enabled);
+            $query->getQuery()->withModelLog($enabled);
+            // $query->getQuery()->getConnection()->setQueryCache($enabled); not need
+            $query->getModel()->setWithModelLogAttribute($enabled);
+        }
 
         return $query;
     }

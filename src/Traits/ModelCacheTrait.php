@@ -65,10 +65,19 @@ trait ModelCacheTrait
      */
     public function newEloquentBuilder($query)
     {
-        $builder = new EloquentBuilder($query);
-        $builder->getQuery()->setQueryCache(null);
-        $builder->getQuery()->setQueryLog(null);
-        $builder->getQuery()->setModelLog($this->withModelLog);
+        if (
+            Lh::config(ConfigEnum::QueryCache, 'enabled')
+            || Lh::config(ConfigEnum::QueryLog, 'enabled')
+            || Lh::config(ConfigEnum::ModelLog, 'enabled')
+        ) {
+            $builder = new EloquentBuilder($query);
+            $builder->getQuery()->setQueryCache(null);
+            $builder->getQuery()->setQueryLog(null);
+            $builder->getQuery()->setModelLog($this->withModelLog);
+
+        } else {
+            $builder = parent::newEloquentBuilder($query);
+        }
 
         return $builder;
     }
