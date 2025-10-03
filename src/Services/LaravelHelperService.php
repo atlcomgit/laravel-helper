@@ -54,6 +54,13 @@ class LaravelHelperService extends DefaultService
      */
     public function config(ConfigEnum $configType, ?string $configName = null, mixed $default = null): mixed
     {
+        if (
+            ($configName === 'enabled' || Hlp::stringEnds($configName, '.enabled'))
+            && !(bool)config('laravel-helper.enabled', true)
+        ) {
+            return false;
+        }
+
         return config("laravel-helper.{$configType->value}" . ($configName ? ".{$configName}" : ''), $default);
     }
 

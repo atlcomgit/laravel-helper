@@ -34,6 +34,9 @@ $userPrimaryKeyName = (string)$user->getKeyName();
 $userPrimaryKeyType = (string)$user->getKeyType();
 
 return [
+    // Включение пакета хелпера
+    'enabled' => (bool)env('HELPER_ENABLED', true),
+
         /**
          * Application. Настройки пакета
          */

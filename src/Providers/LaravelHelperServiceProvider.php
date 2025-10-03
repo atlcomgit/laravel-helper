@@ -241,9 +241,11 @@ class LaravelHelperServiceProvider extends ServiceProvider
         Route::aliasMiddleware('withHttpLog', HttpLogMiddleware::class);
 
         // Подключение логирования очередей
-        Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
-        Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
-        Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
+        if (Lh::config(ConfigEnum::QueueLog, 'enabled')) {
+            Queue::before(fn (JobProcessing $event) => app(QueueLogService::class)->job($event));
+            Queue::after(fn (JobProcessed $event) => app(QueueLogService::class)->job($event));
+            Queue::failing(fn (JobFailed $event) => app(QueueLogService::class)->job($event));
+        }
 
         // not need
         // Event::listen(CommandStarting::class, function (CommandStarting $event) {
