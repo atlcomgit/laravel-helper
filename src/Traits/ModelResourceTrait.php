@@ -65,7 +65,7 @@ trait ModelResourceTrait
      * @return Collection<static>
      */
     public static function getModelItemsForForm(
-        string $columnId = null,
+        ?string $columnId = null,
         string $columnName = 'name',
         ?string $columnComment = null,
         int|bool|null $withCache = null,

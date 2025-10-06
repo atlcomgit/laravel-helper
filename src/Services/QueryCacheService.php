@@ -132,7 +132,7 @@ class QueryCacheService extends DefaultService
      * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string|null
      */
-    public function getQueryKey(?array $tags = null, EloquentBuilder|QueryBuilder|string $builder): ?string
+    public function getQueryKey(?array $tags = null, EloquentBuilder|QueryBuilder|string $builder = ''): ?string
     {
         // Если есть в тегах таблица из исключения, то кеш не используется
         if (Hlp::arraySearchValues($tags, $this->exclude)) {
@@ -171,7 +171,7 @@ class QueryCacheService extends DefaultService
      * @param string|null $key
      * @return bool
      */
-    public function hasQueryCache(?array $tags = null, ?string $key): bool
+    public function hasQueryCache(?array $tags = null, ?string $key = null): bool
     {
         if (!$key) {
             return false;
@@ -190,7 +190,7 @@ class QueryCacheService extends DefaultService
      * @param int|bool|null $ttl - (int в секундах, null/true по умолчанию, false не сохранять)
      * @return bool
      */
-    public function setQueryCache(?array $tags = null, ?string $key, mixed $value, int|bool|null $ttl = null): bool
+    public function setQueryCache(?array $tags = null, ?string $key, mixed $value = null, int|bool|null $ttl = null): bool
     {
         return $this->withoutTelescope(
             function () use (&$tags, &$key, &$value, &$ttl) {
@@ -235,7 +235,7 @@ class QueryCacheService extends DefaultService
      * @param mixed|null $default
      * @return mixed
      */
-    public function getQueryCache(?array $tags = null, ?string $key, mixed $default = null): mixed
+    public function getQueryCache(?array $tags = null, ?string $key = null, mixed $default = null): mixed
     {
         return $this->withoutTelescope(
             function () use (&$tags, &$key, &$default) {
