@@ -190,7 +190,7 @@ class QueryCacheService extends DefaultService
      * @param int|bool|null $ttl - (int в секундах, null/true по умолчанию, false не сохранять)
      * @return bool
      */
-    public function setQueryCache(?array $tags = null, ?string $key, mixed $value = null, int|bool|null $ttl = null): bool
+    public function setQueryCache(?array $tags = null, ?string $key = null, mixed $value = null, int|bool|null $ttl = null): bool
     {
         return $this->withoutTelescope(
             function () use (&$tags, &$key, &$value, &$ttl) {
