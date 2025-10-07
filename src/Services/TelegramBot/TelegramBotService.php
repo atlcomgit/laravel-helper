@@ -343,13 +343,20 @@ class TelegramBotService extends DefaultService
             try {
                 $deletedMessageDto = TelegramBotInDeletedMessageDto::create(externalMessageId: $externalMessageId);
 
-                $json = $this->telegramApiService->deleteMessage(
-                    botToken: $dto->token,
-                    chatId: $dto->externalChatId,
-                    messageId: $externalMessageId,
-                );
+                try {
+                    $json = $this->telegramApiService->deleteMessage(
+                        botToken: $dto->token,
+                        chatId: $dto->externalChatId,
+                        messageId: $externalMessageId,
+                    );
+                    $deletedMessageDto->status = true;
 
-                $deletedMessageDto->status = true;
+                } catch (Throwable $exception) {
+                    if ($json && ($json['description'] ?? null) === 'Bad Request: message to delete not found') {
+                        $deletedMessageDto->status = true;
+                    }
+                }
+
 
             } catch (Throwable $exception) {
                 $deletedMessageDto->status = $exception->getCode() === 400;

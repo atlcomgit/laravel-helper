@@ -25,7 +25,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotChatRepository;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotMessageRepository;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use UnitEnum;
 
 /**
