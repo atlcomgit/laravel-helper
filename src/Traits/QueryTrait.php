@@ -493,7 +493,10 @@ trait QueryTrait
                     $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $this);
                     $hasCache = $queryCacheService->hasQueryCache(tags: $tags, key: $cacheKey);
                     $result = $hasCache
-                        ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
+                        ? (
+                            $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
+                            ?? parent::get($columns)
+                        )
                         : parent::get($columns);
 
                     $hasCache ?: $isCached = $queryCacheService->setQueryCache(
@@ -572,7 +575,10 @@ trait QueryTrait
                 $cacheKey = $queryCacheService->getQueryKey(tags: $tags, builder: $sql);
                 $hasCache = $queryCacheService->hasQueryCache(tags: $tags, key: $cacheKey);
                 $result = $hasCache
-                    ? $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
+                    ? (
+                        $queryCacheService->getQueryCache(tags: $tags, key: $cacheKey)
+                        ?? parent::select($query, $bindings, $useReadPdo)
+                    )
                     : parent::select($query, $bindings, $useReadPdo);
 
                 $hasCache ?: $isCached = $queryCacheService->setQueryCache(
