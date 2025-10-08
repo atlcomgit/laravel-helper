@@ -20,8 +20,8 @@
         "php": "^8.2",
         "ext-mbstring": "*",
         "nesbot/carbon": ">=2.0",
-        "atlcom/helper": "^1.18",
-        "atlcom/dto": "^2.74"
+        "atlcom/helper": "^1.23",
+        "atlcom/dto": "^2.75"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",

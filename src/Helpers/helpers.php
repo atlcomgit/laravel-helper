@@ -218,7 +218,7 @@ if (!function_exists('queue')) {
 
 if (!function_exists('sql')) {
     /**
-     * Возвращает сырой sql запрос c заменой плейсхолдеров
+     * Возвращает сырой sql запрос c заменой плейсхолдеров и усечением длинных значений до 1000 символов
      *
      * @param EloquentBuilder|QueryBuilder|string $builder
      * @return string
@@ -231,7 +231,7 @@ if (!function_exists('sql')) {
 
             default => Hlp::sqlBindings(
                 is_string($builder) ? $builder : $builder->toSql(),
-                is_string($builder) ? $bindings : $builder->getBindings()
+                is_string($builder) ? Hlp::arrayTruncateStringValues($bindings, 1000) : $builder->getBindings()
             ),
         };
     }

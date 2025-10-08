@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4970e7d0764f6bf76659fe3edaad251c",
+    "content-hash": "5e6e0d09d0220db17a432f892e77e6d7",
     "packages": [
         {
             "name": "atlcom/dto",
@@ -61,16 +61,16 @@
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.17",
+            "version": "v1.23.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "7392dd6edcdcaea956cf66850ce9a0cb02ff322e"
+                "reference": "031f12ce7ab0158e06a481498f15567e81fdc618"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/7392dd6edcdcaea956cf66850ce9a0cb02ff322e",
-                "reference": "7392dd6edcdcaea956cf66850ce9a0cb02ff322e",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/031f12ce7ab0158e06a481498f15567e81fdc618",
+                "reference": "031f12ce7ab0158e06a481498f15567e81fdc618",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.17"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.19"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-10-03T13:27:12+00:00"
+            "time": "2025-10-08T04:44:07+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
