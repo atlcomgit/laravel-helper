@@ -122,9 +122,9 @@ class TelegramBotVariableRepository extends DefaultRepository
      * @param TelegramBotMessage $message
      * @param string $group
      * @param string $name
-     * @return TelegramBotVariable
+     * @return TelegramBotVariable|null
      */
-    public function getMessageVariable(TelegramBotMessage $message, string $group, string $name): TelegramBotVariable
+    public function getMessageVariable(TelegramBotMessage $message, string $group, string $name): ?TelegramBotVariable
     {
         return $message->refresh()->telegramBotChat?->telegramBotVariables
             ->where('group', $group)
