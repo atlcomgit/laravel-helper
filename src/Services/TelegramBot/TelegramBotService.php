@@ -143,7 +143,6 @@ class TelegramBotService extends DefaultService
      * @param int|null $chatId
      * @param int|null $userId
      * @param string|null $language
-     * @param mixed 
      * @return array
      */
     private function buildCommandOptions(

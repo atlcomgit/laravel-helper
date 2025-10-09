@@ -119,7 +119,6 @@ class HttpCacheService extends DefaultService
      * @param string $url
      * @param array|string|null $data
      * @param ?HttpCacheConfigDto $config
-     * @param mixed 
      * @return ResponseIn|ResponseOut|BinaryFileResponse|StreamedResponse|null
      */
     public function sendWithCache(

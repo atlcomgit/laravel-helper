@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Defaults;
 
+use Atlcom\LaravelHelper\Dto\Scope\FilterDto;
 use Atlcom\LaravelHelper\Traits\ModelCacheTrait;
 use Atlcom\LaravelHelper\Traits\ModelLogTrait;
 use Atlcom\LaravelHelper\Traits\ModelResourceTrait;
@@ -11,6 +12,7 @@ use Atlcom\LaravelHelper\Traits\ModelScopeTrait;
 use Atlcom\LaravelHelper\Traits\ModelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * Абстрактный класс моделей
@@ -27,4 +29,15 @@ abstract class DefaultModel extends Model
     use ModelResourceTrait;
     use ModelScopeTrait;
     // use ModelHasFilesTrait;
+
+
+    /**
+     * Возвращает коллекцию с фильтрами модели
+     *
+     * @return Collection<string, FilterDto>
+     */
+    public static function filters(): Collection
+    {
+        return collect([]);
+    }
 }

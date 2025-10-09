@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
+use Atlcom\LaravelHelper\Dto\Scope\FilterDto;
 use Atlcom\LaravelHelper\Dto\Scope\SortScopeDto;
+use Atlcom\LaravelHelper\Enums\FilterOperatorEnum;
 use Atlcom\LaravelHelper\Enums\SortDirectionEnum;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
  * 
  * @method self|Builder|DefaultModel ofSort(array $sort)
  * @method self|Builder|DefaultModel ofPage(int $page, int $limit)
+ * @method self|Builder|DefaultModel ofFilters(int $page, int $limit)
  * 
  * @mixin DefaultModel
  */
@@ -54,5 +57,50 @@ trait ModelScopeTrait
         return $query
             ->offset(($page - 1) * $limit)
             ->limit($limit);
+    }
+
+
+    /**
+     * Применяет фильтры к запросу списка с пагинацией
+     *
+     * @param Builder $query
+     * @param array|null $requestFilters
+     * @return Builder
+     */
+    public function scopeOfFilters(Builder $query, ?array $requestFilters = null): Builder
+    {
+        return $query
+            ->when(
+                method_exists($this, 'filters') && ($modelFilters = $this->filters()) && $requestFilters,
+                static function ($query) use ($modelFilters, $requestFilters) {
+
+                    // Применяем фильтры из модели
+                    foreach ($modelFilters as $modelFilterName => $modelFilterData) {
+                        $modelFilterDto = FilterDto::create($modelFilterData);
+
+                        if ($requestFilterValue = $requestFilters[$modelFilterName] ?? null) {
+                            $closure = $modelFilterDto->closure;
+
+                            match ($modelFilterDto->operator) {
+                                FilterOperatorEnum::Equal
+                                => $query->where($modelFilterDto->column, '=', $requestFilterValue),
+                                FilterOperatorEnum::Like
+                                => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
+                                FilterOperatorEnum::Ilike
+                                => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
+                                FilterOperatorEnum::In
+                                => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
+                                FilterOperatorEnum::Between
+                                => $query->whereBetween($modelFilterDto->column, (array)$requestFilterValue),
+                                FilterOperatorEnum::Closure
+                                => !is_callable($closure) ?: $closure($query, $requestFilterValue),
+
+                                default => null,
+                            };
+                        }
+                    }
+
+                }
+            );
     }
 }

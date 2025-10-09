@@ -83,7 +83,6 @@ trait ModelResourceTrait
      * @param string $columnId
      * @param string $columnName
      * @param string|null $columnComment
-     * @param mixed 
      * @return Collection<static>
      */
     public static function getModelLabels(
