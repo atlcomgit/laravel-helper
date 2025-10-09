@@ -51,6 +51,21 @@ class TelegramBotVariableService extends DefaultService
 
 
     /**
+     * Удаляет переменные по группе чата телеграм бота
+     *
+     * @param TelegramBotMessage $message
+     * @param BackedEnum|string $group
+     * @return void
+     */
+    public function delGroupVariables(TelegramBotMessage $message, BackedEnum|string $group): void
+    {
+        !($group instanceof BackedEnum) ?: $group = $group->value;
+
+        $this->telegramBotVariableRepository->delMessageGroupVariables($message, $group);
+    }
+
+
+    /**
      * Возвращает значение переменной чата телеграм бота
      *
      * @param TelegramBotMessage $message
@@ -86,5 +101,22 @@ class TelegramBotVariableService extends DefaultService
         !($name instanceof BackedEnum) ?: $name = $name->value;
 
         return $this->telegramBotVariableRepository->setMessageVariable($message, $group, $name, $value);
+    }
+
+
+    /**
+     * Удаляет значение переменной чата телеграм бота
+     *
+     * @param TelegramBotMessage $message
+     * @param BackedEnum|string $group
+     * @param BackedEnum|string $name
+     * @return void
+     */
+    public function delVariable(TelegramBotMessage $message, BackedEnum|string $group, BackedEnum|string $name): void
+    {
+        !($group instanceof BackedEnum) ?: $group = $group->value;
+        !($name instanceof BackedEnum) ?: $name = $name->value;
+
+        $this->telegramBotVariableRepository->delMessageVariable($message, $group, $name);
     }
 }

@@ -117,6 +117,21 @@ class TelegramBotVariableRepository extends DefaultRepository
 
 
     /**
+     * Удаляет переменные по группе чата телеграм бота
+     *
+     * @param TelegramBotMessage $message
+     * @param string $group
+     * @return void
+     */
+    public function delMessageGroupVariables(TelegramBotMessage $message, string $group): void
+    {
+        $message->refresh()->telegramBotChat?->telegramBotVariables()
+            ->where('group', $group)
+            ->delete();
+    }
+
+
+    /**
      * Возвращает значение переменной чата телеграм бота
      *
      * @param TelegramBotMessage $message
@@ -134,7 +149,7 @@ class TelegramBotVariableRepository extends DefaultRepository
 
 
     /**
-     * Устанавливает значение переменной чата телеграм бота и удаляет предыдущие значения через softDelete
+     * Устанавливает значение переменной чата телеграм бота и удаляет предыдущее значение через softDelete
      *
      * @param TelegramBotMessage $message
      * @param string $group
@@ -161,5 +176,25 @@ class TelegramBotVariableRepository extends DefaultRepository
             name: $name,
             value: $value,
         )->save();
+    }
+
+
+    /**
+     * Удаляет значение переменной чата телеграм бота
+     *
+     * @param TelegramBotMessage $message
+     * @param string $group
+     * @param string $name
+     * @return void
+     */
+    public function delMessageVariable(
+        TelegramBotMessage $message,
+        string $group,
+        string $name,
+    ): void {
+        $message->refresh()->telegramBotChat?->telegramBotVariables
+            ->where('group', $group)
+            ->where('name', $name)
+            ->first()?->delete();
     }
 }
