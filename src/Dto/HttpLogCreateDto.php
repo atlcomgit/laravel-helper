@@ -133,4 +133,13 @@ class HttpLogCreateDto extends Dto
                 ...($this->responseData ? ['try_count' => 1] : []),
             ]);
     }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerialized(array &$array): void
+    {
+        $array = Hlp::arrayTruncateStringValues($array, 2048);
+    }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Models\HttpLog;
 use Atlcom\LaravelHelper\Services\HttpLogService;
@@ -109,5 +110,14 @@ class HttpLogUpdateDto extends Dto
             ->includeArray([
                 'try_count' => DB::raw('try_count + 1'),
             ]);
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerialized(array &$array): void
+    {
+        $array = Hlp::arrayTruncateStringValues($array, 2048);
     }
 }
