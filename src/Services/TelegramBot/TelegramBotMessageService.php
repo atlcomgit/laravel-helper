@@ -105,7 +105,7 @@ class TelegramBotMessageService extends DefaultService
                 && ($lastMessageOut->type === TelegramBotMessageTypeEnum::Outgoing)
                 && (
                     ($lastMessageOut->slug === $dto->slug)
-                    || ($lastMessage?->slug === $dto->slug)
+                    || ($lastMessage?->slug === $dto->slug && $dto->slug)
                     || (property_exists($dto, 'text') && strip_tags($lastMessageOut->text) === strip_tags($dto->text))
                     || (property_exists($dto, 'caption') && strip_tags($lastMessageOut->text) === strip_tags($dto->caption))
                 )
