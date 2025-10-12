@@ -71,14 +71,14 @@ class TelegramBotVariableService extends DefaultService
      * @param TelegramBotMessage $message
      * @param BackedEnum|string $group
      * @param BackedEnum|string $name
-     * @return mixed
+     * @return TelegramBotVariable|null
      */
-    public function getVariable(TelegramBotMessage $message, BackedEnum|string $group, BackedEnum|string $name): mixed
+    public function getVariable(TelegramBotMessage $message, BackedEnum|string $group, BackedEnum|string $name): ?TelegramBotVariable
     {
         !($group instanceof BackedEnum) ?: $group = $group->value;
         !($name instanceof BackedEnum) ?: $name = $name->value;
 
-        return $this->telegramBotVariableRepository->getMessageVariable($message, $group, $name)?->value;
+        return $this->telegramBotVariableRepository->getMessageVariable($message, $group, $name);
     }
 
 
