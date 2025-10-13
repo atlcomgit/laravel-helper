@@ -58,6 +58,16 @@ class ModelLog extends DefaultModel
         'changes' => 'array',
         'created_at' => 'datetime',
     ];
+    protected $fields = [
+        'id' => 'ID лога',
+        'user_id' => 'Id пользователя',
+        'model_type' => 'Класс логируемой модели',
+        'model_id' => 'Id логируемой записи',
+        'type' => 'Тип логирования',
+        'attributes' => 'Текущие атрибуты логируемой записи',
+        'changes' => 'Измененные атрибуты логируемой записи',
+        'created_at' => 'Добавлено',
+    ];
 
 
     /**

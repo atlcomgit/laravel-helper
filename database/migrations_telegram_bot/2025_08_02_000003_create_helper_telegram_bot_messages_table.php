@@ -36,11 +36,11 @@ return new class extends Migration {
                 ->comment('Внешний Id обновления сообщения телеграм бота');
 
             $table->foreignId('telegram_bot_chat_id')->nullable(false)->index()
-                ->comment('Связь с пользователем телеграм бота')
+                ->comment('Связь с чатом телеграм бота')
                 ->references('id')->on(Lh::getTable($config, 'chat'))
                 ->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('telegram_bot_user_id')->nullable(false)->index()
-                ->comment('Связь с чатом телеграм бота')
+                ->comment('Связь с пользователем телеграм бота')
                 ->references('id')->on(Lh::getTable($config, 'user'))
                 ->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('telegram_bot_message_id')->nullable(true)->index()

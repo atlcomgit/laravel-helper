@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\Scope;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\FilterComponentEnum;
 use Atlcom\LaravelHelper\Enums\FilterOperatorEnum;
@@ -31,16 +32,16 @@ class FilterDto extends DefaultDto
     /**
      * Возвращает фильтр: Текстовое поле
      *
-     * @param string $label
+     * @param string $modelClassOrLabel
      * @param string $column
      * @param FilterOperatorEnum $operator
      * @return array
      */
-    public static function input(string $label, string $column, FilterOperatorEnum $operator): array
+    public static function input(string $modelClassOrLabel, string $column, FilterOperatorEnum $operator): array
     {
         return static::create(
             component: FilterComponentEnum::Input,
-            label: $label,
+            label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: $operator,
         )->toArray();
@@ -50,16 +51,16 @@ class FilterDto extends DefaultDto
     /**
      * Возвращает фильтр: Выбор одного значения из списка
      *
-     * @param string $label
+     * @param string $modelClassOrLabel
      * @param string $column
      * @param array|Collection $items
      * @return array
      */
-    public static function select(string $label, string $column, array|Collection $items): array
+    public static function select(string $modelClassOrLabel, string $column, array|Collection $items): array
     {
         return static::create(
             component: FilterComponentEnum::ComboboxRadio,
-            label: $label,
+            label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             items: $items instanceof Collection ? $items->all() : $items,
             operator: FilterOperatorEnum::Equal,
@@ -70,16 +71,16 @@ class FilterDto extends DefaultDto
     /**
      * Возвращает фильтр: Выбор нескольких значений из списка
      *
-     * @param string $label
+     * @param string $modelClassOrLabel
      * @param string $column
      * @param array|Collection $items
      * @return array
      */
-    public static function multiple(string $label, string $column, array|Collection $items): array
+    public static function multiple(string $modelClassOrLabel, string $column, array|Collection $items): array
     {
         return static::create(
             component: FilterComponentEnum::ComboboxCheck,
-            label: $label,
+            label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             items: $items instanceof Collection ? $items->all() : $items,
             operator: FilterOperatorEnum::In,
@@ -90,16 +91,16 @@ class FilterDto extends DefaultDto
     /**
      * Возвращает фильтр: Выбор нескольких значений из списка с замыканием
      *
-     * @param string $label
+     * @param string $modelClassOrLabel
      * @param array|Collection $items
      * @param Closure $closure
      * @return array
      */
-    public static function query(string $label, array|Collection $items, Closure $closure): array
+    public static function query(string $modelClassOrLabel, string $column, array|Collection $items, Closure $closure): array
     {
         return static::create(
             component: FilterComponentEnum::ComboboxCheck,
-            label: $label,
+            label: static::getLabel($modelClassOrLabel, $column),
             items: $items instanceof Collection ? $items->all() : $items,
             operator: FilterOperatorEnum::Closure,
             closure: $closure,
@@ -110,15 +111,15 @@ class FilterDto extends DefaultDto
     /**
      * Возвращает фильтр: Выбор интервала дат
      *
-     * @param string $label
+     * @param string $modelClassOrLabel
      * @param string $column
      * @return array
      */
-    public static function dates(string $label, string $column): array
+    public static function dates(string $modelClassOrLabel, string $column): array
     {
         return static::create(
             component: FilterComponentEnum::DateInterval,
-            label: $label,
+            label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: FilterOperatorEnum::Between,
         )->toArray();
@@ -132,5 +133,20 @@ class FilterDto extends DefaultDto
     protected function onSerializing(array &$array): void
     {
         $this->onlyNotNull();
+    }
+
+
+    /**
+     * Возвращает название поля модели
+     *
+     * @param string $modelClassOrLabel
+     * @param string $column
+     * @return string
+     */
+    public static function getLabel(string $modelClassOrLabel, string $column): string
+    {
+        return class_exists($modelClassOrLabel)
+            ? (Hlp::castToString($modelClassOrLabel::getModelFields()[$column] ?? $column))
+            : ($modelClassOrLabel ?: $column);
     }
 }

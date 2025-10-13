@@ -60,6 +60,18 @@ class TelegramBotChat extends DefaultModel
         'type' => 'string',
         'info' => 'array',
     ];
+    protected $fields = [
+        'id' => 'ID чата телеграм бота',
+        'uuid' => 'Uuid чата телеграм бота',
+        'external_chat_id' => 'Внешний Id чата телеграм бота',
+        'name' => 'Имя чата телеграм бота',
+        'chat_name' => 'Логин чата телеграм бота',
+        'type' => 'Тип чата телеграм бота',
+        'info' => 'Информация о чате телеграм бота',
+        'created_at' => 'Добавлено',
+        'updated_at' => 'Обновлено',
+        'deleted_at' => 'Удалено',
+    ];
 
 
     /** CONFIG */

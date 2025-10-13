@@ -35,7 +35,8 @@ return new class extends Migration {
 
             app(MigrationService::class)->addForeignUser($table);
 
-            $table->string('name')->nullable(true)->index();
+            $table->string('name')->nullable(true)->index()
+                ->comment('Имя http запроса');
             $table->enum('type', HttpLogTypeEnum::enumValues())->nullable(false)->index()
                 ->default(HttpLogTypeEnum::enumDefault())
                 ->comment('Тип http запроса');

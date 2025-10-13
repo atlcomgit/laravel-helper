@@ -61,12 +61,25 @@ class TelegramBotVariable extends DefaultModel
     protected $guarded = ['id'];
     protected $casts = [
         'uuid' => 'string',
-        'type' => TelegramBotVariableTypeEnum::class,
         'telegram_bot_chat_id' => 'integer',
         'telegram_bot_message_id' => 'integer',
+        'type' => TelegramBotVariableTypeEnum::class,
         'group' => 'string',
         'name' => 'string',
         'value' => 'string',
+    ];
+    protected $fields = [
+        'id' => 'ID переменной телеграм бота',
+        'uuid' => 'Uuid переменной телеграм бота',
+        'telegram_bot_chat_id' => 'Чат телеграм бота',
+        'telegram_bot_message_id' => 'Сообщение телеграм бота',
+        'type' => 'Тип переменной телеграм бота',
+        'group' => 'Группа переменной чата телеграм бота',
+        'name' => 'Имя переменной чата телеграм бота',
+        'value' => 'Значение переменной чата телеграм бота',
+        'created_at' => 'Добавлено',
+        'updated_at' => 'Обновлено',
+        'deleted_at' => 'Удалено',
     ];
 
 

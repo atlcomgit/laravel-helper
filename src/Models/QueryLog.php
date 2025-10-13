@@ -61,6 +61,23 @@ class QueryLog extends DefaultModel
         'count' => 'integer',
         'info' => 'array',
     ];
+    protected $fields = [
+        'id' => 'ID лога',
+        'uuid' => 'Uuid query запроса',
+        'user_id' => 'Id пользователя',
+        'name' => 'Название query запроса',
+        'query' => 'Сырой query запрос',
+        'cache_key' => 'Ключ кеша query запроса',
+        'is_cached' => 'Флаг сохранения query запроса в кеш',
+        'is_from_cache' => 'Флаг обращения query запроса в кеш',
+        'status' => 'Статус выполнения query запроса',
+        'duration' => 'Время выполнения query запроса',
+        'memory' => 'Потребляемая память при выполнении query запроса',
+        'count' => 'Количество затронутых записей при выполнении query запроса',
+        'info' => 'Информация о выполнении query запроса',
+        'created_at' => 'Добавлено',
+        'updated_at' => 'Обновлено',
+    ];
 
 
     /**

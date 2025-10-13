@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\QueueLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -114,6 +115,15 @@ class QueueLogDto extends Dto
             ->mappingKeys($this->mappings())
             ->onlyNotNull()
             ->excludeKeys(['withQueueLog', 'isUpdated']);
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerialized(array &$array): void
+    {
+        $array = Hlp::arrayTruncateStringValues($array, 2048);
     }
 
 

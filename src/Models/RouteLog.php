@@ -45,6 +45,16 @@ class RouteLog extends DefaultModel
         'count' => 'integer',
         'exist' => 'boolean',
     ];
+    protected $fields = [
+        'id' => 'ID лога',
+        'method' => 'Метод роута',
+        'uri' => 'Uri роута',
+        'controller' => 'Контроллер роута',
+        'count' => 'Количество запросов роута',
+        'exist' => 'Флаг существования роута',
+        'created_at' => 'Добавлено',
+        'updated_at' => 'Обновлено',
+    ];
 
 
     /**

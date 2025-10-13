@@ -91,6 +91,33 @@ class HttpLog extends DefaultModel
         'size' => 'integer',
         'info' => 'array',
     ];
+    protected $fields = [
+        'id' => 'ID лога',
+        'uuid' => 'Uuid http запроса',
+        'user_id' => 'Id пользователя',
+        'name' => 'Имя http запроса',
+        'type' => 'Тип http запроса',
+        'method' => 'Метод http запроса',
+        'status' => 'Статус http запроса',
+        'ip' => 'Ip адрес http запроса',
+        'url' => 'Url http запроса',
+        'request_headers' => 'Заголовки http запроса',
+        'request_data' => 'Тело http запроса',
+        'request_hash' => 'Хеш http запроса',
+        'response_code' => 'Код ответа на http запрос',
+        'response_message' => 'Сообщение ответа на http запрос',
+        'response_headers' => 'Заголовки ответа на http запрос',
+        'response_data' => 'Тело ответа на http запрос',
+        'cache_key' => 'Ключ кеша http запроса',
+        'is_cached' => 'Флаг сохранения http запроса в кеш',
+        'is_from_cache' => 'Флаг обращения http запроса в кеш',
+        'try_count' => 'Количество попыток http запроса',
+        'duration' => 'Время выполнения http запроса',
+        'size' => 'Размер http запроса',
+        'info' => 'Информация о http запросе',
+        'created_at' => 'Добавлено',
+        'updated_at' => 'Обновлено',
+    ];
 
 
     /**

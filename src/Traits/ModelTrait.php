@@ -50,6 +50,17 @@ trait ModelTrait
 
 
     /**
+     * Возвращает описание таблицы
+     *
+     * @return array
+     */
+    public static function getTableFields(): array
+    {
+        return with(new static)->getFields();
+    }
+
+
+    /**
      * Возвращает имя первичного ключа
      *
      * @return string
@@ -237,5 +248,16 @@ trait ModelTrait
             ? $this->castAttribute($attribute, $value ?? $this->getAttributes()[$attribute] ?? null)
             : $value
         ) ?? $this->$attribute ?? null;
+    }
+
+
+    /**
+     * Возвращает названия полей модели
+     *
+     * @return array
+     */
+    public function getFields(): array
+    {
+        return property_exists($this, 'fields') ? $this->fields : [];
     }
 }
