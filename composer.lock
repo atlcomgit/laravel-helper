@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "atlcom/dto",
-            "version": "v2.75.12",
+            "version": "v2.75.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/dto.git",
-                "reference": "a60adbd64629b7c4ce601e41b9e32a9ff8cdf050"
+                "reference": "8ec8d38d2f6f5cd3babae452d7462ceaeec1fc4f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/a60adbd64629b7c4ce601e41b9e32a9ff8cdf050",
-                "reference": "a60adbd64629b7c4ce601e41b9e32a9ff8cdf050",
+                "url": "https://api.github.com/repos/atlcomgit/dto/zipball/8ec8d38d2f6f5cd3babae452d7462ceaeec1fc4f",
+                "reference": "8ec8d38d2f6f5cd3babae452d7462ceaeec1fc4f",
                 "shasum": ""
             },
             "require": {
@@ -49,7 +49,7 @@
             "description": "Atlcom DTO library",
             "support": {
                 "issues": "https://github.com/atlcomgit/dto/issues",
-                "source": "https://github.com/atlcomgit/dto/tree/v2.75.12"
+                "source": "https://github.com/atlcomgit/dto/tree/v2.75.13"
             },
             "funding": [
                 {
@@ -57,20 +57,20 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-09-30T09:50:44+00:00"
+            "time": "2025-10-10T03:33:18+00:00"
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.19",
+            "version": "v1.23.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "031f12ce7ab0158e06a481498f15567e81fdc618"
+                "reference": "dc88393ae9d82b29a342f3d09abcf93527173535"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/031f12ce7ab0158e06a481498f15567e81fdc618",
-                "reference": "031f12ce7ab0158e06a481498f15567e81fdc618",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/dc88393ae9d82b29a342f3d09abcf93527173535",
+                "reference": "dc88393ae9d82b29a342f3d09abcf93527173535",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.19"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.20"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-10-08T04:44:07+00:00"
+            "time": "2025-10-13T15:19:24+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",

@@ -289,7 +289,7 @@ return [
         // Входящие запросы
         'in' => [
             // Флаг включения логов
-            'enabled' => (bool)env('HELPER_HTTP_LOG_IN_ENABLED', env('HELPER_HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HELPER_HTTP_LOG_IN_ENABLED', env('HELPER_HTTP_LOG_ENABLED', true)),
             // Исключения логов, например ['name' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_HTTP_LOG_IN_EXCLUDE', base_path('.env')) ?? []),
             // Флаг включения логирования всех входящих запросов (HttpLogMiddleware глобально)
@@ -298,7 +298,7 @@ return [
         // Исходящие запросы
         'out' => [
             // Флаг включения логов
-            'enabled' => (bool)env('HELPER_HTTP_LOG_OUT_ENABLED', env('HELPER_HTTP_LOG_ENABLED', false)),
+            'enabled' => (bool)env('HELPER_HTTP_LOG_OUT_ENABLED', env('HELPER_HTTP_LOG_ENABLED', true)),
             // Исключения логов, например ['name' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_HTTP_LOG_OUT_EXCLUDE', base_path('.env')) ?? []),
             // Флаг включения логирования всех исходящих запросов

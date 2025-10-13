@@ -104,11 +104,12 @@ class HttpLogDto extends Dto
                     'requestData' => $request->getContent(),
                 ],
                 $request instanceof RequestOut => [
-                    'name' => ($request->header(HttpLogService::HTTP_HEADER_NAME) ?? [])[0] ?? null,
+                    'url' => $url = $request->url(),
+                    'name' => (($request->header(HttpLogService::HTTP_HEADER_NAME) ?? [])[0] ?? null)
+                        ?: Hlp::urlParse($url)['host'],
                     'type' => HttpLogTypeEnum::Out,
                     'method' => Str::lower($request->method()),
                     'ip' => ip(),
-                    'url' => $request->url(),
                     'requestHeaders' => $request->headers(),
                     'requestData' => $request->body(),
                     'cacheKey' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
@@ -267,8 +268,8 @@ class HttpLogDto extends Dto
      */
     public function __serialize(): array
     {
-        $this->requestData = $this->removeMultipartBinary($this->requestData);
-        $this->responseData = $this->removeMultipartBinary($this->responseData);
+        $this->requestData = Hlp::stringTruncateBetweenQuotes($this->removeMultipartBinary($this->requestData), 2048);
+        $this->responseData = Hlp::stringTruncateBetweenQuotes($this->removeMultipartBinary($this->responseData), 2048);
 
         return parent::__serialize();
     }
