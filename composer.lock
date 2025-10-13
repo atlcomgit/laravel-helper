@@ -61,16 +61,16 @@
         },
         {
             "name": "atlcom/helper",
-            "version": "v1.23.20",
+            "version": "v1.23.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/atlcomgit/helper.git",
-                "reference": "dc88393ae9d82b29a342f3d09abcf93527173535"
+                "reference": "537a7ef0763973b0c003127e9195f2ba6b4445c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/dc88393ae9d82b29a342f3d09abcf93527173535",
-                "reference": "dc88393ae9d82b29a342f3d09abcf93527173535",
+                "url": "https://api.github.com/repos/atlcomgit/helper/zipball/537a7ef0763973b0c003127e9195f2ba6b4445c2",
+                "reference": "537a7ef0763973b0c003127e9195f2ba6b4445c2",
                 "shasum": ""
             },
             "require": {
@@ -102,7 +102,7 @@
             "description": "Atlcom Helper library",
             "support": {
                 "issues": "https://github.com/atlcomgit/helper/issues",
-                "source": "https://github.com/atlcomgit/helper/tree/v1.23.20"
+                "source": "https://github.com/atlcomgit/helper/tree/v1.23.21"
             },
             "funding": [
                 {
@@ -110,7 +110,7 @@
                     "type": "yoomoney"
                 }
             ],
-            "time": "2025-10-13T15:19:24+00:00"
+            "time": "2025-10-13T16:48:38+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
