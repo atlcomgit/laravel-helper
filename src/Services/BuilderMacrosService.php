@@ -27,6 +27,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && method_exists($this, 'withQueryCache')
                 ? $this->withQueryCache($seconds)
                 : $this;
         };
@@ -37,6 +38,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && method_exists($this, 'withQueryCache')
                 ? $this->withQueryCache(false)
                 : $this;
         };
@@ -47,6 +49,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && method_exists($this, 'withQueryCache')
                 ? $this->withQueryCache($seconds)
                 : $this;
         };
@@ -57,6 +60,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && method_exists($this, 'withQueryCache')
                 ? $this->withQueryCache(false)
                 : $this;
         };
@@ -67,6 +71,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryLog, 'enabled')
+                && method_exists($this, 'withQueryLog')
                 ? $this->withQueryLog($enabled)
                 : $this;
         };
@@ -77,6 +82,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryLog, 'enabled')
+                && method_exists($this, 'withQueryLog')
                 ? $this->withQueryLog(false)
                 : $this;
         };
@@ -87,6 +93,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryLog, 'enabled')
+                && method_exists($this, 'withQueryLog')
                 ? $this->withQueryLog($enabled)
                 : $this;
         };
@@ -97,6 +104,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::QueryLog, 'enabled')
+                && method_exists($this, 'withQueryLog')
                 ? $this->withQueryLog(false)
                 : $this;
         };
@@ -107,6 +115,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::ModelLog, 'enabled')
+                && method_exists($this, 'withModelLog')
                 ? $this->withModelLog($enabled)
                 : $this;
         };
@@ -117,6 +126,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\EloquentBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::ModelLog, 'enabled')
+                && method_exists($this, 'withModelLog')
                 ? $this->withModelLog(false)
                 : $this;
         };
@@ -127,6 +137,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::ModelLog, 'enabled')
+                && method_exists($this, 'withModelLog')
                 ? $this->withModelLog($enabled)
                 : $this;
         };
@@ -137,6 +148,7 @@ class BuilderMacrosService extends DefaultService
             /** @var \Atlcom\LaravelHelper\Databases\Builders\QueryBuilder $this */
             return Lh::config(ConfigEnum::Macros, 'builder.enabled')
                 && Lh::config(ConfigEnum::ModelLog, 'enabled')
+                && method_exists($this, 'withModelLog')
                 ? $this->withModelLog(false)
                 : $this;
         };
