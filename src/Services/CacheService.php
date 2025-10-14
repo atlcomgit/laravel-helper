@@ -351,7 +351,7 @@ class CacheService extends DefaultService
      * @param array $tags
      * @return void
      */
-    public function flushCache(ConfigEnum $config, array $tags): void
+    public function clearCache(ConfigEnum $config, array $tags): void
     {
         $driver = Lh::config($config, 'driver') ?: config('cache.default');
         $tags = Hlp::arrayDeleteValues($tags, [Hlp::pathClassName($this::class), 'ttl_*']);

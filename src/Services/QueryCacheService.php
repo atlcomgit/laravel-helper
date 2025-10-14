@@ -281,7 +281,7 @@ class QueryCacheService extends DefaultService
                     Lh::notFoundIgnoreTables($tags)
                     && !Hlp::arraySearchValues($tags, $this->exclude)
                 ) {
-                    $this->cacheService->flushCache(ConfigEnum::QueryCache, $tags);
+                    $this->cacheService->clearCache(ConfigEnum::QueryCache, $tags);
 
                     event(
                         new QueryCacheEvent(
@@ -306,7 +306,7 @@ class QueryCacheService extends DefaultService
     {
         $this->withoutTelescope(
             function () {
-                $this->cacheService->flushCache(ConfigEnum::QueryCache, $tags = [ConfigEnum::QueryCache->value]);
+                $this->cacheService->clearCache(ConfigEnum::QueryCache, $tags = [ConfigEnum::QueryCache->value]);
 
                 event(
                     new QueryCacheEvent(

@@ -420,7 +420,7 @@ class HttpCacheService extends DefaultService
     {
         $this->withoutTelescope(
             function () use (&$tags) {
-                $this->cacheService->flushCache(ConfigEnum::HttpCache, $tags);
+                $this->cacheService->clearCache(ConfigEnum::HttpCache, $tags);
 
                 event(
                     new HttpCacheEvent(
@@ -444,7 +444,7 @@ class HttpCacheService extends DefaultService
     {
         $this->withoutTelescope(
             function () {
-                $this->cacheService->flushCache(ConfigEnum::HttpCache, $tags = [ConfigEnum::HttpCache->value]);
+                $this->cacheService->clearCache(ConfigEnum::HttpCache, $tags = [ConfigEnum::HttpCache->value]);
 
                 event(
                     new HttpCacheEvent(

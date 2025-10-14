@@ -222,7 +222,7 @@ class ViewCacheService extends DefaultService
     {
         $this->withoutTelescope(
             function () use (&$tags) {
-                $this->cacheService->flushCache(ConfigEnum::ViewCache, $tags);
+                $this->cacheService->clearCache(ConfigEnum::ViewCache, $tags);
 
                 event(
                     new ViewCacheEvent(
@@ -246,7 +246,7 @@ class ViewCacheService extends DefaultService
     {
         $this->withoutTelescope(
             function () {
-                $this->cacheService->flushCache(ConfigEnum::ViewCache, $tags = [ConfigEnum::ViewCache->value]);
+                $this->cacheService->clearCache(ConfigEnum::ViewCache, $tags = [ConfigEnum::ViewCache->value]);
 
                 event(
                     new ViewCacheEvent(

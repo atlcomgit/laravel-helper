@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\App;
  * 
  * @method self|EloquentBuilder setCached(bool $value)
  * @method self|EloquentBuilder setFromCached(bool $value)
- * @method self|EloquentBuilder flushCache()
+ * @method self|EloquentBuilder clearCache()
  * 
  * @method bool isCached()
  * @method bool isFromCached()
@@ -166,7 +166,7 @@ trait ModelCacheTrait
      *
      * @return static
      */
-    public function flushCache(): static
+    public function clearCache(): static
     {
         app(QueryCacheService::class)->flushQueryCache($this);
 

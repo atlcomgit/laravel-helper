@@ -655,7 +655,7 @@ trait QueryTrait
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
-                $this->flushCache($query, $bindings);
+                $this->clearCache($query, $bindings);
 
                 $ids = $this->observeModelLog(ModelLogTypeEnum::Create, $query, $bindings);
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
@@ -710,7 +710,7 @@ trait QueryTrait
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
-                $this->flushCache($attributes);
+                $this->clearCache($attributes);
 
                 $ids = $this->observeModelLog(ModelLogTypeEnum::Create, $attributes);
                 !($ids && $arrayQueryLogDto) ?: $arrayQueryLogDto[0]->info['ids'] = $ids;
@@ -777,7 +777,7 @@ trait QueryTrait
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
-                $this->flushCache($query, $bindings);
+                $this->clearCache($query, $bindings);
 
                 return $result;
             };
@@ -848,7 +848,7 @@ trait QueryTrait
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
-                $this->flushCache($query, $bindings);
+                $this->clearCache($query, $bindings);
 
                 return $result;
             };
@@ -908,7 +908,7 @@ trait QueryTrait
                     default => throw new Exception('Конструктор запроса не определен в ' . __FUNCTION__),
                 };
 
-                $this->flushCache();
+                $this->clearCache();
 
                 return $result;
             };
@@ -935,7 +935,7 @@ trait QueryTrait
      * @param array  $bindings
      * @return void
      */
-    public function flushCache($query = null, $bindings = []): void
+    public function clearCache($query = null, $bindings = []): void
     {
         if (!Lh::config(ConfigEnum::QueryLog, 'enabled')) {
             return;
