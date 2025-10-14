@@ -14,7 +14,7 @@ use Atlcom\LaravelHelper\Services\RouteLogService;
 class RouteLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:route_log';
-    protected $description = 'Очистка логов роутов';
+    protected $description = 'Очистка логов роутов от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

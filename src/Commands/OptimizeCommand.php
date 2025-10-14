@@ -29,7 +29,7 @@ class OptimizeCommand extends DefaultCommand
     protected $signature = 'lh:optimize
         {--schedule : Запуск команды по расписанию }
     ';
-    protected $description = 'Оптимизация всех логов';
+    protected $description = 'Оптимизация всех логов от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = true;
     protected ?bool $withTelegramLog = true;
@@ -100,9 +100,9 @@ class OptimizeCommand extends DefaultCommand
                 || Lh::config(ConfigEnum::QueryCache, 'enabled')
                 || Lh::config(ConfigEnum::ViewCache, 'enabled')
             ) {
-                $this->httpCacheService->flushHttpCacheAll();
-                $this->queryCacheService->flushQueryCacheAll();
-                $this->viewCacheService->flushViewCacheAll();
+                $this->httpCacheService->clearHttpCacheAll();
+                $this->queryCacheService->clearQueryCacheAll();
+                $this->viewCacheService->clearViewCacheAll();
             }
         }
 

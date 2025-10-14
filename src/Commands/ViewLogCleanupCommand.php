@@ -16,7 +16,7 @@ use Atlcom\LaravelHelper\Services\ViewLogService;
 class ViewLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:view_log';
-    protected $description = 'Очистка логов рендеринга blade шаблонов';
+    protected $description = 'Очистка логов рендеринга blade шаблонов от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

@@ -16,7 +16,7 @@ use Atlcom\LaravelHelper\Services\ProfilerLogService;
 class ProfilerLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:profiler_log';
-    protected $description = 'Очистка логов профилирования методов класса';
+    protected $description = 'Очистка логов профилирования методов класса от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

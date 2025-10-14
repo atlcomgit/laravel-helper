@@ -16,8 +16,8 @@ use Atlcom\LaravelHelper\Services\ViewCacheService;
  */
 class CacheClearCommand extends DefaultCommand
 {
-    protected $signature = 'lh:clear:cache';
-    protected $description = 'Очистка кеша';
+    protected $signature = 'lh:cache:clear';
+    protected $description = 'Очистка кеша от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;
@@ -42,9 +42,9 @@ class CacheClearCommand extends DefaultCommand
         $this->outputBold($this->description);
         $this->outputEol();
 
-        !Lh::config(ConfigEnum::HttpCache, 'enabled') ?: $this->httpCacheService->flushHttpCacheAll();
-        !Lh::config(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->flushQueryCacheAll();
-        !Lh::config(ConfigEnum::ViewCache, 'enabled') ?: $this->viewCacheService->flushViewCacheAll();
+        !Lh::config(ConfigEnum::HttpCache, 'enabled') ?: $this->httpCacheService->clearHttpCacheAll();
+        !Lh::config(ConfigEnum::QueryCache, 'enabled') ?: $this->queryCacheService->clearQueryCacheAll();
+        !Lh::config(ConfigEnum::ViewCache, 'enabled') ?: $this->viewCacheService->clearViewCacheAll();
 
         return self::SUCCESS;
     }

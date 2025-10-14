@@ -14,13 +14,13 @@ enum EventTypeEnum: string
 
     case GetHttpCache = 'get_http_cache';
     case SetHttpCache = 'set_http_cache';
-    case FlushHttpCache = 'flush_http_cache';
+    case ClearHttpCache = 'clear_http_cache';
     case GetQueryCache = 'get_query_cache';
     case SetQueryCache = 'set_query_cache';
-    case FlushQueryCache = 'flush_query_cache';
+    case ClearQueryCache = 'clear_query_cache';
     case GetViewCache = 'get_view_cache';
     case SetViewCache = 'set_view_cache';
-    case FlushViewCache = 'flush_view_cache';
+    case ClearViewCache = 'clear_view_cache';
 
 
     /**
@@ -45,13 +45,13 @@ enum EventTypeEnum: string
         return match ($enum) {
             self::GetHttpCache => 'Получение http кеша',
             self::SetHttpCache => 'Сохранение http кеша',
-            self::FlushHttpCache => 'Сброс http кеша',
+            self::ClearHttpCache => 'Сброс http кеша',
             self::GetQueryCache => 'Получение query кеша',
             self::SetQueryCache => 'Сохранение query кеша',
-            self::FlushQueryCache => 'Сброс query кеша',
+            self::ClearQueryCache => 'Сброс query кеша',
             self::GetViewCache => 'Получение view кеша',
             self::SetViewCache => 'Сохранение view кеша',
-            self::FlushViewCache => 'Сброс view кеша',
+            self::ClearViewCache => 'Сброс view кеша',
 
             default => null,
         };

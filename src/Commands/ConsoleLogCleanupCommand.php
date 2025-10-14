@@ -16,7 +16,7 @@ use Atlcom\LaravelHelper\Services\ConsoleLogService;
 class ConsoleLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:console_log';
-    protected $description = 'Очистка логов консольных команд';
+    protected $description = 'Очистка логов консольных команд от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

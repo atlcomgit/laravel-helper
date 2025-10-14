@@ -23,7 +23,7 @@ class SwaggerCommand extends DefaultCommand
         {--description= : Описание API}
     ';
 
-    protected $description = 'Генерация swagger файла (OpenAPI 3.0)';
+    protected $description = 'Генерация swagger файла (OpenAPI 3.0) от laravel-helper';
 
 
     /**

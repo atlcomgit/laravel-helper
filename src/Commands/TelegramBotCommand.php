@@ -19,7 +19,7 @@ class TelegramBotCommand extends DefaultCommand
     protected $signature = 'lh:telegram:bot
         {cmd : Команда бота }
     ';
-    protected $description = 'Настройка телеграм бота';
+    protected $description = 'Настройка телеграм бота от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

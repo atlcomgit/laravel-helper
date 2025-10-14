@@ -270,7 +270,7 @@ class QueryCacheService extends DefaultService
      * @param Collection<Model>|null $pivotedModels
      * @return void
      */
-    public function flushQueryCache(Model|string $table, ?string $relation = null, ?Collection $pivotedModels = null): void
+    public function clearQueryCache(Model|string $table, ?string $relation = null, ?Collection $pivotedModels = null): void
     {
         $this->withoutTelescope(
             function () use (&$table, &$relation, &$pivotedModels) {
@@ -286,7 +286,7 @@ class QueryCacheService extends DefaultService
                     event(
                         new QueryCacheEvent(
                             QueryCacheEventDto::create(
-                                type: EventTypeEnum::FlushQueryCache,
+                                type: EventTypeEnum::ClearQueryCache,
                                 tags: $tags,
                             ),
                         ),
@@ -302,7 +302,7 @@ class QueryCacheService extends DefaultService
      *
      * @return void
      */
-    public function flushQueryCacheAll(): void
+    public function clearQueryCacheAll(): void
     {
         $this->withoutTelescope(
             function () {
@@ -311,7 +311,7 @@ class QueryCacheService extends DefaultService
                 event(
                     new QueryCacheEvent(
                         QueryCacheEventDto::create(
-                            type: EventTypeEnum::FlushQueryCache,
+                            type: EventTypeEnum::ClearQueryCache,
                             tags: $tags,
                         ),
                     ),

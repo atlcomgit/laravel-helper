@@ -24,7 +24,7 @@ class QueryCacheObserver
      */
     public function created(Model $model)
     {
-        $this->queryCacheService->flushQueryCache($model);
+        $this->queryCacheService->clearQueryCache($model);
     }
 
 
@@ -36,7 +36,7 @@ class QueryCacheObserver
      */
     public function updated(Model $model)
     {
-        $this->queryCacheService->flushQueryCache($model);
+        $this->queryCacheService->clearQueryCache($model);
     }
 
 
@@ -48,7 +48,7 @@ class QueryCacheObserver
      */
     public function deleted(Model $model)
     {
-        $this->queryCacheService->flushQueryCache($model);
+        $this->queryCacheService->clearQueryCache($model);
     }
 
 
@@ -60,7 +60,7 @@ class QueryCacheObserver
      */
     public function forceDeleted(Model $model)
     {
-        $this->queryCacheService->flushQueryCache($model);
+        $this->queryCacheService->clearQueryCache($model);
     }
 
 
@@ -72,7 +72,7 @@ class QueryCacheObserver
      */
     public function restored(Model $model)
     {
-        $this->queryCacheService->flushQueryCache($model);
+        $this->queryCacheService->clearQueryCache($model);
     }
 
 
@@ -86,7 +86,7 @@ class QueryCacheObserver
      */
     public function belongsToManyAttached($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -100,7 +100,7 @@ class QueryCacheObserver
      */
     public function belongsToManyDetached($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -114,7 +114,7 @@ class QueryCacheObserver
      */
     public function belongsToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -128,7 +128,7 @@ class QueryCacheObserver
      */
     public function morphToManyAttached($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -142,7 +142,7 @@ class QueryCacheObserver
      */
     public function morphToManyDetached($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 
 
@@ -156,6 +156,6 @@ class QueryCacheObserver
      */
     public function morphToManyUpdatedExistingPivot($relation, Model $model, $ids)
     {
-        $this->queryCacheService->flushQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
+        $this->queryCacheService->clearQueryCache($model, $relation, $model->{$relation}()->findMany($ids));
     }
 }

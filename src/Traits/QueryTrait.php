@@ -956,7 +956,7 @@ trait QueryTrait
         }
 
         foreach ($tables as $table) {
-            $queryCacheService->flushQueryCache($table);
+            $queryCacheService->clearQueryCache($table);
         }
     }
 

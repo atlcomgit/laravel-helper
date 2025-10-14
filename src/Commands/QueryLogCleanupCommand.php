@@ -16,7 +16,7 @@ use Atlcom\LaravelHelper\Services\QueryLogService;
 class QueryLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:query_log';
-    protected $description = 'Очистка логов query запросов';
+    protected $description = 'Очистка логов query запросов от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

@@ -168,7 +168,7 @@ trait ModelCacheTrait
      */
     public function clearCache(): static
     {
-        app(QueryCacheService::class)->flushQueryCache($this);
+        app(QueryCacheService::class)->clearQueryCache($this);
 
         return $this;
     }

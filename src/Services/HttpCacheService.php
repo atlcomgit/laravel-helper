@@ -416,7 +416,7 @@ class HttpCacheService extends DefaultService
      * @param array $tags
      * @return void
      */
-    public function flushHttpCache(array $tags = []): void
+    public function clearHttpCache(array $tags = []): void
     {
         $this->withoutTelescope(
             function () use (&$tags) {
@@ -425,7 +425,7 @@ class HttpCacheService extends DefaultService
                 event(
                     new HttpCacheEvent(
                         HttpCacheEventDto::create(
-                            type: EventTypeEnum::FlushHttpCache,
+                            type: EventTypeEnum::ClearHttpCache,
                             tags: $tags,
                         ),
                     ),
@@ -440,7 +440,7 @@ class HttpCacheService extends DefaultService
      *
      * @return void
      */
-    public function flushHttpCacheAll()
+    public function ClearHttpCacheAll()
     {
         $this->withoutTelescope(
             function () {
@@ -449,7 +449,7 @@ class HttpCacheService extends DefaultService
                 event(
                     new HttpCacheEvent(
                         HttpCacheEventDto::create(
-                            type: EventTypeEnum::FlushHttpCache,
+                            type: EventTypeEnum::ClearHttpCache,
                             tags: $tags,
                         ),
                     ),

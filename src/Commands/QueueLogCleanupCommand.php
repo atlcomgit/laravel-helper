@@ -16,7 +16,7 @@ use Atlcom\LaravelHelper\Services\QueueLogService;
 class QueueLogCleanupCommand extends DefaultCommand
 {
     protected $signature = 'lh:cleanup:queue_log';
-    protected $description = 'Очистка логов очередей';
+    protected $description = 'Очистка логов очередей от laravel-helper';
     protected $isolated = true;
     protected ?bool $withConsoleLog = false;
     protected ?bool $withTelegramLog = false;

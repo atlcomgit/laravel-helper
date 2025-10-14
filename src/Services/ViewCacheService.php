@@ -218,7 +218,7 @@ class ViewCacheService extends DefaultService
      * @param array $tags
      * @return void
      */
-    public function flushViewCache(array $tags = []): void
+    public function clearViewCache(array $tags = []): void
     {
         $this->withoutTelescope(
             function () use (&$tags) {
@@ -227,7 +227,7 @@ class ViewCacheService extends DefaultService
                 event(
                     new ViewCacheEvent(
                         ViewCacheEventDto::create(
-                            type: EventTypeEnum::FlushViewCache,
+                            type: EventTypeEnum::ClearViewCache,
                             tags: $tags,
                         ),
                     ),
@@ -242,7 +242,7 @@ class ViewCacheService extends DefaultService
      *
      * @return void
      */
-    public function flushViewCacheAll(): void
+    public function clearViewCacheAll(): void
     {
         $this->withoutTelescope(
             function () {
@@ -251,7 +251,7 @@ class ViewCacheService extends DefaultService
                 event(
                     new ViewCacheEvent(
                         ViewCacheEventDto::create(
-                            type: EventTypeEnum::FlushViewCache,
+                            type: EventTypeEnum::ClearViewCache,
                             tags: $tags,
                         ),
                     ),
