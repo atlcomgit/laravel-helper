@@ -59,9 +59,15 @@ class TableDto extends DefaultDto
      */
     protected function onFilling(array &$array): void
     {
-        if (($model = $this->model ?? $array['model'] ?? null) && !($array['columns'] ?? null)) {
-            $array['columns'] = collect($model::getTableFields())
-                ->map(static fn (string $column, $label) => TableColumnDto::create(
+        if (
+            ($model = $this->model ?? $array['model'] ?? null)
+            && !($array['columns'] ?? null)
+            && class_exists($model)
+            && method_exists($model, 'getTableFields')
+            && ($fields = $model::getTableFields())
+        ) {
+            $array['columns'] = collect($fields)
+                ->map(static fn (?string $label, string $column) => TableColumnDto::create(
                     column: $column,
                     label: $label,
                 ));
