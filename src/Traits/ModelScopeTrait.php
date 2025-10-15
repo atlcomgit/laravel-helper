@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
  * 
  * @method self|Builder|DefaultModel ofSort(array $sort)
  * @method self|Builder|DefaultModel ofPage(int $page, int $limit)
- * @method self|Builder|DefaultModel ofFilters(int $page, int $limit)
+ * @method self|Builder|DefaultModel ofFilters(array|null $requestFilters)
  * 
  * @mixin DefaultModel
  */
