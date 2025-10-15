@@ -50,13 +50,17 @@ trait ModelTrait
 
 
     /**
-     * Возвращает описание таблицы
+     * Возвращает список полей модели
      *
      * @return array
      */
     public static function getTableFields(): array
     {
-        return with(new static)->getFields();
+        return [
+            static::getPrimaryKeyName(),
+            ...array_fill_keys(array_keys(static::getModelCasts()), null),
+            ...with(new static)->getFields(),
+        ];
     }
 
 

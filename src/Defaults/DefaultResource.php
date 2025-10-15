@@ -67,6 +67,9 @@ abstract class DefaultResource extends JsonResource
      */
     public function whenFilled(mixed $value): mixed
     {
-        return $this->when(Hlp::castToBool($value), static fn () => $value);
+        return $this->when(
+            Hlp::castToBool($value),
+            static fn () => is_object($value) && is_callable($value) ? $value() : $value,
+        );
     }
 }

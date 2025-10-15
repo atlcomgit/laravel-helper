@@ -101,19 +101,4 @@ trait ModelResourceTrait
             ->withCache($withCache)
             ->get();
     }
-
-
-    /**
-     * Возвращает названия полей модели
-     *
-     * @return array
-     */
-    public static function getModelFields(): array
-    {
-        return [
-            static::getPrimaryKeyName(),
-            ...array_fill_keys(array_keys(static::getModelCasts()), null),
-            ...static::getTableFields(),
-        ];
-    }
 }

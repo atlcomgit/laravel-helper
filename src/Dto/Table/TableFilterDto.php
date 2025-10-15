@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Atlcom\LaravelHelper\Dto\Scope;
+namespace Atlcom\LaravelHelper\Dto\Table;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
+use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\FilterComponentEnum;
 use Atlcom\LaravelHelper\Enums\FilterOperatorEnum;
 use Closure;
@@ -13,9 +14,9 @@ use Illuminate\Support\Collection;
 use Override;
 
 /**
- * Класс dto для фильтров
+ * Dto настройки фильтров таблицы CRUD модели
  */
-class FilterDto extends DefaultDto
+class TableFilterDto extends DefaultDto
 {
     public const AUTO_CASTS_ENABLED = true;
     public const AUTO_MAPPINGS_ENABLED = true;
@@ -145,8 +146,9 @@ class FilterDto extends DefaultDto
      */
     public static function getLabel(string $modelClassOrLabel, string $column): string
     {
-        return class_exists($modelClassOrLabel)
-            ? (Hlp::castToString($modelClassOrLabel::getModelFields()[$column] ?? $column))
+        /** @var DefaultModel $modelClassOrLabel */
+        return class_exists($modelClassOrLabel) && method_exists($modelClassOrLabel, 'getTableFields')
+            ? (Hlp::castToString($modelClassOrLabel::getTableFields()[$column] ?? $column))
             : ($modelClassOrLabel ?: $column);
     }
 }

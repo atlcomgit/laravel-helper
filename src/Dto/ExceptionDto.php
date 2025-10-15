@@ -296,6 +296,7 @@ class ExceptionDto extends Dto
      */
     protected function getMessage(string $localeKey): string
     {
+        $localeKey = Hlp::stringReplace($localeKey, ['::class' => 'class']);
         $replaces = [
             'model' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
                 ? Hlp::pathClassName($this->debugInfo->throw->getModel() ?? '')

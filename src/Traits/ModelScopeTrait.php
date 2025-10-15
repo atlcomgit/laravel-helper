@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Traits;
 
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
-use Atlcom\LaravelHelper\Dto\Scope\FilterDto;
 use Atlcom\LaravelHelper\Dto\Scope\SortScopeDto;
+use Atlcom\LaravelHelper\Dto\Table\TableFilterDto;
 use Atlcom\LaravelHelper\Enums\FilterOperatorEnum;
 use Atlcom\LaravelHelper\Enums\SortDirectionEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -69,38 +69,40 @@ trait ModelScopeTrait
      */
     public function scopeOfFilters(Builder $query, ?array $requestFilters = null): Builder
     {
-        return $query
-            ->when(
-                method_exists($this, 'filters') && ($modelFilters = $this->filters()) && $requestFilters,
-                static function ($query) use ($modelFilters, $requestFilters) {
+        return method_exists($this, 'table')
+            ? $query
+                ->when(
+                    ($modelTable = $this::table()) && $requestFilters,
+                    static function ($query) use ($modelTable, $requestFilters) {
 
-                    // Применяем фильтры из модели
-                    foreach ($modelFilters as $modelFilterName => $modelFilterData) {
-                        $modelFilterDto = FilterDto::create($modelFilterData);
+                        // Применяем фильтры из модели
+                        foreach ($modelTable->filters as $modelFilterName => $modelFilterData) {
+                            $modelFilterDto = TableFilterDto::create($modelFilterData);
 
-                        if ($requestFilterValue = $requestFilters[$modelFilterName] ?? null) {
-                            $closure = $modelFilterDto->closure;
+                            if ($requestFilterValue = $requestFilters[$modelFilterName] ?? null) {
+                                $closure = $modelFilterDto->closure;
 
-                            match ($modelFilterDto->operator) {
-                                FilterOperatorEnum::Equal
-                                => $query->where($modelFilterDto->column, '=', $requestFilterValue),
-                                FilterOperatorEnum::Like
-                                => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
-                                FilterOperatorEnum::Ilike
-                                => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
-                                FilterOperatorEnum::In
-                                => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
-                                FilterOperatorEnum::Between
-                                => $query->whereBetween($modelFilterDto->column, (array)$requestFilterValue),
-                                FilterOperatorEnum::Closure
-                                => !is_callable($closure) ?: $closure($query, $requestFilterValue),
+                                match ($modelFilterDto->operator) {
+                                    FilterOperatorEnum::Equal
+                                    => $query->where($modelFilterDto->column, '=', $requestFilterValue),
+                                    FilterOperatorEnum::Like
+                                    => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
+                                    FilterOperatorEnum::Ilike
+                                    => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
+                                    FilterOperatorEnum::In
+                                    => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
+                                    FilterOperatorEnum::Between
+                                    => $query->whereBetween($modelFilterDto->column, (array)$requestFilterValue),
+                                    FilterOperatorEnum::Closure
+                                    => !is_callable($closure) ?: $closure($query, $requestFilterValue),
 
-                                default => null,
-                            };
+                                    default => null,
+                                };
+                            }
                         }
-                    }
 
-                }
-            );
+                    }
+                )
+            : $query;
     }
 }
