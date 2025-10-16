@@ -58,8 +58,7 @@ trait ModelTrait
     {
         return [
             ...[static::getPrimaryKeyName() => 'ID'],
-            ...array_fill_keys(array_keys(static::getModelCasts()), null),
-            ...with(new static)->getFields(),
+            ...(with(new static)->getFields() + array_fill_keys(array_keys(static::getModelCasts()), null))
         ];
     }
 
