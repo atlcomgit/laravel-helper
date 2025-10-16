@@ -29,9 +29,12 @@ class TableDto extends DefaultDto
     /**
      * @inheritDoc
      */
+    #[Override()]
     protected function casts(): array
     {
         return [
+            'model' => 'string',
+            'name' => 'string',
             'permissions' => TablePermissionsDto::class,
             'pagination' => TablePaginationDto::class,
             'columns' => [TableColumnDto::class],
@@ -57,20 +60,28 @@ class TableDto extends DefaultDto
     /**
      * @inheritDoc
      */
+    #[Override()]
     protected function onFilling(array &$array): void
     {
-        if (
-            ($model = $this->model ?? $array['model'] ?? null)
-            && !($array['columns'] ?? null)
-            && class_exists($model)
-            && method_exists($model, 'getTableFields')
-            && ($fields = $model::getTableFields())
-        ) {
-            $array['columns'] = collect($fields)
-                ->map(static fn (?string $label, string $column) => TableColumnDto::create(
-                    column: $column,
-                    label: $label,
-                ));
+        $model = $this->model ?? $array['model'] ?? null;
+
+        if ($model && !($this->defaults()['name'] ?? [])) {
+            !method_exists($model, 'getTableComment') ?: $array['name'] ??= $model::getTableComment();
+        }
+
+        if ($model && !($this->defaults()['columns'] ?? [])) {
+            $array['columns'] ??= collect($model::getTableFields())
+                ->map(
+                    static fn (?string $label, string $column) => match ($column) {
+                        'updated_at', 'deleted_at' => TableColumnDto::create(
+                            column: $column,
+                            label: $label,
+                            visible: false,
+                        ),
+
+                        default => TableColumnDto::create(column: $column, label: $label),
+                    }
+                );
         }
     }
 
@@ -81,6 +92,16 @@ class TableDto extends DefaultDto
     #[Override()]
     protected function onSerializing(array &$array): void
     {
-        $this->onlyNotNull();
+        $this->onlyNotNull()->excludeKeys(['model']);
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    #[Override()]
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

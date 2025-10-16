@@ -23,10 +23,11 @@ class TablePaginationDto extends DefaultDto
     /**
      * @inheritDoc
      */
+    #[Override()]
     protected function defaults(): array
     {
         return [
-            'countOnPage' => 10,
+            'countOnPage' => [10, 25, 50, 100],
             'visible' => true,
         ];
     }

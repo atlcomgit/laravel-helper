@@ -21,8 +21,8 @@ class TableColumnDto extends DefaultDto
     public bool $resize = true;
     public bool $sortable = true;
     public bool $visible = true;
-    public ?int $minWith;
-    public ?int $maxWith;
+    public ?int $minWith = 100;
+    public ?int $maxWith = 300;
 
 
     /**
