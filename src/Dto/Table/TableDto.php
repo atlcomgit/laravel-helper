@@ -18,6 +18,7 @@ class TableDto extends DefaultDto
     public const AUTO_SERIALIZE_ENABLED = true;
 
     public string $model;
+    public ?string $name;
     public TablePermissionsDto $permissions;
     public TablePaginationDto $pagination;
     /** @var Collection<TableColumnDto> */
