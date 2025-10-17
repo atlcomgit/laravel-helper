@@ -97,6 +97,16 @@ trait ModelResourceTrait
                 "{$columnId} as value",
                 ...($columnComment ? ["{$columnComment} as comment"] : []),
             ])
+            ->when(
+                method_exists(static::class, 'scopeOfActive'),
+                static fn ($q) => $q->ofActive(),
+                static fn ($q) => match (true) {
+                    with(new static)->getFields()['is_active'] ?? null => $q->where('is_active', true),
+                    with(new static)->getFields()['active'] ?? null => $q->where('active', true),
+
+                    default => $q
+                },
+            )
             ->limit(1000)
             ->withCache($withCache)
             ->get();
