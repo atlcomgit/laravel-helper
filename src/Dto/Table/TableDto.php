@@ -72,6 +72,7 @@ class TableDto extends DefaultDto
 
         if ($model && !($this->defaults()['columns'] ?? [])) {
             $array['columns'] ??= collect($model::getTableFields())
+                ->put('actions', 'Действия')
                 ->map(
                     static fn (?string $label, string $column) => match ($column) {
                         'updated_at', 'deleted_at' => TableColumnDto::create(
