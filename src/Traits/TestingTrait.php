@@ -112,8 +112,14 @@ trait TestingTrait
                 }
 
                 // Получаем пользователя для авторизации
-                if (!$user && ($userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? []))) {
-                    $userClass = Lh::config(ConfigEnum::App, 'user');
+                if (
+                    !$user
+                    && ($userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? []))
+                    && ($userClass = Lh::config(ConfigEnum::App, 'user'))
+                ) {
+                    method_exists($userClass, 'forceDelete')
+                        ? $userClass::where($userData)->forceDelete()
+                        : $userClass::where($userData)->delete();
                     $user = method_exists($userClass, 'factory')
                         ? $userClass::where($userData)->first() ?? $userClass::factory()->create($userData)
                         : $userClass::firstOrCreate($userData);
