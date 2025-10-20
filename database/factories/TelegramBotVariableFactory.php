@@ -29,7 +29,7 @@ class TelegramBotVariableFactory extends Factory
      */
     public function definition(): array
     {
-        $telegramBotChat = TelegramBotChat::inRandomOrder()->first();
+        $telegramBotChat = TelegramBotChat::inRandomOrder()->first() ?? TelegramBotChat::factory()->create();
         $telegramBotMessage = TelegramBotMessage::inRandomOrder()->first();
 
         return [

@@ -31,7 +31,7 @@ class TelegramBotMessageFactory extends Factory
     public function definition(): array
     {
         $telegramBotChat = TelegramBotChat::inRandomOrder()->first();
-        $telegramBotUser = TelegramBotUser::inRandomOrder()->first();
+        $telegramBotUser = TelegramBotUser::inRandomOrder()->first() ?? TelegramBotUser::factory()->create();
         $telegramBotMessage = TelegramBotMessage::inRandomOrder()->first();
 
         return [
