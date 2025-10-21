@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use ReflectionMethod;
 use UnitEnum;
 
 /**
@@ -91,6 +92,16 @@ trait ModelResourceTrait
         ?string $columnComment = null,
         int|bool|null $withCache = null,
     ): Collection {
+        $hasActiveScope = method_exists(static::class, 'scopeOfActive');
+        $scopeRequiresValue = false;
+
+        if ($hasActiveScope) {
+            $scope = new ReflectionMethod(static::class, 'scopeOfActive');
+            $scopeRequiresValue = $scope->getNumberOfRequiredParameters() > 1;
+        }
+
+        $fields = $hasActiveScope ? [] : with(new static)->getFields();
+
         return static::query()
             ->select([
                 "{$columnName} as label",
@@ -98,13 +109,13 @@ trait ModelResourceTrait
                 ...($columnComment ? ["{$columnComment} as comment"] : []),
             ])
             ->when(
-                method_exists(static::class, 'scopeOfActive'),
-                static fn ($q) => $q->ofActive(),
-                static fn ($q) => match (true) {
-                    with(new static)->getFields()['is_active'] ?? null => $q->where('is_active', true),
-                    with(new static)->getFields()['active'] ?? null => $q->where('active', true),
+                $hasActiveScope,
+                fn ($q) => $scopeRequiresValue ? $q->ofActive(true) : $q->ofActive(),
+                fn ($q) => match (true) {
+                    $fields['is_active'] ?? null => $q->where('is_active', true),
+                    $fields['active'] ?? null => $q->where('active', true),
 
-                    default => $q
+                    default => $q,
                 },
             )
             ->limit(1000)
