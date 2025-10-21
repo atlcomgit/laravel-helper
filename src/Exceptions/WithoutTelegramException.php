@@ -11,4 +11,30 @@ use Atlcom\LaravelHelper\Defaults\DefaultException;
  */
 class WithoutTelegramException extends DefaultException
 {
+    protected bool $withoutTelegram = true;
+
+
+    /**
+     * Возвращает состояние флага отключения отправки лога в телеграм
+     *
+     * @return bool
+     */
+    public function isWithoutTelegram(): bool
+    {
+        return $this->withoutTelegram;
+    }
+
+
+    /**
+     * Устанавливает состояние флага отключения отправки лога в телеграм
+     *
+     * @param bool $withoutTelegram
+     * @return static
+     */
+    public function setWithoutTelegram(bool $withoutTelegram): static
+    {
+        $this->withoutTelegram = $withoutTelegram;
+
+        return $this;
+    }
 }

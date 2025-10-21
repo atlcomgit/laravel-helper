@@ -122,8 +122,7 @@ class ExceptionDto extends Dto
                 ])
             )
             && !(is_array($exclude) && in_array($exception::class, $exclude))
-            && !is_subclass_of($exception, WithoutTelegramException::class)
-            && !($exception instanceof WithoutTelegramException)
+            && !($exception instanceof WithoutTelegramException && $exception->isWithoutTelegram())
             && ($uri !== 'CLI Standard input code')
             && ($thisDto->code < 100 || $thisDto->code >= 400)
         ) {
