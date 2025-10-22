@@ -113,7 +113,7 @@ class ExceptionDebugDto extends Dto
                 'func',
                 'file',
                 ...(isDebug() ? ['data'] : []),
-                ...((isDebugTrace() && !$isTelegram) ? ['trace'] : []),
+                ...((isDebug() && isDebugTrace() && !$isTelegram) ? ['trace'] : []),
             ])
             ->includeArray([
                 ...(isDebug()

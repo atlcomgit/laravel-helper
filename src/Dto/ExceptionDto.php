@@ -345,7 +345,7 @@ class ExceptionDto extends Dto
             ->serializeKeys(true)
             ->excludeKeys((isDebug() || $this->isTelegram || isLocal() || isDev()) ? [] : ['exception'])
             ->excludeKeys((isDebug() || $this->isTelegram) ? [] : ['isDebug'])
-            ->excludeKeys((isDebug() || isDebugTrace() || $this->isTelegram) ? [] : ['debugInfo'])
+            ->excludeKeys((isDebug() || $this->isTelegram) ? [] : ['debugInfo'])
             ->excludeKeys(['isTelegram'])
         ;
     }
