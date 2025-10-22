@@ -80,7 +80,13 @@ trait CommandTrait
             $this->consoleLogDto = ConsoleLogDto::create(
                 name: Hlp::pathClassName($this::class),
                 command: $this->name,
-                withConsoleLog: ($this->hasOption('log') && $this->option('log')) || $this->withConsoleLog,
+                withConsoleLog: match (true) {
+                    $this->hasOption('log') && $this->option('log') => true,
+                    !is_null($this->withConsoleLog) => $this->withConsoleLog,
+                    Lh::config(ConfigEnum::ConsoleLog, 'enabled') && Lh::config(ConfigEnum::ConsoleLog, 'global') => true,
+
+                    default => $this->withConsoleLog,
+                },
             );
 
             $config = ConfigEnum::ConsoleLog;
@@ -124,6 +130,7 @@ trait CommandTrait
             ];
 
             // Отправляем результат в телеграм
+            $config = ConfigEnum::TelegramLog;
             if (
                 Lh::config($config, 'enabled')
                 && (

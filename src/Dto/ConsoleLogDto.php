@@ -56,7 +56,7 @@ class ConsoleLogDto extends Dto
             'cli' => implode(' ', $_SERVER['argv'] ?? []),
             'status' => ConsoleLogStatusEnum::enumDefault(),
 
-            'withConsoleLog' => false,
+            'withConsoleLog' => null,
             'storeInterval' => Lh::config(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
             'startTime' => (string)now()->getTimestampMs(),
             'startMemory' => memory_get_usage(),
