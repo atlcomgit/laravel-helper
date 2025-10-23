@@ -72,6 +72,9 @@ trait TestingTrait
     {
         echo PHP_EOL . class_basename($this->toString()) . ' ';
 
+        !method_exists($this, 'refreshDatabase')
+            ?: throw new WithoutTelegramException("Запуск с трейтом RefreshDatabase невозможен");
+
         parent::setUp();
 
         static $started = false;
@@ -100,7 +103,11 @@ trait TestingTrait
                     $config = ConfigEnum::ModelLog;
                     Config::set("laravel-helper.{$config->value}.enabled", false);
 
-                    $this->artisan('migrate:fresh');
+                    while (DB::transactionLevel() > 0) {
+                        DB::rollBack();
+                    }
+
+                    $this->artisan('migrate:fresh', ['--force' => true]);
                     $this->artisan('migrate', ['--path' => __DIR__ . '/../../database/migrations']);
 
                     // Запускаем сидеры
@@ -112,17 +119,14 @@ trait TestingTrait
                 }
 
                 // Получаем пользователя для авторизации
-                if (
-                    !$user
-                    && ($userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? []))
-                    && ($userClass = Lh::config(ConfigEnum::App, 'user'))
-                ) {
-                    method_exists($userClass, 'forceDelete')
-                        ? $userClass::where($userData)->forceDelete()
-                        : $userClass::where($userData)->delete();
-                    $user = method_exists($userClass, 'factory')
-                        ? $userClass::where($userData)->first() ?? $userClass::factory()->create($userData)
-                        : $userClass::firstOrCreate($userData);
+                if (!$user && ($userData = array_filter(Lh::config(ConfigEnum::TestingLog, 'user') ?? []))) {
+                    try {
+                        $userClass = Lh::config(ConfigEnum::App, 'user');
+                        $user = method_exists($userClass, 'factory')
+                            ? $userClass::where($userData)->first() ?? $userClass::factory()->create($userData)
+                            : $userClass::firstOrCreate($userData);
+                    } catch (Throwable $exception) {
+                    }
                 }
             }
 
