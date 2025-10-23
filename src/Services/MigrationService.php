@@ -25,10 +25,10 @@ class MigrationService extends DefaultService
             // Обработка типа user_id в зависимости от типа ключа
             switch ($userPrimaryKeyType) {
                 case 'string':
-                    $table->string('user_id')->nullable(true)->index();
+                    $table->string('user_id')->nullable(true)->index()->comment('Id пользователя');
                     break;
                 case 'uuid':
-                    $table->uuid('user_id')->nullable(true)->index();
+                    $table->uuid('user_id')->nullable(true)->index()->comment('Id пользователя');
                     break;
                 case 'integer':
                 case 'bigint':
@@ -36,21 +36,20 @@ class MigrationService extends DefaultService
                     $connectionName = Schema::getConnection()->getName();
                     switch ($connectionName) {
                         case 'pgsql':
-                            $table->bigInteger('user_id')->nullable(true)->index();
+                            $table->bigInteger('user_id')->nullable(true)->index()->comment('Id пользователя');
                             break;
                         case 'sqlite':
-                            $table->unsignedBigInteger('user_id')->nullable(true)->index();
+                            $table->unsignedBigInteger('user_id')->nullable(true)->index()->comment('Id пользователя');
                             break;
                         default: // mysql и остальные
-                            $table->unsignedBigInteger('user_id')->nullable(true)->index();
+                            $table->unsignedBigInteger('user_id')->nullable(true)->index()->comment('Id пользователя');
                             break;
                     }
                     break;
             }
-            $table->foreign('user_id')
-                ->references($userPrimaryKeyName)->on($userTableName)
-                ->onUpdate('cascade')->onDelete('restrict')
-                ->comment('Id пользователя');
+
+            // $table->foreign('user_id')
+            //     ->references($userPrimaryKeyName)->on($userTableName)->onUpdate('cascade')->onDelete('restrict');
         }
 
     }
