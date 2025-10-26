@@ -345,12 +345,7 @@ class TelegramBotService extends DefaultService
                     );
                     $deletedMessageDto->status = true;
 
-                } catch (Throwable $exception) {
-                    if ($json && ($json['description'] ?? null) === 'Bad Request: message to delete not found') {
-                        $deletedMessageDto->status = true;
-                    }
-                }
-
+                } catch (Throwable $exception) {}
 
             } catch (Throwable $exception) {
                 $deletedMessageDto->status = $exception->getCode() === 400;

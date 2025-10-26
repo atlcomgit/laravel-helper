@@ -40,10 +40,15 @@ class TelegramApiService extends DefaultService
 
         return ($response->successful() && ($json['ok'] ?? false) === true)
             ? $json
-            : throw new WithoutTelegramException(
-                "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
-                $json['error_code'] ?? $response->getStatusCode() ?? 400,
-            );
+            : match ($description = $json['description'] ?? null) {
+                'Bad Request: message to delete not found',
+                'Bad Request: message can\'t be deleted for everyone' => $json,
+
+                default => throw new WithoutTelegramException(
+                    "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
+                    $json['error_code'] ?? $response->getStatusCode() ?? 400,
+                ),
+            };
     }
 
 
