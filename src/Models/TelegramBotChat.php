@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotChatFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -123,6 +124,19 @@ class TelegramBotChat extends DefaultModel
 
 
     /** ATTRIBUTES */
+
+
+    /**
+     * Аттрибут: Блокировка бота пользователем
+     *
+     * @return Attribute
+     */
+    public function attrIsKicked(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => ($this->info ?? [])['status'] ?? false,
+        );
+    }
 
 
     /** MUTATORS */

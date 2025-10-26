@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotButtonTrait;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotKeyboardTrait;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotOptionTrait;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
@@ -14,11 +15,13 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
  * @method TelegramBotOutSendMessageDto resizeKeyboard(bool $value)
  * @method TelegramBotOutSendMessageDto oneTimeKeyboard(bool $value)
  * @method TelegramBotOutSendMessageDto removeKeyboard(bool $value)
+ * @method TelegramBotOutSendMessageDto disableWebPagePreview(bool $value)
  */
 class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {
     use TelegramBotButtonTrait;
     use TelegramBotKeyboardTrait;
+    use TelegramBotOptionTrait;
 
 
     public string $externalChatId;
@@ -37,6 +40,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
             'resizeKeyboard' => true,
             'oneTimeKeyboard' => false,
             'removeKeyboard' => false,
+            'disableWebPagePreview' => false,
         ];
     }
 

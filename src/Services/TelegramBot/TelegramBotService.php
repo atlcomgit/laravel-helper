@@ -113,6 +113,7 @@ class TelegramBotService extends DefaultService
                 ? [
                     'reply_markup' => json_encode([
                         ...($dto->removeKeyboard ? ['remove_keyboard' => true] : []),
+                        ...($dto->disableWebPagePreview ? ['disable_web_page_preview' => true] : []),
                         ...(
                             (property_exists($dto, 'buttons') && $dto->buttons?->isNotEmpty())
                             ? [
