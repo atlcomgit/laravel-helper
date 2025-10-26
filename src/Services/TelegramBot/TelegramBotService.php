@@ -104,34 +104,28 @@ class TelegramBotService extends DefaultService
      */
     protected function getOptions(TelegramBotOutDto $dto): array
     {
+        $replyMarkup = [];
+
+        // Приоритет: inline_keyboard > keyboard > removeKeyboard
+        if (property_exists($dto, 'buttons') && $dto->buttons?->isNotEmpty()) {
+            $replyMarkup = [
+                'inline_keyboard' => $dto->buttons->toArrayRecursive(),
+            ];
+        } elseif (property_exists($dto, 'keyboards') && $dto->keyboards?->isNotEmpty()) {
+            $replyMarkup = [
+                'keyboard' => $dto->keyboards->toArrayRecursive(),
+                'resize_keyboard' => $dto->resizeKeyboard ?? true,
+            ];
+        } elseif ($dto->removeKeyboard ?? false) {
+            $replyMarkup = ['remove_keyboard' => true];
+        }
+
         return [
+            ...(!empty($replyMarkup) ? ['reply_markup' => json_encode($replyMarkup)] : []),
             ...(
-                (
-                    (property_exists($dto, 'buttons') && $dto->buttons?->isNotEmpty())
-                    || (property_exists($dto, 'keyboards') && $dto->keyboards?->isNotEmpty())
-                )
-                ? [
-                    'reply_markup' => json_encode([
-                        ...($dto->removeKeyboard ? ['remove_keyboard' => true] : []),
-                        ...($dto->disableWebPagePreview ? ['disable_web_page_preview' => true] : []),
-                        ...(
-                            (property_exists($dto, 'buttons') && $dto->buttons?->isNotEmpty())
-                            ? [
-                                'inline_keyboard' => $dto->buttons->toArrayRecursive(),
-                            ]
-                            : []
-                        ),
-                        ...(
-                            (property_exists($dto, 'keyboards') && $dto->keyboards?->isNotEmpty())
-                            ? [
-                                'keyboard' => $dto->keyboards->toArrayRecursive(),
-                                'resize_keyboard' => $dto->resizeKeyboard ?? true,
-                            ]
-                            : []
-                        ),
-                    ]),
-                ]
-                : []
+                (property_exists($dto, 'disableWebPagePreview') && $dto->disableWebPagePreview)
+                    ? ['disable_web_page_preview' => true]
+                    : []
             ),
         ];
     }
