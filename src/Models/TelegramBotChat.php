@@ -32,6 +32,8 @@ use UnitEnum;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
+ * @property-read bool $attrIsKicked
+ * @property-read bool $attr_is_kicked
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
@@ -134,7 +136,7 @@ class TelegramBotChat extends DefaultModel
     public function attrIsKicked(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => ($this->info ?? [])['status'] ?? false,
+            get: fn ($value, $attributes) => (($this->info ?? [])['status'] ?? '') === 'kicked',
         );
     }
 
