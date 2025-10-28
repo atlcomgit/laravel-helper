@@ -21,6 +21,7 @@ use Atlcom\LaravelHelper\Dto\RouteLogDto;
 use Atlcom\LaravelHelper\Dto\TelegramLogDto;
 use Atlcom\LaravelHelper\Dto\ViewLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\HttpLogMethodEnum;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
@@ -261,6 +262,7 @@ class LaravelHelperService extends DefaultService
                 $can = $this->config($config, 'enabled')
                     && $this->config($config, "{$type}.enabled")
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
+                    && (!in_array($dto->method, [HttpLogMethodEnum::Head->value, HttpLogMethodEnum::Options->value]))
                 ;
                 break;
 
