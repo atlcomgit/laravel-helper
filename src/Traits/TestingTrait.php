@@ -57,9 +57,34 @@ trait TestingTrait
     }
 
 
+    /**
+     * Завершение работы класса тестов
+     *
+     * @return void
+     */
     public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
+    }
+
+
+    /**
+     * Пропускает текущий тест, если он помечен группой ignore.
+     *
+     * @return void
+     */
+    protected function skipIgnoredGroupTestIfNeeded(): void
+    {
+        foreach ($this->groups() as $groupName) {
+            if (strtolower($groupName) !== 'ignore') {
+                continue;
+            }
+
+            // Пропускаем тест, так как группа ignore используется для отключения.
+            $this->markTestSkipped('Тест помечен группой ignore');
+
+            return;
+        }
     }
 
 
@@ -76,6 +101,8 @@ trait TestingTrait
             ?: throw new WithoutTelegramException("Запуск с трейтом RefreshDatabase невозможен");
 
         parent::setUp();
+
+        $this->skipIgnoredGroupTestIfNeeded();
 
         static $started = false;
         static $user = null;
