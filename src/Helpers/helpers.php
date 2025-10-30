@@ -121,7 +121,7 @@ if (!function_exists('isTesting')) {
      */
     function isTesting(): bool
     {
-        return in_array(env('APP_ENV', null), ['test', 'testing'])
+        return in_array(env('APP_ENV', null), ['testing'])
             || ApplicationDto::restore()?->type === ApplicationTypeEnum::Testing;
     }
 } else {
