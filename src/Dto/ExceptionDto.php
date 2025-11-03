@@ -290,11 +290,17 @@ class ExceptionDto extends Dto
     /**
      * Возвращает локализованное сообщение
      *
-     * @param string $localeKey
+     * @param string|null $localeKey Ключ локализации или сырой текст. Если null или пустой — вернёт пустую строку.
      * @return string
      */
-    protected function getMessage(string $localeKey): string
+    protected function getMessage(?string $localeKey): string
     {
+        // Если передали null или пустую строку — ничего не обрабатываем и возвращаем пустую строку,
+        // чтобы не вызывать ошибку типа при попытке подставить null в функцию локализации.
+        if ($localeKey === null || $localeKey === '') {
+            return '';
+        }
+
         $localeKey = Hlp::stringReplace($localeKey, ['::class' => 'class']);
         $replaces = [
             'model' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
