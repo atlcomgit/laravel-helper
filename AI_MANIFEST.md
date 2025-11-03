@@ -106,6 +106,7 @@ class Example
 - Подключай поля timestamps и softDeletes и создай к ним индексы.
 - Перед созданием новой таблицы используй удаление существующей таблицы `dropIfExists`.
 - Перед изменением существующей таблицы используй проверку на существование таблицы `hasTable`.
+- Самостоятельно миграции не запускай.
 
 Пример:
 ```php
@@ -127,18 +128,18 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('user_id')->nullable(false)->index()
-                ->comment('...')
+                ->comment(Model::getTableFields()['user_id'])
                 ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade');
 
             $table->foreignUuid('user_uuid')->nullable(true)->index()
-                ->comment('...')
+                ->comment(Model::getTableFields()['user_uuid'])
                 ->constrained(User::getTableName())->onUpdate('cascade')->onDelete('cascade');
 
             $table->string('name')->nullable(true)
-                ->comment('...');
-            $table->enum('type', ModelTypeEnum::getValues())->nullable(false)->index()
+                ->comment(Model::getTableFields()['name']);
+            $table->string('type')->nullable(false)->index()
                 ->default(ModelTypeEnum::enumDefault())
-                ->comment('...');
+                ->comment(Model::getTableFields()['type']);
 
             $table->timestamps();
             $table->softDeletes();

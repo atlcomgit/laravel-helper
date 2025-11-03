@@ -18,6 +18,8 @@ class TableColumnDto extends DefaultDto
 
     public string $column;
     public string $label;
+    public ?string $align = null;
+    public ?string $class = null;
     public bool $resize = true;
     public bool $sortable = true;
     public bool $visible = true;
