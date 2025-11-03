@@ -265,7 +265,7 @@ class ExceptionDto extends Dto
             match ($this->exception) {
                 ClientException::class,
                 RequestException::class => $this->getMessage(
-                    $this->debugInfo?->throw?->getResponse()->getBody()->getContents(),
+                    $this->debugInfo?->throw?->getResponse()?->getBody()?->getContents(),
                 ),
                 MethodNotAllowedHttpException::class
                 => $this->getMessage('Маршрут :route не поддерживает метод :method'),

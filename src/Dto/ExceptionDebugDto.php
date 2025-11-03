@@ -91,7 +91,7 @@ class ExceptionDebugDto extends Dto
     protected function onFilled(array $array): void
     {
         !($this->throw instanceof ClientException)
-            ?: $this->data[] = $this->throw->getResponse()->getBody()->getContents();
+            ?: $this->data[] = $this->throw->getResponse()?->getBody()?->getContents();
     }
 
 
