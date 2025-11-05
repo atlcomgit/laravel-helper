@@ -18,6 +18,7 @@ class TelegramBotOutEditMessageTextDto extends TelegramBotOutDto
     public ?string $parseMode;
     public ?array $replyMarkup;
 
+
     protected function defaults(): array
     {
         return [

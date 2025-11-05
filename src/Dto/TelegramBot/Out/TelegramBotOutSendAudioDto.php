@@ -23,6 +23,7 @@ class TelegramBotOutSendAudioDto extends TelegramBotOutDto
     public ?string $slug;
     public ?array $options;
 
+
     protected function defaults(): array
     {
         return [

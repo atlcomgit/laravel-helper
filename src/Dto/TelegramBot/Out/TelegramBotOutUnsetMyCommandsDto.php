@@ -16,6 +16,7 @@ class TelegramBotOutUnsetMyCommandsDto extends TelegramBotOutDto
     public ?TelegramBotOutCommandScopeDto $scope;
     public ?TelegramBotLanguageEnum $language;
 
+
     /**
      * @inheritDoc
      */

@@ -23,10 +23,29 @@ class TelegramBotOutSendPhotoDto extends TelegramBotOutDto
     public ?string $slug;
     public ?array $options;
 
+
     protected function defaults(): array
     {
         return [
             ...parent::defaults(),
+            'photo' => '',
+        ];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function mappings(): array
+    {
+        return [
+            'externalChatId' => [
+                'chatId',
+                'chat_id',
+                'telegramBotChat.external_chat_id',
+                'telegram_bot_chat.external_chat_id',
+                'external_chat_id',
+            ],
         ];
     }
 
