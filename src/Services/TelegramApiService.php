@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
@@ -719,24 +720,23 @@ class TelegramApiService extends DefaultService
             'file_id' => $fileId,
         ]);
 
-        $filePath = $fileInfo['result']['file_path'] ?? null;
-        !$filePath
+        $filePath = $fileInfo['result']['file_path']
             ?: throw new WithoutTelegramException('Ошибка получения пути к файлу из Telegram API');
 
         // Формируем URL для загрузки файла
         $fileUrl = "https://api.telegram.org/file/bot{$botToken}/{$filePath}";
 
         // Создаём директорию, если она не существует
-        $directory = dirname($savePath);
-        is_dir($directory) ?: mkdir($directory, 0755, true);
+        is_dir($savePath) ?: mkdir($savePath, 0755, true);
 
         // Загружаем файл
         $fileContents = $this->getHttp()->get($fileUrl)->body();
+        $saveFileName = rtrim($savePath, '/') . '/' . Hlp::fakeUuid7() . '_' . Hlp::fileName($filePath);
 
         // Сохраняем файл
-        file_put_contents($savePath, $fileContents)
-            ?: throw new WithoutTelegramException("Ошибка сохранения файла: {$savePath}");
+        file_put_contents($saveFileName, $fileContents)
+            ?: throw new WithoutTelegramException("Ошибка сохранения файла: {$saveFileName}");
 
-        return $savePath;
+        return $saveFileName;
     }
 }

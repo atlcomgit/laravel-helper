@@ -24,6 +24,7 @@ class TelegramBotOutDto extends TelegramBotDto
     public ?int $previousMessageId;
     public ?TelegramBotOutResponseDto $response;
     public ?array $meta;
+    public ?bool $useSendSync;
 
 
     /**
@@ -36,6 +37,7 @@ class TelegramBotOutDto extends TelegramBotDto
             'parseMode' => 'HTML',
             'response' => null,
             'meta' => [],
+            'useSendSync' => false,
         ];
     }
 
@@ -60,7 +62,10 @@ class TelegramBotOutDto extends TelegramBotDto
     public function dispatch(): static
     {
         if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::TelegramBot, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
+            (
+                (Lh::config(ConfigEnum::TelegramBot, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
+                || $this->useSendSync
+            )
                 ? TelegramBotJob::dispatchSync($this)
                 : TelegramBotJob::dispatch($this);
         }

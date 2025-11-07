@@ -26,6 +26,7 @@ class TelegramBotOutDownloadFileDto extends TelegramBotOutDto
             'fileId' => '',
             'savePath' => '',
             'downloadedFilePath' => null,
+            'syncDownload' => false,
         ];
     }
 
@@ -39,6 +40,7 @@ class TelegramBotOutDownloadFileDto extends TelegramBotOutDto
             'fileId' => 'file_id',
             'savePath' => 'save_path',
             'downloadedFilePath' => 'downloaded_file_path',
+            'syncDownload' => 'sync_download',
         ];
     }
 
@@ -80,6 +82,20 @@ class TelegramBotOutDownloadFileDto extends TelegramBotOutDto
     public function setDownloadedFilePath(string $downloadedFilePath): static
     {
         $this->downloadedFilePath = $downloadedFilePath;
+
+        return $this;
+    }
+
+
+    /**
+     * Устанавливает флаг синхронной загрузки
+     *
+     * @param bool $syncDownload
+     * @return static
+     */
+    public function setSyncDownload(bool $syncDownload): static
+    {
+        $this->syncDownload = $syncDownload;
 
         return $this;
     }
