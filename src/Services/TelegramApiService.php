@@ -711,17 +711,20 @@ class TelegramApiService extends DefaultService
      * @param string $botToken Токен Telegram-бота
      * @param string $fileId   Идентификатор файла
      * @param string $savePath Путь для сохранения файла (абсолютный путь)
-     * @return string          Путь к сохранённому файлу
+     * @return string|null     Путь к сохранённому файлу
      */
-    public function downloadFile(string $botToken, string $fileId, string $savePath): string
+    public function downloadFile(string $botToken, string $fileId, string $savePath): ?string
     {
         // Получаем информацию о файле через метод getFile
         $fileInfo = $this->call($botToken, 'getFile', [
             'file_id' => $fileId,
         ]);
 
-        $filePath = $fileInfo['result']['file_path']
-            ?: throw new WithoutTelegramException('Ошибка получения пути к файлу из Telegram API');
+        $filePath = $fileInfo['result']['file_path'] ?? null;
+
+        if (!$filePath) {
+            return null;
+        }
 
         // Формируем URL для загрузки файла
         $fileUrl = "https://api.telegram.org/file/bot{$botToken}/{$filePath}";
@@ -733,10 +736,6 @@ class TelegramApiService extends DefaultService
         $fileContents = $this->getHttp()->get($fileUrl)->body();
         $saveFileName = rtrim($savePath, '/') . '/' . Hlp::fakeUuid7() . '_' . Hlp::fileName($filePath);
 
-        // Сохраняем файл
-        file_put_contents($saveFileName, $fileContents)
-            ?: throw new WithoutTelegramException("Ошибка сохранения файла: {$saveFileName}");
-
-        return $saveFileName;
+        return file_put_contents($saveFileName, $fileContents) ? $saveFileName : null;
     }
 }

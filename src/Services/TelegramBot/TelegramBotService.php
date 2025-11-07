@@ -475,14 +475,10 @@ class TelegramBotService extends DefaultService
 
         $dto->setDownloadedFilePath($downloadedPath);
 
-        return TelegramBotOutResponseDto::create(
-            dto: $dto,
-            json: [
-                'ok' => true,
-                'result' => [
-                    'file_id' => $dto->fileId,
-                    'file_path' => $downloadedPath,
-                ],
+        return TelegramBotOutResponseDto::create($dto, [
+                'status' => (bool)$downloadedPath,
+                'result' => $downloadedPath,
+                'description' => $dto->fileId,
             ],
         );
     }
