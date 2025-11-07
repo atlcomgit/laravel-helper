@@ -20,6 +20,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutEditMessageTextDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendPhotoDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendVideoDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendAudioDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutDownloadFileDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
@@ -77,6 +78,7 @@ class TelegramBotService extends DefaultService
                         TelegramBotOutSendPhotoDto::class => $this->sendPhoto($dto),
                         TelegramBotOutSendVideoDto::class => $this->sendVideo($dto),
                         TelegramBotOutSendAudioDto::class => $this->sendAudio($dto),
+                        TelegramBotOutDownloadFileDto::class => $this->downloadFile($dto),
 
                         default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
                     },
@@ -124,8 +126,8 @@ class TelegramBotService extends DefaultService
             ...(!empty($replyMarkup) ? ['reply_markup' => json_encode($replyMarkup)] : []),
             ...(
                 (property_exists($dto, 'disableWebPagePreview') && $dto->disableWebPagePreview)
-                    ? ['disable_web_page_preview' => true]
-                    : []
+                ? ['disable_web_page_preview' => true]
+                : []
             ),
         ];
     }
@@ -345,7 +347,8 @@ class TelegramBotService extends DefaultService
                     );
                     $deletedMessageDto->status = true;
 
-                } catch (Throwable $exception) {}
+                } catch (Throwable $exception) {
+                }
 
             } catch (Throwable $exception) {
                 $deletedMessageDto->status = $exception->getCode() === 400;
@@ -453,5 +456,34 @@ class TelegramBotService extends DefaultService
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
+    }
+
+
+    /**
+     * Загружает файл из Telegram
+     *
+     * @param TelegramBotOutDownloadFileDto $dto
+     * @return TelegramBotOutResponseDto
+     */
+    protected function downloadFile(TelegramBotOutDownloadFileDto $dto): TelegramBotOutResponseDto
+    {
+        $downloadedPath = $this->telegramApiService->downloadFile(
+            botToken: $dto->token,
+            fileId: $dto->fileId,
+            savePath: $dto->savePath,
+        );
+
+        $dto->setDownloadedFilePath($downloadedPath);
+
+        return TelegramBotOutResponseDto::create(
+            dto: $dto,
+            json: [
+                'ok' => true,
+                'result' => [
+                    'file_id' => $dto->fileId,
+                    'file_path' => $downloadedPath,
+                ],
+            ],
+        );
     }
 }

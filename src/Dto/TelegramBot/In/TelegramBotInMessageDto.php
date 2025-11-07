@@ -22,11 +22,14 @@ class TelegramBotInMessageDto extends DefaultDto
     public ?Carbon $editDate;
     public ?TelegramBotInReplyMarkupDto $replyMarkup;
     // public ?TelegramBotInWebAppDto $webAppData;
+    /** @var Collection<TelegramBotInPhotoDto> */
+    public ?Collection $photos;
+    public ?TelegramBotInDocumentDto $document;
     public ?array $buttons;
     public ?array $keyboards;
     public ?array $video;
     public ?array $audio;
-    public ?array $photo;
+    // public ?array $photo;
 
 
     /**
@@ -41,6 +44,8 @@ class TelegramBotInMessageDto extends DefaultDto
             'contact' => TelegramBotInContactDto::class,
             'replyToMessage' => TelegramBotInMessageDto::class,
             'entities' => [TelegramBotInEntitiesDto::class],
+            'photos' => [TelegramBotInPhotoDto::class],
+            'document' => TelegramBotInDocumentDto::class,
             'text' => 'string',
             'date' => Carbon::class,
             'editDate' => Carbon::class,
@@ -71,6 +76,7 @@ class TelegramBotInMessageDto extends DefaultDto
             'replyToMessage' => 'reply_to_message',
             'editDate' => 'edit_date',
             'replyMarkup' => 'reply_markup',
+            'photos' => 'photo',
         ];
     }
 }

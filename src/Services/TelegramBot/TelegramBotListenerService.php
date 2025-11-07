@@ -80,6 +80,8 @@ class TelegramBotListenerService extends DefaultService
                 'info' => [
                     ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
                     ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
+                    ...($dto->message?->photos?->isNotEmpty() ? ['photos' => $dto->message->photos] : []),
+                    ...($dto->message?->document ? ['document' => $dto->message->document] : []),
                 ],
             ]))->save();
 
@@ -159,6 +161,16 @@ class TelegramBotListenerService extends DefaultService
                     ...(
                         $dto->response->message?->video
                         ? ['video' => $dto->response->message->video]
+                        : []
+                    ),
+                    ...(
+                        $dto->response->message?->photos
+                        ? ['photos' => $dto->response->message->photos]
+                        : []
+                    ),
+                    ...(
+                        $dto->response->message?->document
+                        ? ['document' => $dto->response->message->document]
                         : []
                     ),
                 ],
