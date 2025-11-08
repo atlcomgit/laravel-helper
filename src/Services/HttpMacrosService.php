@@ -120,6 +120,12 @@ class HttpMacrosService extends DefaultService
                         ->acceptJson()
                         ->timeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
                         ->connectTimeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
+                        ->retry(
+                            Lh::config(ConfigEnum::Http, 'telegramOrg.retry.times'),
+                            Lh::config(ConfigEnum::Http, 'telegramOrg.retry.sleep'),
+                            static fn ($exception) => $exception instanceof ConnectionException,
+                            Lh::config(ConfigEnum::Http, 'telegramOrg.retry.throw'),
+                        )
                 );
         }
     }

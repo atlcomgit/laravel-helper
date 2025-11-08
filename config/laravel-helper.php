@@ -231,6 +231,13 @@ return [
             'url' => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
             // Таймаут подключения api к сервису
             'timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 10),
+            // Настройки повторной отправки запроса
+            'retry' => [
+                'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_RETRY_ENABLED', true),
+                'times' => (int)env('HELPER_HTTP_TELEGRAMORG_RETRY_TIMES', 2),
+                'sleep' => (int)env('HELPER_HTTP_TELEGRAMORG_RETRY_SLEEP', 1000),
+                'throw' => (bool)env('HELPER_HTTP_TELEGRAMORG_RETRY_THROW', true),
+            ],
         ],
     ],
 
