@@ -625,6 +625,18 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_WARNING_CACHE_TTL', '5 seconds'),
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
+        // Настройка отправки логов уведомлений
+        'notice' => [
+            // Вкл/Выкл отправки уведомлений
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_NOTICE_ENABLED', true),
+            // Telegram chat id для уведомлений
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
+            // Токен бота для уведомлений
+            'token' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            // Кеш повторной отправки в группу чата
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_CACHE_TTL', '1 seconds'),
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_NOTICE_EXCLUDE', base_path('.env')) ?? []),
+        ],
         // Настройка отправки логов отладки
         'debug' => [
             // Вкл/Выкл отправки предупреждений

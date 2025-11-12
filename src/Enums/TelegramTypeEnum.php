@@ -15,6 +15,7 @@ enum TelegramTypeEnum: string
     case Info = 'info';
     case Error = 'error';
     case Warning = 'warning';
+    case Notice = 'notice';
     case Debug = 'debug';
     case None = 'none';
 
@@ -42,6 +43,7 @@ enum TelegramTypeEnum: string
             self::Info => 'Информация',
             self::Error => 'Ошибка',
             self::Warning => 'Предупреждение',
+            self::Notice => 'Уведомление',
             self::Debug => 'Отладка',
             self::None => 'Без отправки',
 
