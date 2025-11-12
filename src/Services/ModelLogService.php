@@ -39,7 +39,8 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::create([
             'modelType' => $model::class,
-            'modelId' => (string)$model->{$primaryKey}
+            'modelId' => (string)(
+                $model->{$primaryKey}
                 ?? (
                     (is_null($attributes) || !$primaryKey)
                     ? null
@@ -52,8 +53,8 @@ class ModelLogService extends DefaultService
                                 foreach ($attributes as $column => $value) {
                                     match (true) {
                                         is_null($value) => $q->whereNull($column),
-                                        is_array($value) => $q->whereIn($column, $value),
-                                        is_object($value) => $q->whereIn($column, Hlp::castToArray($value)),
+                                        // is_array($value) => $q->whereRaw("{$column}::text = ?", [Hlp::castToJson($value)]),
+                                        // is_object($value) => $q->where("{$column}::text = ?", [Hlp::castToJson($value)]),
                                         is_scalar($value) => $q->where($column, $value),
 
                                         default => null,
@@ -64,11 +65,13 @@ class ModelLogService extends DefaultService
                             return $q;
                         })
                         // ->when(!$attributes, static fn ($q) => $q->orderByDesc($primaryKey))
+                        ->when($primaryKey, static fn ($q) => $q->orderByDesc($primaryKey))
                         ->first()
                         ?->{$primaryKey}
                     )
                 )
-                ?? null,
+                ?? null
+            ),
             'type' => $type,
             'attributes' => $attributes ?? $this->getAttributes($model),
             'changes' => null,

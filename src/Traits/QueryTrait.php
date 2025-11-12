@@ -628,6 +628,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileInsert($this->getQuery(), $query),
@@ -692,6 +693,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileInsert($this->getQuery(), $attributes),
@@ -747,6 +749,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileUpdate($this->getQuery(), $query),
@@ -812,6 +815,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     $this->getGrammar()->compileDelete($this->getQuery()),
@@ -880,6 +884,7 @@ trait QueryTrait
     {
         try {
             $status = false;
+            $this->syncQueryProperties();
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
                     array_keys($this->getGrammar()->compileTruncate($this->getQuery()))[0] ?? null,
@@ -978,6 +983,7 @@ trait QueryTrait
             && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true
+                || ($this->withModelLog === null && $this->getModel()->withModelLog)
                 || ($this->withModelLog !== false && Lh::config(ConfigEnum::ModelLog, 'global'))
             )
         ) {
@@ -1022,7 +1028,8 @@ trait QueryTrait
         }
 
         if (
-            $this instanceof Connection && is_string($attributes)
+            $this instanceof Connection
+            && is_string($attributes)
             && Lh::config(ConfigEnum::ModelLog, 'enabled')
             && (
                 $this->withModelLog === true

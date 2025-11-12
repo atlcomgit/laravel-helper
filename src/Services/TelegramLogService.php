@@ -151,7 +151,7 @@ final class TelegramLogService extends DefaultService
         $time = Carbon::now()->format('d.m.Y в H:i:s');
 
         $showTitle = $messageIndex == 1;
-        $showSpoiler = $messageIndex == $messageCount;
+        $showSpoiler = $messageIndex == $messageCount && !in_array($type, [LogLevel::NOTICE]);
 
         $parts = "Сообщение разбито: на <b>{$messageCount} "
             . trans_choice('часть|части|частей', $messageCount)
