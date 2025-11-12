@@ -242,8 +242,8 @@ class ModelLogService extends DefaultService
             ? ($model->modelLogHiddenAttributes ?: [])
             : [];
 
-        foreach (($model->getAttributes() ?: $attributes) ?? [] as $attribute => $newValue) {
-            $oldValue = $model->getOriginal($attribute);
+        foreach (($attributes ?: $model->getAttributes()) ?? [] as $attribute => $newValue) {
+            $oldValue = $model->getOriginal($attribute) ?? $model->getAttribute($attribute);
             $newValue = (!is_null($attributes) && array_key_exists($attribute, $attributes))
                 ? (
                     method_exists($model, 'getCastedAttribute')
