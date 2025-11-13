@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Models;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
@@ -69,6 +70,26 @@ class TelegramBotChatDto extends DefaultDto
     protected function casts(): array
     {
         return TelegramBotChat::getModelCasts();
+    }
+
+
+    /**
+     * @inheritDoc
+     * @see parent::onFilled()
+     */
+    protected function onFilled(array $array): void
+    {
+        // Устраняем любые HTML-теги
+        $this->name = strip_tags($this->name);
+
+        // Преобразуем к безопасному sql значению
+        $this->name = Hlp::sqlSafeValue($this->name);
+
+        // Устраняем любые HTML-теги
+        $this->chatName = strip_tags($this->chatName);
+
+        // Преобразуем к безопасному sql значению
+        $this->chatName = Hlp::sqlSafeValue($this->chatName);
     }
 
 

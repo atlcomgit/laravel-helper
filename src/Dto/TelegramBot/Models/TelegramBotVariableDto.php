@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Models;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Atlcom\LaravelHelper\Enums\TelegramBotVariableTypeEnum;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
@@ -77,6 +78,20 @@ class TelegramBotVariableDto extends DefaultDto
     {
         $value = $array['value'] ?? null;
         $array['type'] ??= TelegramBotVariableTypeEnum::getType($value);
+    }
+
+
+    /**
+     * @inheritDoc
+     * @see parent::onFilled()
+     */
+    protected function onFilled(array $array): void
+    {
+        // Устраняем любые HTML-теги
+        $this->value = strip_tags($this->value);
+
+        // Преобразуем к безопасному sql значению
+        $this->value = Hlp::sqlSafeValue($this->value);
     }
 
 

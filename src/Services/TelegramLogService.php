@@ -150,6 +150,8 @@ final class TelegramLogService extends DefaultService
         $type = $dto->type ?? null;
         $time = Carbon::now()->format('d.m.Y в H:i:s');
 
+        $message = $this->prepareMessageText($message);
+
         $showTitle = $messageIndex == 1;
         $showSpoiler = $messageIndex == $messageCount && !in_array($type, [LogLevel::NOTICE]);
 
@@ -221,5 +223,101 @@ final class TelegramLogService extends DefaultService
         );
 
         return "{$filePathFull}/{$fileName}";
+    }
+
+
+    /**
+     * Подготавливает текст для безопасной отправки в Telegram
+     *
+     * @param mixed $text
+     * @return mixed
+     */
+    public function prepareMessageText(string $text): mixed
+    {
+        // Удаляем управляющие символы, не допускаемые Telegram API
+        $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $text) ?? '';
+
+        // Приводим скобки к сбалансированному состоянию
+        $text = $this->removeUnbalancedBrackets($text);
+
+        return $text;
+    }
+
+
+    /**
+     * Удаляет незакрытые скобки из текста
+     *
+     * @param string $text
+     * @return string
+     */
+    private function removeUnbalancedBrackets(string $text): string
+    {
+        // Преобразуем строку в массив символов для многобайтовой поддержки
+        $characters = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        if ($characters === false) {
+            return $text;
+        }
+
+        // Подготавливаем структуры для отслеживания индексов скобок
+        $openBrackets = [
+            '<' => [],
+            '[' => [],
+            '{' => [],
+            '(' => [],
+        ];
+
+        $closingMap = [
+            '>' => '<',
+            ']' => '[',
+            '}' => '{',
+            ')' => '(',
+        ];
+
+        $indexesToRemove = [];
+
+        foreach ($characters as $index => $character) {
+            if (array_key_exists($character, $openBrackets)) {
+                $openBrackets[$character][] = $index;
+
+                continue;
+            }
+
+            if (array_key_exists($character, $closingMap)) {
+                $relatedOpen = $closingMap[$character];
+
+                if ($openBrackets[$relatedOpen] === []) {
+                    $indexesToRemove[$index] = true;
+
+                    continue;
+                }
+
+                array_pop($openBrackets[$relatedOpen]);
+            }
+        }
+
+        // Добавляем индексы незакрытых скобок
+        foreach ($openBrackets as $positions) {
+            foreach ($positions as $position) {
+                $indexesToRemove[$position] = true;
+            }
+        }
+
+        if ($indexesToRemove === []) {
+            return $text;
+        }
+
+        // Собираем строку без нежелательных скобок
+        $resultCharacters = [];
+
+        foreach ($characters as $index => $character) {
+            if (isset($indexesToRemove[$index])) {
+                continue;
+            }
+
+            $resultCharacters[] = $character;
+        }
+
+        return implode('', $resultCharacters);
     }
 }
