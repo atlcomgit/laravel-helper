@@ -66,7 +66,7 @@ class OptimizeCommand extends DefaultCommand
         // Очистка таблиц логов
         if (Lh::config(ConfigEnum::Optimize, 'log_cleanup.enabled')) {
             $this->telegramComment = ['Env' => config('app.env')];
-            $this->withTelegramLog = isLocal() || isDev() || isProd();
+            $cleanupTotal = 0;
 
             foreach ([
                 ['config' => ConfigEnum::ConsoleLog, 'service' => $this->consoleLogService],
@@ -83,14 +83,15 @@ class OptimizeCommand extends DefaultCommand
                     ->hasTable(Lh::getTable($config))
                     ? $service->cleanup($isSchedule ? Lh::config($config, 'cleanup_days') : 0)
                     : 0;
-                $this->telegramComment = [
+                !$cleanup ?: $this->telegramComment = [
                     ...$this->telegramComment,
                     $config->value => 'Удалено ' . Hlp::stringPlural($cleanup, ['записей', 'запись', 'записи']),
                 ];
+                $cleanupTotal += $cleanup;
             }
 
-
             $this->outputEol(json($this->telegramComment, JSON_PRETTY_PRINT), 'fg=green');
+            $this->withTelegramLog = $cleanupTotal && (isLocal() || isDev() || isProd());
         }
 
         // Очистка кеша
