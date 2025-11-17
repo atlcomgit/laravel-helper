@@ -164,13 +164,18 @@ class TelegramBotListenerService extends DefaultService
                         : []
                     ),
                     ...(
-                        $dto->response->message?->photos
+                        $dto->response->message?->photos?->isNotEmpty()
                         ? ['photos' => $dto->response->message->photos]
                         : []
                     ),
                     ...(
                         $dto->response->message?->document
                         ? ['document' => $dto->response->message->document]
+                        : []
+                    ),
+                    ...(
+                        $dto->meta
+                        ? ['meta' => $dto->meta]
                         : []
                     ),
                 ],
