@@ -14,6 +14,16 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\ModelLogRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Collection;
+use UnitEnum;
+use BackedEnum;
+use DateTimeInterface;
+use DateTimeImmutable;
+use DateTimeZone;
+use JsonSerializable;
+use Stringable;
+use Traversable;
 use Throwable;
 
 /**
@@ -42,20 +52,20 @@ class ModelLogService extends DefaultService
             'modelId' => (string)(
                 $model->{$primaryKey}
                 ?? (
-                    (is_null($attributes) || !$primaryKey)
+                    (\is_null($attributes) || !$primaryKey)
                     ? null
                     : ($model->{$primaryKey} = $model::query()
                         ->when($attributes, static function ($q) use (&$attributes, &$primaryKey) {
-                            if ($primaryKey && array_key_exists($primaryKey, $attributes)) {
+                            if ($primaryKey && \array_key_exists($primaryKey, $attributes)) {
                                 $q->where($primaryKey, $attributes[$primaryKey] ?? null);
 
                             } else {
                                 foreach ($attributes as $column => $value) {
                                     match (true) {
-                                        is_null($value) => $q->whereNull($column),
+                                        \is_null($value) => $q->whereNull($column),
                                         // is_array($value) => $q->whereRaw("{$column}::text = ?", [Hlp::castToJson($value)]),
                                         // is_object($value) => $q->where("{$column}::text = ?", [Hlp::castToJson($value)]),
-                                        is_scalar($value) => $q->where($column, $value),
+                                        \is_scalar($value) => $q->where($column, $value),
 
                                         default => null,
                                     };
@@ -92,8 +102,8 @@ class ModelLogService extends DefaultService
     {
         $type = method_exists($model, 'softDeleted')
             ? match (true) {
-                !is_null($attributes) && array_key_exists('deleted_at', $attributes) => match (true) {
-                        is_null($attributes['deleted_at']) => ModelLogTypeEnum::Restore,
+                !\is_null($attributes) && \array_key_exists('deleted_at', $attributes) => match (true) {
+                        \is_null($attributes['deleted_at']) => ModelLogTypeEnum::Restore,
 
                         default => ModelLogTypeEnum::SoftDelete,
                     },
@@ -107,7 +117,7 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
-            'modelId' => $model->id ?? null,
+            'modelId' => $model->{$model->getKeyName()} ?? null,
             'type' => $type,
             'attributes' => $this->getAttributes($model),
             'changes' => $this->getChanges($model, $attributes),
@@ -144,7 +154,7 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
-            'modelId' => $model->id ?? null,
+            'modelId' => $model->{$model->getKeyName()} ?? null,
             'type' => $type,
             'attributes' => $this->getAttributes($model),
             'changes' => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges($model) : null,
@@ -166,7 +176,7 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
-            'modelId' => $model->id ?? null,
+            'modelId' => $model->{$model->getKeyName()} ?? null,
             'type' => $type,
             'attributes' => $this->getAttributes($model),
             'changes' => null,
@@ -188,7 +198,7 @@ class ModelLogService extends DefaultService
 
         $dto = ModelLogDto::fill([
             'modelType' => $model::class,
-            'modelId' => $model->id ?? null,
+            'modelId' => $model->{$model->getKeyName()} ?? null,
             'type' => $type,
             'attributes' => $this->getAttributes($model),
             'changes' => null,
@@ -215,8 +225,8 @@ class ModelLogService extends DefaultService
             : [];
 
         foreach ($model->getAttributes() as $attribute => $newValue) {
-            if (!in_array($attribute, $modelLogExcludeAttributes)) {
-                if (in_array($attribute, $modelLogHiddenAttributes)) {
+            if (!\in_array($attribute, $modelLogExcludeAttributes)) {
+                if (\in_array($attribute, $modelLogHiddenAttributes)) {
                     $newValue = static::HIDDEN_VALUE;
                 }
 
@@ -247,7 +257,7 @@ class ModelLogService extends DefaultService
 
         foreach (($attributes ?: $model->getAttributes()) ?? [] as $attribute => $newValue) {
             $oldValue = $model->getOriginal($attribute) ?? $model->getAttribute($attribute);
-            $newValue = (!is_null($attributes) && array_key_exists($attribute, $attributes))
+            $newValue = (!\is_null($attributes) && \array_key_exists($attribute, $attributes))
                 ? (
                     method_exists($model, 'getCastedAttribute')
                     ? $model->getCastedAttribute($attribute, $attributes[$attribute])
@@ -255,14 +265,17 @@ class ModelLogService extends DefaultService
                 )
                 : $model->$attribute;
 
-            if (!in_array($attribute, $modelLogExcludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
-                if (in_array($attribute, $modelLogHiddenAttributes)) {
-                    $newValue = $oldValue = static::HIDDEN_VALUE;
+            if (!\in_array($attribute, $modelLogExcludeAttributes) && $this->hasDifference($oldValue, $newValue)) {
+                $oldFormattedValue = $this->normalizeDifferenceValue($oldValue);
+                $newFormattedValue = $this->normalizeDifferenceValue($newValue);
+
+                if (\in_array($attribute, $modelLogHiddenAttributes)) {
+                    $newFormattedValue = $oldFormattedValue = static::HIDDEN_VALUE;
                 }
 
                 $result[$attribute] = [
-                    'old' => $oldValue,
-                    'new' => $newValue,
+                    'old' => $oldFormattedValue,
+                    'new' => $newFormattedValue,
                 ];
             }
         }
@@ -280,40 +293,84 @@ class ModelLogService extends DefaultService
      */
     protected function hasDifference(mixed $oldValue, mixed $newValue): bool
     {
+        $oldValue = $this->normalizeDifferenceValue($oldValue);
+        $newValue = $this->normalizeDifferenceValue($newValue);
+
         return !match (true) {
             is_numeric($oldValue) && is_numeric($newValue) => (string)(float)$oldValue === (string)(float)$newValue,
 
-            is_float($oldValue) && is_float($newValue) => (string)$oldValue === (string)$newValue,
+            \is_scalar($oldValue) && \is_scalar($newValue) => $oldValue === $newValue,
 
-            is_scalar($oldValue) && is_scalar($newValue) => $oldValue === $newValue,
+            \is_array($oldValue) && \is_array($newValue) => json_encode($oldValue, Hlp::jsonFlags())
+            === json_encode($newValue, Hlp::jsonFlags()),
 
-            is_array($oldValue) && is_array($newValue) => (bool)(
-                array_udiff_uassoc(
-                    $oldValue,
-                    $newValue,
-                    fn ($a, $b) => $this->hasDifference($a, $b),
-                    fn ($a, $b) => $this->hasDifference($a, $b),
-                )
-            ),
+            \is_object($oldValue) && \is_object($newValue) => json_encode((array)$oldValue, Hlp::jsonFlags())
+            === json_encode((array)$newValue, Hlp::jsonFlags()),
 
-            is_object($oldValue) && is_object($newValue) => (bool)(
-                method_exists($oldValue, 'toArray') && method_exists($newValue, 'toArray')
-                ? array_udiff_uassoc(
-                    $oldValue->toArray(),
-                    $newValue->toArray(),
-                    fn ($a, $b) => (int)$this->hasDifference($a, $b),
-                    fn ($a, $b) => (int)$this->hasDifference($a, $b),
-                )
-                : array_udiff_uassoc(
-                    (array)$oldValue,
-                    (array)$newValue,
-                    fn ($a, $b) => (int)$this->hasDifference($a, $b),
-                    fn ($a, $b) => (int)$this->hasDifference($a, $b),
-                )
-            ),
+            \is_resource($oldValue) && \is_resource($newValue) => get_resource_id($oldValue) === get_resource_id($newValue),
 
-            default => json_encode($oldValue) === json_encode($newValue),
+            default => json_encode($oldValue, Hlp::jsonFlags()) === json_encode($newValue, Hlp::jsonFlags()),
         };
+    }
+
+
+    /**
+     * Нормализует значение для корректного сравнения
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function normalizeDifferenceValue(mixed $value): mixed
+    {
+        return match (true) {
+            \is_array($value) => $this->normalizeDifferenceArray($value),
+
+            $value instanceof BackedEnum => $value->value,
+
+            $value instanceof UnitEnum => $value->name,
+
+            $value instanceof DateTimeInterface => DateTimeImmutable::createFromInterface($value)
+                ->setTimezone(new DateTimeZone(config('app.timezone') ?? 'UTC'))
+                ->format('Y-m-d H:i:s'),
+
+            $value instanceof Stringable => (string)$value,
+
+            $value instanceof Model => $this->normalizeDifferenceArray($value->attributesToArray()),
+
+            $value instanceof Collection => $this->normalizeDifferenceArray($value->toArray()),
+
+            $value instanceof Arrayable => $this->normalizeDifferenceArray($value->toArray()),
+
+            $value instanceof JsonSerializable => $this->normalizeDifferenceValue($value->jsonSerialize()),
+
+            $value instanceof Traversable => $this->normalizeDifferenceArray(iterator_to_array($value)),
+
+            default => $value,
+        };
+    }
+
+
+    /**
+     * Нормализует массив с учётом порядка ключей
+     *
+     * @param array $value
+     * @return array
+     */
+    protected function normalizeDifferenceArray(array $value): array
+    {
+        if (array_is_list($value)) {
+            return array_map(fn ($item) => $this->normalizeDifferenceValue($item), $value);
+        }
+
+        $result = [];
+
+        foreach ($value as $key => $item) {
+            $result[$key] = $this->normalizeDifferenceValue($item);
+        }
+
+        ksort($result);
+
+        return $result;
     }
 
 
@@ -329,7 +386,7 @@ class ModelLogService extends DefaultService
 
         foreach ($drivers as $driver) {
             try {
-                !is_string($driver) ?: $driver = trim($driver);
+                !\is_string($driver) ?: $driver = trim($driver);
 
                 switch (ModelLogDriverEnum::enumFrom($driver)) {
                     case ModelLogDriverEnum::File:

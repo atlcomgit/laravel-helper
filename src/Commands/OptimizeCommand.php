@@ -81,7 +81,7 @@ class OptimizeCommand extends DefaultCommand
                 $service = $log['service'];
                 $cleanup = Schema::connection(Lh::getConnection($config))
                     ->hasTable(Lh::getTable($config))
-                    ? $service->cleanup($isSchedule ? Lh::config($config, 'cleanup_days') : 0)
+                    ? $service->cleanup(Lh::config($config, 'cleanup_days'))
                     : 0;
                 !$cleanup ?: $this->telegramComment = [
                     ...$this->telegramComment,
