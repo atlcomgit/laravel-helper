@@ -82,7 +82,7 @@ class TelegramBotMessageService extends DefaultService
      * Проверяет отправляемое сообщение на дубликат последнего сообщения от бота
      * Проверка на зацикливание ответа
      *
-     * @param TelegramBotOutDto $dto
+     * @param TelegramBotOutDto|TelegramBotOutSendMessageDto $dto
      * @return bool
      */
     public function isDuplicateLastMessage(TelegramBotOutDto $dto): bool
@@ -106,8 +106,10 @@ class TelegramBotMessageService extends DefaultService
                 && (
                     ($lastMessageOut->slug === $dto->slug)
                     || ($lastMessage?->slug === $dto->slug && $dto->slug)
-                    || (property_exists($dto, 'text') && strip_tags($lastMessageOut->text) === strip_tags($dto->text))
-                    || (property_exists($dto, 'caption') && strip_tags($lastMessageOut->text) === strip_tags($dto->caption))
+                    || (property_exists($dto, 'text')
+                        && strip_tags($lastMessageOut->text ?? '') === strip_tags($dto->text ?? ''))
+                    || (property_exists($dto, 'caption')
+                        && strip_tags($lastMessageOut->text ?? '') === strip_tags($dto->caption ?? ''))
                 )
                 && !(
                     array_diff_assoc(
