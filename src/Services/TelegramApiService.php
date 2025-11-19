@@ -504,6 +504,46 @@ class TelegramApiService extends DefaultService
 
 
     /**
+     * Отправляет документ
+     *
+     * @param string      $botToken  Токен Telegram-бота
+     * @param string|int  $chatId    ID чата
+     * @param string      $document  Путь к файлу, file_id или URL
+     * @param string|null $caption   Подпись
+     * @param string      $parseMode parse_mode (по умолчанию HTML)
+     * @param array       $options   Доп. параметры (thumbnail, disable_content_type_detection и пр.)
+     * @return mixed                 Ответ Telegram API
+     */
+    public function sendDocument(
+        string $botToken,
+        string|int $chatId,
+        string $document,
+        ?string $caption = null,
+        string $parseMode = 'HTML',
+        array $options = [],
+    ): mixed {
+        $files = [];
+        $params = [
+            'chat_id' => $chatId,
+            'parse_mode' => $parseMode,
+            ...$options,
+        ];
+
+        if (is_file($document)) {
+            $files['document'] = $document;
+        } else {
+            $params['document'] = $document;
+        }
+
+        if ($caption !== null) {
+            $params['caption'] = $caption;
+        }
+
+        return $this->call($botToken, 'sendDocument', $params, $files);
+    }
+
+
+    /**
      * Отправляет голосовое сообщение
      *
      * @param string      $botToken  Токен Telegram-бота

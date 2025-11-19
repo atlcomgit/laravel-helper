@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInDeletedMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendDocumentDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSetMyCommandsDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutUnsetMyCommandsDto;
@@ -78,9 +80,12 @@ class TelegramBotService extends DefaultService
                         TelegramBotOutSendPhotoDto::class => $this->sendPhoto($dto),
                         TelegramBotOutSendVideoDto::class => $this->sendVideo($dto),
                         TelegramBotOutSendAudioDto::class => $this->sendAudio($dto),
+                        TelegramBotOutSendDocumentDto::class => $this->sendDocument($dto),
                         TelegramBotOutDownloadFileDto::class => $this->downloadFile($dto),
 
-                        default => throw new LaravelHelperException('Не определен метод отправки сообщения'),
+                        default => throw new LaravelHelperException(
+                            'Не определен метод отправки сообщения для ' . Hlp::pathClassName($dto::class)
+                        ),
                     },
             };
 
@@ -460,6 +465,30 @@ class TelegramBotService extends DefaultService
 
 
     /**
+     * Отправляет в бот документ
+     *
+     * @param TelegramBotOutSendDocumentDto $dto
+     * @return TelegramBotOutResponseDto
+     */
+    protected function sendDocument(TelegramBotOutSendDocumentDto $dto): TelegramBotOutResponseDto
+    {
+        $json = $this->telegramApiService->sendDocument(
+            botToken: $dto->token,
+            chatId: $dto->externalChatId,
+            document: $dto->document,
+            caption: $dto->caption,
+            parseMode: $dto->parseMode ?? self::DEFAULT_PARSE_MODE,
+            options: [
+                ...$this->getOptions($dto),
+                ...($dto->options ?? []),
+            ],
+        );
+
+        return TelegramBotOutResponseDto::create($dto, $json);
+    }
+
+
+    /**
      * Загружает файл из Telegram
      *
      * @param TelegramBotOutDownloadFileDto $dto
@@ -475,7 +504,9 @@ class TelegramBotService extends DefaultService
 
         $dto->setDownloadedFilePath($downloadedPath);
 
-        return TelegramBotOutResponseDto::create($dto, [
+        return TelegramBotOutResponseDto::create(
+            $dto,
+            [
                 'status' => (bool)$downloadedPath,
                 'result' => $downloadedPath,
                 'description' => $dto->fileId,
