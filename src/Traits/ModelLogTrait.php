@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
 
 /**
@@ -34,9 +35,9 @@ trait ModelLogTrait
      * Вызывает макрос подключения логирования модели
      *
      * @param bool|null $enabled
-     * @return EloquentBuilder<static>
+     * @return EloquentBuilder<static>|Builder<static>
      */
-    public static function withModelLog(?bool $enabled = null): EloquentBuilder
+    public static function withModelLog(?bool $enabled = null): EloquentBuilder|Builder
     {
         if (Lh::config(ConfigEnum::ModelLog, 'enabled')) {
             $query = static::query()->withModelLog($enabled);

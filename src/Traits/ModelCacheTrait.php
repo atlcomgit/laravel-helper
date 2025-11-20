@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Observers\QueryCacheObserver;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
 
 /**
@@ -87,9 +88,9 @@ trait ModelCacheTrait
      * Вызывает макрос подключения кеша
      *
      * @param int|string|bool|null $seconds
-     * @return EloquentBuilder<static>
+     * @return EloquentBuilder<static>|Builder<static>
      */
-    public static function withQueryCache(int|string|bool|null $seconds = null): EloquentBuilder
+    public static function withQueryCache(int|string|bool|null $seconds = null): EloquentBuilder|Builder
     {
         $query = static::query()->withQueryCache($seconds);
 
@@ -101,9 +102,9 @@ trait ModelCacheTrait
      * Вызывает макрос подключения лога query запроса
      *
      * @param bool|null $enabled
-     * @return EloquentBuilder<static>
+     * @return EloquentBuilder<static>|Builder<static>
      */
-    public static function withQueryLog(bool|null $enabled = null): EloquentBuilder
+    public static function withQueryLog(bool|null $enabled = null): EloquentBuilder|Builder
     {
         $query = static::query()->withQueryLog($enabled);
 
