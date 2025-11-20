@@ -9,6 +9,8 @@ use Atlcom\LaravelHelper\Dto\Scope\SortScopeDto;
 use Atlcom\LaravelHelper\Dto\Table\TableFilterDto;
 use Atlcom\LaravelHelper\Enums\FilterOperatorEnum;
 use Atlcom\LaravelHelper\Enums\SortDirectionEnum;
+use Atlcom\LaravelHelper\Services\ModelScopeService;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -69,11 +71,14 @@ trait ModelScopeTrait
      */
     public function scopeOfFilters(Builder $query, ?array $requestFilters = null): Builder
     {
+        $modelInstance     = $this;
+        $modelScopeService = app(ModelScopeService::class);
+
         return method_exists($this, 'table')
             ? $query
                 ->when(
                     ($modelTable = $this::table()) && $requestFilters,
-                    static function ($query) use ($modelTable, $requestFilters) {
+                    static function ($query) use ($modelTable, $requestFilters, $modelInstance, $modelScopeService) {
 
                         // Применяем фильтры из модели
                         foreach ($modelTable->filters as $modelFilterName => $modelFilterData) {
@@ -84,19 +89,102 @@ trait ModelScopeTrait
 
                                 match ($modelFilterDto->operator) {
                                     FilterOperatorEnum::Equal
-                                    => $query->where($modelFilterDto->column, '=', $requestFilterValue),
+                                      => $query->where($modelFilterDto->column, '=', $requestFilterValue),
                                     FilterOperatorEnum::Like
-                                    => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
+                                       => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
                                     FilterOperatorEnum::Ilike
-                                    => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
+                                      => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
                                     FilterOperatorEnum::In
-                                    => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
+                                         => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
                                     FilterOperatorEnum::Between
-                                    => $query->whereBetween($modelFilterDto->column, (array)$requestFilterValue),
+                                    => $query->when(
+                                        is_array($requestFilterValue),
+                                        static function ($query) use ($modelFilterDto, $requestFilterValue, $modelInstance, $modelScopeService) {
+                                                $normalize = static function ($value) {
+                                                    if ($value === null || $value === '') {
+                                                        return null;
+                                                    }
+
+                                                    if ($value instanceof DateTimeInterface) {
+                                                        return $value;
+                                                    }
+
+                                                    if (is_bool($value)) {
+                                                        return (int)$value;
+                                                    }
+
+                                                    if (is_numeric($value)) {
+                                                        $numericString = (string)$value;
+
+                                                        return str_contains($numericString, '.')
+                                                        ? (float)$numericString
+                                                        : (int)$numericString;
+                                                    }
+
+                                                    return (string)$value;
+                                                };
+
+                                                $rawRange = array_values(
+                                                array_pad(
+                                                    array_slice((array)$requestFilterValue, 0, 2),
+                                                    2,
+                                                    null,
+                                                ),
+                                                );
+
+                                                $range = array_map($normalize, $rawRange);
+
+                                                [$columnExpression, $range] = $modelScopeService->prepareFilterRange(
+                                                $modelInstance,
+                                                $query,
+                                                $modelFilterDto->column,
+                                                $rawRange,
+                                                $range,
+                                                );
+
+                                                [$from, $to] = $range;
+
+                                                $shouldSwap = static function ($left, $right): bool {
+                                                    if (
+                                                    $left instanceof DateTimeInterface
+                                                    && $right instanceof DateTimeInterface
+                                                    ) {
+                                                        return $left->getTimestamp() > $right->getTimestamp();
+                                                    }
+
+                                                    if (is_numeric($left) && is_numeric($right)) {
+                                                        return (float)$left > (float)$right;
+                                                    }
+
+                                                    if (is_string($left) && is_string($right)) {
+                                                        return strcmp($left, $right) > 0;
+                                                    }
+
+                                                    return false;
+                                                };
+
+                                                // Переставляем границы, если они переданы в обратном порядке
+                                                if ($from !== null && $to !== null && $shouldSwap($from, $to)) {
+                                                    [$from, $to] = [$to, $from];
+                                                }
+
+                                                // Поддерживаем открытые границы интервала: >= или <= при null
+                                                match (true) {
+                                                    $from !== null && $to !== null
+                                                    => $query->whereBetween($columnExpression, [$from, $to]),
+                                                    $from !== null
+                                                                    => $query->where($columnExpression, '>=', $from),
+                                                    $to !== null
+                                                                      => $query->where($columnExpression, '<=', $to),
+
+                                                    default                        => null,
+                                                };
+                                            },
+                                    ),
                                     FilterOperatorEnum::Closure
                                     => !is_callable($closure) ?: $closure($query, $requestFilterValue),
 
-                                    default => null,
+                                    default                     => null,
                                 };
                             }
                         }
