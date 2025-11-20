@@ -13,12 +13,13 @@ enum FilterComponentEnum: string
     use HelperEnumTrait;
 
 
-    case Input = 'v-input';
-    case Select = 'v-select';
+    case Input         = 'v-input';
+    case InputBetween  = 'InputBetween';
+    case Select        = 'v-select';
     case ComboboxRadio = 'ComboboxRadio';
     case ComboboxCheck = 'ComboboxCheck';
-    case Date = 'v-date-picker';
-    case DateInterval = 'DateInterval';
+    case Date          = 'v-date-picker';
+    case DateInterval  = 'DateInterval';
 
 
     /**
@@ -41,14 +42,15 @@ enum FilterComponentEnum: string
     public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
-            self::Input => 'Текстовое поле ввода',
-            self::Select => 'Выбор одного значения',
+            self::Input         => 'Текстовое поле ввода',
+            self::InputBetween  => 'Поле между интервалом',
+            self::Select        => 'Выбор одного значения',
             self::ComboboxRadio => 'Выбор одного значений',
             self::ComboboxCheck => 'Выбор нескольких значений',
-            self::Date => 'Выбор одной даты',
-            self::DateInterval => 'Выбор интервала дат',
+            self::Date          => 'Выбор одной даты',
+            self::DateInterval  => 'Выбор интервала дат',
 
-            default => null,
+            default             => null,
         };
     }
 }

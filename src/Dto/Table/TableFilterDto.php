@@ -18,16 +18,16 @@ use Override;
  */
 class TableFilterDto extends DefaultDto
 {
-    public const AUTO_CASTS_ENABLED = true;
-    public const AUTO_MAPPINGS_ENABLED = true;
+    public const AUTO_CASTS_ENABLED     = true;
+    public const AUTO_MAPPINGS_ENABLED  = true;
     public const AUTO_SERIALIZE_ENABLED = true;
 
     public FilterComponentEnum|string|null $component;
-    public ?FilterOperatorEnum $operator;
-    public ?string $label;
-    public ?string $column;
-    public ?array $items;
-    public ?Closure $closure;
+    public ?FilterOperatorEnum             $operator;
+    public ?string                         $label;
+    public ?string                         $column;
+    public ?array                          $items;
+    public ?Closure                        $closure;
 
 
     /**
@@ -45,6 +45,25 @@ class TableFilterDto extends DefaultDto
             label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: $operator,
+        )->toArray();
+    }
+
+
+    /**
+     * Возвращает фильтр: Поле между интервалом
+     *
+     * @param string $modelClassOrLabel
+     * @param string $column
+     * @param FilterOperatorEnum $operator
+     * @return array
+     */
+    public static function between(string $modelClassOrLabel, string $column): array
+    {
+        return static::create(
+            component: FilterComponentEnum::InputBetween,
+            label: static::getLabel($modelClassOrLabel, $column),
+            column: $column,
+            operator: FilterOperatorEnum::Between,
         )->toArray();
     }
 
