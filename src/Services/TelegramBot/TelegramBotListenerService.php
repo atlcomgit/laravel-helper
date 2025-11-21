@@ -58,30 +58,31 @@ class TelegramBotListenerService extends DefaultService
                 ->save();
 
             $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [
-                'type' => TelegramBotMessageTypeEnum::Incoming,
-                'status' => match (true) {
+                'type'                 => TelegramBotMessageTypeEnum::Incoming,
+                'status'               => match (true) {
                     (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
-                    (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
-                    (bool)$dto->message->editDate => TelegramBotMessageStatusEnum::Update,
+                    (bool)$dto->callbackQuery           => TelegramBotMessageStatusEnum::Callback,
+                    (bool)$dto->message->editDate       => TelegramBotMessageStatusEnum::Update,
 
-                    default => TelegramBotMessageStatusEnum::New ,
+                    default                             => TelegramBotMessageStatusEnum::New ,
                 },
-                'externalUpdateId' => $dto->updateId,
-                'telegramBotChatId' => $telegramBotChat->id,
-                'telegramBotUserId' => $telegramBotUser->id,
+                'externalUpdateId'     => $dto->updateId,
+                'telegramBotChatId'    => $telegramBotChat->id,
+                'telegramBotUserId'    => $telegramBotUser->id,
                 'telegramBotMessageId' => match (true) {
                     (bool)$dto->message->replyToMessage => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->message->replyToMessage)?->id,
-                    (bool)$dto->callbackQuery => $this->telegramBotMessageService
+                    (bool)$dto->callbackQuery           => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->message)?->id,
 
-                    default => $this->telegramBotMessageService->getPreviousMessageOutgoing($dto->message)?->id,
+                    default                             => $this->telegramBotMessageService->getPreviousMessageOutgoing($dto->message)?->id,
                 },
-                'info' => [
+                'info'                 => [
                     ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
                     ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
                     ...($dto->message?->photos?->isNotEmpty() ? ['photos' => $dto->message->photos] : []),
                     ...($dto->message?->document ? ['document' => $dto->message->document] : []),
+                    ...($dto->message?->sticker ? ['sticker' => $dto->message->sticker] : []),
                 ],
             ]))->save();
 
@@ -89,8 +90,8 @@ class TelegramBotListenerService extends DefaultService
 
         } catch (Throwable $exception) {
             telegram([
-                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
-                'Событие' => 'Ошибка входящего сообщения бота телеграм',
+                'Бот'       => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие'   => 'Ошибка входящего сообщения бота телеграм',
                 'Сообщение' => $dto,
                 'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);
@@ -125,19 +126,19 @@ class TelegramBotListenerService extends DefaultService
                 ->save();
 
             $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->response->message, [
-                'type' => TelegramBotMessageTypeEnum::Outgoing,
-                'status' => TelegramBotMessageStatusEnum::New ,
-                'slug' => property_exists($dto, 'slug') ? $dto->slug : null,
-                'externalUpdateId' => null,
-                'telegramBotChatId' => $telegramBotChat->id,
-                'telegramBotUserId' => $telegramBotUser->id,
+                'type'                 => TelegramBotMessageTypeEnum::Outgoing,
+                'status'               => TelegramBotMessageStatusEnum::New ,
+                'slug'                 => property_exists($dto, 'slug') ? $dto->slug : null,
+                'externalUpdateId'     => null,
+                'telegramBotChatId'    => $telegramBotChat->id,
+                'telegramBotUserId'    => $telegramBotUser->id,
                 'telegramBotMessageId' => match (true) {
                     (bool)$dto->response->message->replyToMessage => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->response->message->replyToMessage)?->id,
 
-                    default => $dto->previousMessageId,
+                    default                                       => $dto->previousMessageId,
                 },
-                'info' => [
+                'info'                 => [
                     ...(
                         $dto->response->message?->buttons
                         ? ['buttons' => $dto->response->message->buttons]
@@ -174,6 +175,11 @@ class TelegramBotListenerService extends DefaultService
                         : []
                     ),
                     ...(
+                        $dto->response->message?->sticker
+                        ? ['sticker' => $dto->response->message->sticker]
+                        : []
+                    ),
+                    ...(
                         $dto->meta
                         ? ['meta' => $dto->meta]
                         : []
@@ -185,8 +191,8 @@ class TelegramBotListenerService extends DefaultService
 
         } catch (Throwable $exception) {
             telegram([
-                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
-                'Событие' => 'Ошибка исходящего сообщения бота телеграм',
+                'Бот'       => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие'   => 'Ошибка исходящего сообщения бота телеграм',
                 'Сообщение' => $dto,
                 'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);
@@ -212,8 +218,8 @@ class TelegramBotListenerService extends DefaultService
 
         } catch (Throwable $exception) {
             telegram([
-                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
-                'Событие' => 'Ошибка входящего информирования бота телеграм',
+                'Бот'       => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие'   => 'Ошибка входящего информирования бота телеграм',
                 'Сообщение' => $dto,
                 'Exception' => Hlp::exceptionToArray($exception),
             ], TelegramTypeEnum::Error);

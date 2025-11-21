@@ -10,25 +10,26 @@ use Illuminate\Support\Collection;
 
 class TelegramBotInMessageDto extends DefaultDto
 {
-    public int $messageId;
-    public TelegramBotInFromDto $from;
-    public TelegramBotInChatDto $chat;
+    public int                      $messageId;
+    public TelegramBotInFromDto     $from;
+    public TelegramBotInChatDto     $chat;
     public ?TelegramBotInContactDto $contact;
     public ?TelegramBotInMessageDto $replyToMessage;
     /** @var Collection<TelegramBotInEntitiesDto> */
-    public ?Collection $entities;
-    public string $text;
-    public Carbon $date;
-    public ?Carbon $editDate;
+    public ?Collection                  $entities;
+    public string                       $text;
+    public Carbon                       $date;
+    public ?Carbon                      $editDate;
     public ?TelegramBotInReplyMarkupDto $replyMarkup;
     // public ?TelegramBotInWebAppDto $webAppData;
     /** @var Collection<TelegramBotInPhotoDto> */
-    public ?Collection $photos;
+    public ?Collection               $photos;
     public ?TelegramBotInDocumentDto $document;
-    public ?array $buttons;
-    public ?array $keyboards;
-    public ?array $video;
-    public ?array $audio;
+    public ?TelegramBotInStickerDto  $sticker;
+    public ?array                    $buttons;
+    public ?array                    $keyboards;
+    public ?array                    $video;
+    public ?array                    $audio;
     // public ?array $photo;
 
 
@@ -38,18 +39,19 @@ class TelegramBotInMessageDto extends DefaultDto
     protected function casts(): array
     {
         return [
-            'messageId' => 'integer',
-            'from' => TelegramBotInFromDto::class,
-            'chat' => TelegramBotInChatDto::class,
-            'contact' => TelegramBotInContactDto::class,
+            'messageId'      => 'integer',
+            'from'           => TelegramBotInFromDto::class,
+            'chat'           => TelegramBotInChatDto::class,
+            'contact'        => TelegramBotInContactDto::class,
             'replyToMessage' => TelegramBotInMessageDto::class,
-            'entities' => [TelegramBotInEntitiesDto::class],
-            'photos' => [TelegramBotInPhotoDto::class],
-            'document' => TelegramBotInDocumentDto::class,
-            'text' => 'string',
-            'date' => Carbon::class,
-            'editDate' => Carbon::class,
-            'replyMarkup' => TelegramBotInReplyMarkupDto::class,
+            'entities'       => [TelegramBotInEntitiesDto::class],
+            'photos'         => [TelegramBotInPhotoDto::class],
+            'document'       => TelegramBotInDocumentDto::class,
+            'sticker'        => TelegramBotInStickerDto::class,
+            'text'           => 'string',
+            'date'           => Carbon::class,
+            'editDate'       => Carbon::class,
+            'replyMarkup'    => TelegramBotInReplyMarkupDto::class,
         ];
     }
 
@@ -71,12 +73,12 @@ class TelegramBotInMessageDto extends DefaultDto
     protected function mappings(): array
     {
         return [
-            'messageId' => 'message_id',
-            'text' => ['text', '--reply_to_message', 'caption'],
+            'messageId'      => 'message_id',
+            'text'           => ['text', '--reply_to_message', 'caption'],
             'replyToMessage' => 'reply_to_message',
-            'editDate' => 'edit_date',
-            'replyMarkup' => 'reply_markup',
-            'photos' => 'photo',
+            'editDate'       => 'edit_date',
+            'replyMarkup'    => 'reply_markup',
+            'photos'         => 'photo',
         ];
     }
 }
