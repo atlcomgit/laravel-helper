@@ -120,7 +120,7 @@ class TelegramBotService extends DefaultService
             ];
         } elseif (property_exists($dto, 'keyboards') && $dto->keyboards?->isNotEmpty()) {
             $replyMarkup = [
-                'keyboard' => $dto->keyboards->toArrayRecursive(),
+                'keyboard'        => $dto->keyboards->toArrayRecursive(),
                 'resize_keyboard' => $dto->resizeKeyboard ?? true,
             ];
         } elseif ($dto->removeKeyboard ?? false) {
@@ -303,7 +303,7 @@ class TelegramBotService extends DefaultService
             fromChatId: $dto->fromChatId,
             messageId: $dto->externalMessageId,
             options: array_filter([
-                'caption' => $dto->caption,
+                'caption'    => $dto->caption,
                 'parse_mode' => $dto->parseMode,
             ], static fn ($v) => $v !== null),
         );
@@ -351,16 +351,17 @@ class TelegramBotService extends DefaultService
                         messageId: $externalMessageId,
                     );
                     $deletedMessageDto->status = true;
+                    $deletedMessages[] = $deletedMessageDto;
 
                 } catch (Throwable $exception) {
+                    $deletedMessageDto->status = $exception->getCode() === 400;
+                    $deletedMessageDto->statusMessage = $exception->getMessage();
+
+                    !Hlp::stringSearchAny($deletedMessageDto->statusMessage, TelegramApiService::DELETE_DESCRIPTIONS)
+                        ?: $deletedMessages[] = $deletedMessageDto;
                 }
 
             } catch (Throwable $exception) {
-                $deletedMessageDto->status = $exception->getCode() === 400;
-                $deletedMessageDto->statusMessage = $exception->getMessage();
-
-            } finally {
-                $deletedMessages[] = $deletedMessageDto;
             }
         }
 
@@ -380,11 +381,11 @@ class TelegramBotService extends DefaultService
             botToken: $dto->token,
             text: $dto->text,
             options: array_filter([
-                'chat_id' => $dto->externalChatId,
-                'message_id' => $dto->messageId,
+                'chat_id'           => $dto->externalChatId,
+                'message_id'        => $dto->messageId,
                 'inline_message_id' => $dto->inlineMessageId,
-                'parse_mode' => $dto->parseMode,
-                'reply_markup' => $dto->replyMarkup ? json_encode($dto->replyMarkup) : null,
+                'parse_mode'        => $dto->parseMode,
+                'reply_markup'      => $dto->replyMarkup ? json_encode($dto->replyMarkup) : null,
             ], static fn ($v) => $v !== null),
         );
 
@@ -507,8 +508,8 @@ class TelegramBotService extends DefaultService
         return TelegramBotOutResponseDto::create(
             $dto,
             [
-                'status' => (bool)$downloadedPath,
-                'result' => $downloadedPath,
+                'status'      => (bool)$downloadedPath,
+                'result'      => $downloadedPath,
                 'description' => $dto->fileId,
             ],
         );

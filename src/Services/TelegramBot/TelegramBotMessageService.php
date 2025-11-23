@@ -124,8 +124,8 @@ class TelegramBotMessageService extends DefaultService
             ;
 
             !(false && $result && (isLocal() || isDev())) ?: telegram([
-                'Бот' => Lh::config(ConfigEnum::TelegramBot, 'name'),
-                'Событие' => 'Повторное сообщение бота отменено',
+                'Бот'       => Lh::config(ConfigEnum::TelegramBot, 'name'),
+                'Событие'   => 'Повторное сообщение бота отменено',
                 'Сообщение' => $dto->onlyKeys(['externalChatId', 'slug', 'text']),
             ], TelegramTypeEnum::Warning);
 
@@ -253,7 +253,10 @@ class TelegramBotMessageService extends DefaultService
      */
     public function deleteMessages(array $deletedMessages): Collection
     {
-        $externalMessageIds = collect($deletedMessages)->where('status', true)->pluck('externalMessageId')->toArray();
+        $externalMessageIds = collect($deletedMessages)
+            // ->where('status', true)
+            ->pluck('externalMessageId')
+            ->toArray();
         $telegramBotMessages = (
             $externalMessageIds && $this->telegramBotMessageRepository->deleteByExternalMessageIds($externalMessageIds)
         )

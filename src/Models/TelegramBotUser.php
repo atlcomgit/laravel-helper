@@ -34,6 +34,7 @@ use UnitEnum;
  * @property ?\Carbon\Carbon $created_at
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
+ * @property-read string $attrName
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
@@ -52,32 +53,32 @@ class TelegramBotUser extends DefaultModel
     public const COMMENT = 'Пользователь телеграм бота';
 
     protected ?bool $withModelLog = false;
-    protected $guarded = ['id'];
-    protected $casts = [
-        'uuid' => 'string',
+    protected       $guarded      = ['id'];
+    protected       $casts        = [
+        'uuid'             => 'string',
         'external_user_id' => 'integer',
-        'first_name' => 'string',
-        'user_name' => 'string',
-        'phone' => 'string',
-        'language' => 'string',
-        'is_ban' => 'boolean',
-        'is_bot' => 'boolean',
-        'info' => 'array',
+        'first_name'       => 'string',
+        'user_name'        => 'string',
+        'phone'            => 'string',
+        'language'         => 'string',
+        'is_ban'           => 'boolean',
+        'is_bot'           => 'boolean',
+        'info'             => 'array',
     ];
-    protected $fields = [
-        'id' => 'ID пользователя телеграм бота',
-        'uuid' => 'Uuid пользователя телеграм бота',
+    protected       $fields       = [
+        'id'               => 'ID пользователя телеграм бота',
+        'uuid'             => 'Uuid пользователя телеграм бота',
         'external_user_id' => 'Внешний Id пользователя телеграм бота',
-        'first_name' => 'Имя пользователя телеграм бота',
-        'user_name' => 'Логин пользователя телеграм бота',
-        'phone' => 'Телефон пользователя телеграм бота',
-        'language' => 'Код локализации пользователя телеграм бота',
-        'is_ban' => 'Флаг бана пользователя телеграм бота',
-        'is_bot' => 'Флаг бота',
-        'info' => 'Информация о пользователе телеграм бота',
-        'created_at' => 'Добавлено',
-        'updated_at' => 'Обновлено',
-        'deleted_at' => 'Удалено',
+        'first_name'       => 'Имя пользователя телеграм бота',
+        'user_name'        => 'Логин пользователя телеграм бота',
+        'phone'            => 'Телефон пользователя телеграм бота',
+        'language'         => 'Код локализации пользователя телеграм бота',
+        'is_ban'           => 'Флаг бана пользователя телеграм бота',
+        'is_bot'           => 'Флаг бота',
+        'info'             => 'Информация о пользователе телеграм бота',
+        'created_at'       => 'Добавлено',
+        'updated_at'       => 'Обновлено',
+        'deleted_at'       => 'Удалено',
     ];
 
 
@@ -130,6 +131,16 @@ class TelegramBotUser extends DefaultModel
 
 
     /** ATTRIBUTES */
+
+    /**
+     * Атрибут: возвращает строку с id и именем пользователя телеграм бота.
+     *
+     * @return string
+     */
+    public function getAttrNameAttribute(): string
+    {
+        return "{$this->id}, {$this->first_name}";
+    }
 
 
     /** MUTATORS */

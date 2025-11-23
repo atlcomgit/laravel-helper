@@ -18,6 +18,12 @@ use Illuminate\Support\Facades\Http;
  */
 class TelegramApiService extends DefaultService
 {
+    public const DELETE_DESCRIPTIONS = [
+        'Bad Request: message to delete not found',
+        "Bad Request: message can't be deleted for everyone",
+    ];
+
+
     /**
      * Возвращает фасад запроса
      *
@@ -41,9 +47,8 @@ class TelegramApiService extends DefaultService
 
         return ($response->successful() && ($json['ok'] ?? false) === true)
             ? $json
-            : match ($description = $json['description'] ?? null) {
-                'Bad Request: message to delete not found',
-                'Bad Request: message can\'t be deleted for everyone' => $json,
+            : match (true) {
+                in_array($json['description'] ?? null, self::DELETE_DESCRIPTIONS) => $json,
 
                 default => throw new WithoutTelegramException(
                     "Ошибка отправки сообщения в телеграм: " . ($json['description'] ?? $response->getReasonPhrase()),
@@ -109,8 +114,8 @@ class TelegramApiService extends DefaultService
         array $options = [],
     ): mixed {
         return $this->call($botToken, 'sendMessage', [
-            'chat_id' => $chatId,
-            'text' => $text,
+            'chat_id'    => $chatId,
+            'text'       => $text,
             'parse_mode' => $parseMode,
             ...$options,
         ]);
@@ -142,8 +147,8 @@ class TelegramApiService extends DefaultService
         $response = $this->getHttp()
             ->attach('document', file_get_contents($filePath), basename($filePath))
             ->post("bot{$botToken}/sendDocument", [
-                'chat_id' => $chatId,
-                'caption' => $caption,
+                'chat_id'    => $chatId,
+                'caption'    => $caption,
                 'parse_mode' => $parseMode,
                 ...$options,
             ]);
@@ -249,9 +254,9 @@ class TelegramApiService extends DefaultService
     public function forwardMessage(string $botToken, string|int $chatId, string|int $fromChatId, int $messageId, array $options = []): mixed
     {
         return $this->call($botToken, 'forwardMessage', [
-            'chat_id' => $chatId,
+            'chat_id'      => $chatId,
             'from_chat_id' => $fromChatId,
-            'message_id' => $messageId,
+            'message_id'   => $messageId,
             ...$options,
         ]);
     }
@@ -270,9 +275,9 @@ class TelegramApiService extends DefaultService
     public function copyMessage(string $botToken, string|int $chatId, string|int $fromChatId, int $messageId, array $options = []): mixed
     {
         return $this->call($botToken, 'copyMessage', [
-            'chat_id' => $chatId,
+            'chat_id'      => $chatId,
             'from_chat_id' => $fromChatId,
-            'message_id' => $messageId,
+            'message_id'   => $messageId,
             ...$options,
         ]);
     }
@@ -357,7 +362,7 @@ class TelegramApiService extends DefaultService
     public function deleteMessage(string $botToken, string|int $chatId, int $messageId): mixed
     {
         return $this->call($botToken, 'deleteMessage', [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'message_id' => $messageId,
         ]);
     }
@@ -401,7 +406,7 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $files = [];
         $params = [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'parse_mode' => $parseMode,
             ...$options,
         ];
@@ -441,7 +446,7 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $files = [];
         $params = [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'parse_mode' => $parseMode,
             ...$options,
         ];
@@ -484,7 +489,7 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $files = [];
         $params = [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'parse_mode' => $parseMode,
             ...$options,
         ];
@@ -524,7 +529,7 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $files = [];
         $params = [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'parse_mode' => $parseMode,
             ...$options,
         ];
@@ -564,7 +569,7 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $files = [];
         $params = [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'parse_mode' => $parseMode,
             ...$options,
         ];
@@ -595,7 +600,7 @@ class TelegramApiService extends DefaultService
     {
         return $this->call($botToken, 'sendChatAction', [
             'chat_id' => $chatId,
-            'action' => $action,
+            'action'  => $action,
         ]);
     }
 
@@ -644,7 +649,7 @@ class TelegramApiService extends DefaultService
     public function pinChatMessage(string $botToken, string|int $chatId, int $messageId, array $options = []): mixed
     {
         return $this->call($botToken, 'pinChatMessage', [
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'message_id' => $messageId,
             ...$options,
         ]);
@@ -662,7 +667,7 @@ class TelegramApiService extends DefaultService
     public function unpinChatMessage(string $botToken, string|int $chatId, ?int $messageId = null): mixed
     {
         return $this->call($botToken, 'unpinChatMessage', array_filter([
-            'chat_id' => $chatId,
+            'chat_id'    => $chatId,
             'message_id' => $messageId,
         ], static fn ($v) => $v !== null));
     }
