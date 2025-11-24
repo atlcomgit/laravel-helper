@@ -53,7 +53,7 @@ trait QueryTrait
     protected bool|null $withModelLog = null;
 
     private string|null $withQueryCacheClass = null;
-    private string|null $withQueryLogClass = null;
+    private string|null $withQueryLogClass   = null;
 
 
     /**
@@ -338,11 +338,11 @@ trait QueryTrait
                 // modelId: $model instanceof Model ? $model->{$model->getKeyName()} : null,
                 query: $sql,
                 info: [
-                    'class' => $class,
-                    'tables' => Hlp::sqlTables($sql),
-                    'fields' => Hlp::sqlFields($sql),
-                    'ids' => $ids[$class] ?? null,
-                    'query_length' => Hlp::stringLength($sql),
+                    'class'              => $class,
+                    'tables'             => Hlp::sqlTables($sql),
+                    'fields'             => Hlp::sqlFields($sql),
+                    'ids'                => $ids[$class] ?? null,
+                    'query_length'       => Hlp::stringLength($sql),
                     ...(Lh::config(ConfigEnum::App, 'debug_trace')
                         ? [
                             'trace' => Lh::config(ConfigEnum::App, 'debug_trace_vendor')
@@ -402,9 +402,9 @@ trait QueryTrait
             };
             $dto->info = [
                 ...($dto->info ?? []),
-                'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
-                'memory' => Hlp::sizeBytesToString($dto->memory),
-                'count' => Hlp::stringPlural($dto->count, ['записей', 'запись', 'записи']),
+                'duration'    => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
+                'memory'      => Hlp::sizeBytesToString($dto->memory),
+                'count'       => Hlp::stringPlural($dto->count, ['записей', 'запись', 'записи']),
                 // 'result_length' => Hlp::stringLength(serialize($result)),
                 'result_type' => match (true) {
                     is_object($result) => $result::class,
@@ -446,8 +446,8 @@ trait QueryTrait
             $dto->memory = $dto->getMemory();
             $dto->info = [
                 ...($dto->info ?? []),
-                'duration' => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
-                'memory' => Hlp::sizeBytesToString($dto->memory),
+                'duration'  => Hlp::timeSecondsToString(value: $dto->duration, withMilliseconds: true),
+                'memory'    => Hlp::sizeBytesToString($dto->memory),
                 'exception' => Hlp::exceptionToArray($exception),
             ];
 
@@ -626,6 +626,8 @@ trait QueryTrait
     // #[Override()]
     public function queryInsert($query = null, $bindings = [])
     {
+        $arrayQueryLogDto = [];
+
         try {
             $status = false;
             $this->syncQueryProperties();
@@ -691,12 +693,17 @@ trait QueryTrait
     // #[Override()]
     public function queryCreate($attributes = null)
     {
+        $arrayQueryLogDto = [];
+
         try {
             $status = false;
             $this->syncQueryProperties();
+            $insertAttributes = is_array($attributes) && array_is_list($attributes)
+                ? $attributes
+                : [$attributes];
             $sql = match (true) {
                 $this instanceof EloquentBuilder => sql(
-                    $this->getGrammar()->compileInsert($this->getQuery(), $attributes),
+                    $this->getGrammar()->compileInsert($this->getQuery(), $insertAttributes),
                     $attributes,
                 ),
 
