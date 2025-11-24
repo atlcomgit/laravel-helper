@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class HttpCacheService extends DefaultService
 {
     protected CacheService $cacheService;
-    protected array $exclude = [];
+    protected array        $exclude      = [];
 
 
     public function __construct()
@@ -74,6 +74,23 @@ class HttpCacheService extends DefaultService
 
 
             /**
+             * Синхронизирует настройки запроса
+             *
+             * @return void
+             */
+            protected function syncPendingRequest(): void
+            {
+                $this->pendingRequest->retry(
+                    $this->tries,
+                    $this->retryDelay,
+                    $this->retryWhenCallback,
+                    $this->retryThrow,
+                );
+                $this->pendingRequest->withOptions($this->options);
+            }
+
+
+            /**
              * GET исходящий запрос
              * @override
              * @see parent::get()
@@ -85,6 +102,8 @@ class HttpCacheService extends DefaultService
             // #[Override()]
             public function get(string $url, $query = null)
             {
+                $this->syncPendingRequest();
+
                 return app(HttpCacheService::class)
                     ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Get, $url, $query, $this->config);
             }
@@ -102,6 +121,8 @@ class HttpCacheService extends DefaultService
             // #[Override()]
             public function post(string $url, $data = [])
             {
+                $this->syncPendingRequest();
+
                 return app(HttpCacheService::class)
                     ->sendWithCache($this->pendingRequest, HttpCacheMethodEnum::Post, $url, $data, $this->config);
             }
@@ -320,7 +341,7 @@ class HttpCacheService extends DefaultService
                 }
 
                 $response = [
-                    'status' => $dto->response->getStatusCode(),
+                    'status'  => $dto->response->getStatusCode(),
                     'headers' => match (true) {
                         $dto->response instanceof StreamedResponse => $dto->response->headers->all(),
                         $dto->response instanceof BinaryFileResponse => $dto->response->headers->all(),
@@ -329,7 +350,7 @@ class HttpCacheService extends DefaultService
 
                         default => [],
                     },
-                    'data' => match (true) {
+                    'data'    => match (true) {
                         $dto->response instanceof StreamedResponse => '[' . $dto->response::class . ']',
                         $dto->response instanceof BinaryFileResponse
                         => '[' . $dto->response::class . ', ' . $dto->response->getFile()->getMimeType() . ']',
