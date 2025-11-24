@@ -62,7 +62,7 @@ class ModelLogService extends DefaultService
                             } else {
                                 foreach ($attributes as $column => $value) {
                                     match (true) {
-                                        \is_null($value) => $q->whereNull($column),
+                                        \is_null($value) && $column !== $primaryKey => $q->whereNull($column),
                                         // is_array($value) => $q->whereRaw("{$column}::text = ?", [Hlp::castToJson($value)]),
                                         // is_object($value) => $q->where("{$column}::text = ?", [Hlp::castToJson($value)]),
                                         \is_scalar($value) => $q->where($column, $value),
