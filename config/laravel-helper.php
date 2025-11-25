@@ -599,6 +599,9 @@ return [
             'token' => (string)env('HELPER_TELEGRAM_LOG_INFO_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_INFO_CACHE_TTL', '0 seconds'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_INFO_TITLE', true),
+            // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_INFO_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов ошибок
@@ -611,6 +614,9 @@ return [
             'token' => (string)env('HELPER_TELEGRAM_LOG_ERROR_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_ERROR_CACHE_TTL', '5 minutes'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_ERROR_TITLE', true),
+            // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов предупреждений
@@ -623,6 +629,9 @@ return [
             'token' => (string)env('HELPER_TELEGRAM_LOG_WARNING_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_WARNING_CACHE_TTL', '5 seconds'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_WARNING_TITLE', true),
+            // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов уведомлений
@@ -635,7 +644,25 @@ return [
             'token' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_CACHE_TTL', '1 seconds'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_NOTICE_TITLE', true),
+            // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_NOTICE_EXCLUDE', base_path('.env')) ?? []),
+        ],
+        // Настройка отправки логов тревоги
+        'alert' => [
+            // Вкл/Выкл отправки уведомлений
+            'enabled' => (bool)env('HELPER_TELEGRAM_LOG_ALERT_ENABLED', true),
+            // Telegram chat id для уведомлений
+            'chat_id' => (string)env('HELPER_TELEGRAM_LOG_ALERT_CHAT_ID', env('HELPER_TELEGRAM_LOG_CHAT_ID')),
+            // Токен бота для уведомлений
+            'token' => (string)env('HELPER_TELEGRAM_LOG_ALERT_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
+            // Кеш повторной отправки в группу чата
+            'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_ALERT_CACHE_TTL', '1 seconds'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_ALERT_TITLE', true),
+            // Исключения логов, например ['type' => '...']
+            'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_ALERT_EXCLUDE', base_path('.env')) ?? []),
         ],
         // Настройка отправки логов отладки
         'debug' => [
@@ -647,6 +674,9 @@ return [
             'token' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_TOKEN', env('HELPER_TELEGRAM_LOG_TOKEN')),
             // Кеш повторной отправки в группу чата
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_CACHE_TTL', '5 seconds'),
+            // Показывать заголовок сообщения
+            'title' => env('HELPER_TELEGRAM_LOG_DEBUG_TITLE', true),
+            // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
     ],

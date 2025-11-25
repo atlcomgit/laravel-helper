@@ -307,6 +307,7 @@ if (!function_exists('telegram')) {
                     TelegramTypeEnum::Error => $log->error(json($data), $context),
                     TelegramTypeEnum::Warning => $log->warning(json($data), $context),
                     TelegramTypeEnum::Notice => $log->notice(json($data), $context),
+                    TelegramTypeEnum::Alert => $log->alert(json($data), $context),
                     TelegramTypeEnum::Debug => $log->debug(json($data), $context),
 
                     default => $log->debug(json($data), [...$context, 'level' => $type]),

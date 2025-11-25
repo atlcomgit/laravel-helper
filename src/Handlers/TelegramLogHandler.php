@@ -65,6 +65,12 @@ class TelegramLogHandler extends AbstractProcessingHandler
                     $type = LogLevel::NOTICE;
                     break;
 
+                case Level::Alert:
+                case LogLevel::ALERT:
+                    $title = "ТРЕВОГА: {$record->channel}";
+                    $type = LogLevel::ALERT;
+                    break;
+
                 case Level::Debug:
                 case LogLevel::DEBUG:
                     $title = "ОТЛАДКА: {$record->channel}";
