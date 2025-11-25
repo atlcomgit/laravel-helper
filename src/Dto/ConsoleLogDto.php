@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -23,24 +24,24 @@ use Illuminate\Support\Facades\Schema;
  */
 class ConsoleLogDto extends Dto
 {
-    public ?string $uuid;
-    public string $name;
-    public string $command;
-    public string $cli;
-    public ?string $output;
-    public ?int $result;
-    public ?string $exception;
+    public ?string              $uuid;
+    public string               $name;
+    public string               $command;
+    public string               $cli;
+    public ?string              $output;
+    public ?int                 $result;
+    public ?string              $exception;
     public ConsoleLogStatusEnum $status;
-    public ?float $duration;
-    public ?int $memory;
-    public ?array $info;
+    public ?float               $duration;
+    public ?int                 $memory;
+    public ?array               $info;
 
-    public ?bool $withConsoleLog;
-    public int $storeInterval;
+    public ?bool  $withConsoleLog;
+    public int    $storeInterval;
     public string $startTime;
-    public int $startMemory;
+    public int    $startMemory;
     public Carbon $storedAt;
-    public bool $isUpdated;
+    public bool   $isUpdated;
 
 
     /**
@@ -53,15 +54,15 @@ class ConsoleLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'cli' => implode(' ', $_SERVER['argv'] ?? []),
-            'status' => ConsoleLogStatusEnum::enumDefault(),
+            'cli'            => implode(' ', $_SERVER['argv'] ?? []),
+            'status'         => ConsoleLogStatusEnum::enumDefault(),
 
             'withConsoleLog' => null,
-            'storeInterval' => Lh::config(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
-            'startTime' => (string)now()->getTimestampMs(),
-            'startMemory' => memory_get_usage(),
-            'storedAt' => now(),
-            'isUpdated' => false,
+            'storeInterval'  => Lh::config(ConfigEnum::ConsoleLog, 'store_interval_seconds', 10),
+            'startTime'      => (string)now()->getTimestampMs(),
+            'startMemory'    => memory_get_usage(),
+            'storedAt'       => now(),
+            'isUpdated'      => false,
         ];
     }
 
@@ -99,6 +100,15 @@ class ConsoleLogDto extends Dto
                 'storedAt',
                 'isUpdated',
             ]);
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function onSerialized(array &$array): void
+    {
+        $array['output'] = Hlp::sqlSafeValue($array['output'] ?? null);
     }
 
 

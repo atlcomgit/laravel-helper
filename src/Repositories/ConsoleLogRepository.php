@@ -58,7 +58,13 @@ class ConsoleLogRepository extends DefaultRepository
                     $dto->includeArray(
                         is_null($dto->output)
                         ? []
-                        : ['output' => DB::raw("COALESCE(output, '') || '{$dto->output}'")]
+                        : [
+                            'output' => match (DB::connection()->getDriverName()) {
+                                'pgsql' => DB::raw("COALESCE(output, '') || '{$dto->output}'"),
+
+                                default => DB::raw("CONCAT(COALESCE(output, ''), '{$dto->output}')"),
+                            },
+                        ]
                     )
                         ->toArray(),
                 );
