@@ -25,6 +25,7 @@ class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 
 
     public string $externalChatId;
+    public ?int $messageThreadId;
     public string $text;
     public ?string $slug;
 

@@ -187,6 +187,7 @@ return new class extends Migration {
 - Запуск: `make phpunit *`. Конфигурация — `phpunit.xml` (ENV=testing, драйверы: cache/session=array, queue=sync, mail=array, storage=local).
 - Дополнительные папки тестов: `tests/Unit/**`, `tests/Feature/**`. Моки — `tests/Mock/**`.
 - Пиши тесты под каждый метод класса.
+- Не используй Mockery и не заменяй реальные классы поддельными, делай инстанс как `app(Service::class)`.
 
 ### Запуск тестов через make phpunit (с фильтрами)
 - Базовый запуск: `make phpunit`

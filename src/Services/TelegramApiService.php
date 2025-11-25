@@ -112,12 +112,14 @@ class TelegramApiService extends DefaultService
         string $text,
         string $parseMode = 'HTML',
         array $options = [],
+        ?int $messageThreadId = null,
     ): mixed {
         return $this->call($botToken, 'sendMessage', [
             'chat_id'    => $chatId,
             'text'       => $text,
             'parse_mode' => $parseMode,
             ...$options,
+            ...($messageThreadId ? ['message_thread_id' => $messageThreadId] : []),
         ]);
     }
 

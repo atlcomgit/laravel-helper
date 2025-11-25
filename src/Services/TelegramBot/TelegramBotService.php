@@ -189,6 +189,7 @@ class TelegramBotService extends DefaultService
             options: [
                 ...$this->getOptions($dto),
             ],
+            messageThreadId: $dto->messageThreadId,
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
