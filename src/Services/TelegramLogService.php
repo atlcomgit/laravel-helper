@@ -155,8 +155,13 @@ final class TelegramLogService extends DefaultService
         $title = Lh::config(ConfigEnum::TelegramLog, "{$dto->type}.title");
         !($title === null || $title === true) ?: $title = $dto->title ?? null;
 
+        $uri = Lh::config(ConfigEnum::TelegramLog, "{$dto->type}.uri");
+        !($uri === null || $uri === true) ?: $uri = $dto->uri ?? null;
+
         $showTitle = $messageIndex == 1;
         $showSpoiler = $messageIndex == $messageCount && !in_array($type, [LogLevel::NOTICE, LogLevel::ALERT]);
+
+        $showUri = Lh::config(ConfigEnum::TelegramLog, "{$dto->type}.uri");
 
         $parts = "Сообщение разбито: на <b>{$messageCount} "
             . trans_choice('часть|части|частей', $messageCount)
@@ -169,7 +174,7 @@ final class TelegramLogService extends DefaultService
                 ($showTitle
                     ? ""
                     . ($title ? "<b>{$title}</b>\n" : '')
-                    . ($title ? "{$method} <b>{$uri}</b>\n" : '')
+                    . ($uri ? "{$method} <b>{$uri}</b>\n" : '')
                     . ($messageCount > 1 ? "{$parts}\n" : '')
                     . "\n"
                     . ($uuid ? "uuid: <b>{$uuid}</b>\n" : '')

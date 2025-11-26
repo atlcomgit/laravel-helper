@@ -616,6 +616,8 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_ERROR_CACHE_TTL', '5 minutes'),
             // Показывать заголовок сообщения
             'title' => env('HELPER_TELEGRAM_LOG_ERROR_TITLE', true),
+            // Показывать uri адрес запроса
+            'uri' => env('HELPER_TELEGRAM_LOG_ERROR_URI', true),
             // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_ERROR_EXCLUDE', base_path('.env')) ?? []),
         ],
@@ -631,6 +633,8 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_WARNING_CACHE_TTL', '5 seconds'),
             // Показывать заголовок сообщения
             'title' => env('HELPER_TELEGRAM_LOG_WARNING_TITLE', true),
+            // Показывать uri адрес запроса
+            'uri' => env('HELPER_TELEGRAM_LOG_WARNING_URI', true),
             // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_WARNING_EXCLUDE', base_path('.env')) ?? []),
         ],
@@ -646,6 +650,8 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_NOTICE_CACHE_TTL', '1 seconds'),
             // Показывать заголовок сообщения
             'title' => env('HELPER_TELEGRAM_LOG_NOTICE_TITLE', true),
+            // Показывать uri адрес запроса
+            'uri' => env('HELPER_TELEGRAM_LOG_NOTICE_URI', true),
             // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_NOTICE_EXCLUDE', base_path('.env')) ?? []),
         ],
@@ -661,6 +667,8 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_ALERT_CACHE_TTL', '1 seconds'),
             // Показывать заголовок сообщения
             'title' => env('HELPER_TELEGRAM_LOG_ALERT_TITLE', true),
+            // Показывать uri адрес запроса
+            'uri' => env('HELPER_TELEGRAM_LOG_ALERT_URI', true),
             // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_ALERT_EXCLUDE', base_path('.env')) ?? []),
         ],
@@ -676,6 +684,8 @@ return [
             'cache_ttl' => (string)env('HELPER_TELEGRAM_LOG_DEBUG_CACHE_TTL', '5 seconds'),
             // Показывать заголовок сообщения
             'title' => env('HELPER_TELEGRAM_LOG_DEBUG_TITLE', true),
+            // Показывать uri адрес запроса
+            'uri' => env('HELPER_TELEGRAM_LOG_DEBUG_URI', true),
             // Исключения логов, например ['type' => '...']
             'exclude' => (array)(Hlp::envGet('HELPER_TELEGRAM_LOG_DEBUG_EXCLUDE', base_path('.env')) ?? []),
         ],
