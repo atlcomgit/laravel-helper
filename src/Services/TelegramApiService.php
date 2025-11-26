@@ -6,9 +6,12 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
+use Atlcom\LaravelHelper\Facades\Lh;
 use CURLFile;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -75,22 +78,51 @@ class TelegramApiService extends DefaultService
         array $files = [],
         bool $json = false,
     ): mixed {
-        $http = $this->getHttp();
-        !$json ?: $http->asJson();
+        $requestFactory = function () use ($json, $files): PendingRequest {
+            $request = $this->getHttp();
+            !$json ?: $request->asJson();
 
-        foreach ($files as $name => $path) {
-            if ($path instanceof CURLFile) {
-                // Корректная отправка файла: читаем содержимое, используем basename
-                $filePath = $path->getFilename();
-                if (is_file($filePath)) {
-                    $http = $http->attach($name, file_get_contents($filePath), basename($filePath));
+            foreach ($files as $name => $path) {
+                if ($path instanceof CURLFile) {
+                    // Корректная отправка файла: читаем содержимое, используем basename
+                    $filePath = $path->getFilename();
+                    if (is_file($filePath)) {
+                        $request = $request->attach($name, file_get_contents($filePath), basename($filePath));
+                    }
+                } elseif (is_string($path) && is_file($path)) {
+                    $request = $request->attach($name, file_get_contents($path), basename($path));
                 }
-            } elseif (is_string($path) && is_file($path)) {
-                $http = $http->attach($name, file_get_contents($path), basename($path));
+            }
+
+            return $request;
+        };
+
+        $retryEnabled = (bool)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.enabled');
+        $retryTimes = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.times'));
+        $retrySleep = max(0, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.sleep'));
+
+        if (!$retryEnabled || $retryTimes <= 1) {
+            $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
+        } else {
+            // Пересоздаём multipart-запрос на каждую попытку, т.к. asMultipart конфликтует со встроенным retry
+            $attempt = 0;
+
+            while (true) {
+                $attempt++;
+
+                try {
+                    $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
+                    break;
+
+                } catch (ConnectionException $exception) {
+                    if ($attempt >= $retryTimes) {
+                        throw $exception;
+                    }
+
+                    $retrySleep === 0 ?: usleep($retrySleep * 1000);
+                }
             }
         }
-
-        $response = $http->post("bot{$botToken}/{$method}", $params);
 
         return $this->checkResponse($response);
     }
