@@ -189,7 +189,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Глобальные настройки запросов (laravel 10+)
         !Lh::config(ConfigEnum::HttpLog, 'out.global') ?: Http::globalOptions([
             'headers' => HttpLogService::getLogHeaders(HttpLogHeaderEnum::Unknown),
-            'curl' => [
+            'curl'    => [
                 CURLOPT_FOLLOWLOCATION => true,
             ],
         ]);
@@ -269,4 +269,5 @@ class LaravelHelperServiceProvider extends ServiceProvider
         //         logger()->info("Выполняется {$event->command} — действия пакета.");
         //     }
         // });
+    }
 }
