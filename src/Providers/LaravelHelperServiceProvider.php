@@ -41,6 +41,7 @@ use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Services\MigrationService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
@@ -107,6 +108,10 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         // Регистрация роутов
         $this->loadRoutesFrom(__DIR__ . '/../../routes/api-telegram-bot.php');
+
+        // Регистрация сервиса миграций
+        $this->app->singleton(MigrationService::class);
+        app(MigrationService::class)->disableQueryCacheDuringMigrations();
 
         // Регистрация обработчика исключений
         $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
@@ -264,5 +269,4 @@ class LaravelHelperServiceProvider extends ServiceProvider
         //         logger()->info("Выполняется {$event->command} — действия пакета.");
         //     }
         // });
-    }
 }
