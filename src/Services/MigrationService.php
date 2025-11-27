@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -79,7 +80,8 @@ class MigrationService extends DefaultService
             return;
         }
 
-        config(['laravel-helper.' . ConfigEnum::QueryCache->value . '.enabled' => false]);
+        $config = ConfigEnum::QueryCache;
+        Config::set("laravel-helper.{$config->value}.enabled", false);
     }
 
 

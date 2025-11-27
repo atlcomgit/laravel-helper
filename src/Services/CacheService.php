@@ -232,9 +232,9 @@ class CacheService extends DefaultService
                     $cache = Hlp::cacheRuntimeGet(__CLASS__ . "_{$config->value}");
 
                     $cache[$rootKey][$key] = [
-                        'value' => $value,
+                        'value'      => $value,
                         'created_at' => now(),
-                        'ttl' => $ttl ?: null,
+                        'ttl'        => $ttl ?: null,
                     ];
                     Hlp::cacheRuntimeSet(__CLASS__ . "_{$config->value}", $cache);
 
@@ -353,6 +353,10 @@ class CacheService extends DefaultService
      */
     public function clearCache(ConfigEnum $config, array $tags): void
     {
+        if (!Lh::config(ConfigEnum::QueryCache, 'enabled')) {
+            return;
+        }
+
         $driver = Lh::config($config, 'driver') ?: config('cache.default');
         $tags = Hlp::arrayDeleteValues($tags, [Hlp::pathClassName($this::class), 'ttl_*']);
 
