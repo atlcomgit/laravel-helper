@@ -16,6 +16,7 @@ use Atlcom\LaravelHelper\Repositories\MailLogRepository;
 /**
  * Сервис логирования отправки писем
  */
+//?!? check
 class MailLogService extends DefaultService
 {
     /**
@@ -27,6 +28,8 @@ class MailLogService extends DefaultService
     public function create(MailLogDto $dto): void
     {
         app(MailLogRepository::class)->create($dto);
+
+        MailLogEvent::dispatch($dto);
     }
 
 
@@ -142,7 +145,7 @@ class MailLogService extends DefaultService
             $dto->dispatch();
         }
 
-        MailFailed::dispatch($dto);
+        MailLogEvent::dispatch($dto);
     }
 
 

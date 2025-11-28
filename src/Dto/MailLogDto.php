@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Enums\MailLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\MailLogJob;
 use Exception;
+use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Mail\PendingMail;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
@@ -21,13 +22,14 @@ use Symfony\Component\Mime\Address;
  * Dto лога отправки письма
  * @see \Atlcom\LaravelHelper\Models\MailLog
  */
+//?!? 
 class MailLogDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;
 
     public ?string $uuid;
 
-    public int|string|null    $userId;
+    public int|string|null    $user_id; //?!? camel
     public ?MailLogStatusEnum $status;
     public ?string            $from;
     public ?array             $to;
@@ -37,7 +39,7 @@ class MailLogDto extends Dto
     public ?string            $body;
     public ?array             $attachments;
 
-    public ?string $errorMessage;
+    public ?string $error_message; //?!? delete
     public ?array  $info;
 
     public ?Exception $exception;
@@ -52,8 +54,8 @@ class MailLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'userId' => user(returnOnlyId: true),
-            'status' => MailLogStatusEnum::Process,
+            'user_id' => user(returnOnlyId: true),
+            'status'  => MailLogStatusEnum::Process,
         ];
     }
 
@@ -166,5 +168,23 @@ class MailLogDto extends Dto
         $this->body = Hlp::stringTruncateBetweenQuotes($this->body, 10000);
 
         return parent::__serialize();
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    //?!? delete
+    public function toArray(
+        ?bool $onlyFilled = null,
+        ?bool $onlyNotNull = null,
+        ?array $onlyKeys = null,
+        ?array $excludeKeys = null,
+        ?array $mappingKeys = null,
+    ): array {
+        $data = parent::toArray($onlyFilled, $onlyNotNull, $onlyKeys, $excludeKeys, $mappingKeys);
+        unset($data['exception']);
+
+        return $data;
     }
 }

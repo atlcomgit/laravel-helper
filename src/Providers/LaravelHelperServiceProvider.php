@@ -24,11 +24,15 @@ use Atlcom\LaravelHelper\Databases\Connections\ConnectionFactory;
 use Atlcom\LaravelHelper\Defaults\DefaultExceptionHandler;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\HttpLogHeaderEnum;
+use Atlcom\LaravelHelper\Events\MailFailed;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Listeners\HttpConnectionFailedListener;
 use Atlcom\LaravelHelper\Listeners\HttpRequestSendingListener;
 use Atlcom\LaravelHelper\Listeners\HttpResponseReceivedListener;
+use Atlcom\LaravelHelper\Listeners\MailMessageFailedListener;
+use Atlcom\LaravelHelper\Listeners\MailMessageSendingListener;
+use Atlcom\LaravelHelper\Listeners\MailMessageSentListener;
 use Atlcom\LaravelHelper\Listeners\TelegramBotEventListener;
 use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
@@ -71,6 +75,8 @@ use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
@@ -133,7 +139,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(HttpCacheService::class);
         $this->app->singleton(HttpLogService::class);
         $this->app->singleton(MailLogService::class);
-        $this->app->singleton(ModelLogService::class);;
+        $this->app->singleton(ModelLogService::class);
+        ;
         $this->app->singleton(HttpLogService::class);
         $this->app->singleton(ModelLogService::class);
         $this->app->singleton(ProfilerLogService::class);
@@ -178,6 +185,12 @@ class LaravelHelperServiceProvider extends ServiceProvider
             Event::listen(ResponseReceived::class, HttpResponseReceivedListener::class);
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
+
+        //?!? 
+        // Подключение событий MailLog
+        Event::listen(MessageSending::class, MailMessageSendingListener::class);
+        Event::listen(MessageSent::class, MailMessageSentListener::class);
+        Event::listen(MailFailed::class, MailMessageFailedListener::class);
 
         // Подключение событий телеграм бота
         !Lh::config(ConfigEnum::TelegramBot, 'enabled')

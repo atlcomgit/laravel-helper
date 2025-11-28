@@ -70,13 +70,15 @@ final class MailLogTest extends TestCase
 
             public function build()
             {
+                $this->to('test@example.com');
+
                 return $this->html('Test Body');
             }
 
 
             };
 
-        Mail::to('test@example.com')->send($mailable);
+        Mail::sendWithLog($mailable);
 
         $this->assertDatabaseHas('helper_mail_logs', [
             'status'  => MailLogStatusEnum::Success,
@@ -87,5 +89,52 @@ final class MailLogTest extends TestCase
         $this->assertNotNull($log);
         $this->assertEquals('Test Subject', $log->subject);
         $this->assertStringContainsString('test@example.com', json_encode($log->to));
+    }
+
+
+    /**
+     * Тест ошибки отправки письма
+     * @see \Atlcom\LaravelHelper\Services\MailMacrosService::setMacros()
+     *
+     * @return void
+     */
+    #[Test]
+    public function mailLogFailed(): void
+    {
+        Config::set('laravel-helper.mail_log.store_on_start', false);
+
+        // Mock transport to throw exception
+        $mockTransport = \Mockery::mock(\Symfony\Component\Mailer\Transport\TransportInterface::class);
+        $mockTransport->shouldReceive('send')->andThrow(new \Exception('Mail Error'));
+        $mockTransport->shouldReceive('__toString')->andReturn('mock');
+
+        // Register mock driver
+        Config::set('mail.mailers.mock', ['transport' => 'mock']);
+        Config::set('mail.default', 'mock');
+        Mail::extend('mock', fn () => $mockTransport);
+
+        $mailable =
+
+            new class extends DefaultMailable {
+            public $subject = 'Test Subject';
+            public function build()
+            {
+                $this->to('test@example.com');
+                return $this->html('Test Body');
+            }
+
+
+            };
+
+        try {
+            Mail::sendWithLog($mailable);
+        } catch (\Exception $e) {
+            // Expected
+        }
+
+        $this->assertDatabaseHas('helper_mail_logs', [
+            'status'        => MailLogStatusEnum::Failed,
+            'error_message' => 'Mail Error',
+        ]);
     }
 }

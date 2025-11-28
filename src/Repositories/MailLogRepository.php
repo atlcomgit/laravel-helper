@@ -51,9 +51,11 @@ class MailLogRepository extends DefaultRepository
             fn () => $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->ofUuid($dto->uuid)
+                ->where('uuid', $dto->uuid) //?!? ofUuid
                 ->update($dto->toArray())
         );
+
+        return null;
     }
 
 
