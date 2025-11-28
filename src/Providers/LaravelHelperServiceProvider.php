@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Commands\CacheClearCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeCommand;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\MailLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeOverrideCommand;
 use Atlcom\LaravelHelper\Commands\ProfilerLogCleanupCommand;
@@ -41,6 +42,8 @@ use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Atlcom\LaravelHelper\Services\MailLogService;
+use Atlcom\LaravelHelper\Services\MailMacrosService;
 use Atlcom\LaravelHelper\Services\MigrationService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
@@ -129,6 +132,9 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(ConsoleLogService::class);
         $this->app->singleton(HttpCacheService::class);
         $this->app->singleton(HttpLogService::class);
+        $this->app->singleton(MailLogService::class);
+        $this->app->singleton(ModelLogService::class);;
+        $this->app->singleton(HttpLogService::class);
         $this->app->singleton(ModelLogService::class);
         $this->app->singleton(ProfilerLogService::class);
         $this->app->singleton(RouteLogService::class);
@@ -185,6 +191,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         CollectionMacrosService::setMacros();
         // Подключение макросов Http
         HttpMacrosService::setMacros();
+        // Подключение макросов Mail
+        MailMacrosService::setMacros();
 
         // Глобальные настройки запросов (laravel 10+)
         !Lh::config(ConfigEnum::HttpLog, 'out.global') ?: Http::globalOptions([
@@ -204,6 +212,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
+                MailLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
                 ProfilerLogCleanupCommand::class,
                 RouteLogCleanupCommand::class,

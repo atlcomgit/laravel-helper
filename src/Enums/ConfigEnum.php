@@ -12,25 +12,26 @@ enum ConfigEnum: string
     use HelperEnumTrait;
 
 
-    case App = 'app';
-    case Optimize = 'optimize';
-    case Macros = 'macros';
-    case Http = 'http';
-    case Swagger = 'swagger';
-    case ConsoleLog = 'console_log';
-    case HttpCache = 'http_cache';
-    case HttpLog = 'http_log';
-    case ModelLog = 'model_log';
+    case App         = 'app';
+    case Optimize    = 'optimize';
+    case Macros      = 'macros';
+    case Http        = 'http';
+    case Swagger     = 'swagger';
+    case ConsoleLog  = 'console_log';
+    case HttpCache   = 'http_cache';
+    case HttpLog     = 'http_log';
+    case MailLog     = 'mail_log';
+    case ModelLog    = 'model_log';
     case ProfilerLog = 'profiler_log';
-    case RouteLog = 'route_log';
-    case QueryCache = 'query_cache';
-    case QueryLog = 'query_log';
-    case QueueLog = 'queue_log';
+    case RouteLog    = 'route_log';
+    case QueryCache  = 'query_cache';
+    case QueryLog    = 'query_log';
+    case QueueLog    = 'queue_log';
     case TelegramBot = 'telegram_bot';
     case TelegramLog = 'telegram_log';
-    case TestingLog = 'testing_log';
-    case ViewCache = 'view_cache';
-    case ViewLog = 'view_log';
+    case TestingLog  = 'testing_log';
+    case ViewCache   = 'view_cache';
+    case ViewLog     = 'view_log';
 
 
     /**
@@ -61,6 +62,7 @@ enum ConfigEnum: string
             self::ConsoleLog => 'Лог консольной команды',
             self::HttpCache => 'Кеш http запроса',
             self::HttpLog => 'Лог http запроса',
+            self::MailLog => 'Лог отправки письма',
             self::ModelLog => 'Лог изменения модели',
             self::ProfilerLog => 'Лог профилировщика',
             self::RouteLog => 'Лог зарегистрированного роута',

@@ -136,6 +136,22 @@ class ExampleService extends DefaultService
 }
 ```
 
+##### MailLog
+
+Логирование отправки писем в таблице helper_mail_logs
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultMailable;
+use Illuminate\Support\Facades\Mail;
+
+class ExampleMailable extends DefaultMailable
+{
+    // ...
+}
+
+Mail::to('test@test.ru')->send(new ExampleMailable());
+```
+
 ##### ModelLog
 
 Логирование изменений модели в таблице helper_model_logs (withModelLog)
@@ -480,6 +496,18 @@ class ExampleListener extends DefaultListener
 use Atlcom\LaravelHelper\Defaults\DefaultLogger;
 
 class ExampleLogger extends DefaultLogger
+{
+}
+```
+
+##### DefaultMailable
+
+Расширение класса отправки писем
+
+```php
+use Atlcom\LaravelHelper\Defaults\DefaultMailable;
+
+class ExampleMailable extends DefaultMailable
 {
 }
 ```

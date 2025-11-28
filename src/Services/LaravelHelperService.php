@@ -13,6 +13,7 @@ use Atlcom\LaravelHelper\Defaults\DefaultTest;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Dto\HttpCacheDto;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
+use Atlcom\LaravelHelper\Dto\MailLogDto;
 use Atlcom\LaravelHelper\Dto\ModelLogDto;
 use Atlcom\LaravelHelper\Dto\ProfilerLogDto;
 use Atlcom\LaravelHelper\Dto\QueryLogDto;
@@ -26,6 +27,7 @@ use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
+use Atlcom\LaravelHelper\Models\MailLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
@@ -112,6 +114,12 @@ class LaravelHelperService extends DefaultService
             && ($config[$param = ConfigEnum::HttpLog->value . 'table'] ?? null)
             && ($config[$param = ConfigEnum::HttpLog->value . 'model'] ?? null)
             && ($config[$param = ConfigEnum::HttpLog->value . 'cleanup_days'] ?? null)
+
+            && ($config[$param = ConfigEnum::MailLog->value . 'queue'] ?? null)
+            && ($config[$param = ConfigEnum::MailLog->value . 'connection'] ?? null)
+            && ($config[$param = ConfigEnum::MailLog->value . 'table'] ?? null)
+            && ($config[$param = ConfigEnum::MailLog->value . 'model'] ?? null)
+            && ($config[$param = ConfigEnum::MailLog->value . 'cleanup_days'] ?? null)
 
             && ($config[$param = ConfigEnum::ModelLog->value . 'queue'] ?? null)
             && ($config[$param = ConfigEnum::ModelLog->value . 'connection'] ?? null)
@@ -208,6 +216,7 @@ class LaravelHelperService extends DefaultService
         $ignoreTables ??= [
             $this->config(ConfigEnum::ConsoleLog, 'table'),
             $this->config(ConfigEnum::HttpLog, 'table'),
+            $this->config(ConfigEnum::MailLog, 'table'),
             $this->config(ConfigEnum::ModelLog, 'table'),
             $this->config(ConfigEnum::ProfilerLog, 'table'),
             $this->config(ConfigEnum::QueueLog, 'table'),
@@ -263,6 +272,14 @@ class LaravelHelperService extends DefaultService
                     && $this->config($config, "{$type}.enabled")
                     && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
                     && (!in_array($dto->method, [HttpLogMethodEnum::Head->value, HttpLogMethodEnum::Options->value]))
+                ;
+                break;
+
+            case MailLogDto::class:
+                $config = ConfigEnum::MailLog;
+                /** @var MailLogDto $dto */
+                $can = $this->config($config, 'enabled')
+                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.exclude", $dto)
                 ;
                 break;
 
