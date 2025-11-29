@@ -128,15 +128,16 @@ class HelperMailer extends Mailer
             app(MailLogService::class)->create($dto);
         }
 
-            try {
-                $result = parent::send($view, $data, $callback);
-                $dto->update($result);
-                
-                if ($result) {
-                    $dto->updateFromEmail($result->getOriginalMessage());
-                }
+        try {
+            $result = parent::send($view, $data, $callback);
+            $dto->update($result);
 
-                app(MailLogService::class)->success($dto);            return $result;
+            if ($result) {
+                $dto->updateFromEmail($result->getOriginalMessage());
+            }
+
+            app(MailLogService::class)->success($dto);
+            return $result;
 
         } catch (Throwable $exception) {
             $dto->message = $exception->getMessage();
