@@ -10,12 +10,16 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\MailLogStatusEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\MailLogJob;
+use Atlcom\LaravelHelper\Models\MailLog;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Mail\PendingMail;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
+use Throwable;
 
 /**
  * @internal
@@ -29,20 +33,27 @@ class MailLogDto extends Dto
 
     public ?string $uuid;
 
-    public int|string|null    $user_id; //?!? camel
+    public int|string|null    $userId;
     public ?MailLogStatusEnum $status;
     public ?string            $from;
     public ?array             $to;
     public ?array             $cc;
     public ?array             $bcc;
+    public ?array             $replyTo;
     public ?string            $subject;
-    public ?string            $body;
-    public ?array             $attachments;
+    // markdown, view, viewData, rawAttachments, diskAttachments, tags, metadata, theme, callbacks
+    public ?string $body;
+    public ?array  $attachments;
 
-    public ?string $error_message; //?!? delete
+    public ?string $message;
+    public ?float  $duration;
+    public ?int    $memory;
+    public ?int    $size;
     public ?array  $info;
 
-    public ?Exception $exception;
+    public ?Throwable $exception;
+    public string     $startTime;
+    public int        $startMemory;
 
 
     /**
@@ -54,9 +65,29 @@ class MailLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'user_id' => user(returnOnlyId: true),
-            'status'  => MailLogStatusEnum::Process,
+            'user_id'     => user(returnOnlyId: true),
+            'status'      => MailLogStatusEnum::Process,
+            'startTime'   => (string)now()->getTimestampMs(),
+            'startMemory' => memory_get_usage(),
         ];
+    }
+
+
+    /**
+     * Создает dto из PendingMail
+     *
+     * @param Mailable|string|array $view
+     * @param array $data
+     * @return static
+     */
+    public static function createFromPendingMail(Mailable|string|array $view, array $data = []): static
+    {
+        return $view instanceof Mailable
+            ? static::createByMailable($view)
+            : static::create([
+                'uuid' => uuid(),
+                'info' => ['view' => $view],
+            ]);
     }
 
 
@@ -77,27 +108,51 @@ class MailLogDto extends Dto
         ]);
 
         if ($mailable instanceof Mailable) {
-            $dto->from = self::formatAddressesToString($mailable->from);
-            $dto->to = self::formatAddresses($mailable->to);
-            $dto->cc = self::formatAddresses($mailable->cc);
-            $dto->bcc = self::formatAddresses($mailable->bcc);
+            /** @see \Illuminate\Mail\Mailable */
+            $dto->from = static::formatAddressesToString($mailable->from);
+            $dto->to = static::formatAddresses($mailable->to);
+            $dto->cc = static::formatAddresses($mailable->cc);
+            $dto->bcc = static::formatAddresses($mailable->bcc);
+            $dto->replyTo = static::formatAddresses($mailable->replyTo);
             $dto->subject = $mailable->subject;
-            // Body might be hard to get before render, but we can try
             try {
-                $dto->body = $mailable->render();
+                $dto->body = $mailable->render() ?: $mailable->textView;
+
             } catch (Exception $e) {
                 $dto->body = 'Error rendering body: ' . $e->getMessage();
             }
             $dto->attachments = array_map(fn ($a) => $a['name'] ?? 'unknown', $mailable->attachments);
-        } elseif ($mailable instanceof Email) {
-            $dto->from = self::formatSymfonyAddressesToString($mailable->getFrom());
-            $dto->to = self::formatSymfonyAddresses($mailable->getTo());
-            $dto->cc = self::formatSymfonyAddresses($mailable->getCc());
-            $dto->bcc = self::formatSymfonyAddresses($mailable->getBcc());
+            $dto->info = [
+                'class'           => $mailable::class,
+                'markdown'        => $mailable->markdown,
+                'view'            => $mailable->view,
+                'data'            => $mailable->viewData,
+                'rawAttachments'  => $mailable->rawAttachments,
+                'diskAttachments' => $mailable->diskAttachments,
+                // 'callbacks'       => $mailable->callbacks,
+                'theme'           => $mailable->theme,
+                'mailer'          => $mailable->mailer,
+            ];
+
+        } else if ($mailable instanceof Email) {
+            /** @see \Symfony\Component\Mime\Email */
+            $dto->from = static::formatSymfonyAddressesToString($mailable->getFrom());
+            $dto->to = static::formatSymfonyAddresses($mailable->getTo());
+            $dto->cc = static::formatSymfonyAddresses($mailable->getCc());
+            $dto->bcc = static::formatSymfonyAddresses($mailable->getBcc());
+            $dto->replyTo = static::formatSymfonyAddresses($mailable->getReplyTo());
             $dto->subject = $mailable->getSubject();
-            $dto->body = $mailable->getHtmlBody() ?? $mailable->getTextBody();
+            $dto->body = $mailable->getHtmlBody() ?: $mailable->getTextBody();
             $dto->attachments = array_map(fn ($a) => $a->getFilename(), $mailable->getAttachments());
+            $dto->info = [
+                'class'       => $mailable::class,
+                'priority'    => $mailable->getPriority(),
+                'htmlCharset' => $mailable->getHtmlCharset(),
+                'textCharset' => $mailable->getTextCharset(),
+            ];
         }
+
+        $dto->size = Hlp::stringLength($dto->body);
 
         return $dto;
     }
@@ -109,15 +164,19 @@ class MailLogDto extends Dto
             if ($address instanceof Address) {
                 return $address->getAddress();
             }
+
             if (is_array($address)) {
                 return $address['address'] ?? '';
             }
+
             if (is_object($address) && property_exists($address, 'address')) {
                 return $address->address;
             }
+
             if (is_object($address) && property_exists($address, 'email')) {
                 return $address->email;
             }
+
             return (string)$address;
         }, $addresses);
     }
@@ -126,6 +185,7 @@ class MailLogDto extends Dto
     private static function formatAddressesToString(array $addresses): ?string
     {
         $formatted = self::formatAddresses($addresses);
+
         return !empty($formatted) ? implode(', ', $formatted) : null;
     }
 
@@ -139,6 +199,31 @@ class MailLogDto extends Dto
     private static function formatSymfonyAddressesToString(array $addresses): string
     {
         return implode(', ', self::formatSymfonyAddresses($addresses));
+    }
+
+
+    public function update(?SentMessage $result = null): static
+    {
+        $this->info = [
+            ...$this->info ?? [],
+            ...(
+                $result
+                ? [
+                    'message_id' => $result->getMessageId(),
+                    'debug'      => $result->getDebug(),
+                    'headers'    => $result->getOriginalMessage()->getHeaders()->toArray(),
+                ]
+                : []
+            ),
+            'duration' => $duration = Hlp::timeSecondsToString(
+                value: $this->duration = $this->getDuration(),
+                withMilliseconds: true,
+            ),
+            'memory'   => $memory = Hlp::sizeBytesToString($this->memory = $this->getMemory()),
+            'size'     => $size = Hlp::sizeBytesToString($this->size),
+        ];
+
+        return $this;
     }
 
 
@@ -174,17 +259,36 @@ class MailLogDto extends Dto
     /**
      * @inheritDoc
      */
-    //?!? delete
-    public function toArray(
-        ?bool $onlyFilled = null,
-        ?bool $onlyNotNull = null,
-        ?array $onlyKeys = null,
-        ?array $excludeKeys = null,
-        ?array $mappingKeys = null,
-    ): array {
-        $data = parent::toArray($onlyFilled, $onlyNotNull, $onlyKeys, $excludeKeys, $mappingKeys);
-        unset($data['exception']);
+    protected function onSerializing(array &$array): void
+    {
+        $this->onlyKeys(MailLog::getModelKeys())
+            ->onlyNotNull()
+            ->excludeKeys([
+                'exception',
+                'startTime',
+                'startMemory',
+            ]);
+    }
 
-        return $data;
+
+    /**
+     * Возвращает длительность работы скрипта
+     *
+     * @return float
+     */
+    public function getDuration(): float
+    {
+        return max(0, Carbon::createFromTimestampMs($this->startTime)->diffInMilliseconds() / 1000);
+    }
+
+
+    /**
+     * Возвращает потребляемую память скрипта
+     *
+     * @return int
+     */
+    public function getMemory(): int
+    {
+        return max(0, memory_get_usage() - $this->startMemory);
     }
 }

@@ -8,6 +8,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
+use Atlcom\LaravelHelper\Models\MailLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
 trait DynamicTableModelTrait
 {
     protected $connection = null;
-    protected $table = null;
+    protected $table      = null;
 
 
     /**
@@ -89,6 +90,7 @@ trait DynamicTableModelTrait
         return match (static::class) {
             ConsoleLog::class => static::queryFrom(ConfigEnum::ConsoleLog),
             HttpLog::class => static::queryFrom(ConfigEnum::HttpLog),
+            MailLog::class => static::queryFrom(ConfigEnum::MailLog),
             ModelLog::class => static::queryFrom(ConfigEnum::ModelLog),
             ProfilerLog::class => static::queryFrom(ConfigEnum::ProfilerLog),
             RouteLog::class => static::queryFrom(ConfigEnum::RouteLog),

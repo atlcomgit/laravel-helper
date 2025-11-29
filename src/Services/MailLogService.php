@@ -12,6 +12,7 @@ use Atlcom\LaravelHelper\Events\MailFailed;
 use Atlcom\LaravelHelper\Events\MailLogEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Repositories\MailLogRepository;
+use Illuminate\Mail\Mailer;
 
 /**
  * Сервис логирования отправки писем

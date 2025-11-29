@@ -29,7 +29,7 @@ class HttpMacrosService extends DefaultService
                 /** @var PendingRequest $this */
                 return Lh::config(ConfigEnum::Macros, 'http.enabled')
                     && Lh::config(ConfigEnum::HttpCache, 'enabled')
-                    ? app(HttpCacheService::class)->setMacro($this, $seconds)
+                    ? app(HttpCacheService::class)->setMacro($this, $seconds) //?!? seconds проверить
                     : $this;
             };
             PendingRequest::macro('withCache', $withHttpCacheMacro);

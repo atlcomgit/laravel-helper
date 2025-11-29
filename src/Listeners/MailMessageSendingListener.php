@@ -22,6 +22,10 @@ class MailMessageSendingListener extends DefaultListener
             return;
         }
 
+        if ($event->message->getHeaders()->has('X-Helper-Mailer-Logged')) {
+            return;
+        }
+
         $dto = MailLogDto::createByMailable($event->message); // event->message is Email (Symfony)
 
         // Store uuid in message headers to retrieve it in MessageSent

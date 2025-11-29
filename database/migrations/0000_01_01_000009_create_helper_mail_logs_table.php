@@ -44,6 +44,8 @@ return new class extends Migration {
                     ->comment('Копии');
                 $table->jsonb('bcc')->nullable(true)
                     ->comment('Скрытые копии');
+                $table->jsonb('reply_to')->nullable(true)
+                    ->comment('Ответы');
                 $table->string('subject')->nullable(true)->index()
                     ->comment('Тема письма');
                 $table->longText('body')->nullable(true)
@@ -51,8 +53,15 @@ return new class extends Migration {
                 $table->jsonb('attachments')->nullable(true)
                     ->comment('Вложения');
 
-                $table->text('error_message')->nullable(true)
+                $table->text('message')->nullable(true)
                     ->comment('Сообщение об ошибке');
+
+                $table->float('duration')->nullable(true)
+                    ->comment('Длительность выполнения');
+                $table->integer('memory')->nullable(true)
+                    ->comment('Потребление памяти');
+                $table->integer('size')->nullable(true)
+                    ->comment('Размер письма');
 
                 $table->jsonb('info')->nullable(true)
                     ->comment('Дополнительная информация');

@@ -160,6 +160,13 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         $this->app->singleton(ModelLogObserver::class);
 
+        // Переопределение менеджера почты для поддержки логирования
+        if (Lh::config(ConfigEnum::MailLog, 'enabled')) {
+            $this->app->extend('mail.manager', function ($service, $app) {
+                return new \Atlcom\LaravelHelper\Mail\HelperMailManager($app);
+            });
+        }
+
         // Регистрация обработчика соединений
         if (
             Lh::config(ConfigEnum::QueryCache, 'enabled')
@@ -186,11 +193,12 @@ class LaravelHelperServiceProvider extends ServiceProvider
             Event::listen(ConnectionFailed::class, HttpConnectionFailedListener::class);
         }
 
-        //?!? 
         // Подключение событий MailLog
-        Event::listen(MessageSending::class, MailMessageSendingListener::class);
-        Event::listen(MessageSent::class, MailMessageSentListener::class);
-        Event::listen(MailFailed::class, MailMessageFailedListener::class);
+        if (Lh::config(ConfigEnum::MailLog, 'enabled')) {
+            Event::listen(MessageSending::class, MailMessageSendingListener::class);
+            Event::listen(MessageSent::class, MailMessageSentListener::class);
+            Event::listen(MailFailed::class, MailMessageFailedListener::class);
+        }
 
         // Подключение событий телеграм бота
         !Lh::config(ConfigEnum::TelegramBot, 'enabled')
