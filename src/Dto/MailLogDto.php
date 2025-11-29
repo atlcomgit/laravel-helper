@@ -109,7 +109,8 @@ class MailLogDto extends Dto
 
         if ($mailable instanceof Mailable) {
             /** @see \Illuminate\Mail\Mailable */
-            $dto->from = static::formatAddressesToString($mailable->from);
+            $dto->from = static::formatAddressesToString($mailable->from)
+                ?: static::formatAddressesToString([config('mail.from')]);
             $dto->to = static::formatAddresses($mailable->to);
             $dto->cc = static::formatAddresses($mailable->cc);
             $dto->bcc = static::formatAddresses($mailable->bcc);
@@ -202,6 +203,52 @@ class MailLogDto extends Dto
     }
 
 
+    public function updateFromMailable(Mailable $mailable): static
+    {
+        $this->from = static::formatAddressesToString($mailable->from)
+            ?: static::formatAddressesToString([config('mail.from')]);
+        $this->to = static::formatAddresses($mailable->to);
+        $this->cc = static::formatAddresses($mailable->cc);
+        $this->bcc = static::formatAddresses($mailable->bcc);
+        $this->replyTo = static::formatAddresses($mailable->replyTo);
+        $this->subject = $mailable->subject;
+
+        try {
+            $this->body = $mailable->render() ?: $mailable->textView;
+
+        } catch (Exception $e) {
+            $this->body = 'Error rendering body: ' . $e->getMessage();
+        }
+        $this->attachments = array_map(fn ($a) => $a['name'] ?? 'unknown', $mailable->attachments);
+        $this->size = Hlp::stringLength($this->body);
+
+        return $this;
+    }
+
+
+    public function updateFromEmail(Email $email): static
+    {
+        $this->from = static::formatSymfonyAddressesToString($email->getFrom());
+        $this->to = static::formatSymfonyAddresses($email->getTo());
+        $this->cc = static::formatSymfonyAddresses($email->getCc());
+        $this->bcc = static::formatSymfonyAddresses($email->getBcc());
+        $this->replyTo = static::formatSymfonyAddresses($email->getReplyTo());
+        $this->subject = $email->getSubject();
+        $this->body = $email->getHtmlBody() ?: $email->getTextBody();
+        $this->attachments = array_map(fn ($a) => $a->getFilename(), $email->getAttachments());
+        $this->size = Hlp::stringLength($this->body);
+
+        $this->info = [
+            ...$this->info ?? [],
+            'priority'    => $email->getPriority(),
+            'htmlCharset' => $email->getHtmlCharset(),
+            'textCharset' => $email->getTextCharset(),
+        ];
+
+        return $this;
+    }
+
+
     public function update(?SentMessage $result = null): static
     {
         $this->info = [
@@ -213,6 +260,11 @@ class MailLogDto extends Dto
                     'debug'      => $result->getDebug(),
                     'headers'    => $result->getOriginalMessage()->getHeaders()->toArray(),
                 ]
+                : []
+            ),
+            ...(
+                $this->exception
+                ? ['exception' => Hlp::exceptionToString($this->exception)]
                 : []
             ),
             'duration' => $duration = Hlp::timeSecondsToString(

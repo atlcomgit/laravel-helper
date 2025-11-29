@@ -99,12 +99,19 @@ class HelperMailer extends Mailer
             return parent::send($view, $data, $callback);
         }
 
+        $dto = MailLogDto::createFromPendingMail($view, $data);
+
         // Если передали Mailable, ставим флаг
         if ($view instanceof MailableContract) {
             $this->processingMailable = true;
-        }
 
-        $dto = MailLogDto::createFromPendingMail($view, $data);
+            if (method_exists($view, 'withSymfonyMessage')) {
+                $view->withSymfonyMessage(function ($message) use ($dto) {
+                    $message->getHeaders()->addTextHeader('X-Helper-Mailer-Logged', 'true');
+                    $message->getHeaders()->addTextHeader('X-Mail-Log-Uuid', $dto->uuid);
+                });
+            }
+        }
 
         $originalCallback = $callback;
         $callback = function ($message) use ($originalCallback, $dto) {
@@ -121,18 +128,24 @@ class HelperMailer extends Mailer
             app(MailLogService::class)->create($dto);
         }
 
-        try {
-            $result = parent::send($view, $data, $callback);
-            $dto->update($result);
+            try {
+                $result = parent::send($view, $data, $callback);
+                $dto->update($result);
+                
+                if ($result) {
+                    $dto->updateFromEmail($result->getOriginalMessage());
+                }
 
-            app(MailLogService::class)->success($dto);
-
-            return $result;
+                app(MailLogService::class)->success($dto);            return $result;
 
         } catch (Throwable $exception) {
             $dto->message = $exception->getMessage();
             $dto->exception = $exception;
             $dto->update();
+
+            if ($view instanceof MailableContract) {
+                $dto->updateFromMailable($view);
+            }
 
             app(MailLogService::class)->failed($dto);
 
@@ -173,10 +186,12 @@ class HelperMailer extends Mailer
 
             $dto = MailLogDto::createFromPendingMail($mailable, $data);
 
-            $mailable->withSymfonyMessage(function ($message) use ($dto) {
-                $message->getHeaders()->addTextHeader('X-Helper-Mailer-Logged', 'true');
-                $message->getHeaders()->addTextHeader('X-Mail-Log-Uuid', $dto->uuid);
-            });
+            if (method_exists($mailable, 'withSymfonyMessage')) {
+                $mailable->withSymfonyMessage(function ($message) use ($dto) {
+                    $message->getHeaders()->addTextHeader('X-Helper-Mailer-Logged', 'true');
+                    $message->getHeaders()->addTextHeader('X-Mail-Log-Uuid', $dto->uuid);
+                });
+            }
 
             if (Lh::config(ConfigEnum::MailLog, 'store_on_start')) {
                 app(MailLogService::class)->create($dto);
@@ -186,6 +201,10 @@ class HelperMailer extends Mailer
                 $result = parent::sendNow($mailable, $data, $callback);
                 $dto->update($result);
 
+                if ($result) {
+                    $dto->updateFromEmail($result->getOriginalMessage());
+                }
+
                 app(MailLogService::class)->success($dto);
 
                 return $result;
@@ -194,6 +213,10 @@ class HelperMailer extends Mailer
                 $dto->message = $exception->getMessage();
                 $dto->exception = $exception;
                 $dto->update();
+
+                if ($mailable instanceof MailableContract) {
+                    $dto->updateFromMailable($mailable);
+                }
 
                 app(MailLogService::class)->failed($dto);
 
