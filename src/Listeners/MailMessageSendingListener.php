@@ -26,6 +26,10 @@ class MailMessageSendingListener extends DefaultListener
             return;
         }
 
+        if (!Lh::config(ConfigEnum::MailLog, 'global')) {
+            return;
+        }
+
         $dto = MailLogDto::createByMailable($event->message); // event->message is Email (Symfony)
 
         // Store uuid in message headers to retrieve it in MessageSent

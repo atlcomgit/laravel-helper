@@ -26,6 +26,10 @@ class MailMessageSentListener extends DefaultListener
             return;
         }
 
+        if (!Lh::config(ConfigEnum::MailLog, 'global')) {
+            return;
+        }
+
         $uuidHeader = $event->message->getHeaders()->get('X-Mail-Log-Uuid');
         $uuid = $uuidHeader ? $uuidHeader->getBodyAsString() : null;
 
