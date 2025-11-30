@@ -49,7 +49,7 @@ class TelegramBotInFromDto extends DefaultDto
         return [
             'isBot' => 'is_bot',
             'firstName' => 'first_name',
-            'userName' => ['username', 'first_name'],
+            'userName' => ['username', '-first_name'],
             'languageCode' => 'language_code',
         ];
     }
