@@ -85,17 +85,11 @@ class TelegramBotUserDto extends DefaultDto
      */
     protected function onFilled(array $array): void
     {
-        // Устраняем любые HTML-теги
-        $this->firstName = strip_tags($this->firstName);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->firstName) ?: $this->firstName = Hlp::sqlSafeValue(strip_tags($this->firstName));
 
-        // Преобразуем к безопасному sql значению
-        $this->firstName = Hlp::sqlSafeValue($this->firstName);
-
-        // Устраняем любые HTML-теги
-        $this->userName = strip_tags($this->userName);
-
-        // Преобразуем к безопасному sql значению
-        $this->userName = Hlp::sqlSafeValue($this->userName);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->userName) ?: $this->userName = Hlp::sqlSafeValue(strip_tags($this->userName));
     }
 
 

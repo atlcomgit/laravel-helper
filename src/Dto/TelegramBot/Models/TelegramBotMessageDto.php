@@ -88,11 +88,8 @@ class TelegramBotMessageDto extends DefaultDto
      */
     protected function onFilled(array $array): void
     {
-        // Устраняем любые HTML-теги
-        $this->text = strip_tags($this->text);
-
-        // Преобразуем к безопасному sql значению
-        $this->text = Hlp::sqlSafeValue($this->text);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->text) ?: $this->text = Hlp::sqlSafeValue(strip_tags($this->text));
     }
 
 

@@ -79,17 +79,11 @@ class TelegramBotChatDto extends DefaultDto
      */
     protected function onFilled(array $array): void
     {
-        // Устраняем любые HTML-теги
-        $this->name = strip_tags($this->name);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->name) ?: $this->name = Hlp::sqlSafeValue(strip_tags($this->name));
 
-        // Преобразуем к безопасному sql значению
-        $this->name = Hlp::sqlSafeValue($this->name);
-
-        // Устраняем любые HTML-теги
-        $this->chatName = strip_tags($this->chatName);
-
-        // Преобразуем к безопасному sql значению
-        $this->chatName = Hlp::sqlSafeValue($this->chatName);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->chatName) ?: $this->chatName = Hlp::sqlSafeValue(strip_tags($this->chatName));
     }
 
 

@@ -87,11 +87,8 @@ class TelegramBotVariableDto extends DefaultDto
      */
     protected function onFilled(array $array): void
     {
-        // Устраняем любые HTML-теги
-        $this->value = strip_tags($this->value);
-
-        // Преобразуем к безопасному sql значению
-        $this->value = Hlp::sqlSafeValue($this->value);
+        // Устраняем любые HTML-теги и преобразуем к безопасному sql значению
+        is_null($this->value) ?: $this->value = Hlp::sqlSafeValue(strip_tags($this->value));
     }
 
 
