@@ -36,6 +36,7 @@ class TelegramBotInFromDto extends DefaultDto
     protected function defaults(): array
     {
         return [
+            'userName' => '',
             'languageCode' => '',
         ];
     }
