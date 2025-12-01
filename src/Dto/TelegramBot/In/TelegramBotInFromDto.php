@@ -11,7 +11,7 @@ class TelegramBotInFromDto extends DefaultDto
     public int $id;
     public bool $isBot;
     public string $firstName;
-    public string $userName;
+    public ?string $userName;
     public string $languageCode;
 
 
@@ -36,7 +36,6 @@ class TelegramBotInFromDto extends DefaultDto
     protected function defaults(): array
     {
         return [
-            'userName' => '',
             'languageCode' => '',
         ];
     }

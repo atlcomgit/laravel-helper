@@ -21,7 +21,7 @@ class TelegramBotUserDto extends DefaultDto
     public string $uuid;
     public int $externalUserId;
     public string $firstName;
-    public string $userName;
+    public ?string $userName;
     public ?string $phone;
     public string $language;
     public ?bool $isBan;

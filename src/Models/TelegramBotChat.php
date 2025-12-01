@@ -26,7 +26,7 @@ use UnitEnum;
  * @property string $uuid
  * @property int $external_chat_id
  * @property string $name
- * @property string $chat_name
+ * @property ?string $chat_name
  * @property string $type
  * @property ?array $info
  * @property ?\Carbon\Carbon $created_at

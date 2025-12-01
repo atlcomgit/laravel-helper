@@ -10,7 +10,7 @@ class TelegramBotInChatDto extends DefaultDto
 {
     public int $id;
     public string $firstName;
-    public string $userName;
+    public ?string $userName;
     public string $type;
 
 

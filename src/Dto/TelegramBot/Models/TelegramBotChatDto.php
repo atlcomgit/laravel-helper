@@ -23,7 +23,7 @@ class TelegramBotChatDto extends DefaultDto
     public string $uuid;
     public int $externalChatId;
     public string $name;
-    public string $chatName;
+    public ?string $chatName;
     public string $type;
     public ?array $info;
 

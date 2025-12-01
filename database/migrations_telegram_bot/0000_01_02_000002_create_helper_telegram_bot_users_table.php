@@ -32,7 +32,7 @@ return new class extends Migration {
 
                 $table->string('first_name')->nullable(false)->index()
                     ->comment('Имя пользователя телеграм бота');
-                $table->string('user_name')->nullable(false)->index()
+                $table->string('user_name')->nullable(true)->index()
                     ->comment('Логин пользователя телеграм бота');
                 $table->string('phone')->nullable(true)->index()
                     ->comment('Телефон пользователя телеграм бота');

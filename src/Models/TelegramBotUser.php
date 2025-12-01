@@ -25,7 +25,7 @@ use UnitEnum;
  * @property string $uuid
  * @property int $external_user_id
  * @property string $first_name
- * @property string $user_name
+ * @property ?string $user_name
  * @property ?string $phone
  * @property string $language
  * @property bool $is_ban
