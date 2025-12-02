@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Traits;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Dto\Scope\SortScopeDto;
 use Atlcom\LaravelHelper\Dto\Table\TableFilterDto;
@@ -71,7 +72,7 @@ trait ModelScopeTrait
      */
     public function scopeOfFilters(Builder $query, ?array $requestFilters = null): Builder
     {
-        $modelInstance     = $this;
+        $modelInstance = $this;
         $modelScopeService = app(ModelScopeService::class);
 
         return method_exists($this, 'table')
@@ -89,13 +90,23 @@ trait ModelScopeTrait
 
                                 match ($modelFilterDto->operator) {
                                     FilterOperatorEnum::Equal
-                                      => $query->where($modelFilterDto->column, '=', $requestFilterValue),
+                                    => $query->where($modelFilterDto->column, '=', $requestFilterValue),
+                                    FilterOperatorEnum::EqualAsInteger
+                                    => $query->whereRaw(
+                                        "$modelFilterDto->column::integer = ?",
+                                        [Hlp::castToInt($requestFilterValue)],
+                                    ),
+                                    FilterOperatorEnum::EqualAsString
+                                    => $query->whereRaw(
+                                        "$modelFilterDto->column::text = ?",
+                                        [Hlp::castToString($requestFilterValue)],
+                                    ),
                                     FilterOperatorEnum::Like
-                                       => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
+                                    => $query->where($modelFilterDto->column, 'like', "%$requestFilterValue%"),
                                     FilterOperatorEnum::Ilike
-                                      => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
+                                    => $query->where($modelFilterDto->column, 'ilike', "%$requestFilterValue%"),
                                     FilterOperatorEnum::In
-                                         => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
+                                    => $query->whereIn($modelFilterDto->column, (array)$requestFilterValue),
                                     FilterOperatorEnum::Between
                                     => $query->when(
                                         is_array($requestFilterValue),
@@ -173,18 +184,18 @@ trait ModelScopeTrait
                                                     $from !== null && $to !== null
                                                     => $query->whereBetween($columnExpression, [$from, $to]),
                                                     $from !== null
-                                                                    => $query->where($columnExpression, '>=', $from),
+                                                    => $query->where($columnExpression, '>=', $from),
                                                     $to !== null
-                                                                      => $query->where($columnExpression, '<=', $to),
+                                                    => $query->where($columnExpression, '<=', $to),
 
-                                                    default                        => null,
+                                                    default => null,
                                                 };
                                             },
                                     ),
                                     FilterOperatorEnum::Closure
                                     => !is_callable($closure) ?: $closure($query, $requestFilterValue),
 
-                                    default                     => null,
+                                    default => null,
                                 };
                             }
                         }

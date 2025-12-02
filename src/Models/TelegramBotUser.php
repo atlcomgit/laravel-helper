@@ -7,6 +7,7 @@ namespace Atlcom\LaravelHelper\Models;
 use Atlcom\LaravelHelper\Defaults\DefaultModel;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotUserService;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotUserFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,6 +36,7 @@ use UnitEnum;
  * @property ?\Carbon\Carbon $updated_at
  * @property ?\Carbon\Carbon $deleted_at
  * @property-read string $attrName
+ * @property-read ?string $attrEstimateRegistrationDate
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
@@ -140,6 +142,17 @@ class TelegramBotUser extends DefaultModel
     public function getAttrNameAttribute(): string
     {
         return "{$this->id}, {$this->first_name}";
+    }
+
+
+    /**
+     * Атрибут: возвращает строку с примерной датой регистрации пользователя в телеграм по external_user_id.
+     *
+     * @return string|null
+     */
+    public function getAttrEstimateRegistrationDateAttribute(): ?string
+    {
+        return app(TelegramBotUserService::class)->getEstimateRegistrationDate($this->external_user_id);
     }
 
 

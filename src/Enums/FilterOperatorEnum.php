@@ -14,6 +14,8 @@ enum FilterOperatorEnum: string
 
 
     case Equal = 'equal';
+    case EqualAsInteger = 'equal_as_integer';
+    case EqualAsString = 'equal_as_string';
     case Like = 'like';
     case Ilike = 'ilike';
     case In = 'in';
@@ -42,6 +44,8 @@ enum FilterOperatorEnum: string
     {
         return match ($enum) {
             self::Equal => 'Равенство',
+            self::EqualAsInteger => 'Равенство как целое число',
+            self::EqualAsString => 'Равенство как строка',
             self::Like => 'Содержание',
             self::Ilike => 'Содержание без учета регистра',
             self::In => 'Список',
