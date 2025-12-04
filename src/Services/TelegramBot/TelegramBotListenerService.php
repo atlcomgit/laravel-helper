@@ -41,9 +41,7 @@ class TelegramBotListenerService extends DefaultService
             $telegramBotChat = ($chatDto = TelegramBotChatDto::create($dto->message->chat))
                 ->save();
 
-            $telegramBotUser = (
-            $userDto = TelegramBotUserDto::create($dto->callbackQuery?->from ?? $dto->message->from)
-            )
+            $telegramBotUser = ($userDto = TelegramBotUserDto::create($dto->callbackQuery?->from ?? $dto->message->from)
                 ->merge([
                     ...(
                         $dto->message->contact
@@ -55,16 +53,17 @@ class TelegramBotListenerService extends DefaultService
                         : []
                     ),
                 ])
+            )
                 ->save();
 
             $telegramBotMessage = ($chatDto = TelegramBotMessageDto::create($dto->message, [
                 'type'                 => TelegramBotMessageTypeEnum::Incoming,
                 'status'               => match (true) {
                     (bool)$dto->message->replyToMessage => TelegramBotMessageStatusEnum::Reply,
-                    (bool)$dto->callbackQuery           => TelegramBotMessageStatusEnum::Callback,
-                    (bool)$dto->message->editDate       => TelegramBotMessageStatusEnum::Update,
+                    (bool)$dto->callbackQuery => TelegramBotMessageStatusEnum::Callback,
+                    (bool)$dto->message->editDate => TelegramBotMessageStatusEnum::Update,
 
-                    default                             => TelegramBotMessageStatusEnum::New ,
+                    default => TelegramBotMessageStatusEnum::New ,
                 },
                 'externalUpdateId'     => $dto->updateId,
                 'telegramBotChatId'    => $telegramBotChat->id,
@@ -72,17 +71,32 @@ class TelegramBotListenerService extends DefaultService
                 'telegramBotMessageId' => match (true) {
                     (bool)$dto->message->replyToMessage => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->message->replyToMessage)?->id,
-                    (bool)$dto->callbackQuery           => $this->telegramBotMessageService
+                    (bool)$dto->callbackQuery => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->message)?->id,
 
-                    default                             => $this->telegramBotMessageService->getPreviousMessageOutgoing($dto->message)?->id,
+                    default => $this->telegramBotMessageService->getPreviousMessageOutgoing($dto->message)?->id,
                 },
                 'info'                 => [
                     ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
-                    ...($dto->message?->replyMarkup?->buttons ? ['buttons' => $dto->message->replyMarkup->buttons] : []),
+                    ...($dto->message?->buttons ? ['buttons'   => $dto->message->buttons] : []),
+                    ...($dto->message?->keyboards ? ['keyboards'   => $dto->message->keyboards] : []),
+                    ...(
+                        $dto->message?->replyMarkup?->buttons ? [
+                            'reply_buttons'   => $dto->message->replyMarkup->buttons,
+                        ]
+                        : []
+                    ),
+                    ...(
+                        $dto->message?->replyMarkup?->keyboards ? [
+                            'reply_keyboards' => $dto->message->replyMarkup->keyboards,
+                        ]
+                        : []
+                    ),
                     ...($dto->message?->photos?->isNotEmpty() ? ['photos' => $dto->message->photos] : []),
                     ...($dto->message?->document ? ['document' => $dto->message->document] : []),
                     ...($dto->message?->sticker ? ['sticker' => $dto->message->sticker] : []),
+                    ...($dto->message?->replyToMessage ? ['reply' => $dto->message->replyToMessage?->messageId] : []),
+                    ...($telegramBotUser->wasRecentlyCreated ? ['user_created' => true] : []),
                 ],
             ]))->save();
 
@@ -136,7 +150,7 @@ class TelegramBotListenerService extends DefaultService
                     (bool)$dto->response->message->replyToMessage => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->response->message->replyToMessage)?->id,
 
-                    default                                       => $dto->previousMessageId,
+                    default => $dto->previousMessageId,
                 },
                 'info'                 => [
                     ...(
@@ -146,7 +160,7 @@ class TelegramBotListenerService extends DefaultService
                     ),
                     ...(
                         $dto->response->message?->replyMarkup?->buttons
-                        ? ['buttons' => $dto->response->message->replyMarkup->buttons]
+                        ? ['reply_buttons' => $dto->response->message->replyMarkup->buttons]
                         : []
                     ),
                     ...(
@@ -156,7 +170,7 @@ class TelegramBotListenerService extends DefaultService
                     ),
                     ...(
                         $dto->response->message?->replyMarkup?->keyboards
-                        ? ['keyboards' => $dto->response->message->replyMarkup->keyboards]
+                        ? ['reply_keyboards' => $dto->response->message->replyMarkup->keyboards]
                         : []
                     ),
                     ...(

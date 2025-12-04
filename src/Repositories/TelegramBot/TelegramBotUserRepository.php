@@ -53,10 +53,10 @@ class TelegramBotUserRepository extends DefaultRepository
             ($model = $this->getByExternalUserId($dto->externalUserId))
                 ? $model->update([
                     'first_name' => $dto->firstName,
-                    'user_name' => $dto->userName,
-                    'phone' => $dto->phone,
-                    'language' => $dto->language,
-                    'is_bot' => $dto->isBot,
+                    'user_name'  => $dto->userName,
+                    'phone'      => $dto->phone,
+                    'language'   => $dto->language,
+                    'is_bot'     => $dto->isBot,
                     ...(
                         (is_null($model->info) && is_null($dto->info))
                         ? []
@@ -72,15 +72,15 @@ class TelegramBotUserRepository extends DefaultRepository
                     ->withoutQueryLog()
                     ->withoutQueryCache()
                     ->create([
-                        'uuid' => $dto->uuid,
+                        'uuid'             => $dto->uuid,
                         'external_user_id' => $dto->externalUserId,
-                        'first_name' => $dto->firstName,
-                        'user_name' => $dto->userName,
-                        'phone' => $dto->phone,
-                        'language' => $dto->language,
-                        'is_ban' => $dto->isBan,
-                        'is_bot' => $dto->isBot,
-                        'info' => $dto->info,
+                        'first_name'       => $dto->firstName,
+                        'user_name'        => $dto->userName,
+                        'phone'            => $dto->phone,
+                        'language'         => $dto->language,
+                        'is_ban'           => $dto->isBan,
+                        'is_bot'           => $dto->isBot,
+                        'info'             => $dto->info,
                     ]);
 
             return $model;

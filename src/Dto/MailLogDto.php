@@ -26,7 +26,6 @@ use Throwable;
  * Dto лога отправки письма
  * @see \Atlcom\LaravelHelper\Models\MailLog
  */
-//?!? 
 class MailLogDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;

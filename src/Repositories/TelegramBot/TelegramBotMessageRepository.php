@@ -204,17 +204,17 @@ class TelegramBotMessageRepository extends DefaultRepository
         return $this->withoutTelescope(function () use ($dto) {
             ($model = $this->getByExternalMessageId($dto->externalMessageId, $dto->type))
                 ? $model->update([
-                    'external_message_id' => $dto->externalMessageId,
-                    'external_update_id' => $dto->externalUpdateId,
-                    'telegram_bot_chat_id' => $dto->telegramBotChatId,
-                    'telegram_bot_user_id' => $dto->telegramBotUserId,
+                    'external_message_id'     => $dto->externalMessageId,
+                    'external_update_id'      => $dto->externalUpdateId,
+                    'telegram_bot_chat_id'    => $dto->telegramBotChatId,
+                    'telegram_bot_user_id'    => $dto->telegramBotUserId,
                     'telegram_bot_message_id' => $dto->telegramBotMessageId,
-                    'status' => $dto->status,
+                    'status'                  => $dto->status,
                     ...($dto->slug ? ['slug' => $dto->slug] : []),
-                    'text' => $dto->text,
-                    'send_at' => $dto->sendAt,
-                    'edit_at' => $dto->editAt,
-                    'info' => [
+                    'text'                    => $dto->text,
+                    'send_at'                 => $dto->sendAt,
+                    'edit_at'                 => $dto->editAt,
+                    'info'                    => [
                         ...($model->info ?? []),
                         ...($dto->info ?? []),
                         ...(
@@ -232,19 +232,19 @@ class TelegramBotMessageRepository extends DefaultRepository
                     ->withoutQueryLog()
                     ->withoutQueryCache()
                     ->create([
-                        'uuid' => $dto->uuid,
-                        'external_message_id' => $dto->externalMessageId,
-                        'external_update_id' => $dto->externalUpdateId,
-                        'telegram_bot_chat_id' => $dto->telegramBotChatId,
-                        'telegram_bot_user_id' => $dto->telegramBotUserId,
+                        'uuid'                    => $dto->uuid,
+                        'external_message_id'     => $dto->externalMessageId,
+                        'external_update_id'      => $dto->externalUpdateId,
+                        'telegram_bot_chat_id'    => $dto->telegramBotChatId,
+                        'telegram_bot_user_id'    => $dto->telegramBotUserId,
                         'telegram_bot_message_id' => $dto->telegramBotMessageId,
-                        'type' => $dto->type,
-                        'status' => $dto->status,
-                        'slug' => $dto->slug,
-                        'text' => $dto->text,
-                        'send_at' => $dto->sendAt,
-                        'edit_at' => $dto->editAt,
-                        'info' => [
+                        'type'                    => $dto->type,
+                        'status'                  => $dto->status,
+                        'slug'                    => $dto->slug,
+                        'text'                    => $dto->text,
+                        'send_at'                 => $dto->sendAt,
+                        'edit_at'                 => $dto->editAt,
+                        'info'                    => [
                             ...($dto->info ?? []),
                             ...($dto->externalUpdateId ? ['update_ids' => [$dto->externalUpdateId]] : []),
                         ],
@@ -252,5 +252,27 @@ class TelegramBotMessageRepository extends DefaultRepository
 
             return $model;
         });
+    }
+
+
+    /**
+     * Возвращает предыдущее исходящее сообщение бота с слагом по external_chat_id
+     *
+     * @param string $externalChatId
+     * @return TelegramBotMessage|null
+     */
+    public function getPreviousMessageOutgoingWithSlug(string $externalChatId): ?TelegramBotMessage
+    {
+        return $this->withoutTelescope(
+            fn () => $this->model::query()
+                ->withoutQueryLog()
+                ->withoutQueryCache()
+                ->whereHas('telegramBotChat', static fn ($q) => $q->where('external_chat_id', $externalChatId))
+                ->ofType(TelegramBotMessageTypeEnum::Outgoing)
+                ->whereNotIn('slug', ['', 'unknown', 'undefined', 'unrecognized', 'none', 'null'])
+                ->whereNotNull('slug')
+                ->orderByDesc('id')
+                ->first()
+        );
     }
 }

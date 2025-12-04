@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageStatusEnum;
 use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Relations\TelegramBotMessagePreviousMessageWithSlugRelation;
 use Atlcom\LaravelHelper\Traits\DynamicTableModelTrait;
 use Atlcom\LaravelHelper\Database\Factories\TelegramBotMessageFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,6 +50,8 @@ use UnitEnum;
  * @method Relation|TelegramBotMessage telegramBotMessage()
  * @property-read TelegramBotMessage $previousMessage
  * @method Relation|TelegramBotMessage previousMessage()
+ * @property-read TelegramBotMessage $previousMessageWithSlug
+ * @method Relation|TelegramBotMessage previousMessageWithSlug()
  * 
  * @method self|Builder ofUuid(string $uuid)
  * @method self|Builder ofType(TelegramBotMessageTypeEnum $type)
@@ -67,40 +70,40 @@ class TelegramBotMessage extends DefaultModel
     public const COMMENT = 'Сообщение телеграм бота';
 
     protected ?bool $withModelLog = false;
-    protected $guarded = ['id'];
-    protected $casts = [
-        'uuid' => 'string',
-        'external_message_id' => 'integer',
-        'external_update_id' => 'integer',
-        'telegram_bot_chat_id' => 'integer',
-        'telegram_bot_user_id' => 'integer',
+    protected       $guarded      = ['id'];
+    protected       $casts        = [
+        'uuid'                    => 'string',
+        'external_message_id'     => 'integer',
+        'external_update_id'      => 'integer',
+        'telegram_bot_chat_id'    => 'integer',
+        'telegram_bot_user_id'    => 'integer',
         'telegram_bot_message_id' => 'integer',
-        'type' => TelegramBotMessageTypeEnum::class,
-        'status' => TelegramBotMessageStatusEnum::class,
-        'slug' => 'string',
-        'text' => 'string',
-        'send_at' => 'datetime',
-        'edit_at' => 'datetime',
-        'info' => 'array',
+        'type'                    => TelegramBotMessageTypeEnum::class,
+        'status'                  => TelegramBotMessageStatusEnum::class,
+        'slug'                    => 'string',
+        'text'                    => 'string',
+        'send_at'                 => 'datetime',
+        'edit_at'                 => 'datetime',
+        'info'                    => 'array',
     ];
-    protected $fields = [
-        'id' => 'ID сообщения телеграм бота',
-        'uuid' => 'Uuid сообщения телеграм бота',
-        'external_message_id' => 'Внешний Id сообщения телеграм бота',
-        'external_update_id' => 'Внешний Id обновления сообщения телеграм бота',
-        'telegram_bot_chat_id' => 'Чат телеграм бота',
-        'telegram_bot_user_id' => 'Пользователь телеграм бота',
+    protected       $fields       = [
+        'id'                      => 'ID сообщения телеграм бота',
+        'uuid'                    => 'Uuid сообщения телеграм бота',
+        'external_message_id'     => 'Внешний Id сообщения телеграм бота',
+        'external_update_id'      => 'Внешний Id обновления сообщения телеграм бота',
+        'telegram_bot_chat_id'    => 'Чат телеграм бота',
+        'telegram_bot_user_id'    => 'Пользователь телеграм бота',
         'telegram_bot_message_id' => 'Предыдущее сообщение телеграм бота',
-        'type' => 'Тип сообщения телеграм бота',
-        'status' => 'Статус сообщения телеграм бота',
-        'slug' => 'Слаг сообщения чата телеграм бота',
-        'text' => 'Текст сообщения чата телеграм бота',
-        'send_at' => 'Дата и время сообщения телеграм бота',
-        'edit_at' => 'Дата и время редактирования сообщения телеграм бота',
-        'info' => 'Информация о сообщении телеграм бота',
-        'created_at' => 'Добавлено',
-        'updated_at' => 'Обновлено',
-        'deleted_at' => 'Удалено',
+        'type'                    => 'Тип сообщения телеграм бота',
+        'status'                  => 'Статус сообщения телеграм бота',
+        'slug'                    => 'Слаг сообщения чата телеграм бота',
+        'text'                    => 'Текст сообщения чата телеграм бота',
+        'send_at'                 => 'Дата и время сообщения телеграм бота',
+        'edit_at'                 => 'Дата и время редактирования сообщения телеграм бота',
+        'info'                    => 'Информация о сообщении телеграм бота',
+        'created_at'              => 'Добавлено',
+        'updated_at'              => 'Обновлено',
+        'deleted_at'              => 'Удалено',
     ];
 
 
@@ -202,6 +205,17 @@ class TelegramBotMessage extends DefaultModel
     public function previousMessage(): Relation
     {
         return $this->telegramBotMessage();
+    }
+
+
+    /**
+     * Отношение: Предыдущее сообщение с заполненным slug
+     *
+     * @return Relation
+     */
+    public function previousMessageWithSlug(): Relation
+    {
+        return new TelegramBotMessagePreviousMessageWithSlugRelation($this->newQuery(), $this);
     }
 
 

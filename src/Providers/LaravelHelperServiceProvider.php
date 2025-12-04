@@ -129,7 +129,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация dto
         $this->app->resolving(
             Dto::class,
-            fn (Dto $dto, Application $app) => $dto->fillFromRequest(request()->toArray())
+            fn (Dto $dto, Application $app) => $dto->fillFromRequest(request()->toArray()) //?!? проверка массива на запрещенные слова HELPER_DTO_FORBIDDEN_WORDS_ENABLED
         );
 
         // Регистрация сервисов

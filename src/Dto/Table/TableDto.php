@@ -25,6 +25,7 @@ class TableDto extends DefaultDto
     public Collection $columns;
     /** @var Collection<TableFilterDto> */
     public Collection $filters;
+    public array $additional;
 
 
     /**
@@ -54,6 +55,7 @@ class TableDto extends DefaultDto
             'permissions' => TablePermissionsDto::create(),
             'pagination' => TablePaginationDto::create(),
             'filters' => [],
+            'additional' => [],
         ];
     }
 
