@@ -292,12 +292,16 @@ if (!function_exists('telegram')) {
      * Отправляет сообщение в телеграм
      *
      * @param mixed $data
-     * @param string|TelegramTypeEnum $type
+     * @param string|TelegramTypeEnum|null $type
      * @param array $context
      * @return void
      */
-    function telegram(mixed $data, string|TelegramTypeEnum $type = TelegramTypeEnum::Debug, array $context = []): void
+    function telegram(mixed $data, string|TelegramTypeEnum|null $type = TelegramTypeEnum::Debug, array $context = []): void
     {
+        if ($type === null) {
+            return;
+        }
+
         try {
             $log = Log::build(['driver' => 'custom', 'via' => TelegramLogLogger::class]);
             $data instanceof Throwable
