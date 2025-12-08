@@ -48,8 +48,8 @@ class ModelLogService extends DefaultService
         $primaryKey = $model->getKeyName();
 
         $dto = ModelLogDto::create([
-            'modelType' => $model::class,
-            'modelId' => (string)(
+            'modelType'  => $model::class,
+            'modelId'    => (string)(
                 $model->{$primaryKey}
                 ?? (
                     (\is_null($attributes) || !$primaryKey)
@@ -82,9 +82,9 @@ class ModelLogService extends DefaultService
                 )
                 ?? null
             ),
-            'type' => $type,
+            'type'       => $type,
             'attributes' => $attributes ?? $this->getAttributes($model),
-            'changes' => null,
+            'changes'    => null,
         ]);
 
         !$dto->modelId ?: Hlp::cacheRuntime($dto->getHash(), static fn () => $dto->dispatch());
@@ -116,11 +116,11 @@ class ModelLogService extends DefaultService
         $isRestore = $type == ModelLogTypeEnum::Restore;
 
         $dto = ModelLogDto::fill([
-            'modelType' => $model::class,
-            'modelId' => $model->{$model->getKeyName()} ?? null,
-            'type' => $type,
+            'modelType'  => $model::class,
+            'modelId'    => $model->{$model->getKeyName()} ?? null,
+            'type'       => $type,
             'attributes' => $this->getAttributes($model),
-            'changes' => $this->getChanges($model, $attributes),
+            'changes'    => $this->getChanges($model, $attributes),
         ]);
 
         !($dto->changes || $isSoftDelete || $isRestore) ?: $dto->dispatch();
@@ -153,11 +153,11 @@ class ModelLogService extends DefaultService
         }
 
         $dto = ModelLogDto::fill([
-            'modelType' => $model::class,
-            'modelId' => $model->{$model->getKeyName()} ?? null,
-            'type' => $type,
+            'modelType'  => $model::class,
+            'modelId'    => $model->{$model->getKeyName()} ?? null,
+            'type'       => $type,
             'attributes' => $this->getAttributes($model),
-            'changes' => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges($model) : null,
+            'changes'    => $type === ModelLogTypeEnum::SoftDelete ? $this->getChanges($model) : null,
         ]);
 
         $dto->dispatch();
@@ -175,11 +175,11 @@ class ModelLogService extends DefaultService
         $type = ModelLogTypeEnum::Restore;
 
         $dto = ModelLogDto::fill([
-            'modelType' => $model::class,
-            'modelId' => $model->{$model->getKeyName()} ?? null,
-            'type' => $type,
+            'modelType'  => $model::class,
+            'modelId'    => $model->{$model->getKeyName()} ?? null,
+            'type'       => $type,
             'attributes' => $this->getAttributes($model),
-            'changes' => null,
+            'changes'    => null,
         ]);
 
         $dto->dispatch();
@@ -197,11 +197,11 @@ class ModelLogService extends DefaultService
         $type = ModelLogTypeEnum::Truncate;
 
         $dto = ModelLogDto::fill([
-            'modelType' => $model::class,
-            'modelId' => $model->{$model->getKeyName()} ?? null,
-            'type' => $type,
+            'modelType'  => $model::class,
+            'modelId'    => $model->{$model->getKeyName()} ?? null,
+            'type'       => $type,
             'attributes' => $this->getAttributes($model),
-            'changes' => null,
+            'changes'    => null,
         ]);
 
         $dto->dispatch();

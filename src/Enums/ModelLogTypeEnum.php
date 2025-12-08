@@ -12,13 +12,13 @@ enum ModelLogTypeEnum: string
     use HelperEnumTrait;
 
 
-    case Create = 'create';
-    case Update = 'update';
-    case Delete = 'delete';
-    case SoftDelete = 'soft_delete';
+    case Create      = 'create';
+    case Update      = 'update';
+    case Delete      = 'delete';
+    case SoftDelete  = 'soft_delete';
     case ForceDelete = 'force_delete';
-    case Restore = 'restore';
-    case Truncate = 'truncate';
+    case Restore     = 'restore';
+    case Truncate    = 'truncate';
 
 
     /**
@@ -41,11 +41,11 @@ enum ModelLogTypeEnum: string
     public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
-            self::Create => 'Создано',
+            self::Create => 'Добавлено',
             self::Update => 'Обновлено',
             self::Delete => 'Удалено',
-            self::SoftDelete => 'Мягко удалено',
-            self::ForceDelete => 'Удалено безвозвратно',
+            self::SoftDelete => 'Скрыто',
+            self::ForceDelete => 'Удалено',
             self::Restore => 'Восстановлено',
             self::Truncate => 'Очищено',
 
