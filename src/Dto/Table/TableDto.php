@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Dto\Table;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 use Illuminate\Support\Collection;
 use Override;
@@ -18,7 +19,7 @@ class TableDto extends DefaultDto
     public const AUTO_SERIALIZE_ENABLED = true;
 
     public string $model;
-    public ?string $name;
+    public TableSettingsDto $settings;
     public TablePermissionsDto $permissions;
     public TablePaginationDto $pagination;
     /** @var Collection<TableColumnDto> */
@@ -36,7 +37,7 @@ class TableDto extends DefaultDto
     {
         return [
             'model' => 'string',
-            'name' => 'string',
+            'settings' => TableSettingsDto::class,
             'permissions' => TablePermissionsDto::class,
             'pagination' => TablePaginationDto::class,
             'columns' => [TableColumnDto::class],
@@ -52,6 +53,7 @@ class TableDto extends DefaultDto
     protected function defaults(): array
     {
         return [
+            'settings' => TableSettingsDto::create(),
             'permissions' => TablePermissionsDto::create(),
             'pagination' => TablePaginationDto::create(),
             'filters' => [],
@@ -68,8 +70,12 @@ class TableDto extends DefaultDto
     {
         $model = $this->model ?? $array['model'] ?? null;
 
-        if ($model && !($this->defaults()['name'] ?? [])) {
-            !method_exists($model, 'getTableComment') ?: $array['name'] ??= $model::getTableComment();
+        if ($model && !($this->defaults()['settings']['title'] ?? [])) {
+            !method_exists($model, 'getTableComment') ?: $array['settings']['title'] ??= $model::getTableComment();
+        }
+
+        if ($model && !($this->defaults()['settings']['slug'] ?? [])) {
+            !method_exists($model, 'getTableName') ?: $array['settings']['slug'] ??= Hlp::translitToSlug($model::getTableName());
         }
 
         if ($model && !($this->defaults()['columns'] ?? [])) {
