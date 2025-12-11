@@ -332,6 +332,14 @@ class CacheService extends DefaultService
             ? (Lh::config($config, 'gzdeflate.level') ?? -1)
             : false;
 
+        // Проверка на бинарные данные (невалидный UTF-8) — признак повреждённого кэша
+        if (!is_null($result) && is_string($result) && !mb_check_encoding($result, 'UTF-8')) {
+            // Данные бинарные, но gzdeflate выключен — кэш повреждён
+            if ($gzDeflate === false) {
+                return null;
+            }
+        }
+
         $result = is_null($result)
             ? null
             : (
@@ -339,6 +347,8 @@ class CacheService extends DefaultService
                 ? ((($tmp = @unserialize(@gzinflate($result))) === false) ? null : $tmp)
                 : @unserialize($result)
             );
+
+        //?!? проблема после gzinflate($result) данные остаются бинарные
 
         return $result;
     }
