@@ -16,7 +16,8 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
  */
 class TelegramBotJob extends DefaultJob
 {
-    public $tries = 1;
+    public $tries = 3;
+    public $backoff = 1;
 
 
     public function __construct(protected TelegramBotOutDto $dto)
