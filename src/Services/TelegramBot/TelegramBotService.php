@@ -96,6 +96,14 @@ class TelegramBotService extends DefaultService
                 description: $exception->getMessage(),
             );
 
+            $dto->meta = [
+                ...($dto->meta ?? []),
+                'exception' => [
+                    'class' => $exception::class,
+                    'code'  => $exception->getCode(),
+                ],
+            ];
+
             telegram($exception);
 
         } finally {
