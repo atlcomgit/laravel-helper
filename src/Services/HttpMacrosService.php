@@ -129,8 +129,10 @@ class HttpMacrosService extends DefaultService
                             ($connectionTimeout = (int)Lh::config(ConfigEnum::Http, 'telegramOrg.connection_timeout')) > 0
                             ? $connectionTimeout
                             : ($timeout > 0 ? $timeout : 10)
-
                         )
+                        ->withOptions([
+                            'force_ip_resolve' => CURL_IPRESOLVE_V4, // <- форсируем IPv4
+                        ])
                 );
         }
     }
