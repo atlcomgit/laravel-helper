@@ -54,12 +54,11 @@ class TelegramBotService extends DefaultService
     {
         try {
             $dto->response = match (true) {
-                //?!? fix
-                // $this->telegramBotMessageService->isDuplicateLastMessage($dto)
-                // => TelegramBotOutResponseDto::create(
-                //     status: false,
-                //     description: 'Повторное сообщение',
-                // ),
+                $this->telegramBotMessageService->isDuplicateLastMessage($dto)
+                => TelegramBotOutResponseDto::create(
+                    status: false,
+                    description: 'Повторное сообщение',
+                ),
 
                 $this->telegramBotMessageService->isKickedChat($dto)
                 => TelegramBotOutResponseDto::create(

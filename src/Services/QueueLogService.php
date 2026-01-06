@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Throwable;
 
 /**
  * @internal
@@ -41,6 +42,27 @@ class QueueLogService extends DefaultService
     {
         $name = $event->job->resolveName();
 
+        // Диагностика: иногда падение происходит ещё до выполнения job (на этапе Queue::before).
+        // Логируем минимальный контекст только в debug-режиме.
+        //?!?
+        if (true || isDebug()) {
+            try {
+                logger()->debug('QueueLogService: JobProcessing', [
+                    'uuid'       => $event->job->uuid(),
+                    'job_id'     => $event->job->getJobId(),
+                    'name'       => $name,
+                    'job_class'  => $event->job::class,
+                    'queue'      => $event->job->getQueue(),
+                    'connection' => $event->job->getConnectionName(),
+                    'attempts'   => $event->job->attempts(),
+                ]);
+            } catch (Throwable $exception) {
+                logger()->debug('QueueLogService: debug log failed', [
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         if (
             !Lh::config(ConfigEnum::QueueLog, 'enabled')
             || (($event instanceof JobProcessing) && !Lh::config(ConfigEnum::QueueLog, 'store_on_start'))
@@ -57,11 +79,30 @@ class QueueLogService extends DefaultService
             class: $event->job::class,
         );
 
-        $command = unserialize($payload['data']['command'] ?? '');
-        $command = (is_object($command) && method_exists($command, 'toArray'))
+        // Важно: логирование очереди НЕ должно ломать выполнение job.
+        // Десериализация команды может падать (например, при смене кода/версий), поэтому делаем её безопасной.
+        $commandRaw = $payload['data']['command'] ?? null;
+        $command = null;
+        $unserializeError = null;
+
+        if (is_string($commandRaw) && $commandRaw !== '') {
+            try {
+                $command = @unserialize($commandRaw);
+
+                if ($command === false && $commandRaw !== 'b:0;') {
+                    $command = null;
+                }
+            } catch (Throwable $exception) {
+                $command = null;
+                $unserializeError = $exception->getMessage();
+            }
+        }
+
+        $payload['data']['command'] = (is_object($command) && method_exists($command, 'toArray'))
             ? $command->toArray()
             : json_decode(json_encode($command, Hlp::jsonFlags()), true);
-        $payload['data']['command'] = $command;
+
+        !$unserializeError ?: $payload['data']['command_unserialize_error'] = $unserializeError;
 
         $dto = QueueLogDto::create(
             uuid: $uuid,
@@ -86,14 +127,14 @@ class QueueLogService extends DefaultService
         !($dto->isUpdated || !Lh::config(ConfigEnum::QueueLog, 'store_on_start'))
             ?: $dto->merge([
                 'duration' => $duration = Carbon::parse($payload['createdAt'] ?? '')->diffInMilliseconds() / 1000,
-                'memory' => $memory = ApplicationDto::restore()?->getMemory(),
-                'info' => [
-                    'class' => $name,
+                'memory'   => $memory = ApplicationDto::restore()?->getMemory(),
+                'info'     => [
+                    'class'    => $name,
                     'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
-                    'memory' => Hlp::sizeBytesToString($memory),
-                    'deleted' => $event->job->isDeleted(),
+                    'memory'   => Hlp::sizeBytesToString($memory),
+                    'deleted'  => $event->job->isDeleted(),
                     'released' => $event->job->isReleased(),
-                    'failed' => $event->job->hasFailed(),
+                    'failed'   => $event->job->hasFailed(),
                 ],
             ]);
 

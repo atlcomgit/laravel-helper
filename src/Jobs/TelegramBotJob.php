@@ -17,8 +17,9 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
  */
 class TelegramBotJob extends DefaultJob
 {
-    public $tries   = 3;
-    public $backoff = 1;
+    public bool $withQueueLog = true; //?!? 
+    public      $tries        = 3;
+    public      $backoff      = 1;
 
 
     public function __construct(protected TelegramBotOutDto $dto)
@@ -34,6 +35,30 @@ class TelegramBotJob extends DefaultJob
      */
     public function __invoke()
     {
+        if (true || isDebug()) {
+            try {
+                logger()->debug('TelegramBotJob: start', [
+                    'uuid'       => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
+                    'job_id'     => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
+                    'queue'      => method_exists($this->job, 'getQueue') ? $this->job->getQueue() : null,
+                    'connection' => method_exists($this->job, 'getConnectionName') ? $this->job->getConnectionName() : null,
+                    'attempts'   => $this->attempts(),
+                    'tries'      => $this->tries,
+                    'dto'        => [
+                        'class'          => $this->dto::class,
+                        'slug'           => property_exists($this->dto, 'slug') ? $this->dto->slug : null,
+                        'externalChatId' => property_exists($this->dto, 'externalChatId')
+                            ? $this->dto->externalChatId
+                            : null,
+                    ],
+                ]);
+            } catch (\Throwable $exception) {
+                logger()->debug('TelegramBotJob: debug log failed', [
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         // Очищаем маркер ошибки от предыдущих попыток/внешних вызовов,
         // чтобы не уходить в повтор без реального падения текущей отправки.
         if (is_array($this->dto->meta)) {
