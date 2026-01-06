@@ -17,9 +17,9 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
  */
 class TelegramBotJob extends DefaultJob
 {
-    public bool $withQueueLog = true; //?!? 
-    public      $tries        = 3;
-    public      $backoff      = 1;
+    public bool $withQueueLog = false;
+    public      $tries        = 5;
+    public      $backoff      = 0;
 
 
     public function __construct(protected TelegramBotOutDto $dto)
@@ -68,7 +68,7 @@ class TelegramBotJob extends DefaultJob
         app(TelegramBotService::class)->send($this->dto);
 
         // TelegramBotService перехватывает исключения, поэтому стандартный retry очереди не срабатывает.
-        // Если в meta есть данные об исключении — делаем повторную попытку через 1 секунду.
+        // Если в meta есть данные об исключении — делаем повторную попытку сразу (без ожидания).
         if (($this->dto->meta['exception'] ?? null) !== null) {
             if ($this->attempts() >= $this->tries) {
                 !isDebug() ?: logger()->debug('TelegramBotJob: fail', [
@@ -87,10 +87,10 @@ class TelegramBotJob extends DefaultJob
                 'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
                 'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
                 'attempts' => $this->attempts(),
-                'delay'    => 1,
+                'delay'    => 0,
             ]);
 
-            $this->release(1);
+            $this->release(0);
 
             return;
         }

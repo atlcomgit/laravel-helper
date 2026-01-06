@@ -42,34 +42,6 @@ class QueueLogService extends DefaultService
     {
         $name = $event->job->resolveName();
 
-        // Диагностика: иногда падение происходит ещё до выполнения job (на этапе Queue::before).
-        // Логируем минимальный контекст только в debug-режиме.
-        if (isDebug()) {
-            try {
-                $eventName = match (true) {
-                    $event instanceof JobProcessing => 'JobProcessing',
-                    $event instanceof JobProcessed => 'JobProcessed',
-                    $event instanceof JobFailed => 'JobFailed',
-
-                    default => $event::class,
-                };
-
-                logger()->debug("QueueLogService: {$eventName}", [
-                    'uuid'       => $event->job->uuid(),
-                    'job_id'     => $event->job->getJobId(),
-                    'name'       => $name,
-                    'job_class'  => $event->job::class,
-                    'queue'      => $event->job->getQueue(),
-                    'connection' => $event->job->getConnectionName(),
-                    'attempts'   => $event->job->attempts(),
-                ]);
-            } catch (Throwable $exception) {
-                logger()->debug('QueueLogService: debug log failed', [
-                    'error' => $exception->getMessage(),
-                ]);
-            }
-        }
-
         if (
             !Lh::config(ConfigEnum::QueueLog, 'enabled')
             || (($event instanceof JobProcessing) && !Lh::config(ConfigEnum::QueueLog, 'store_on_start'))
