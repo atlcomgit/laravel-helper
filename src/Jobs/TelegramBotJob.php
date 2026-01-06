@@ -101,8 +101,14 @@ class TelegramBotJob extends DefaultJob
                 'delay'    => 0,
             ]);
 
-            // Пере-диспатчим задачу в ready-очередь, чтобы воркер подхватил её мгновенно.
-            self::dispatch($this->dto)->onQueue(Lh::config(ConfigEnum::TelegramBot, 'queue'));
+            // Делаем dispatch задачи в ready-очередь, чтобы worker подхватил её мгновенно
+            (
+                (Lh::config(ConfigEnum::TelegramBot, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
+                || $this->dto->useSendSync
+            )
+                ? self::dispatchSync($this->dto)
+                : self::dispatch($this->dto)->onQueue(Lh::config(ConfigEnum::TelegramBot, 'queue'));
+
             $this->delete();
 
             return;

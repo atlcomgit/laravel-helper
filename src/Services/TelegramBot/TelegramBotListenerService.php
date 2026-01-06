@@ -18,6 +18,7 @@ use Atlcom\LaravelHelper\Enums\TelegramBotMessageTypeEnum;
 use Atlcom\LaravelHelper\Enums\TelegramTypeEnum;
 use Atlcom\LaravelHelper\Events\TelegramBotMessageEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
+use Atlcom\LaravelHelper\Models\TelegramBotMessage;
 use Throwable;
 
 /**
@@ -78,11 +79,11 @@ class TelegramBotListenerService extends DefaultService
                 },
                 'info'                 => [
                     ...($dto->callbackQuery ? ['callback' => $dto->callbackQuery->data] : []),
-                    ...($dto->message?->buttons ? ['buttons'   => $dto->message->buttons] : []),
-                    ...($dto->message?->keyboards ? ['keyboards'   => $dto->message->keyboards] : []),
+                    ...($dto->message?->buttons ? ['buttons' => $dto->message->buttons] : []),
+                    ...($dto->message?->keyboards ? ['keyboards' => $dto->message->keyboards] : []),
                     ...(
                         $dto->message?->replyMarkup?->buttons ? [
-                            'reply_buttons'   => $dto->message->replyMarkup->buttons,
+                            'reply_buttons' => $dto->message->replyMarkup->buttons,
                         ]
                         : []
                     ),
@@ -100,7 +101,7 @@ class TelegramBotListenerService extends DefaultService
                 ],
             ]))->save();
 
-            event(new TelegramBotMessageEvent($telegramBotMessage));
+            $this->event($telegramBotMessage);
 
         } catch (Throwable $exception) {
             telegram([
@@ -201,7 +202,7 @@ class TelegramBotListenerService extends DefaultService
                 ],
             ]))->save();
 
-            event(new TelegramBotMessageEvent($telegramBotMessage));
+            $this->event($telegramBotMessage);
 
         } catch (Throwable $exception) {
             telegram([
@@ -252,7 +253,19 @@ class TelegramBotListenerService extends DefaultService
         $telegramBotMessages = $this->telegramBotMessageService->deleteMessages($deletedMessages);
 
         foreach ($telegramBotMessages as $telegramBotMessage) {
-            event(new TelegramBotMessageEvent($telegramBotMessage));
+            $this->event($telegramBotMessage);
         }
+    }
+
+
+    /**
+     * Вызывает событие сохранения сообщения телеграм бота
+     *
+     * @param TelegramBotMessage $telegramBotMessage
+     * @return void
+     */
+    public function event(TelegramBotMessage $telegramBotMessage): void
+    {
+        event(new TelegramBotMessageEvent($telegramBotMessage));
     }
 }
