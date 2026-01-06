@@ -72,7 +72,7 @@ class TelegramBotJob extends DefaultJob
             // Важно: при Redis release(0) попадает в delayed zset, а при block_for=60 воркер
             // может подобрать задачу только через ~минуту. Поэтому делаем немедленный re-dispatch.
             $retryAttempt = is_array($this->dto->meta)
-                ? (int) ($this->dto->meta['queue_retry_attempt'] ?? 0)
+                ? (int)($this->dto->meta['queue_retry_attempt'] ?? 0)
                 : 0;
             $retryAttempt++;
 
@@ -81,7 +81,7 @@ class TelegramBotJob extends DefaultJob
                 'queue_retry_attempt' => $retryAttempt,
             ];
 
-            if ($retryAttempt >= (int) $this->tries) {
+            if ($retryAttempt >= (int)$this->tries) {
                 !isDebug() ?: logger()->debug('TelegramBotJob: fail', [
                     'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
                     'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
