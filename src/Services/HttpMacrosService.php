@@ -118,8 +118,10 @@ class HttpMacrosService extends DefaultService
                         ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::TelegramOrg))
                         ->asMultipart()
                         ->acceptJson()
-                        ->timeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
-                        ->connectTimeout(Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'))
+                        // Важно: timeout=0 отключает таймаут в Guzzle/cURL и может подвесить job до таймаута воркера.
+                        // Поэтому гарантируем ненулевое значение.
+                        ->timeout(($timeout = (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout')) > 0 ? $timeout : 10)
+                        ->connectTimeout($timeout > 0 ? $timeout : 10)
                 );
         }
     }
