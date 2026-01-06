@@ -103,7 +103,7 @@ class TelegramBotService extends DefaultService
                 ],
             ];
 
-            logger()->error($exception->getMessage(), [
+            !isDebug() ?: logger()->error($exception->getMessage(), [
                 'dto_class' => $dto::class,
                 'dto'       => $dto->toArray(),
                 'trace'     => $exception->getTraceAsString(),
@@ -114,7 +114,7 @@ class TelegramBotService extends DefaultService
             try {
                 // telegram($exception);
             } catch (Throwable $telegramException) {
-                logger()->warning('Не удалось отправить исключение в Telegram', [
+                !isDebug() ?: logger()->warning('Не удалось отправить исключение в Telegram', [
                     'error' => $telegramException->getMessage(),
                 ]);
             }

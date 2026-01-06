@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotService;
+use Throwable;
 
 /**
  * @internal
@@ -35,28 +36,26 @@ class TelegramBotJob extends DefaultJob
      */
     public function __invoke()
     {
-        if (isDebug()) {
-            try {
-                logger()->debug('TelegramBotJob: start', [
-                    'uuid'       => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
-                    'job_id'     => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
-                    'queue'      => method_exists($this->job, 'getQueue') ? $this->job->getQueue() : null,
-                    'connection' => method_exists($this->job, 'getConnectionName') ? $this->job->getConnectionName() : null,
-                    'attempts'   => $this->attempts(),
-                    'tries'      => $this->tries,
-                    'dto'        => [
-                        'class'          => $this->dto::class,
-                        'slug'           => property_exists($this->dto, 'slug') ? $this->dto->slug : null,
-                        'externalChatId' => property_exists($this->dto, 'externalChatId')
-                            ? $this->dto->externalChatId
-                            : null,
-                    ],
-                ]);
-            } catch (\Throwable $exception) {
-                logger()->debug('TelegramBotJob: debug log failed', [
-                    'error' => $exception->getMessage(),
-                ]);
-            }
+        try {
+            !isDebug() ?: logger()->debug('TelegramBotJob: start', [
+                'uuid'       => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
+                'job_id'     => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
+                'queue'      => method_exists($this->job, 'getQueue') ? $this->job->getQueue() : null,
+                'connection' => method_exists($this->job, 'getConnectionName') ? $this->job->getConnectionName() : null,
+                'attempts'   => $this->attempts(),
+                'tries'      => $this->tries,
+                'dto'        => [
+                    'class'          => $this->dto::class,
+                    'slug'           => property_exists($this->dto, 'slug') ? $this->dto->slug : null,
+                    'externalChatId' => property_exists($this->dto, 'externalChatId')
+                        ? $this->dto->externalChatId
+                        : null,
+                ],
+            ]);
+        } catch (Throwable $exception) {
+            !isDebug() ?: logger()->debug('TelegramBotJob: debug log failed', [
+                'error' => $exception->getMessage(),
+            ]);
         }
 
         // Очищаем маркер ошибки от предыдущих попыток/внешних вызовов,

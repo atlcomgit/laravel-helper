@@ -120,8 +120,17 @@ class HttpMacrosService extends DefaultService
                         ->acceptJson()
                         // Важно: timeout=0 отключает таймаут в Guzzle/cURL и может подвесить job до таймаута воркера.
                         // Поэтому гарантируем ненулевое значение.
-                        ->timeout(($timeout = (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout')) > 0 ? $timeout : 10)
-                        ->connectTimeout($timeout > 0 ? $timeout : 10)
+                        ->timeout(
+                            ($timeout = (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout')) > 0
+                            ? $timeout
+                            : 10
+                        )
+                        ->connectTimeout(
+                            ($connectionTimeout = (int)Lh::config(ConfigEnum::Http, 'telegramOrg.connection_timeout')) > 0
+                            ? $connectionTimeout
+                            : ($timeout > 0 ? $timeout : 10)
+
+                        )
                 );
         }
     }
