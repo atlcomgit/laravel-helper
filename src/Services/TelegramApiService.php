@@ -111,14 +111,18 @@ class TelegramApiService extends DefaultService
                 $attempt++;
 
                 try {
+                    !isDebug() ?: logger()->info('Отправка api запроса в telegram');
                     $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
                     break;
 
                 } catch (ConnectionException $exception) {
                     if ($attempt >= $retryTimes) {
+                        !isDebug() ?: logger()->error('Ошибка отправки api запроса в telegram');
+
                         throw $exception;
                     }
 
+                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram');
                     $retrySleep === 0 ?: usleep($retrySleep * 1000);
                 }
             }

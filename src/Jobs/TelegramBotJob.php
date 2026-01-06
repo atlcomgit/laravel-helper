@@ -69,7 +69,19 @@ class TelegramBotJob extends DefaultJob
         // TelegramBotService перехватывает исключения, поэтому стандартный retry очереди не срабатывает.
         // Если в meta есть данные об исключении — делаем повторную попытку сразу (без ожидания).
         if (($this->dto->meta['exception'] ?? null) !== null) {
-            if ($this->attempts() >= $this->tries) {
+            // Важно: при Redis release(0) попадает в delayed zset, а при block_for=60 воркер
+            // может подобрать задачу только через ~минуту. Поэтому делаем немедленный re-dispatch.
+            $retryAttempt = is_array($this->dto->meta)
+                ? (int) ($this->dto->meta['queue_retry_attempt'] ?? 0)
+                : 0;
+            $retryAttempt++;
+
+            $this->dto->meta = [
+                ...(is_array($this->dto->meta) ? $this->dto->meta : []),
+                'queue_retry_attempt' => $retryAttempt,
+            ];
+
+            if ($retryAttempt >= (int) $this->tries) {
                 !isDebug() ?: logger()->debug('TelegramBotJob: fail', [
                     'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
                     'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
@@ -89,7 +101,9 @@ class TelegramBotJob extends DefaultJob
                 'delay'    => 0,
             ]);
 
-            $this->release(0);
+            // Пере-диспатчим задачу в ready-очередь, чтобы воркер подхватил её мгновенно.
+            self::dispatch($this->dto)->onQueue(Lh::config(ConfigEnum::TelegramBot, 'queue'));
+            $this->delete();
 
             return;
         }
