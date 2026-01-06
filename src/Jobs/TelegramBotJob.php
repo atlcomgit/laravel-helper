@@ -35,7 +35,7 @@ class TelegramBotJob extends DefaultJob
      */
     public function __invoke()
     {
-        if (true || isDebug()) {
+        if (isDebug()) {
             try {
                 logger()->debug('TelegramBotJob: start', [
                     'uuid'       => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
@@ -70,10 +70,29 @@ class TelegramBotJob extends DefaultJob
         // TelegramBotService перехватывает исключения, поэтому стандартный retry очереди не срабатывает.
         // Если в meta есть данные об исключении — делаем повторную попытку через 1 секунду.
         if (($this->dto->meta['exception'] ?? null) !== null) {
-            $this->attempts() >= $this->tries
-                ? $this->fail(new LaravelHelperException('Не удалось отправить сообщение в Telegram после нескольких попыток'))
+            if ($this->attempts() >= $this->tries) {
+                !isDebug() ?: logger()->debug('TelegramBotJob: fail', [
+                    'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
+                    'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
+                    'attempts' => $this->attempts(),
+                    'tries'    => $this->tries,
+                ]);
 
-                : $this->release(1);
+                $this->fail(new LaravelHelperException('Не удалось отправить сообщение в Telegram после нескольких попыток'));
+
+                return;
+            }
+
+            !isDebug() ?: logger()->debug('TelegramBotJob: release', [
+                'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
+                'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
+                'attempts' => $this->attempts(),
+                'delay'    => 1,
+            ]);
+
+            $this->release(1);
+
+            return;
         }
     }
 }
