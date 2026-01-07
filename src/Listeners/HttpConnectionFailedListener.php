@@ -34,6 +34,9 @@ class HttpConnectionFailedListener extends DefaultListener
         $uuid = ($event->request?->header(HttpLogService::HTTP_HEADER_UUID) ?? [])[0] ?? null;
         $throwable = ($event->exception ?? null) instanceof Throwable ? $event->exception : null;
 
+        $telegramAttempt = ($event->request?->header('X-Telegram-Attempt') ?? [])[0] ?? null;
+        $telegramTimeout = ($event->request?->header('X-Telegram-Timeout') ?? [])[0] ?? null;
+
         $dto = HttpLogDto::createByRequest(
             uuid: $uuid,
             request: $event->request,
@@ -45,6 +48,10 @@ class HttpConnectionFailedListener extends DefaultListener
                     'previous_exception' => $throwable?->getPrevious() ? $throwable->getPrevious()::class : null,
                     'previous_message'   => $throwable?->getPrevious()?->getMessage(),
                 ],
+                'telegram'          => array_filter([
+                    'attempt'         => $telegramAttempt,
+                    'timeout_seconds' => $telegramTimeout,
+                ], static fn ($v) => $v !== null),
             ],
         )
             ->merge([

@@ -82,6 +82,17 @@ class TelegramApiService extends DefaultService
         // Кэширование TLS session id (ускоряет TLS при keep-alive / повторных коннектах).
         !defined('CURLOPT_SSL_SESSIONID_CACHE') ?: $curl[CURLOPT_SSL_SESSIONID_CACHE] = 1;
 
+        // Форсируем HTTP/1.1: у Telegram/прокси периодически бывают “подвисания” на HTTP/2.
+        !defined('CURLOPT_HTTP_VERSION') || !defined('CURL_HTTP_VERSION_1_1')
+            ?: $curl[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
+
+        // Стабильные таймауты в окружениях, где сигналы могут влиять на cURL.
+        !defined('CURLOPT_NOSIGNAL') ?: $curl[CURLOPT_NOSIGNAL] = 1;
+
+        // Даем шанс быстрее уходить с “плохого” IP: перемешивание адресов + ограниченный DNS cache.
+        !defined('CURLOPT_DNS_SHUFFLE_ADDRESSES') ?: $curl[CURLOPT_DNS_SHUFFLE_ADDRESSES] = 1;
+        !defined('CURLOPT_DNS_CACHE_TIMEOUT') ?: $curl[CURLOPT_DNS_CACHE_TIMEOUT] = 60;
+
         // Разрешаем переиспользование соединения (на всякий случай задаём явно).
         !defined('CURLOPT_FORBID_REUSE') ?: $curl[CURLOPT_FORBID_REUSE] = false;
         !defined('CURLOPT_FRESH_CONNECT') ?: $curl[CURLOPT_FRESH_CONNECT] = false;
@@ -150,13 +161,21 @@ class TelegramApiService extends DefaultService
         array $files = [],
         bool $json = false,
     ): mixed {
-        $requestFactory = function () use ($json, $files): PendingRequest {
+        $timeoutSeconds = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'));
+
+        $requestFactory = function (int $attempt) use ($json, $files, $timeoutSeconds): PendingRequest {
             $request = $this->getReusableTelegramHttp();
 
-            // Макрос telegramOrg по умолчанию multipart. Для JSON-запросов переключаемся явно.
-            !$json
-                ? $request->asMultipart()
-                : $request->asJson();
+            $request = $request->withHeaders([
+                'X-Telegram-Attempt' => (string)$attempt,
+                'X-Telegram-Timeout' => (string)$timeoutSeconds,
+            ]);
+
+            // Для запросов БЕЗ файлов multipart не нужен и иногда ухудшает стабильность.
+            // Выбираем максимально простой формат: JSON или application/x-www-form-urlencoded.
+            $json
+                ? $request->asJson()
+                : (empty($files) ? $request->asForm() : $request->asMultipart());
 
             foreach ($files as $name => $path) {
                 if ($path instanceof CURLFile) {
@@ -178,7 +197,7 @@ class TelegramApiService extends DefaultService
         $retrySleep = max(0, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.sleep'));
 
         if (!$retryEnabled || $retryTimes <= 1) {
-            $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
+            $response = $requestFactory(1)->post("bot{$botToken}/{$method}", $params);
         } else {
             // Пересоздаём multipart-запрос на каждую попытку, т.к. asMultipart конфликтует со встроенным retry
             $attempt = 0;
@@ -188,7 +207,7 @@ class TelegramApiService extends DefaultService
 
                 try {
                     !isDebug() ?: logger()->info('Отправка api запроса в telegram');
-                    $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
+                    $response = $requestFactory($attempt)->post("bot{$botToken}/{$method}", $params);
                     break;
 
                 } catch (ConnectionException $exception) {
@@ -198,19 +217,25 @@ class TelegramApiService extends DefaultService
                         throw $exception;
                     }
 
-                    // При keep-alive Telegram может закрыть сокет со своей стороны.
-                    // Сбрасываем общий handler/request на первой ошибке, чтобы следующая попытка
-                    // точно пересоздала соединение.
-                    if ($attempt === 1) {
-                        self::$telegramReusableRequest = null;
-                        self::$telegramReusableHandler = null;
-                    }
+                    // При keep-alive Telegram может закрыть сокет со своей стороны,
+                    // либо конкретный IP может “подвиснуть”. Сбрасываем общий handler/request
+                    // на каждой ошибке, чтобы следующая попытка создала новое соединение.
+                    self::$telegramReusableRequest = null;
+                    self::$telegramReusableHandler = null;
+
+                    // Экспоненциальный backoff + небольшой jitter.
+                    // retrySleep из конфига считаем базовым (мс).
+                    $baseSleepMs = max(100, $retrySleep);
+                    $backoffMs = min(10000, (int)($baseSleepMs * (2 ** max(0, $attempt - 1))));
+                    $jitterMs = random_int(0, 250);
+                    $sleepMs = $backoffMs + $jitterMs;
 
                     !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram', [
-                        'attempt' => $attempt,
-                        'error'   => $exception->getMessage(),
+                        'attempt'  => $attempt,
+                        'error'    => $exception->getMessage(),
+                        'sleep_ms' => $sleepMs,
                     ]);
-                    $retrySleep === 0 ?: usleep($retrySleep * 1000);
+                    usleep($sleepMs * 1000);
                 }
             }
         }
