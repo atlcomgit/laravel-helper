@@ -132,7 +132,11 @@ class HttpMacrosService extends DefaultService
                         )
                         ->withOptions([
                             'force_ip_resolve' => CURL_IPRESOLVE_V4, // <- форсируем IPv4
+                            'headers'          => [
+                                'Connection' => 'keep-alive',
+                            ],
                         ])
+                        ->retry(5, 300)
                 );
         }
     }
