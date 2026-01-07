@@ -36,6 +36,18 @@ class HttpConnectionFailedListener extends DefaultListener
 
         $telegramAttempt = ($event->request?->header('X-Telegram-Attempt') ?? [])[0] ?? null;
         $telegramTimeout = ($event->request?->header('X-Telegram-Timeout') ?? [])[0] ?? null;
+        $telegramConnectTimeout = ($event->request?->header('X-Telegram-Connect-Timeout') ?? [])[0] ?? null;
+        $telegramMaxAttempts = ($event->request?->header('X-Telegram-Max-Attempts') ?? [])[0] ?? null;
+
+        // Если это не последняя попытка Telegram-ретрая — не пишем ошибку в логи,
+        // т.к. следующая попытка часто успешно отправляет сообщение.
+        // if (
+        //     $telegramAttempt !== null
+        //     && $telegramMaxAttempts !== null
+        //     && (int)$telegramAttempt < (int)$telegramMaxAttempts
+        // ) {
+        //     return;
+        // }
 
         $dto = HttpLogDto::createByRequest(
             uuid: $uuid,
@@ -49,8 +61,10 @@ class HttpConnectionFailedListener extends DefaultListener
                     'previous_message'   => $throwable?->getPrevious()?->getMessage(),
                 ],
                 'telegram'          => array_filter([
-                    'attempt'         => $telegramAttempt,
-                    'timeout_seconds' => $telegramTimeout,
+                    'attempt'                 => $telegramAttempt,
+                    'timeout_seconds'         => $telegramTimeout,
+                    'connect_timeout_seconds' => $telegramConnectTimeout,
+                    'max_attempts'            => $telegramMaxAttempts,
                 ], static fn ($v) => $v !== null),
             ],
         )

@@ -89,6 +89,11 @@ class TelegramApiService extends DefaultService
         // Стабильные таймауты в окружениях, где сигналы могут влиять на cURL.
         !defined('CURLOPT_NOSIGNAL') ?: $curl[CURLOPT_NOSIGNAL] = 1;
 
+        // Быстрее обрываем "подвисшие" соединения (0 bytes received):
+        // если скорость < 1 байт/сек в течение 5 секунд — считаем запрос зависшим.
+        !defined('CURLOPT_LOW_SPEED_LIMIT') ?: $curl[CURLOPT_LOW_SPEED_LIMIT] = 1;
+        !defined('CURLOPT_LOW_SPEED_TIME') ?: $curl[CURLOPT_LOW_SPEED_TIME] = 5;
+
         // Даем шанс быстрее уходить с “плохого” IP: перемешивание адресов + ограниченный DNS cache.
         !defined('CURLOPT_DNS_SHUFFLE_ADDRESSES') ?: $curl[CURLOPT_DNS_SHUFFLE_ADDRESSES] = 1;
         !defined('CURLOPT_DNS_CACHE_TIMEOUT') ?: $curl[CURLOPT_DNS_CACHE_TIMEOUT] = 60;
@@ -162,13 +167,16 @@ class TelegramApiService extends DefaultService
         bool $json = false,
     ): mixed {
         $timeoutSeconds = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'));
+        $connectTimeoutSeconds = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.connection_timeout'));
 
-        $requestFactory = function (int $attempt) use ($json, $files, $timeoutSeconds): PendingRequest {
+        $requestFactory = function (int $attempt, int $maxAttempts) use ($json, $files, $timeoutSeconds, $connectTimeoutSeconds): PendingRequest {
             $request = $this->getReusableTelegramHttp();
 
             $request = $request->withHeaders([
-                'X-Telegram-Attempt' => (string)$attempt,
-                'X-Telegram-Timeout' => (string)$timeoutSeconds,
+                'X-Telegram-Attempt'         => (string)$attempt,
+                'X-Telegram-Timeout'         => (string)$timeoutSeconds,
+                'X-Telegram-Connect-Timeout' => (string)$connectTimeoutSeconds,
+                'X-Telegram-Max-Attempts'    => (string)$maxAttempts,
             ]);
 
             // Для запросов БЕЗ файлов multipart не нужен и иногда ухудшает стабильность.
@@ -197,7 +205,7 @@ class TelegramApiService extends DefaultService
         $retrySleep = max(0, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.sleep'));
 
         if (!$retryEnabled || $retryTimes <= 1) {
-            $response = $requestFactory(1)->post("bot{$botToken}/{$method}", $params);
+            $response = $requestFactory(1, 1)->post("bot{$botToken}/{$method}", $params);
         } else {
             // Пересоздаём multipart-запрос на каждую попытку, т.к. asMultipart конфликтует со встроенным retry
             $attempt = 0;
@@ -207,7 +215,7 @@ class TelegramApiService extends DefaultService
 
                 try {
                     !isDebug() ?: logger()->info('Отправка api запроса в telegram');
-                    $response = $requestFactory($attempt)->post("bot{$botToken}/{$method}", $params);
+                    $response = $requestFactory($attempt, $retryTimes)->post("bot{$botToken}/{$method}", $params);
                     break;
 
                 } catch (ConnectionException $exception) {
