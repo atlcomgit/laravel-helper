@@ -6,8 +6,10 @@ namespace Atlcom\LaravelHelper\Listeners;
 
 use Atlcom\LaravelHelper\Defaults\DefaultListener;
 use Atlcom\LaravelHelper\Dto\HttpLogDto;
+use Atlcom\LaravelHelper\Enums\HttpLogStatusEnum;
 use Atlcom\LaravelHelper\Services\HttpLogService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
+use Throwable;
 
 /**
  * @internal
@@ -21,11 +23,35 @@ class HttpConnectionFailedListener extends DefaultListener
     ) {}
 
 
+    /**
+     * Обрабатывает событие ошибки подключения http клиента.
+     *
+     * @param object $event
+     * @return void
+     */
     public function __invoke(object $event): void
     {
-        !($dto = HttpLogDto::createByResponse(
-            uuid: ($event->request?->header(HttpLogService::HTTP_HEADER_UUID) ?? [])[0] ?? null,
+        $uuid = ($event->request?->header(HttpLogService::HTTP_HEADER_UUID) ?? [])[0] ?? null;
+        $throwable = ($event->exception ?? null) instanceof Throwable ? $event->exception : null;
+
+        $dto = HttpLogDto::createByRequest(
+            uuid: $uuid,
             request: $event->request,
-        ))->uuid ?: $dto->dispatch();
+            info: [
+                'connection_failed' => [
+                    'exception'          => $throwable ? $throwable::class : null,
+                    'message'            => $throwable?->getMessage(),
+                    'code'               => $throwable?->getCode(),
+                    'previous_exception' => $throwable?->getPrevious() ? $throwable->getPrevious()::class : null,
+                    'previous_message'   => $throwable?->getPrevious()?->getMessage(),
+                ],
+            ],
+        )
+            ->merge([
+                'status'          => HttpLogStatusEnum::Failed,
+                'responseMessage' => 'Connection failed',
+            ]);
+
+        !$dto->uuid ?: $dto->dispatch();
     }
 }

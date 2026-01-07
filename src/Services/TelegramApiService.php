@@ -11,6 +11,8 @@ use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Facades\Lh;
 use CURLFile;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\Handler\CurlMultiHandler;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -28,13 +30,83 @@ class TelegramApiService extends DefaultService
 
 
     /**
+     * Общий handler для переиспользования TCP/TLS соединений до api.telegram.org
+     */
+    protected static mixed $telegramReusableHandler = null;
+
+
+    /**
+     * Базовый PendingRequest для Telegram с общим handler (клонируется перед отправкой)
+     */
+    protected static ?PendingRequest $telegramReusableRequest = null;
+
+
+    /**
      * Возвращает фасад запроса
      *
      * @return Http|PendingRequest
      */
-    protected function getHttp(): Http|PendingRequest
+    protected function getHttp(): PendingRequest
     {
         return Http::telegramOrg();
+    }
+
+
+    /**
+     * Возвращает общий handler для переиспользования TCP/TLS соединений.
+     *
+     * @return callable
+     */
+    protected static function getTelegramReusableHandler(): callable
+    {
+        return self::$telegramReusableHandler ??= class_exists(CurlMultiHandler::class)
+            ? new CurlMultiHandler()
+            : new CurlHandler();
+    }
+
+
+    /**
+     * Возвращает дополнительные опции для стабильности TCP keep-alive.
+     *
+     * @return array
+     */
+    protected function getTelegramKeepAliveOptions(): array
+    {
+        $curl = [];
+
+        // Включаем TCP keep-alive, если поддерживается сборкой cURL.
+        !defined('CURLOPT_TCP_KEEPALIVE') ?: $curl[CURLOPT_TCP_KEEPALIVE] = 1;
+        !defined('CURLOPT_TCP_KEEPIDLE') ?: $curl[CURLOPT_TCP_KEEPIDLE] = 30;
+        !defined('CURLOPT_TCP_KEEPINTVL') ?: $curl[CURLOPT_TCP_KEEPINTVL] = 30;
+
+        // Кэширование TLS session id (ускоряет TLS при keep-alive / повторных коннектах).
+        !defined('CURLOPT_SSL_SESSIONID_CACHE') ?: $curl[CURLOPT_SSL_SESSIONID_CACHE] = 1;
+
+        // Разрешаем переиспользование соединения (на всякий случай задаём явно).
+        !defined('CURLOPT_FORBID_REUSE') ?: $curl[CURLOPT_FORBID_REUSE] = false;
+        !defined('CURLOPT_FRESH_CONNECT') ?: $curl[CURLOPT_FRESH_CONNECT] = false;
+
+        return [
+            'curl' => $curl,
+        ];
+    }
+
+
+    /**
+     * Возвращает базовый PendingRequest для Telegram, настроенный на reuse соединений.
+     *
+     * @return PendingRequest
+     */
+    protected function getReusableTelegramHttp(): PendingRequest
+    {
+        self::$telegramReusableRequest ??= $this->getHttp()
+            // Отключаем встроенный retry у PendingRequest: multipart + retry в Laravel часто даёт баги.
+            ->retry(1, 0)
+            // Важно: один и тот же handler на весь процесс = reuse TCP/TLS.
+            ->setHandler(self::getTelegramReusableHandler())
+            ->withOptions($this->getTelegramKeepAliveOptions());
+
+        return clone self::$telegramReusableRequest;
     }
 
 
@@ -79,8 +151,12 @@ class TelegramApiService extends DefaultService
         bool $json = false,
     ): mixed {
         $requestFactory = function () use ($json, $files): PendingRequest {
-            $request = $this->getHttp();
-            !$json ?: $request->asJson();
+            $request = $this->getReusableTelegramHttp();
+
+            // Макрос telegramOrg по умолчанию multipart. Для JSON-запросов переключаемся явно.
+            !$json
+                ? $request->asMultipart()
+                : $request->asJson();
 
             foreach ($files as $name => $path) {
                 if ($path instanceof CURLFile) {
@@ -122,7 +198,18 @@ class TelegramApiService extends DefaultService
                         throw $exception;
                     }
 
-                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram');
+                    // При keep-alive Telegram может закрыть сокет со своей стороны.
+                    // Сбрасываем общий handler/request на первой ошибке, чтобы следующая попытка
+                    // точно пересоздала соединение.
+                    if ($attempt === 1) {
+                        self::$telegramReusableRequest = null;
+                        self::$telegramReusableHandler = null;
+                    }
+
+                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram', [
+                        'attempt' => $attempt,
+                        'error'   => $exception->getMessage(),
+                    ]);
                     $retrySleep === 0 ?: usleep($retrySleep * 1000);
                 }
             }
