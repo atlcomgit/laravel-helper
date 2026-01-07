@@ -11,8 +11,6 @@ use Atlcom\LaravelHelper\Exceptions\TelegramBotException;
 use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Facades\Lh;
 use CURLFile;
-use GuzzleHttp\Handler\CurlHandler;
-use GuzzleHttp\Handler\CurlMultiHandler;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -30,99 +28,13 @@ class TelegramApiService extends DefaultService
 
 
     /**
-     * Общий handler для переиспользования TCP/TLS соединений до api.telegram.org
-     */
-    protected static mixed $telegramReusableHandler = null;
-
-
-    /**
-     * Базовый PendingRequest для Telegram с общим handler (клонируется перед отправкой)
-     */
-    protected static ?PendingRequest $telegramReusableRequest = null;
-
-
-    /**
      * Возвращает фасад запроса
      *
      * @return Http|PendingRequest
      */
-    protected function getHttp(): PendingRequest
+    protected function getHttp(): Http|PendingRequest
     {
         return Http::telegramOrg();
-    }
-
-
-    /**
-     * Возвращает общий handler для переиспользования TCP/TLS соединений.
-     *
-     * @return callable
-     */
-    protected static function getTelegramReusableHandler(): callable
-    {
-        return self::$telegramReusableHandler ??= class_exists(CurlMultiHandler::class)
-            ? new CurlMultiHandler()
-            : new CurlHandler();
-    }
-
-
-    /**
-     * Возвращает дополнительные опции для стабильности TCP keep-alive.
-     *
-     * @return array
-     */
-    protected function getTelegramKeepAliveOptions(): array
-    {
-        $curl = [];
-
-        // Включаем TCP keep-alive, если поддерживается сборкой cURL.
-        !defined('CURLOPT_TCP_KEEPALIVE') ?: $curl[CURLOPT_TCP_KEEPALIVE] = 1;
-        !defined('CURLOPT_TCP_KEEPIDLE') ?: $curl[CURLOPT_TCP_KEEPIDLE] = 30;
-        !defined('CURLOPT_TCP_KEEPINTVL') ?: $curl[CURLOPT_TCP_KEEPINTVL] = 30;
-
-        // Кэширование TLS session id (ускоряет TLS при keep-alive / повторных коннектах).
-        !defined('CURLOPT_SSL_SESSIONID_CACHE') ?: $curl[CURLOPT_SSL_SESSIONID_CACHE] = 1;
-
-        // Форсируем HTTP/1.1: у Telegram/прокси периодически бывают “подвисания” на HTTP/2.
-        !defined('CURLOPT_HTTP_VERSION') || !defined('CURL_HTTP_VERSION_1_1')
-            ?: $curl[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
-
-        // Стабильные таймауты в окружениях, где сигналы могут влиять на cURL.
-        !defined('CURLOPT_NOSIGNAL') ?: $curl[CURLOPT_NOSIGNAL] = 1;
-
-        // Быстрее обрываем "подвисшие" соединения (0 bytes received):
-        // если скорость < 1 байт/сек в течение 5 секунд — считаем запрос зависшим.
-        !defined('CURLOPT_LOW_SPEED_LIMIT') ?: $curl[CURLOPT_LOW_SPEED_LIMIT] = 1;
-        !defined('CURLOPT_LOW_SPEED_TIME') ?: $curl[CURLOPT_LOW_SPEED_TIME] = 5;
-
-        // Даем шанс быстрее уходить с “плохого” IP: перемешивание адресов + ограниченный DNS cache.
-        !defined('CURLOPT_DNS_SHUFFLE_ADDRESSES') ?: $curl[CURLOPT_DNS_SHUFFLE_ADDRESSES] = 1;
-        !defined('CURLOPT_DNS_CACHE_TIMEOUT') ?: $curl[CURLOPT_DNS_CACHE_TIMEOUT] = 60;
-
-        // Разрешаем переиспользование соединения (на всякий случай задаём явно).
-        !defined('CURLOPT_FORBID_REUSE') ?: $curl[CURLOPT_FORBID_REUSE] = false;
-        !defined('CURLOPT_FRESH_CONNECT') ?: $curl[CURLOPT_FRESH_CONNECT] = false;
-
-        return [
-            'curl' => $curl,
-        ];
-    }
-
-
-    /**
-     * Возвращает базовый PendingRequest для Telegram, настроенный на reuse соединений.
-     *
-     * @return PendingRequest
-     */
-    protected function getReusableTelegramHttp(): PendingRequest
-    {
-        self::$telegramReusableRequest ??= $this->getHttp()
-            // Отключаем встроенный retry у PendingRequest: multipart + retry в Laravel часто даёт баги.
-            ->retry(1, 0)
-            // Важно: один и тот же handler на весь процесс = reuse TCP/TLS.
-            ->setHandler(self::getTelegramReusableHandler())
-            ->withOptions($this->getTelegramKeepAliveOptions());
-
-        return clone self::$telegramReusableRequest;
     }
 
 
@@ -166,24 +78,9 @@ class TelegramApiService extends DefaultService
         array $files = [],
         bool $json = false,
     ): mixed {
-        $timeoutSeconds = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.timeout'));
-        $connectTimeoutSeconds = max(1, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.connection_timeout'));
-
-        $requestFactory = function (int $attempt, int $maxAttempts) use ($json, $files, $timeoutSeconds, $connectTimeoutSeconds): PendingRequest {
-            $request = $this->getReusableTelegramHttp();
-
-            $request = $request->withHeaders([
-                'X-Telegram-Attempt'         => (string)$attempt,
-                'X-Telegram-Timeout'         => (string)$timeoutSeconds,
-                'X-Telegram-Connect-Timeout' => (string)$connectTimeoutSeconds,
-                'X-Telegram-Max-Attempts'    => (string)$maxAttempts,
-            ]);
-
-            // Для запросов БЕЗ файлов multipart не нужен и иногда ухудшает стабильность.
-            // Выбираем максимально простой формат: JSON или application/x-www-form-urlencoded.
-            $json
-                ? $request->asJson()
-                : (empty($files) ? $request->asForm() : $request->asMultipart());
+        $requestFactory = function () use ($json, $files): PendingRequest {
+            $request = $this->getHttp();
+            !$json ?: $request->asJson();
 
             foreach ($files as $name => $path) {
                 if ($path instanceof CURLFile) {
@@ -205,7 +102,7 @@ class TelegramApiService extends DefaultService
         $retrySleep = max(0, (int)Lh::config(ConfigEnum::Http, 'telegramOrg.retry.sleep'));
 
         if (!$retryEnabled || $retryTimes <= 1) {
-            $response = $requestFactory(1, 1)->post("bot{$botToken}/{$method}", $params);
+            $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
         } else {
             // Пересоздаём multipart-запрос на каждую попытку, т.к. asMultipart конфликтует со встроенным retry
             $attempt = 0;
@@ -215,7 +112,7 @@ class TelegramApiService extends DefaultService
 
                 try {
                     !isDebug() ?: logger()->info('Отправка api запроса в telegram');
-                    $response = $requestFactory($attempt, $retryTimes)->post("bot{$botToken}/{$method}", $params);
+                    $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
                     break;
 
                 } catch (ConnectionException $exception) {
@@ -225,25 +122,8 @@ class TelegramApiService extends DefaultService
                         throw $exception;
                     }
 
-                    // При keep-alive Telegram может закрыть сокет со своей стороны,
-                    // либо конкретный IP может “подвиснуть”. Сбрасываем общий handler/request
-                    // на каждой ошибке, чтобы следующая попытка создала новое соединение.
-                    self::$telegramReusableRequest = null;
-                    self::$telegramReusableHandler = null;
-
-                    // Экспоненциальный backoff + небольшой jitter.
-                    // retrySleep из конфига считаем базовым (мс).
-                    $baseSleepMs = max(100, $retrySleep);
-                    $backoffMs = min(10000, (int)($baseSleepMs * (2 ** max(0, $attempt - 1))));
-                    $jitterMs = random_int(0, 250);
-                    $sleepMs = $backoffMs + $jitterMs;
-
-                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram', [
-                        'attempt'  => $attempt,
-                        'error'    => $exception->getMessage(),
-                        'sleep_ms' => $sleepMs,
-                    ]);
-                    usleep($sleepMs * 1000);
+                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram');
+                    $retrySleep === 0 ?: usleep($retrySleep * 1000);
                 }
             }
         }

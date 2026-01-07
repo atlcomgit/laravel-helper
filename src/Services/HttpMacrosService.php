@@ -135,6 +135,13 @@ class HttpMacrosService extends DefaultService
                             'headers'          => [
                                 'Connection' => 'keep-alive',
                             ],
+                            // Прокси для Telegram API (если включен в конфиге)
+                            ...(
+                                Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.enabled')
+                                && (string)Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.url') !== ''
+                                    ? ['proxy' => (string)Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.url')]
+                                    : []
+                            ),
                         ])
                         ->retry(5, 300)
                 );

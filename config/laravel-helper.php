@@ -232,15 +232,15 @@ return [
         // Сервис Telegram API
         'telegramOrg'      => [
             // Флаг включения макроса
-            'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
+            'enabled'            => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
             // Url адрес для запросов api
-            'url'     => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
+            'url'                => (string)env('HELPER_HTTP_TELEGRAMORG_URL', 'https://api.telegram.org/'),
             // Таймаут подключения api к сервису
             'connection_timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_CONNECTION_TIMEOUT', 3),
             // Таймаут подключения api к сервису
-            'timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 30),
+            'timeout'            => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 30),
             // Настройки повторной отправки запроса
-            'retry'   => [
+            'retry'              => [
                 'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_RETRY_ENABLED', true),
                 'times'   => (int)env('HELPER_HTTP_TELEGRAMORG_RETRY_TIMES', 2),
                 'sleep'   => (int)env('HELPER_HTTP_TELEGRAMORG_RETRY_SLEEP', 1000),
