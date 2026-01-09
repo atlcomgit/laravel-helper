@@ -103,9 +103,15 @@ class TelegramBotService extends DefaultService
                 ],
             ];
 
-            !isDebug() ?: logger()->error($exception->getMessage(), [
+            // Важно: токен бота не должен попадать в логи даже в debug.
+            $dtoArray = $dto->toArray();
+            $token = is_string($dtoArray['token'] ?? null) ? (string)$dtoArray['token'] : null;
+            $safeMessage = $token ? $this->maskTelegramToken($exception->getMessage(), $token) : $exception->getMessage();
+            $safeDtoArray = $token ? $this->maskTelegramTokenInArray($dtoArray, $token) : $dtoArray;
+
+            !isDebug() ?: logger()->error($safeMessage, [
                 'dto_class' => $dto::class,
-                'dto'       => $dto->toArray(),
+                'dto'       => $safeDtoArray,
                 'trace'     => $exception->getTraceAsString(),
             ]);
 
@@ -122,6 +128,78 @@ class TelegramBotService extends DefaultService
         } finally {
             event(new TelegramBotEvent($dto));
         }
+    }
+
+
+    /**
+     * Маскирует токен Telegram в строке
+     *
+     * @param string $text
+     * @param string $token
+     * @return string
+     */
+    private function maskTelegramToken(string $text, string $token): string
+    {
+        // Частые случаи утечки: URL вида .../bot<TOKEN>/method и прямое поле token.
+        $maskedToken = $this->maskTokenValue($token);
+
+        return str_replace([
+            $token,
+            "bot{$token}",
+        ], [
+            $maskedToken,
+            "bot{$maskedToken}",
+        ], $text);
+    }
+
+
+    /**
+     * Маскирует токен Telegram рекурсивно в массиве
+     *
+     * @param array $data
+     * @param string $token
+     * @return array
+     */
+    private function maskTelegramTokenInArray(array $data, string $token): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = $this->maskTelegramTokenInArray($value, $token);
+                continue;
+            }
+
+            if (is_string($value)) {
+                $data[$key] = $this->maskTelegramToken($value, $token);
+            }
+        }
+
+        if (array_key_exists('token', $data) && is_string($data['token'])) {
+            $data['token'] = $this->maskTokenValue((string)$data['token']);
+        }
+
+        return $data;
+    }
+
+
+    /**
+     * Маскирует значение токена (оставляет начало и конец)
+     *
+     * @param string $token
+     * @return string
+     */
+    private function maskTokenValue(string $token): string
+    {
+        $token = trim($token);
+        $length = strlen($token);
+
+        if ($length <= 12) {
+            return '***';
+        }
+
+        $head = substr($token, 0, 6);
+        $tail = substr($token, -4);
+
+        return "{$head}***{$tail}";
     }
 
 

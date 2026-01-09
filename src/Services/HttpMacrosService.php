@@ -131,19 +131,24 @@ class HttpMacrosService extends DefaultService
                             : ($timeout > 0 ? $timeout : 10)
                         )
                         ->withOptions([
-                            'force_ip_resolve' => CURL_IPRESOLVE_V4, // <- форсируем IPv4
-                            'headers'          => [
+                            // Важно: форсируем IPv4 через CURLOPT_IPRESOLVE, т.к. AAAA может быть доступен,
+                            // а IPv6 на хосте/провайдере часто работает нестабильно.
+                            'curl'    => [
+                                CURLOPT_IPRESOLVE    => CURL_IPRESOLVE_V4,
+                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
+                            ],
+                            'headers' => [
                                 'Connection' => 'keep-alive',
                             ],
                             // Прокси для Telegram API (если включен в конфиге)
                             ...(
                                 Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.enabled')
                                 && (string)Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.url') !== ''
-                                    ? ['proxy' => (string)Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.url')]
-                                    : []
+                                ? ['proxy' => (string)Lh::config(ConfigEnum::Http, 'telegramOrg.proxy.url')]
+                                : []
                             ),
                         ])
-                        ->retry(5, 300)
+                    // Retry управляется в TelegramApiService (т.к. multipart + встроенный retry конфликтуют).
                 );
         }
     }
