@@ -239,6 +239,11 @@ return [
             'connection_timeout' => (int)env('HELPER_HTTP_TELEGRAMORG_CONNECTION_TIMEOUT', 3),
             // Таймаут подключения api к сервису
             'timeout'            => (int)env('HELPER_HTTP_TELEGRAMORG_TIMEOUT', 30),
+            // Настройки прокси
+            'proxy'              => [
+                'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_PROXY_ENABLED', false),
+                'url'     => (string)env('HELPER_HTTP_TELEGRAMORG_PROXY_URL', ''),
+            ],
             // Настройки повторной отправки запроса
             'retry'              => [
                 'enabled' => (bool)env('HELPER_HTTP_TELEGRAMORG_RETRY_ENABLED', true),

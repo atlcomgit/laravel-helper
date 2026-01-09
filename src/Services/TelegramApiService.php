@@ -110,25 +110,151 @@ class TelegramApiService extends DefaultService
             while (true) {
                 $attempt++;
 
+                $safeEndpoint = $this->maskTelegramEndpoint("bot{$botToken}/{$method}", $botToken);
+
                 try {
-                    !isDebug() ?: logger()->info('Отправка api запроса в telegram');
+                    !isDebug() ?: logger()->info('Отправка api запроса в telegram', [
+                        'attempt'  => $attempt,
+                        'endpoint' => $safeEndpoint,
+                    ]);
                     $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
                     break;
 
                 } catch (ConnectionException $exception) {
                     if ($attempt >= $retryTimes) {
-                        !isDebug() ?: logger()->error('Ошибка отправки api запроса в telegram');
+                        !isDebug() ?: logger()->error('Ошибка отправки api запроса в telegram', [
+                            'attempt'         => $attempt,
+                            'endpoint'        => $safeEndpoint,
+                            'error'           => $this->maskTelegramTokenInText($exception->getMessage(), $botToken),
+                            'handler_context' => $this->extractHandlerContext($exception, $botToken),
+                        ]);
 
                         throw $exception;
                     }
 
-                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram');
-                    $retrySleep === 0 ?: usleep($retrySleep * 1000);
+                    $sleepMs = $retrySleep;
+
+                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram', [
+                        'attempt'         => $attempt,
+                        'endpoint'        => $safeEndpoint,
+                        'error'           => $this->maskTelegramTokenInText($exception->getMessage(), $botToken),
+                        'sleep_ms'        => $sleepMs,
+                        'handler_context' => $this->extractHandlerContext($exception, $botToken),
+                    ]);
+
+                    $sleepMs === 0 ?: usleep($sleepMs * 1000);
                 }
             }
         }
 
         return $this->checkResponse($response);
+    }
+
+
+    /**
+     * Маскирует токен в endpoint Telegram
+     *
+     * @param string $endpoint
+     * @param string $token
+     * @return string
+     */
+    private function maskTelegramEndpoint(string $endpoint, string $token): string
+    {
+        $maskedToken = $this->maskTokenValue($token);
+
+        return str_replace("bot{$token}", "bot{$maskedToken}", $endpoint);
+    }
+
+
+    /**
+     * Маскирует токен Telegram в строке
+     *
+     * @param string $text
+     * @param string $token
+     * @return string
+     */
+    private function maskTelegramTokenInText(string $text, string $token): string
+    {
+        $maskedToken = $this->maskTokenValue($token);
+
+        return str_replace([
+            $token,
+            "bot{$token}",
+        ], [
+            $maskedToken,
+            "bot{$maskedToken}",
+        ], $text);
+    }
+
+
+    /**
+     * Маскирует значение токена (оставляет начало и конец)
+     *
+     * @param string $token
+     * @return string
+     */
+    private function maskTokenValue(string $token): string
+    {
+        $token = trim($token);
+        $length = strlen($token);
+
+        if ($length <= 12) {
+            return '***';
+        }
+
+        $head = substr($token, 0, 6);
+        $tail = substr($token, -4);
+
+        return "{$head}***{$tail}";
+    }
+
+
+    /**
+     * Извлекает диагностический handler_context из исключения Guzzle
+     *
+     * @param ConnectionException $exception
+     * @param string $token
+     * @return array
+     */
+    private function extractHandlerContext(ConnectionException $exception, string $token): array
+    {
+        $previous = $exception->getPrevious();
+
+        if (!$previous || !method_exists($previous, 'getHandlerContext')) {
+            return [];
+        }
+
+        /** @var array $context */
+        $context = (array)$previous->getHandlerContext();
+
+        // Вырезаем/маскируем потенциальные утечки токена
+        foreach (['url', 'effective_url'] as $key) {
+            if (isset($context[$key]) && is_string($context[$key])) {
+                $context[$key] = $this->maskTelegramTokenInText((string)$context[$key], $token);
+            }
+        }
+
+        // Оставляем только полезные для диагностики поля
+        $allow = [
+            'errno',
+            'errormsg',
+            'namelookup_time',
+            'connect_time',
+            'appconnect_time',
+            'pretransfer_time',
+            'starttransfer_time',
+            'total_time',
+            'primary_ip',
+            'primary_port',
+            'local_ip',
+            'local_port',
+            'http_version',
+            'ssl_verifyresult',
+            'size_download',
+            'speed_download',
+        ];
+
+        return array_intersect_key($context, array_flip($allow));
     }
 
 
