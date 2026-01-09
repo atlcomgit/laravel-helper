@@ -131,13 +131,16 @@ class HttpMacrosService extends DefaultService
                             : ($timeout > 0 ? $timeout : 10)
                         )
                         ->withOptions([
+                            // Важно: явный read_timeout предотвращает "Operation too slow" при маленьком
+                            // default_socket_timeout (в PHP ini). Делаем его равным общему timeout.
+                            'read_timeout' => (float)$timeout,
                             // Важно: форсируем IPv4 через CURLOPT_IPRESOLVE, т.к. AAAA может быть доступен,
                             // а IPv6 на хосте/провайдере часто работает нестабильно.
-                            'curl'    => [
+                            'curl'         => [
                                 CURLOPT_IPRESOLVE    => CURL_IPRESOLVE_V4,
                                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
                             ],
-                            'headers' => [
+                            'headers'      => [
                                 'Connection' => 'keep-alive',
                             ],
                             // Прокси для Telegram API (если включен в конфиге)

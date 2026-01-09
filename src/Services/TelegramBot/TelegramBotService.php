@@ -27,6 +27,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 use Atlcom\LaravelHelper\Events\TelegramBotEvent;
 use Atlcom\LaravelHelper\Exceptions\LaravelHelperException;
 use Atlcom\LaravelHelper\Services\TelegramApiService;
+use Illuminate\Http\Client\ConnectionException;
 use Throwable;
 
 /**
@@ -54,7 +55,7 @@ class TelegramBotService extends DefaultService
     {
         try {
             $dto->response = match (true) {
-                $this->telegramBotMessageService->isDuplicateLastMessage($dto)
+                (!$this->shouldSkipDuplicateCheck($dto) && $this->telegramBotMessageService->isDuplicateLastMessage($dto))
                 => TelegramBotOutResponseDto::create(
                     status: false,
                     description: 'Повторное сообщение',
@@ -106,6 +107,14 @@ class TelegramBotService extends DefaultService
             // Важно: токен бота не должен попадать в логи даже в debug.
             $dtoArray = $dto->toArray();
             $token = is_string($dtoArray['token'] ?? null) ? (string)$dtoArray['token'] : null;
+
+            // Важно: сохраняем техническую диагностику сетевых ошибок (без утечки токена).
+            $handlerContext = $this->extractHandlerContext($exception, $token);
+            !$handlerContext ?: $dto->meta = [
+                ...($dto->meta ?? []),
+                'handler_context' => $handlerContext,
+            ];
+
             $safeMessage = $token ? $this->maskTelegramToken($exception->getMessage(), $token) : $exception->getMessage();
             $safeDtoArray = $token ? $this->maskTelegramTokenInArray($dtoArray, $token) : $dtoArray;
 
@@ -128,6 +137,98 @@ class TelegramBotService extends DefaultService
         } finally {
             event(new TelegramBotEvent($dto));
         }
+    }
+
+
+    /**
+     * Определяет, нужно ли пропускать проверку на дубликат
+     *
+     * @param TelegramBotOutDto $dto
+     * @return bool
+     */
+    private function shouldSkipDuplicateCheck(TelegramBotOutDto $dto): bool
+    {
+        $meta = is_array($dto->meta ?? null) ? (array)$dto->meta : [];
+
+        return (bool)($meta['skip_duplicate_check'] ?? false)
+            || (bool)($meta['probe'] ?? false);
+    }
+
+
+    /**
+     * Извлекает диагностический handler_context из исключения (если доступно)
+     *
+     * @param Throwable $exception
+     * @param string|null $token
+     * @return array|null
+     */
+    private function extractHandlerContext(Throwable $exception, ?string $token): ?array
+    {
+        $context = null;
+
+        if (method_exists($exception, 'getHandlerContext')) {
+            try {
+                $context = $exception->getHandlerContext();
+            } catch (Throwable) {
+                $context = null;
+            }
+        }
+
+        if (!$context && $exception instanceof ConnectionException) {
+            $previous = $exception->getPrevious();
+
+            if ($previous && method_exists($previous, 'getHandlerContext')) {
+                try {
+                    $context = $previous->getHandlerContext();
+                } catch (Throwable) {
+                    $context = null;
+                }
+            }
+        }
+
+        if (!is_array($context) || !$context) {
+            return null;
+        }
+
+        // Вырезаем/маскируем потенциальные утечки токена
+        if ($token) {
+            foreach (['url', 'effective_url'] as $key) {
+                if (isset($context[$key]) && is_string($context[$key])) {
+                    $context[$key] = $this->maskTelegramToken((string)$context[$key], $token);
+                }
+            }
+        }
+
+        $allow = [
+            'url',
+            'effective_url',
+            'content_type',
+            'errno',
+            'errormsg',
+            'namelookup_time',
+            'connect_time',
+            'appconnect_time',
+            'pretransfer_time',
+            'starttransfer_time',
+            'total_time',
+            'primary_ip',
+            'primary_port',
+            'local_ip',
+            'local_port',
+            'http_version',
+            'http_code',
+            'ssl_verifyresult',
+            'size_download',
+            'speed_download',
+        ];
+
+        $filtered = [];
+
+        foreach ($allow as $k) {
+            array_key_exists($k, $context) ? $filtered[$k] = $context[$k] : null;
+        }
+
+        return $filtered ?: null;
     }
 
 

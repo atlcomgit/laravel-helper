@@ -80,7 +80,12 @@ class TelegramApiService extends DefaultService
     ): mixed {
         $requestFactory = function () use ($json, $files): PendingRequest {
             $request = $this->getHttp();
+
+            // Важно: по умолчанию telegramOrg настроен как multipart (для файлов).
+            // Для обычных запросов без файлов это избыточно и увеличивает размер payload.
+            // Переключаем формат: JSON для json=true, иначе form, если файлов нет.
             !$json ?: $request->asJson();
+            ($json || !empty($files)) ?: $request->asForm();
 
             foreach ($files as $name => $path) {
                 if ($path instanceof CURLFile) {
