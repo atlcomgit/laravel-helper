@@ -188,6 +188,7 @@ return new class extends Migration {
 - Дополнительные папки тестов: `tests/Unit/**`, `tests/Feature/**`. Моки — `tests/Mock/**`.
 - Пиши тесты под каждый метод класса.
 - Не используй Mockery и не заменяй реальные классы поддельными, делай инстанс как `app(Service::class)`.
+- Для тестирования БД используй `make artisan tinker`
 
 ### Запуск тестов через make phpunit (с фильтрами)
 - Базовый запуск: `make phpunit`
