@@ -18,8 +18,8 @@ use Override;
  */
 class TableFilterDto extends DefaultDto
 {
-    public const AUTO_CASTS_ENABLED     = true;
-    public const AUTO_MAPPINGS_ENABLED  = true;
+    public const AUTO_CASTS_ENABLED = true;
+    public const AUTO_MAPPINGS_ENABLED = true;
     public const AUTO_SERIALIZE_ENABLED = true;
 
     public FilterComponentEnum|string|null $component;
@@ -36,15 +36,21 @@ class TableFilterDto extends DefaultDto
      * @param string $modelClassOrLabel
      * @param string $column
      * @param FilterOperatorEnum $operator
+     * @param Closure|null $closure
      * @return array
      */
-    public static function input(string $modelClassOrLabel, string $column, FilterOperatorEnum $operator): array
-    {
+    public static function input(
+        string $modelClassOrLabel,
+        string $column,
+        FilterOperatorEnum $operator,
+        ?Closure $closure = null,
+    ): array {
         return static::create(
             component: FilterComponentEnum::Input,
             label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: $operator,
+            closure: $closure,
         )->toArray();
     }
 
@@ -54,16 +60,17 @@ class TableFilterDto extends DefaultDto
      *
      * @param string $modelClassOrLabel
      * @param string $column
-     * @param FilterOperatorEnum $operator
+     * @param Closure|null $closure
      * @return array
      */
-    public static function between(string $modelClassOrLabel, string $column): array
+    public static function between(string $modelClassOrLabel, string $column, ?Closure $closure = null): array
     {
         return static::create(
             component: FilterComponentEnum::InputBetween,
             label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: FilterOperatorEnum::Between,
+            closure: $closure,
         )->toArray();
     }
 
@@ -133,15 +140,17 @@ class TableFilterDto extends DefaultDto
      *
      * @param string $modelClassOrLabel
      * @param string $column
+     * @param Closure|null $closure
      * @return array
      */
-    public static function dates(string $modelClassOrLabel, string $column): array
+    public static function dates(string $modelClassOrLabel, string $column, ?Closure $closure = null): array
     {
         return static::create(
             component: FilterComponentEnum::DateInterval,
             label: static::getLabel($modelClassOrLabel, $column),
             column: $column,
             operator: FilterOperatorEnum::Between,
+            closure: $closure,
         )->toArray();
     }
 
