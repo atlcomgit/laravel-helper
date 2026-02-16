@@ -149,8 +149,12 @@ class TelegramBotService extends DefaultService
     private function shouldSkipDuplicateCheck(TelegramBotOutDto $dto): bool
     {
         $meta = is_array($dto->meta ?? null) ? (array)$dto->meta : [];
+        $alwaysShowMessage = property_exists($dto, 'alwaysShowMessage')
+            ? (bool)($dto->alwaysShowMessage ?? false)
+            : false;
 
-        return (bool)($meta['skip_duplicate_check'] ?? false)
+        return $alwaysShowMessage
+            || (bool)($meta['skip_duplicate_check'] ?? false)
             || (bool)($meta['probe'] ?? false);
     }
 
