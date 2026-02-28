@@ -6,8 +6,10 @@ namespace Atlcom\LaravelHelper\Services;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Dto\IpBlockEventDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Enums\IpBlockRuleEnum;
+use Atlcom\LaravelHelper\Events\IpBlockEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -225,6 +227,14 @@ class IpBlockService extends DefaultService
         ];
 
         $this->setState($state);
+
+        // Отправка события блокировки ip адреса
+        event(new IpBlockEvent(IpBlockEventDto::create(
+            ip: $ip,
+            reason: $reason,
+            source: $source,
+            description: $description,
+        )));
     }
 
 
