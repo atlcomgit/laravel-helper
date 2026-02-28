@@ -20,6 +20,7 @@ enum ConfigEnum: string
     case ConsoleLog  = 'console_log';
     case HttpCache   = 'http_cache';
     case HttpLog     = 'http_log';
+    case IpBlock     = 'ip_block';
     case MailLog     = 'mail_log';
     case ModelLog    = 'model_log';
     case ProfilerLog = 'profiler_log';
@@ -62,6 +63,7 @@ enum ConfigEnum: string
             self::ConsoleLog => 'Лог консольной команды',
             self::HttpCache => 'Кеш http запроса',
             self::HttpLog => 'Лог http запроса',
+            self::IpBlock => 'Блокировка ip адреса',
             self::MailLog => 'Лог отправки письма',
             self::ModelLog => 'Лог изменения модели',
             self::ProfilerLog => 'Лог профилировщика',

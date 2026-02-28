@@ -114,6 +114,10 @@ class LaravelHelperService extends DefaultService
             && ($config[$param = ConfigEnum::HttpLog->value . 'model'] ?? null)
             && ($config[$param = ConfigEnum::HttpLog->value . 'cleanup_days'] ?? null)
 
+            && ($config[$param = ConfigEnum::IpBlock->value . 'storage_file'] ?? null)
+            && ($config[$param = ConfigEnum::IpBlock->value . 'block_ttl_seconds'] ?? null)
+            && ($config[$param = ConfigEnum::IpBlock->value . 'response_status'] ?? null)
+
             && ($config[$param = ConfigEnum::MailLog->value . 'queue'] ?? null)
             && ($config[$param = ConfigEnum::MailLog->value . 'connection'] ?? null)
             && ($config[$param = ConfigEnum::MailLog->value . 'table'] ?? null)

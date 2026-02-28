@@ -9,6 +9,7 @@ use Atlcom\LaravelHelper\Commands\CacheClearCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeCommand;
 use Atlcom\LaravelHelper\Commands\ConsoleLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\HttpLogCleanupCommand;
+use Atlcom\LaravelHelper\Commands\IpBlockCleanupCommand;
 use Atlcom\LaravelHelper\Commands\MailLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\ModelLogCleanupCommand;
 use Atlcom\LaravelHelper\Commands\OptimizeOverrideCommand;
@@ -36,6 +37,7 @@ use Atlcom\LaravelHelper\Listeners\MailMessageSentListener;
 use Atlcom\LaravelHelper\Listeners\TelegramBotEventListener;
 use Atlcom\LaravelHelper\Middlewares\HttpCacheMiddleware;
 use Atlcom\LaravelHelper\Middlewares\HttpLogMiddleware;
+use Atlcom\LaravelHelper\Middlewares\IpBlockMiddleware;
 use Atlcom\LaravelHelper\Middlewares\RouteLogMiddleware;
 use Atlcom\LaravelHelper\Observers\ModelLogObserver;
 use Atlcom\LaravelHelper\Services\BuilderMacrosService;
@@ -44,6 +46,7 @@ use Atlcom\LaravelHelper\Services\CollectionMacrosService;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
+use Atlcom\LaravelHelper\Services\IpBlockService;
 use Atlcom\LaravelHelper\Services\HttpMacrosService;
 use Atlcom\LaravelHelper\Services\LaravelHelperService;
 use Atlcom\LaravelHelper\Services\MailLogService;
@@ -66,12 +69,10 @@ use Atlcom\LaravelHelper\Services\TelegramBot\TelegramBotUserService;
 use Atlcom\LaravelHelper\Services\TelegramLogService;
 use Atlcom\LaravelHelper\Services\ViewCacheService;
 use Atlcom\LaravelHelper\Services\ViewLogService;
-use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
@@ -97,10 +98,16 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../../config/laravel-helper.php', 'laravel-helper');
 
         // Публикация настроек пакета
-        $this->publishes(
-            [__DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php')],
-            'laravel-helper',
-        );
+        $publishConfigs = [
+            __DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php'),
+        ];
+
+        if (Lh::config(ConfigEnum::IpBlock, 'enabled')) {
+            $publishConfigs[__DIR__ . '/../../config/laravel-helper-ip-block-patterns.php']
+                = config_path('laravel-helper-ip-block-patterns.php');
+        }
+
+        $this->publishes($publishConfigs, 'laravel-helper');
 
         // Регистрация миграций
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
@@ -138,6 +145,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(ConsoleLogService::class);
         $this->app->singleton(HttpCacheService::class);
         $this->app->singleton(HttpLogService::class);
+        $this->app->singleton(IpBlockService::class);
         $this->app->singleton(MailLogService::class);
         $this->app->singleton(ModelLogService::class);
         ;
@@ -233,6 +241,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
                 ConsoleLogCleanupCommand::class,
                 HttpLogCleanupCommand::class,
+                IpBlockCleanupCommand::class,
                 MailLogCleanupCommand::class,
                 ModelLogCleanupCommand::class,
                 ProfilerLogCleanupCommand::class,
@@ -265,6 +274,11 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $kernel = $this->app->make(Kernel::class);
 
         // Подключение middleware глобально
+        if (Lh::config(ConfigEnum::IpBlock, 'enabled')) {
+            $kernel->prependMiddlewareToGroup('web', IpBlockMiddleware::class);
+            $kernel->prependMiddlewareToGroup('api', IpBlockMiddleware::class);
+        }
+
         $kernel->prependMiddlewareToGroup('web', RouteLogMiddleware::class);
         $kernel->prependMiddlewareToGroup('api', RouteLogMiddleware::class);
 
@@ -278,6 +292,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         }
 
         // Регистрация alias
+        Route::aliasMiddleware('withIpBlock', IpBlockMiddleware::class);
         Route::aliasMiddleware('withHttpCache', HttpCacheMiddleware::class);
         Route::aliasMiddleware('withHttpLog', HttpLogMiddleware::class);
 

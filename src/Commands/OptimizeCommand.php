@@ -11,6 +11,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\ConsoleLogService;
 use Atlcom\LaravelHelper\Services\HttpCacheService;
 use Atlcom\LaravelHelper\Services\HttpLogService;
+use Atlcom\LaravelHelper\Services\IpBlockService;
 use Atlcom\LaravelHelper\Services\ModelLogService;
 use Atlcom\LaravelHelper\Services\ProfilerLogService;
 use Atlcom\LaravelHelper\Services\QueryCacheService;
@@ -26,12 +27,12 @@ use Illuminate\Support\Facades\Schema;
  */
 class OptimizeCommand extends DefaultCommand
 {
-    protected $signature = 'lh:optimize
+    protected       $signature       = 'lh:optimize
         {--schedule : Запуск команды по расписанию }
     ';
-    protected $description = 'Оптимизация всех логов от laravel-helper';
-    protected $isolated = true;
-    protected ?bool $withConsoleLog = true;
+    protected       $description     = 'Оптимизация всех логов от laravel-helper';
+    protected       $isolated        = true;
+    protected ?bool $withConsoleLog  = true;
     protected ?bool $withTelegramLog = true;
 
 
@@ -39,6 +40,7 @@ class OptimizeCommand extends DefaultCommand
         protected ConsoleLogService $consoleLogService,
         protected HttpCacheService $httpCacheService,
         protected HttpLogService $httpLogService,
+        protected IpBlockService $ipBlockService,
         protected ModelLogService $modelLogService,
         protected ProfilerLogService $profileLogService,
         protected QueryCacheService $queryCacheService,
@@ -104,6 +106,18 @@ class OptimizeCommand extends DefaultCommand
                 $this->httpCacheService->clearHttpCacheAll();
                 $this->queryCacheService->clearQueryCacheAll();
                 $this->viewCacheService->clearViewCacheAll();
+            }
+        }
+
+        // Очистка устаревших ip блокировок
+        if (Lh::config(ConfigEnum::Optimize, 'ip_block_cleanup.enabled')) {
+            $ipCleanup = $this->ipBlockService->cleanupExpired();
+
+            if ($ipCleanup > 0) {
+                $text = 'IpBlock: удалено '
+                    . Hlp::stringPlural($ipCleanup, ['блокировок', 'блокировка', 'блокировки']);
+
+                $this->outputEol($text, 'fg=green');
             }
         }
 

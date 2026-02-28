@@ -4,6 +4,7 @@ use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Enums\IpBlockRuleEnum;
 use Atlcom\LaravelHelper\Enums\ModelLogDriverEnum;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
@@ -33,6 +34,12 @@ $userTableName = (string)$user->getTable();
 $userPrimaryKeyName = (string)$user->getKeyName();
 // Тип первичного ключа в таблице пользователей
 $userPrimaryKeyType = (string)$user->getKeyType();
+
+$ipBlockSuspiciousPatternsDefault = (array)(require __DIR__ . '/laravel-helper-ip-block-patterns.php');
+$ipBlockSuspiciousPatternsEnv = (array)(Hlp::envGet('HELPER_IP_BLOCK_RULE_SUSPICIOUS_PATTERNS', base_path('.env')) ?? []);
+$ipBlockSuspiciousPatterns = empty(array_filter($ipBlockSuspiciousPatternsEnv, static fn ($item) => (string)$item !== ''))
+    ? $ipBlockSuspiciousPatternsDefault
+    : $ipBlockSuspiciousPatternsEnv;
 
 return [
     // Включение пакета хелпера
@@ -72,12 +79,17 @@ return [
          */
     ConfigEnum::Optimize->value    => [
         // Очистка таблиц
-        'log_cleanup' => [
+        'log_cleanup'      => [
             // Флаг включения
             'enabled' => (bool)env('HELPER_OPTIMIZE_LOG_CLEANUP_ENABLED', true),
         ],
+        // Очистка устаревших блокировок ip
+        'ip_block_cleanup' => [
+            // Флаг включения
+            'enabled' => (bool)env('HELPER_OPTIMIZE_IP_BLOCK_CLEANUP_ENABLED', true),
+        ],
         // Очистка кеша
-        'cache_clear' => [
+        'cache_clear'      => [
             // Флаг включения
             'enabled' => (bool)env('HELPER_OPTIMIZE_CACHE_CLEAR_ENABLED', true),
         ],
@@ -326,6 +338,54 @@ return [
         ],
         // Количество дней хранения логов
         'cleanup_days'        => (int)env('HELPER_HTTP_LOG_CLEANUP_DAYS', 7),
+    ],
+
+
+        /**
+         * IpBlock. Блокировка ip адресов от брутфорса и фаззинга
+         */
+    ConfigEnum::IpBlock->value     => [
+        // Флаг полного включения сервиса
+        'enabled'                   => (bool)env('HELPER_IP_BLOCK_ENABLED', false),
+        // Список доверенных proxy серверов
+        'trusted_proxies'           => (array)(Hlp::envGet('HELPER_IP_BLOCK_TRUSTED_PROXIES', base_path('.env')) ?? []),
+        // Список ip для белого списка (allow)
+        'manual_allow'              => (array)(Hlp::envGet('HELPER_IP_BLOCK_MANUAL_ALLOW', base_path('.env')) ?? []),
+        // Список ip для ручной блокировки (deny)
+        'manual_deny'               => (array)(Hlp::envGet('HELPER_IP_BLOCK_MANUAL_DENY', base_path('.env')) ?? []),
+        // Список ip, которые игнорируются антибрутфорсом
+        'ignore'                    => (array)(Hlp::envGet('HELPER_IP_BLOCK_IGNORE', base_path('.env')) ?? []),
+        // Время блокировки ip в секундах
+        'block_ttl_seconds'         => (int)env('HELPER_IP_BLOCK_TTL_SECONDS', 3600),
+        // HTTP статус при блокировке
+        'response_status'           => (int)env('HELPER_IP_BLOCK_RESPONSE_STATUS', 403),
+        // Путь к файлу со списком блокировок и счетчиков
+        'storage_file'              => (string)env('HELPER_IP_BLOCK_STORAGE_FILE', storage_path('framework/ip-block-state.php')),
+        // Чувствительность к регистру для паттернов
+        'patterns_case_insensitive' => (bool)env('HELPER_IP_BLOCK_PATTERNS_CASE_INSENSITIVE', true),
+        // Список URL-паттернов, исключённых из проверки suspicious_payload (регулярные выражения)
+        'exclude_urls'              => (array)(Hlp::envGet('HELPER_IP_BLOCK_EXCLUDE_URLS', base_path('.env')) ?? [
+            'ip-block',
+        ]),
+        // Настройки правил блокировки
+        'rules'                     => [
+            IpBlockRuleEnum::RequestsPerMinute->value     => [
+                'enabled' => (bool)env('HELPER_IP_BLOCK_RULE_REQUESTS_ENABLED', true),
+                'limit'   => (int)env('HELPER_IP_BLOCK_RULE_REQUESTS_LIMIT', 100),
+            ],
+            IpBlockRuleEnum::NotFoundPerMinute->value     => [
+                'enabled' => (bool)env('HELPER_IP_BLOCK_RULE_NOT_FOUND_ENABLED', true),
+                'limit'   => (int)env('HELPER_IP_BLOCK_RULE_NOT_FOUND_LIMIT', 10),
+            ],
+            IpBlockRuleEnum::UnauthorizedPerMinute->value => [
+                'enabled' => (bool)env('HELPER_IP_BLOCK_RULE_UNAUTHORIZED_ENABLED', true),
+                'limit'   => (int)env('HELPER_IP_BLOCK_RULE_UNAUTHORIZED_LIMIT', 5),
+            ],
+            IpBlockRuleEnum::SuspiciousPayload->value     => [
+                'enabled'  => (bool)env('HELPER_IP_BLOCK_RULE_SUSPICIOUS_ENABLED', true),
+                'patterns' => $ipBlockSuspiciousPatterns,
+            ],
+        ],
     ],
 
 

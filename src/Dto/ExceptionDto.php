@@ -42,17 +42,17 @@ class ExceptionDto extends Dto
      * Публичные свойства для сериализации
      */
     public int|string $code;
-    public bool $status;
-    public ?string $exception;
-    public string $message;
+    public bool       $status;
+    public ?string    $exception;
+    public string     $message;
 
     /**
      * Скрытые свойства для сериализации
      */
-    public bool $isDebug;
+    public bool              $isDebug;
     public ExceptionDebugDto $debugInfo;
-    public string $uuid;
-    public bool $isTelegram;
+    public string            $uuid;
+    public bool              $isTelegram;
 
 
     /**
@@ -100,11 +100,11 @@ class ExceptionDto extends Dto
             code: $code,
             message: $message,
             debugInfo: [
-                'file' => $exception->getFile() . ':' . $exception->getLine(),
-                'trace' => $exception->getTrace(),
+                'file'    => $exception->getFile() . ':' . $exception->getLine(),
+                'trace'   => $exception->getTrace(),
                 'request' => $request ?? request(),
-                'throw' => $exception,
-                'data' => [] ?: null,
+                'throw'   => $exception,
+                'data'    => [] ?: null,
             ],
         );
 
@@ -132,20 +132,20 @@ class ExceptionDto extends Dto
                 $thisDto->response(isTelegram: true)->getContent(),
                 Hlp::intervalBetween($thisDto->code, [400, 499]) ? TelegramTypeEnum::Warning : TelegramTypeEnum::Error,
                 [
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
-                    'uuid' => $thisDto->uuid,
+                    'file'      => $exception->getFile(),
+                    'line'      => $exception->getLine(),
+                    'uuid'      => $thisDto->uuid,
                     'debugData' => [
-                        'uri' => TelegramLogDto::getMethod() . ' ' . TelegramLogDto::getUri(),
+                        'uri'        => TelegramLogDto::getMethod() . ' ' . TelegramLogDto::getUri(),
                         'controller' => $route
-                            ? class_basename($route?->getControllerClass()) . '::' . $route?->getActionMethod() . '()'
+                            ? class_basename($route?->getControllerClass() ?? '') . '::' . $route?->getActionMethod() . '()'
                             : null,
-                        'project' => config('app.name'),
-                        'env' => config('app.env'),
-                        'exception' => $exception::class,
-                        'message' => $thisDto->message,
-                        'file' => $thisDto->debugInfo->file,
-                        'trace' => $thisDto->debugInfo->trace,
+                        'project'    => config('app.name'),
+                        'env'        => config('app.env'),
+                        'exception'  => $exception::class,
+                        'message'    => $thisDto->message,
+                        'file'       => $thisDto->debugInfo->file,
+                        'trace'      => $thisDto->debugInfo->trace,
                         ...TelegramLogDto::getDebugData(),
                         ...($exception instanceof HttpResponseException
                             ? ['content' => $exception->getResponse()->getContent()]
@@ -160,7 +160,7 @@ class ExceptionDto extends Dto
                             ]
                             : []
                         ),
-                        'user_id' => (string)user(returnOnlyId: true),
+                        'user_id'    => (string)user(returnOnlyId: true),
                     ],
                 ],
             );
@@ -182,7 +182,7 @@ class ExceptionDto extends Dto
     protected function mappings(): array
     {
         return [
-            'isDebug' => 'is_debug',
+            'isDebug'   => 'is_debug',
             'debugInfo' => 'debug_info',
         ];
     }
@@ -198,11 +198,11 @@ class ExceptionDto extends Dto
     protected function defaults(): array
     {
         return [
-            'code' => 400,
-            'status' => false,
-            'message' => 'Undefined message',
-            'isDebug' => isDebug(),
-            'uuid' => uuid(),
+            'code'       => 400,
+            'status'     => false,
+            'message'    => 'Undefined message',
+            'isDebug'    => isDebug(),
+            'uuid'       => uuid(),
             'isTelegram' => false,
         ];
     }
@@ -218,7 +218,7 @@ class ExceptionDto extends Dto
     protected function casts(): array
     {
         return [
-            'code' => static fn ($v) => is_numeric($v) ? (int)$v : (string)$v,
+            'code'      => static fn ($v) => is_numeric($v) ? (int)$v : (string)$v,
             'debugInfo' => ExceptionDebugDto::class,
         ];
     }
@@ -303,16 +303,16 @@ class ExceptionDto extends Dto
 
         $localeKey = Hlp::stringReplace($localeKey, ['::class' => 'class']);
         $replaces = [
-            'model' => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
+            'model'    => ($this->debugInfo->throw && method_exists($this->debugInfo->throw, 'getModel'))
                 ? Hlp::pathClassName($this->debugInfo->throw->getModel() ?? '')
                 : '',
-            'route' => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getRequestUri'))
+            'route'    => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getRequestUri'))
                 ? ($this->debugInfo->request->getRequestUri() ?? '')
                 : '',
-            'method' => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getMethod'))
+            'method'   => ($this->debugInfo->request && method_exists($this->debugInfo->request, 'getMethod'))
                 ? ($this->debugInfo->request->getMethod() ?? '')
                 : '',
-            'class' => $this->toBasename($this::class),
+            'class'    => $this->toBasename($this::class),
             'property' => ':attribute',
         ];
 

@@ -33,26 +33,26 @@ class HttpLogDto extends Dto
 
     public ?string $uuid;
 
-    public int|string|null $userId;
-    public ?string $name;
-    public ?HttpLogTypeEnum $type;
+    public int|string|null    $userId;
+    public ?string            $name;
+    public ?HttpLogTypeEnum   $type;
     public ?HttpLogStatusEnum $status;
-    public ?string $method;
-    public ?string $ip;
-    public string $url;
-    public ?array $requestHeaders;
-    public ?string $requestData;
+    public ?string            $method;
+    public ?string            $ip;
+    public string             $url;
+    public ?array             $requestHeaders;
+    public ?string            $requestData;
 
-    public ?int $responseCode;
+    public ?int    $responseCode;
     public ?string $responseMessage;
-    public ?array $responseHeaders;
+    public ?array  $responseHeaders;
     public ?string $responseData;
     public ?string $cacheKey;
-    public bool $isCached;
-    public bool $isFromCache;
-    public ?float $duration;
-    public ?int $size;
-    public ?array $info;
+    public bool    $isCached;
+    public bool    $isFromCache;
+    public ?float  $duration;
+    public ?int    $size;
+    public ?array  $info;
 
     public ?Exception $exception;
 
@@ -67,8 +67,8 @@ class HttpLogDto extends Dto
     protected function defaults(): array
     {
         return [
-            'userId' => user(returnOnlyId: true),
-            'isCached' => false,
+            'userId'      => user(returnOnlyId: true),
+            'isCached'    => false,
             'isFromCache' => false,
         ];
     }
@@ -88,35 +88,35 @@ class HttpLogDto extends Dto
         ?array $info = null,
     ): static {
         return static::create([
-            'uuid' => $uuid,
+            'uuid'   => $uuid,
             'status' => HttpLogStatusEnum::Process,
 
             ...match (true) {
                 $request instanceof RequestIn => [
-                    'name' => // $request->route()->getName() ?:
-                        class_basename($request->route()?->getControllerClass())
+                    'name'           => // $request->route()->getName() ?:
+                        class_basename($request->route()?->getControllerClass() ?? '')
                         . '::' . $request->route()?->getActionMethod(),
-                    'type' => HttpLogTypeEnum::In,
-                    'method' => Str::lower($request->getMethod()),
-                    'ip' => ip(),
-                    'url' => $request->getUri(),
+                    'type'           => HttpLogTypeEnum::In,
+                    'method'         => Str::lower($request->getMethod()),
+                    'ip'             => ip(),
+                    'url'            => $request->getUri(),
                     'requestHeaders' => $request->headers->all(),
-                    'requestData' => $request->getContent(),
+                    'requestData'    => $request->getContent(),
                 ],
                 $request instanceof RequestOut => [
-                    'url' => $url = $request->url(),
-                    'name' => (($request->header(HttpLogService::HTTP_HEADER_NAME) ?? [])[0] ?? null)
+                    'url'            => $url = $request->url(),
+                    'name'           => (($request->header(HttpLogService::HTTP_HEADER_NAME) ?? [])[0] ?? null)
                         ?: Hlp::urlParse($url)['host'],
-                    'type' => HttpLogTypeEnum::Out,
-                    'method' => Str::lower($request->method()),
-                    'ip' => ip(),
+                    'type'           => HttpLogTypeEnum::Out,
+                    'method'         => Str::lower($request->method()),
+                    'ip'             => ip(),
                     'requestHeaders' => $request->headers(),
-                    'requestData' => $request->body(),
-                    'cacheKey' => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
-                    'isCached' => Hlp::castToBool(
+                    'requestData'    => $request->body(),
+                    'cacheKey'       => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
+                    'isCached'       => Hlp::castToBool(
                         ($request->header(HttpLogService::HTTP_HEADER_CACHE_SET) ?? [])[0] ?? null
                     ),
-                    'isFromCache' => Hlp::castToBool(
+                    'isFromCache'    => Hlp::castToBool(
                         ($request->header(HttpLogService::HTTP_HEADER_CACHE_GET) ?? [])[0] ?? null
                     ),
                 ],
@@ -124,7 +124,7 @@ class HttpLogDto extends Dto
                 default => [],
             },
 
-            'info' => [
+            'info'   => [
                 ...($info ?? []),
                 'request_data_size' => Hlp::sizeBytesToString(
                     Str::length(
@@ -179,51 +179,51 @@ class HttpLogDto extends Dto
             ->merge([
                 ...match (true) {
                     $response instanceof StreamedResponse => [
-                        'responseCode' => $response->getStatusCode(),
+                        'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData' => '[' . $response::class . ']',
-                        'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'responseData'    => '[' . $response::class . ']',
+                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
                     $response instanceof BinaryFileResponse => [
-                        'responseCode' => $response->getStatusCode(),
+                        'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData' => '[' . $response::class . ', ' . $response->getFile()->getMimeType() . ']',
-                        'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'responseData'    => '[' . $response::class . ', ' . $response->getFile()->getMimeType() . ']',
+                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
                     $response instanceof ResponseIn => [
-                        'responseCode' => $response->getStatusCode(),
+                        'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData' => Hlp::castToString($response->getContent()),
-                        'status' => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'responseData'    => Hlp::castToString($response->getContent()),
+                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
                     $response instanceof ResponseOut => [
-                        'responseCode' => $response->status(),
+                        'responseCode'    => $response->status(),
                         'responseMessage' => $response->reason(),
                         'responseHeaders' => $response->headers(),
-                        'responseData' => Hlp::castToString($response->body()),
-                        'status' => $response->successful()
+                        'responseData'    => Hlp::castToString($response->body()),
+                        'status'          => $response->successful()
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
 
                     default => [
                         'responseData' => is_object($response) ? $response::class : $response,
-                        'status' => HttpLogStatusEnum::Failed,
+                        'status'       => HttpLogStatusEnum::Failed,
                     ],
                 },
 
-                'info' => [
+                'info'     => [
                     ...($dto->info ?? []),
-                    'duration' => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
+                    'duration'           => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
                     'response_data_size' => Hlp::sizeBytesToString($size),
                 ],
                 ...(isset($attributes['cacheKey']) ? ['cacheKey' => $attributes['cacheKey']] : []),
@@ -240,7 +240,7 @@ class HttpLogDto extends Dto
                     : []
                 ),
                 'duration' => $duration ?? null,
-                'size' => $size,
+                'size'     => $size,
             ]);
     }
 

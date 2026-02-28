@@ -83,7 +83,7 @@ class RouteLogService extends DefaultService
                             method: $method,
                             uri: $route->uri,
                             controller: trim(
-                                class_basename($route->getControllerClass()) . '::' . $route->getActionMethod(),
+                                class_basename($route->getControllerClass() ?? '') . '::' . $route->getActionMethod(),
                                 ':',
                             ),
                         );
