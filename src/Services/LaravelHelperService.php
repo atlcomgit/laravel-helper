@@ -27,7 +27,6 @@ use Atlcom\LaravelHelper\Exceptions\WithoutTelegramException;
 use Atlcom\LaravelHelper\Jobs\QueueLogJob;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
 use Atlcom\LaravelHelper\Models\HttpLog;
-use Atlcom\LaravelHelper\Models\MailLog;
 use Atlcom\LaravelHelper\Models\ModelLog;
 use Atlcom\LaravelHelper\Models\ProfilerLog;
 use Atlcom\LaravelHelper\Models\QueryLog;
