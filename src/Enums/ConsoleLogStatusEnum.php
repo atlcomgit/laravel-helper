@@ -12,9 +12,10 @@ enum ConsoleLogStatusEnum: string
     use HelperEnumTrait;
 
 
-    case Process = 'process';
-    case Success = 'success';
-    case Failed = 'failed';
+    case Start     = 'start';
+    case Process   = 'process';
+    case Success   = 'success';
+    case Failed    = 'failed';
     case Exception = 'exception';
 
 
@@ -38,6 +39,7 @@ enum ConsoleLogStatusEnum: string
     public static function enumLabel(?BackedEnum $enum): ?string
     {
         return match ($enum) {
+            self::Start => 'Запуск',
             self::Process => 'В процессе',
             self::Success => 'Успешно',
             self::Failed => 'Неудачно',

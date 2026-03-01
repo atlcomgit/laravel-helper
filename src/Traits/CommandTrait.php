@@ -90,8 +90,13 @@ trait CommandTrait
             );
 
             $config = ConfigEnum::ConsoleLog;
-            !(Lh::config($config, 'enabled') && Lh::config($config, 'store_on_start', true))
-                ?: $this->consoleLogDto->store(true);
+            if (Lh::config($config, 'enabled') && Lh::config($config, 'store_on_start', true)) {
+                $this->consoleLogDto->status = ConsoleLogStatusEnum::Start;
+                $this->consoleLogDto->store(true);
+
+                $this->consoleLogDto->status = ConsoleLogStatusEnum::Process;
+                $this->consoleLogDto->store(true);
+            }
 
             // Очищаем консоль stdout
             $this->outputClear();
@@ -116,16 +121,16 @@ trait CommandTrait
             $this->consoleLogDto->duration = $this->consoleLogDto->getDuration();
             $this->consoleLogDto->memory = $this->consoleLogDto->getMemory();
             $info = [
-                'class' => $this::class,
-                'duration' => $duration = Hlp::timeSecondsToString(
+                'class'              => $this::class,
+                'duration'           => $duration = Hlp::timeSecondsToString(
                     value: $this->consoleLogDto->duration,
                     withMilliseconds: true,
                 ),
-                'memory' => $memory = Hlp::sizeBytesToString($this->consoleLogDto->memory),
-                'hidden' => $this->hidden,
-                'isolated' => $this->isolated,
+                'memory'             => $memory = Hlp::sizeBytesToString($this->consoleLogDto->memory),
+                'hidden'             => $this->hidden,
+                'isolated'           => $this->isolated,
                 'isolated_exit_code' => $this->isolatedExitCode,
-                'aliases' => $this->aliases,
+                'aliases'            => $this->aliases,
                 ...(!is_null($this->telegramComment) ? ['comment' => $this->telegramComment] : []),
             ];
 
@@ -153,12 +158,12 @@ trait CommandTrait
                 );
 
                 telegram([
-                    'Событие' => 'Консольная команда',
-                    'Название' => $this->consoleLogDto->name,
-                    'Описание' => $this->description,
+                    'Событие'   => 'Консольная команда',
+                    'Название'  => $this->consoleLogDto->name,
+                    'Описание'  => $this->description,
                     'Результат' => $this->consoleLogDto->status->label(),
-                    'Время' => $duration,
-                    'Память' => $memory,
+                    'Время'     => $duration,
+                    'Память'    => $memory,
                     ...(!is_null($this->telegramComment) ? ['Комментарий' => $this->telegramComment] : []),
                 ], TelegramTypeEnum::Debug);
             }
