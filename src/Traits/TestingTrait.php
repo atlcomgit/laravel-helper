@@ -275,6 +275,10 @@ trait TestingTrait
                     break;
             }
         }
+
+        // Отключаем сервис блокировки IP
+        $config = ConfigEnum::IpBlock;
+        Config::set("laravel-helper.{$config->value}.enabled", false);
     }
 
 
