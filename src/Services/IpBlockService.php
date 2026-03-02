@@ -683,7 +683,7 @@ class IpBlockService extends DefaultService
 
 
     /**
-     * Проверяет, входит ли ip адрес в список ip/cidr
+     * Проверяет, входит ли ip адрес в список ip/cidr/wildcard
      *
      * @param string $ip
      * @param array $list
@@ -702,12 +702,68 @@ class IpBlockService extends DefaultService
                 return true;
             }
 
+            if ($mask === '*') {
+                return true;
+            }
+
             if (str_contains($mask, '/') && IpUtils::checkIp($ip, $mask)) {
+                return true;
+            }
+
+            if ($this->isWildcardIpv4Match($ip, $mask)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+
+    /**
+     * Проверяет совпадение ipv4 адреса с wildcard маской
+     *
+     * @param string $ip
+     * @param string $mask
+     * @return bool
+     */
+    private function isWildcardIpv4Match(string $ip, string $mask): bool
+    {
+        if (!str_contains($mask, '*')) {
+            return false;
+        }
+
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return false;
+        }
+
+        if (!preg_match('/^[0-9*]+(?:\.[0-9*]+){3}$/', $mask)) {
+            return false;
+        }
+
+        $ipParts = explode('.', $ip);
+        $maskParts = explode('.', $mask);
+
+        foreach ($maskParts as $index => $maskPart) {
+            if ($maskPart === '*') {
+                continue;
+            }
+
+            if (!ctype_digit($maskPart)) {
+                return false;
+            }
+
+            $maskOctet = (int)$maskPart;
+
+            if ($maskOctet < 0 || $maskOctet > 255) {
+                return false;
+            }
+
+            if ((int)$ipParts[$index] !== $maskOctet) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 

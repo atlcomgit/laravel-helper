@@ -99,4 +99,39 @@ final class IpBlockServiceTest extends DefaultTest
         Event::assertDispatchedTimes(IpBlockEvent::class, 1);
         $this->assertCount(1, $service->getBlockedIps());
     }
+
+
+    #[Test]
+    public function supportsCidrAndWildcardInManualAllowAndDeny(): void
+    {
+        Config::set('laravel-helper.ip_block.manual_allow', ['198.51.100.0/24', '203.0.113.*']);
+        Config::set('laravel-helper.ip_block.manual_deny', ['198.51.100.10', '203.0.113.15']);
+
+        $service = app(IpBlockService::class);
+
+        $this->assertFalse($service->isBlockedIp('198.51.100.10'));
+        $this->assertFalse($service->isBlockedIp('203.0.113.15'));
+    }
+
+
+    #[Test]
+    public function supportsCidrAndWildcardInIgnoreList(): void
+    {
+        Config::set('laravel-helper.ip_block.ignore', ['198.51.101.0/24', '203.0.114.*']);
+        Config::set('laravel-helper.ip_block.rules.requests_per_minute.enabled', true);
+        Config::set('laravel-helper.ip_block.rules.requests_per_minute.limit', 0);
+
+        $service = app(IpBlockService::class);
+
+        $requestCidr = Request::create('/test', 'GET');
+        $requestCidr->server->set('REMOTE_ADDR', '198.51.101.25');
+        $service->registerIncomingRequest($requestCidr);
+
+        $requestWildcard = Request::create('/test', 'GET');
+        $requestWildcard->server->set('REMOTE_ADDR', '203.0.114.77');
+        $service->registerIncomingRequest($requestWildcard);
+
+        $this->assertFalse($service->isBlockedIp('198.51.101.25'));
+        $this->assertFalse($service->isBlockedIp('203.0.114.77'));
+    }
 }

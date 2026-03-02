@@ -351,11 +351,11 @@ return [
         'enabled'                   => (bool)env('HELPER_IP_BLOCK_ENABLED', false),
         // Список доверенных proxy серверов
         'trusted_proxies'           => (array)(Hlp::envGet('HELPER_IP_BLOCK_TRUSTED_PROXIES', base_path('.env')) ?? []),
-        // Список ip для белого списка (allow)
+        // Список ip/cidr/wildcard для белого списка (allow)
         'manual_allow'              => (array)(Hlp::envGet('HELPER_IP_BLOCK_MANUAL_ALLOW', base_path('.env')) ?? []),
-        // Список ip для ручной блокировки (deny)
+        // Список ip/cidr/wildcard для ручной блокировки (deny)
         'manual_deny'               => (array)(Hlp::envGet('HELPER_IP_BLOCK_MANUAL_DENY', base_path('.env')) ?? []),
-        // Список ip, которые игнорируются антибрутфорсом
+        // Список ip/cidr/wildcard, которые игнорируются антибрутфорсом
         'ignore'                    => (array)(Hlp::envGet('HELPER_IP_BLOCK_IGNORE', base_path('.env')) ?? []),
         // Время блокировки ip в секундах
         'block_ttl_seconds'         => (int)env('HELPER_IP_BLOCK_TTL_SECONDS', 3600),
