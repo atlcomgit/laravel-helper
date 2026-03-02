@@ -35,7 +35,9 @@ $userPrimaryKeyName = (string)$user->getKeyName();
 // Тип первичного ключа в таблице пользователей
 $userPrimaryKeyType = (string)$user->getKeyType();
 
-$ipBlockSuspiciousPatternsDefault = (array)(require __DIR__ . '/laravel-helper-ip-block-patterns.php');
+$ipBlockPatternsFile = __DIR__ . '/laravel-helper-ip-block-patterns.php';
+$ipBlockPatternsFileFallback = base_path('vendor/atlcom/laravel-helper/config/laravel-helper-ip-block-patterns.php');
+$ipBlockSuspiciousPatternsDefault = (array)(require(file_exists($ipBlockPatternsFile) ? $ipBlockPatternsFile : $ipBlockPatternsFileFallback));
 $ipBlockSuspiciousPatternsEnv = (array)(Hlp::envGet('HELPER_IP_BLOCK_RULE_SUSPICIOUS_PATTERNS', base_path('.env')) ?? []);
 $ipBlockSuspiciousPatterns = empty(array_filter($ipBlockSuspiciousPatternsEnv, static fn ($item) => (string)$item !== ''))
     ? $ipBlockSuspiciousPatternsDefault

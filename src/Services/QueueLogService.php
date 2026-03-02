@@ -93,7 +93,11 @@ class QueueLogService extends DefaultService
             payload: $payload, // $event->job->getRawBody(),
             attempts: $event->job->attempts(),
             exception: $event instanceof JobFailed ? Hlp::exceptionToString($event->exception) : null,
-            withQueueLog: is_array($command) && ($command['withQueueLog'] ?? false),
+            withQueueLog: match (true) {
+                is_array($command) => (bool)($command['withQueueLog'] ?? false),
+                is_object($command) && property_exists($command, 'withQueueLog') => (bool)$command->withQueueLog,
+                default => false,
+            },
             isUpdated: ($event instanceof JobProcessed || $event instanceof JobFailed)
             && Lh::config(ConfigEnum::QueueLog, 'store_on_start'),
             status: match (true) {

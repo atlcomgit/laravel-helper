@@ -1030,8 +1030,11 @@ trait QueryTrait
                 }
             }
 
-            is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
-            $this->getQuery()->getConnection()->withModelLog(false);
+            // Отключаем логирование на уровне QueryBuilder/Connection, чтобы избежать
+            // повторного логирования при вызове parent::update/delete через Connection
+            // is_null($this->withModelLog) ?: $this->getQuery()->withModelLog($this->withModelLog);
+            // $this->getQuery()->getConnection()->withModelLog(false);
+            $this->getQuery()->setModelLog(false);
         }
 
         if (

@@ -68,8 +68,8 @@ class HttpCacheService extends DefaultService
 
         return new class ($request, $config) extends PendingRequest {
             public function __construct(
-                protected PendingRequest $pendingRequest,
-                protected ?HttpCacheConfigDto $config = null,
+            protected PendingRequest $pendingRequest,
+            protected ?HttpCacheConfigDto $config = null,
             ) {}
 
 
@@ -178,6 +178,18 @@ class HttpCacheService extends DefaultService
             $request->withHeader(HttpLogService::HTTP_HEADER_CACHE_SET, true);
         }
 
+        // Добавляем log заголовки если их ещё нет (UUID, NAME, TIME) для отслеживания запроса
+        if (!($request->getOptions()['headers'][HttpLogService::HTTP_HEADER_UUID] ?? null)) {
+            $request->replaceHeaders([
+                ...($request->getOptions()['headers'] ?? []),
+                ...Hlp::arrayDeleteKeys(
+                    HttpLogService::getLogHeaders(HttpLogHeaderEnum::Unknown),
+                    [HttpLogService::HTTP_HEADER_NAME],
+                ),
+                ...($httpCacheDto->key ? [HttpLogService::HTTP_HEADER_CACHE_SET => true] : []),
+            ]);
+        }
+
         $httpCacheDto->response = match ($method) {
             HttpCacheMethodEnum::Get => $request->get($url, $data),
             HttpCacheMethodEnum::Post => $request->post($url, $data),
@@ -228,6 +240,7 @@ class HttpCacheService extends DefaultService
             type: match (true) {
                 $request instanceof RequestIn => HttpLogTypeEnum::In,
                 $request instanceof RequestOut => HttpLogTypeEnum::Out,
+                default => HttpLogTypeEnum::Out,
             },
             requestMethod: $method,
             requestUrl: $url,

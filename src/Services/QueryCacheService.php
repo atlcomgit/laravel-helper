@@ -15,8 +15,8 @@ use Illuminate\Cache\TaggableStore;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Expression;
-use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -27,8 +27,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 class QueryCacheService extends DefaultService
 {
     protected CacheService $cacheService;
-    protected string $driver = '';
-    protected array $exclude = [];
+    protected string       $driver       = '';
+    protected array        $exclude      = [];
 
 
     public function __construct()
@@ -90,7 +90,8 @@ class QueryCacheService extends DefaultService
         }
 
         foreach ($tables as $key => $table) {
-            !($table instanceof Expression) ?: $tables[$key] = $table->getValue(new Grammar());
+            !($table instanceof Expression)
+                ?: $tables[$key] = $table->getValue(DB::connection()->getQueryGrammar());
         }
 
         return array_unique(array_filter($tables));
@@ -318,5 +319,16 @@ class QueryCacheService extends DefaultService
                 );
             }
         );
+    }
+
+
+    /**
+     * Сбрасывает все ключи кеша sql запросов (алиас clearQueryCacheAll)
+     *
+     * @return void
+     */
+    public function flushQueryCacheAll(): void
+    {
+        $this->clearQueryCacheAll();
     }
 }

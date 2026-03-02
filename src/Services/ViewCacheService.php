@@ -21,7 +21,7 @@ use Atlcom\LaravelHelper\Facades\Lh;
 class ViewCacheService extends DefaultService
 {
     protected CacheService $cacheService;
-    protected array $exclude = [];
+    protected array        $exclude      = [];
 
 
     public function __construct()
@@ -258,5 +258,16 @@ class ViewCacheService extends DefaultService
                 );
             }
         );
+    }
+
+
+    /**
+     * Сбрасывает все ключи кеша blade шаблонов (алиас clearViewCacheAll)
+     *
+     * @return void
+     */
+    public function flushViewCacheAll(): void
+    {
+        $this->clearViewCacheAll();
     }
 }
