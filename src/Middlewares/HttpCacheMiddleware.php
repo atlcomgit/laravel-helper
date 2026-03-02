@@ -18,12 +18,20 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class HttpCacheMiddleware
 {
-    public static bool $cacheEnabled = false;
-    public static ?string $cacheKey = null;
-    public static bool $isCached = false;
-    public static bool $isFromCache = false;
+    public static bool    $cacheEnabled = false;
+    public static ?string $cacheKey     = null;
+    public static bool    $isCached     = false;
+    public static bool    $isFromCache  = false;
 
 
+    /**
+     * Обрабатывает входящий HTTP-запрос с поддержкой кеширования ответов
+     *
+     * @param Request $request
+     * @param Closure $next
+     * @param string|null $httpCacheConfigDtoJson Зашифрованная конфигурация кеша (HttpCacheConfigDto)
+     * @return Response
+     */
     public function handle(Request $request, Closure $next, ?string $httpCacheConfigDtoJson = null)
     {
         if (static::$cacheEnabled = Lh::config(ConfigEnum::HttpCache, 'enabled')) {

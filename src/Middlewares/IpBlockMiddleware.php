@@ -66,8 +66,13 @@ class IpBlockMiddleware
         }
 
         $service = app(IpBlockService::class);
+        $ip = $service->resolveClientIp($request);
 
-        if ($service->isAllowListedIp($service->resolveClientIp($request))) {
+        if ($service->isAllowListedIp($ip)) {
+            return;
+        }
+
+        if ($service->isBlockedIp($ip)) {
             return;
         }
 

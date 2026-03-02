@@ -199,12 +199,12 @@ if (!function_exists('queue')) {
      */
     function queue(string $classJob, Dto $dto, ?string $queueName = null): void
     {
-        static $queued = [];
         $queueHash = $dto->getHash($queueName ?? '');
+        $cacheKey = 'helpers:queue:' . $queueHash;
 
         // Если постановка в очередь не из самой очереди и не повторная
-        if (!($queued[$queueHash] ?? null)) { // ограничение повторной отправки
-            $queued[$queueHash] = true;
+        if (!Hlp::cacheRuntimeGet($cacheKey)) { // ограничение повторной отправки
+            Hlp::cacheRuntimeSet($cacheKey, true);
 
             isTesting()
                 ? $classJob::dispatchSync($dto)

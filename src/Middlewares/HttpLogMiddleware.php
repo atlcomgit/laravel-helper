@@ -18,10 +18,18 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class HttpLogMiddleware
 {
-    private static ?string $uuid = null;
+    private static ?string $uuid    = null;
     private static ?string $startAt = null;
 
 
+    /**
+     * Обрабатывает входящий HTTP-запрос с логированием
+     *
+     * @param Request $request
+     * @param Closure $next
+     * @param string|null $httpLogConfigDtoJson Зашифрованная конфигурация логирования (HttpLogConfigDto)
+     * @return Response
+     */
     public function handle(Request $request, Closure $next, ?string $httpLogConfigDtoJson = null)
     {
         $dto = null;
@@ -55,13 +63,20 @@ class HttpLogMiddleware
     }
 
 
+    /**
+     * Финализирует логирование после отправки ответа клиенту
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return void
+     */
     public function terminate(Request $request, Response $response): void
     {
         !static::$uuid
             ?: HttpLogDto::createByResponse(static::$uuid, $request, $response, [
-                'startAt' => static::$startAt,
-                'cacheKey' => HttpCacheMiddleware::$cacheKey,
-                'isCached' => HttpCacheMiddleware::$isCached,
+                'startAt'     => static::$startAt,
+                'cacheKey'    => HttpCacheMiddleware::$cacheKey,
+                'isCached'    => HttpCacheMiddleware::$isCached,
                 'isFromCache' => HttpCacheMiddleware::$isFromCache,
             ])->dispatch()
         ;

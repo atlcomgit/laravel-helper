@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Tests\Unit;
 
 use Atlcom\LaravelHelper\Defaults\DefaultTest;
+use Atlcom\LaravelHelper\Events\IpBlockEvent;
 use Atlcom\LaravelHelper\Services\IpBlockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
@@ -82,5 +84,19 @@ final class IpBlockServiceTest extends DefaultTest
         $service = app(IpBlockService::class);
 
         $this->assertFalse($service->isBlockedIp('203.0.113.12'));
+    }
+
+
+    #[Test]
+    public function doesNotDispatchDuplicateEventForAlreadyBlockedIp(): void
+    {
+        Event::fake([IpBlockEvent::class]);
+
+        $service = app(IpBlockService::class);
+        $service->blockIp('203.0.113.13', 'first_reason', 'auto', 'first');
+        $service->blockIp('203.0.113.13', 'second_reason', 'auto', 'second');
+
+        Event::assertDispatchedTimes(IpBlockEvent::class, 1);
+        $this->assertCount(1, $service->getBlockedIps());
     }
 }

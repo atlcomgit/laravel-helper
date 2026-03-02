@@ -51,6 +51,11 @@ class IpBlockService extends DefaultService
     /**
      * Возвращает клиентский ip адрес с учетом trusted proxies
      *
+     * В Docker-окружении REMOTE_ADDR обычно является приватным IP контейнера (172.x.x.x),
+     * реальный клиентский IP передаётся через X-Forwarded-For от reverse proxy (nginx/traefik).
+     * Метод берёт правый (ближайший к серверу) не-trusted IP из цепочки X-Forwarded-For,
+     * что защищает от подделки клиентом заголовка.
+     *
      * @param Request $request
      * @return string
      */
@@ -62,18 +67,29 @@ class IpBlockService extends DefaultService
             return $remoteIp;
         }
 
+        // Извлекаем цепочку IP из X-Forwarded-For и берём правый не-trusted IP
         $forwardedFor = trim((string)$request->headers->get('x-forwarded-for', ''));
 
         if ($forwardedFor) {
-            foreach (explode(',', $forwardedFor) as $part) {
+            $parts = array_reverse(explode(',', $forwardedFor));
+
+            foreach ($parts as $part) {
                 $ip = trim($part);
 
-                if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
-                    return $ip;
+                if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP)) {
+                    continue;
                 }
+
+                // Пропускаем trusted proxy IP (Docker bridge, nginx и т.д.)
+                if ($this->isTrustedProxy($ip)) {
+                    continue;
+                }
+
+                return $ip;
             }
         }
 
+        // Фолбэк на X-Real-IP (если задан reverse proxy)
         $realIp = trim((string)$request->headers->get('x-real-ip', ''));
 
         return $realIp && filter_var($realIp, FILTER_VALIDATE_IP) ? $realIp : $remoteIp;
@@ -213,6 +229,17 @@ class IpBlockService extends DefaultService
 
         $state = $this->getState();
         $now = now()->timestamp;
+        $activeBlock = (array)($state['blocked'][$ip] ?? []);
+
+        if (!empty($activeBlock) && (int)($activeBlock['expiresAt'] ?? 0) > $now) {
+            return;
+        }
+
+        if (!empty($activeBlock)) {
+            unset($state['blocked'][$ip]);
+            unset($state['metrics'][$ip]);
+        }
+
         $ttl = max(60, (int)Lh::config(ConfigEnum::IpBlock, 'block_ttl_seconds', 3600));
 
         $state['blocked'][$ip] = [
@@ -466,7 +493,17 @@ class IpBlockService extends DefaultService
 
             $modifier = (bool)Lh::config(ConfigEnum::IpBlock, 'patterns_case_insensitive', true) ? 'i' : '';
             $regexp = "/{$pattern}/{$modifier}";
+
+            // Ограничиваем backtrack_limit для защиты от ReDoS-атак
+            $prevLimit = (string)ini_get('pcre.backtrack_limit');
+            ini_set('pcre.backtrack_limit', '10000');
             $isMatch = @preg_match($regexp, $subject);
+            ini_set('pcre.backtrack_limit', $prevLimit);
+
+            // Пропускаем некорректный или таймаут-паттерн
+            if ($isMatch === false) {
+                continue;
+            }
 
             if ($isMatch === 1) {
                 $this->blockIp(
@@ -517,6 +554,10 @@ class IpBlockService extends DefaultService
     private function canApplyAutoRules(string $ip): bool
     {
         if ($this->isIpInList($ip, $this->getManualAllowIps())) {
+            return false;
+        }
+
+        if ($this->isBlockedIp($ip)) {
             return false;
         }
 
@@ -848,7 +889,7 @@ class IpBlockService extends DefaultService
         $dir = dirname($path);
 
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            mkdir($dir, 0755, true);
         }
 
         $resource = fopen($path, 'c+');

@@ -97,47 +97,8 @@ class LaravelHelperServiceProvider extends ServiceProvider
         // Регистрация настроек пакета
         $this->mergeConfigFrom(__DIR__ . '/../../config/laravel-helper.php', 'laravel-helper');
 
-        // Публикация настроек пакета
-        $publishConfigs = [
-            __DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php'),
-        ];
-
-        if (Lh::config(ConfigEnum::IpBlock, 'enabled')) {
-            $publishConfigs[__DIR__ . '/../../config/laravel-helper-ip-block-patterns.php']
-                = config_path('laravel-helper-ip-block-patterns.php');
-        }
-
-        $this->publishes($publishConfigs, 'laravel-helper');
-
-        // Регистрация миграций
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
-        !Lh::config(ConfigEnum::TelegramBot, 'enabled')
-            ?: $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations_telegram_bot');
-
-        // Публикация миграций
-        $this->publishes([
-            __DIR__ . '/../../database/migrations' => database_path('migrations'),
-        ], 'laravel-helper');
-
-        // Регистрация фабрик
-        $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
-
-        // Регистрация роутов
-        $this->loadRoutesFrom(__DIR__ . '/../../routes/api-telegram-bot.php');
-
-        // Регистрация сервиса миграций
-        $this->app->singleton(MigrationService::class);
-        app(MigrationService::class)->disableQueryCacheDuringMigrations();
-
         // Регистрация обработчика исключений
         $this->app->singleton(ExceptionHandler::class, DefaultExceptionHandler::class);
-        // $this->renderable(fn (Throwable $e, $request) => app(DefaultExceptionHandler::class)->render($request, $e)));
-
-        // Регистрация dto
-        $this->app->resolving(
-            Dto::class,
-            fn (Dto $dto, Application $app) => $dto->fillFromRequest(request()->toArray()) //?!? проверка массива на запрещенные слова HELPER_DTO_FORBIDDEN_WORDS_ENABLED
-        );
 
         // Регистрация сервисов
         $this->app->singleton(LaravelHelperService::class);
@@ -147,9 +108,7 @@ class LaravelHelperServiceProvider extends ServiceProvider
         $this->app->singleton(HttpLogService::class);
         $this->app->singleton(IpBlockService::class);
         $this->app->singleton(MailLogService::class);
-        $this->app->singleton(ModelLogService::class);
-        ;
-        $this->app->singleton(HttpLogService::class);
+        $this->app->singleton(MigrationService::class);
         $this->app->singleton(ModelLogService::class);
         $this->app->singleton(ProfilerLogService::class);
         $this->app->singleton(RouteLogService::class);
@@ -191,6 +150,41 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Публикация настроек пакета
+        $publishConfigs = [
+            __DIR__ . '/../../config/laravel-helper.php' => config_path('laravel-helper.php'),
+        ];
+        if (Lh::config(ConfigEnum::IpBlock, 'enabled')) {
+            $publishConfigs[__DIR__ . '/../../config/laravel-helper-ip-block-patterns.php']
+                = config_path('laravel-helper-ip-block-patterns.php');
+        }
+        $this->publishes($publishConfigs, 'laravel-helper');
+
+        // Регистрация миграций
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        !Lh::config(ConfigEnum::TelegramBot, 'enabled')
+            ?: $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations_telegram_bot');
+
+        // Публикация миграций
+        $this->publishes([
+            __DIR__ . '/../../database/migrations' => database_path('migrations'),
+        ], 'laravel-helper');
+
+        // Регистрация фабрик
+        $this->loadFactoriesFrom(__DIR__ . '/../../database/factories');
+
+        // Регистрация роутов
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/api-telegram-bot.php');
+
+        // Отключение кеша запросов при миграциях
+        app(MigrationService::class)->disableQueryCacheDuringMigrations();
+
+        // Регистрация заполнения dto из запроса
+        $this->app->resolving(
+            Dto::class,
+            fn (Dto $dto, Application $app) => $dto->fillFromRequest(request()->toArray()),
+        );
+
         // Проверка параметров конфига laravel-helper
         Lh::checkConfig();
 
