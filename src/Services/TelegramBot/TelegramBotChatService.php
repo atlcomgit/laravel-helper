@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotChatDto;
+use Atlcom\LaravelHelper\Events\TelegramBotChatEvent;
 use Atlcom\LaravelHelper\Models\TelegramBotChat;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotChatRepository;
 
@@ -26,6 +27,10 @@ class TelegramBotChatService extends DefaultService
      */
     public function save(TelegramBotChatDto $dto): TelegramBotChat
     {
-        return $this->telegramBotChatRepository->updateOrCreate($dto);
+        $chat = $this->telegramBotChatRepository->updateOrCreate($dto);
+
+        !($chat->wasRecentlyCreated || $chat->wasChanged()) ?: event(new TelegramBotChatEvent($chat));
+
+        return $chat;
     }
 }

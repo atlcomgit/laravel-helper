@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
 use Atlcom\LaravelHelper\Defaults\DefaultService;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Models\TelegramBotUserDto;
+use Atlcom\LaravelHelper\Events\TelegramBotUserEvent;
 use Atlcom\LaravelHelper\Models\TelegramBotUser;
 use Atlcom\LaravelHelper\Repositories\TelegramBot\TelegramBotUserRepository;
 
@@ -26,7 +27,11 @@ class TelegramBotUserService extends DefaultService
      */
     public function save(TelegramBotUserDto $dto): TelegramBotUser
     {
-        return $this->telegramBotUserRepository->updateOrCreate($dto);
+        $user = $this->telegramBotUserRepository->updateOrCreate($dto);
+
+        !($user->wasRecentlyCreated || $user->wasChanged()) ?: event(new TelegramBotUserEvent($user));
+
+        return $user;
     }
 
 
