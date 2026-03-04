@@ -37,9 +37,15 @@ use UnitEnum;
  * @property ?\Carbon\Carbon $deleted_at
  * @property-read string $attrName
  * @property-read ?string $attrEstimateRegistrationDate
+ * @property-read ?int $attrLastTelegramBotChatId
+ * @property-read ?int $last_telegram_bot_chat_id
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
+ * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotChat> $telegramBotChats
+ * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotChat> telegramBotChats()
+ * @property-read ?TelegramBotChat $telegramBotLastChat
+ * @method Relation|TelegramBotChat telegramBotLastChat()
  * 
  * @method self|Builder ofUuid(string $uuid)
  * @method self|Builder ofExternalUserId(int $externalUserId)
@@ -156,6 +162,21 @@ class TelegramBotUser extends DefaultModel
     }
 
 
+    /**
+     * Атрибут: возвращает id последнего чата пользователя по последнему сообщению.
+     *
+     * @return int|null
+     */
+    public function getAttrLastTelegramBotChatIdAttribute(): ?int
+    {
+        $lastMessage = $this->relationLoaded('telegramBotMessages')
+            ? $this->telegramBotMessages->sortByDesc('id')->first()
+            : $this->telegramBotMessages()->latest('id')->first();
+
+        return $lastMessage?->telegram_bot_chat_id ?? null;
+    }
+
+
     /** MUTATORS */
 
 
@@ -170,6 +191,33 @@ class TelegramBotUser extends DefaultModel
     public function telegramBotMessages(): Relation
     {
         return $this->hasMany(TelegramBotMessage::class, 'telegram_bot_user_id');
+    }
+
+
+    /**
+     * Отношение: Связь с чатами бота телеграм
+     *
+     * @return Relation
+     */
+    public function telegramBotChats(): Relation
+    {
+        return $this->belongsToMany(
+            TelegramBotChat::class,
+            TelegramBotMessage::getTableName(),
+            'telegram_bot_user_id',
+            'telegram_bot_chat_id',
+        );
+    }
+
+
+    /**
+     * Отношение: Связь с последним чатом пользователя бота телеграм
+     *
+     * @return Relation
+     */
+    public function telegramBotLastChat(): Relation
+    {
+        return $this->belongsTo(TelegramBotChat::class, 'last_telegram_bot_chat_id');
     }
 
 

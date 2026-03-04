@@ -34,11 +34,17 @@ use UnitEnum;
  * @property ?\Carbon\Carbon $deleted_at
  * @property-read bool $attrIsKicked
  * @property-read bool $attr_is_kicked
+ * @property-read ?int $attrLastTelegramBotUserId
+ * @property-read ?int $last_telegram_bot_user_id
  * 
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotMessage> $telegramBotMessages
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotMessage> telegramBotMessages()
  * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotVariable> $telegramBotVariables
  * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotVariable> telegramBotVariables()
+ * @property-read \Illuminate\Database\Eloquent\Collection<TelegramBotUser> $telegramBotUsers
+ * @method Relation|\Illuminate\Database\Eloquent\Collection<TelegramBotUser> telegramBotUsers()
+ * @property-read ?TelegramBotUser $telegramBotUserLast
+ * @method Relation|TelegramBotUser telegramBotUserLast()
  * 
  * @method self|Builder ofUuid(string $uuid)
  * @method self|Builder ofExternalChatId(int $externalChatId)
@@ -54,26 +60,26 @@ class TelegramBotChat extends DefaultModel
     public const COMMENT = 'Чат телеграм бота';
 
     protected ?bool $withModelLog = false;
-    protected $guarded = ['id'];
-    protected $casts = [
-        'uuid' => 'string',
+    protected       $guarded      = ['id'];
+    protected       $casts        = [
+        'uuid'             => 'string',
         'external_chat_id' => 'integer',
-        'name' => 'string',
-        'chat_name' => 'string',
-        'type' => 'string',
-        'info' => 'array',
+        'name'             => 'string',
+        'chat_name'        => 'string',
+        'type'             => 'string',
+        'info'             => 'array',
     ];
-    protected $fields = [
-        'id' => 'ID чата телеграм бота',
-        'uuid' => 'Uuid чата телеграм бота',
+    protected       $fields       = [
+        'id'               => 'ID чата телеграм бота',
+        'uuid'             => 'Uuid чата телеграм бота',
         'external_chat_id' => 'Внешний Id чата телеграм бота',
-        'name' => 'Имя чата телеграм бота',
-        'chat_name' => 'Логин чата телеграм бота',
-        'type' => 'Тип чата телеграм бота',
-        'info' => 'Информация о чате телеграм бота',
-        'created_at' => 'Добавлено',
-        'updated_at' => 'Обновлено',
-        'deleted_at' => 'Удалено',
+        'name'             => 'Имя чата телеграм бота',
+        'chat_name'        => 'Логин чата телеграм бота',
+        'type'             => 'Тип чата телеграм бота',
+        'info'             => 'Информация о чате телеграм бота',
+        'created_at'       => 'Добавлено',
+        'updated_at'       => 'Обновлено',
+        'deleted_at'       => 'Удалено',
     ];
 
 
@@ -141,6 +147,21 @@ class TelegramBotChat extends DefaultModel
     }
 
 
+    /**
+     * Атрибут: возвращает id последнего пользователя чата по последнему сообщению.
+     *
+     * @return int|null
+     */
+    public function getAttrLastTelegramBotUserIdAttribute(): ?int
+    {
+        $lastMessage = $this->relationLoaded('telegramBotMessages')
+            ? $this->telegramBotMessages->sortByDesc('id')->first()
+            : $this->telegramBotMessages()->latest('id')->first();
+
+        return $lastMessage?->telegram_bot_user_id ?? null;
+    }
+
+
     /** MUTATORS */
 
 
@@ -166,6 +187,33 @@ class TelegramBotChat extends DefaultModel
     public function telegramBotVariables(): Relation
     {
         return $this->hasMany(TelegramBotVariable::class, 'telegram_bot_chat_id');
+    }
+
+
+    /**
+     * Отношение: Связь с пользователями бота телеграм
+     *
+     * @return Relation
+     */
+    public function telegramBotUsers(): Relation
+    {
+        return $this->belongsToMany(
+            TelegramBotUser::class,
+            TelegramBotMessage::getTableName(),
+            'telegram_bot_chat_id',
+            'telegram_bot_user_id',
+        );
+    }
+
+
+    /**
+     * Отношение: Связь с последним пользователем чата бота телеграм
+     *
+     * @return Relation
+     */
+    public function telegramBotUserLast(): Relation
+    {
+        return $this->belongsTo(TelegramBotUser::class, 'last_telegram_bot_user_id');
     }
 
 
