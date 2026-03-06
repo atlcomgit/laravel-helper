@@ -15,4 +15,8 @@ class IpBlockEventDto extends DefaultDto
     public string $reason;
     public string $source;
     public string $description;
+    public bool   $isBlocked;
+    public int    $blockedAt;
+    public int    $expiresAt;
+    public int    $ttl;
 }

@@ -88,6 +88,27 @@ final class IpBlockServiceTest extends DefaultTest
 
 
     #[Test]
+    public function dispatchesIpBlockEventWithBlockMetadata(): void
+    {
+        Event::fake([IpBlockEvent::class]);
+
+        $service = app(IpBlockService::class);
+        $service->blockIp('203.0.113.30', 'manual_reason', 'manual', 'manual description');
+
+        Event::assertDispatched(IpBlockEvent::class, static function (IpBlockEvent $event): bool {
+            return $event->dto->ip === '203.0.113.30'
+                && $event->dto->reason === 'manual_reason'
+                && $event->dto->source === 'manual'
+                && $event->dto->description === 'manual description'
+                && $event->dto->isBlocked === true
+                && $event->dto->blockedAt > 0
+                && $event->dto->expiresAt > $event->dto->blockedAt
+                && $event->dto->ttl === 3600;
+        });
+    }
+
+
+    #[Test]
     public function doesNotDispatchDuplicateEventForAlreadyBlockedIp(): void
     {
         Event::fake([IpBlockEvent::class]);

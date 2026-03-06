@@ -261,6 +261,10 @@ class IpBlockService extends DefaultService
             reason: $reason,
             source: $source,
             description: $description,
+            isBlocked: true,
+            blockedAt: $now,
+            expiresAt: $now + $ttl,
+            ttl: $ttl,
         )));
     }
 

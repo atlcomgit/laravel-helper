@@ -9,9 +9,6 @@ use Atlcom\LaravelHelper\Dto\IpBlockEventDto;
 
 /**
  * Событие блокировки ip адреса
- *
- * Слушатели:
- * @see \App\Domains\Crm\IpBlock\Listeners\IpBlockEventListener
  */
 class IpBlockEvent extends DefaultEvent
 {
