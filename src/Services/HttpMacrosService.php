@@ -153,6 +153,19 @@ class HttpMacrosService extends DefaultService
                         ])
                     // Retry управляется в TelegramApiService (т.к. multipart + встроенный retry конфликтуют).
                 );
+
+            // Регистрация макроса запроса к Google reCAPTCHA
+            !Lh::config(ConfigEnum::Http, 'googleRecaptchaCom.enabled')
+                ?: Http::macro(
+                    'googleRecaptchaCom',
+                    fn () => Http::baseUrl(
+                        rtrim(Lh::config(ConfigEnum::Http, 'googleRecaptchaCom.url'), '/'),
+                    )
+                        ->replaceHeaders(HttpLogService::getLogHeaders(HttpLogHeaderEnum::GoogleRecaptchaCom))
+                        ->asForm()
+                        ->acceptJson()
+                        ->timeout(Lh::config(ConfigEnum::Http, 'googleRecaptchaCom.timeout'))
+                );
         }
     }
 }

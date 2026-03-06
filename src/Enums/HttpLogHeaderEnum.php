@@ -12,16 +12,17 @@ enum HttpLogHeaderEnum: string
     use HelperEnumTrait;
 
 
-    case None = 'none';
-    case Unknown = 'unknown';
-    case Localhost = 'localhost';
-    case SmsRu = 'sms.ru';
-    case MangoOfficeRu = 'mango-office.ru';
-    case DevlineRu = 'devline.ru';
-    case RtspMe = 'rtsp.me';
-    case FcmGoogleApisCom = 'fcm-google-apis.com';
-    case TelegramOrg = 'api.telegram.org';
-    case DaDataRu = 'dadata.ru';
+    case None               = 'none';
+    case Unknown            = 'unknown';
+    case Localhost          = 'localhost';
+    case SmsRu              = 'sms.ru';
+    case MangoOfficeRu      = 'mango-office.ru';
+    case DevlineRu          = 'devline.ru';
+    case RtspMe             = 'rtsp.me';
+    case FcmGoogleApisCom   = 'fcm-google-apis.com';
+    case TelegramOrg        = 'api.telegram.org';
+    case DaDataRu           = 'dadata.ru';
+    case GoogleRecaptchaCom = 'google-recaptcha.com';
 
 
     /**
@@ -54,6 +55,7 @@ enum HttpLogHeaderEnum: string
             self::FcmGoogleApisCom => 'Сервис fcm google apis',
             self::TelegramOrg => 'Сервис telegram api',
             self::DaDataRu => 'Сервис dadata',
+            self::GoogleRecaptchaCom => 'Сервис Google reCAPTCHA',
 
             default => null,
         };

@@ -164,14 +164,14 @@ return [
          */
     ConfigEnum::Http->value        => [
         // Сервис localhost
-        'localhost'        => [
+        'localhost'          => [
             // Флаг включения макроса
             'enabled' => (bool)env('HELPER_HTTP_LOCALHOST_ENABLED', true),
             // Url адрес для запросов api
             'url'     => (string)env('HELPER_HTTP_LOCALHOST_URL', env('APP_URL', 'http://localhost:80')),
         ],
         // Сервис sms.ru
-        'smsRu'            => [
+        'smsRu'              => [
             // Флаг включения макроса
             'enabled'         => (bool)env('HELPER_HTTP_SMSRU_ENABLED', false),
             // Url адрес для запросов api
@@ -186,7 +186,7 @@ return [
             'send_ip_address' => (bool)env('HELPER_HTTP_SMSRU_SEND_IP_ADDRESS', false),
         ],
         // Сервис mango-office.ru
-        'mangoOfficeRu'    => [
+        'mangoOfficeRu'      => [
             // Флаг включения макроса
             'enabled'       => (bool)env('HELPER_HTTP_MANGOOFFICERU_ENABLED', false),
             // Url адрес для запросов api
@@ -199,7 +199,7 @@ return [
             'webhook_token' => (string)env('HELPER_HTTP_MANGOOFFICERU_WEBHOOK_TOKEN', 'mango_token'),
         ],
         // Сервис mango-devline.ru
-        'devlineRu'        => [
+        'devlineRu'          => [
             // Флаг включения макроса
             'enabled'       => (bool)env('HELPER_HTTP_DEVLINERU_ENABLED', false),
             // Url адрес для запросов api
@@ -214,7 +214,7 @@ return [
             'authorization' => (string)env('HELPER_HTTP_DEVLINERU_AUTHORIZATION', ''),
         ],
         // Сервис rtsp.me
-        'rtspMe'           => [
+        'rtspMe'             => [
             // Флаг включения макроса
             'enabled'   => (bool)env('HELPER_HTTP_RTSPME_ENABLED', false),
             // Url адрес для запросов api
@@ -231,7 +231,7 @@ return [
             'embed_url' => 'https://rtsp.me/embed/{rtspme_id}/',
         ],
         // Сервис FCM Google API
-        'fcmGoogleApisCom' => [
+        'fcmGoogleApisCom'   => [
             // Флаг включения макроса
             'enabled'              => (bool)env('HELPER_HTTP_FCMGOOGLEAPISCOM_ENABLED', false),
             // Url адрес для запросов api
@@ -244,7 +244,7 @@ return [
             'timeout'              => (int)env('HELPER_HTTP_FCMGOOGLEAPISCOM_TIMEOUT', 30),
         ],
         // Сервис Telegram API
-        'telegramOrg'      => [
+        'telegramOrg'        => [
             // Флаг включения макроса
             'enabled'            => (bool)env('HELPER_HTTP_TELEGRAMORG_ENABLED', true),
             // Url адрес для запросов api
@@ -265,6 +265,21 @@ return [
                 'sleep'   => (int)env('HELPER_HTTP_TELEGRAMORG_RETRY_SLEEP', 1000),
                 'throw'   => (bool)env('HELPER_HTTP_TELEGRAMORG_RETRY_THROW', true),
             ],
+        ],
+        // Сервис Google reCAPTCHA v3
+        'googleRecaptchaCom' => [
+            // Флаг включения макроса
+            'enabled'    => (bool)env('HELPER_HTTP_GOOGLE_RECAPTCHA_ENABLED', false),
+            // Url адрес для проверки токена reCAPTCHA
+            'url'        => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_URL', 'https://www.google.com/recaptcha/api'),
+            // Секретный ключ reCAPTCHA
+            'secret_key' => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SECRET_KEY', ''),
+            // Публичный ключ reCAPTCHA (site key)
+            'site_key'   => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SITE_KEY', ''),
+            // Минимальный допустимый score (0.0 - 1.0)
+            'score'      => (float)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SCORE', 0.5),
+            // Таймаут подключения api к сервису
+            'timeout'    => (int)env('HELPER_HTTP_GOOGLE_RECAPTCHA_TIMEOUT', 10),
         ],
     ],
 
