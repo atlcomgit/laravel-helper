@@ -151,6 +151,8 @@ class TelegramBotListenerService extends DefaultService
                     (bool)$dto->response->message->replyToMessage => $this->telegramBotMessageService
                         ->getByExternalMessageId($dto->response->message->replyToMessage)?->id,
 
+                    (bool)$dto->replyToTelegramBotMessageId => $dto->replyToTelegramBotMessageId,
+
                     default => $dto->previousMessageId,
                 },
                 'info'                 => [
@@ -193,6 +195,15 @@ class TelegramBotListenerService extends DefaultService
                         $dto->response->message?->sticker
                         ? ['sticker' => $dto->response->message->sticker]
                         : []
+                    ),
+                    ...(
+                        $dto->response->message?->replyToMessage
+                        ? ['reply' => $dto->response->message->replyToMessage?->messageId]
+                        : (
+                            $dto->replyToExternalMessageId
+                            ? ['reply' => $dto->replyToExternalMessageId]
+                            : []
+                        )
                     ),
                     ...(
                         $dto->meta

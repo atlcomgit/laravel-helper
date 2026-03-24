@@ -338,6 +338,7 @@ class TelegramBotService extends DefaultService
 
         return [
             ...(!empty($replyMarkup) ? ['reply_markup' => json_encode($replyMarkup)] : []),
+            ...($dto->replyToExternalMessageId ? ['reply_to_message_id' => $dto->replyToExternalMessageId] : []),
             ...(
                 (property_exists($dto, 'disableWebPagePreview') && $dto->disableWebPagePreview)
                 ? ['disable_web_page_preview' => true]
