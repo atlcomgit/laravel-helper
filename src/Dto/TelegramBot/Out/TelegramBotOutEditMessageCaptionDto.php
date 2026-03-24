@@ -7,14 +7,14 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
- * DTO редактирования текста (editMessageText)
+ * DTO редактирования подписи сообщения (editMessageCaption)
  */
-class TelegramBotOutEditMessageTextDto extends TelegramBotOutDto
+class TelegramBotOutEditMessageCaptionDto extends TelegramBotOutDto
 {
     public string|int $externalChatId;
     public ?int       $messageId;
     public ?string    $inlineMessageId;
-    public string     $text;
+    public ?string    $caption;
     public string     $parseMode;
     public ?array     $replyMarkup;
 
@@ -26,7 +26,7 @@ class TelegramBotOutEditMessageTextDto extends TelegramBotOutDto
             'chatId'          => null,
             'messageId'       => null,
             'inlineMessageId' => null,
-            'text'            => '',
+            'caption'         => null,
             'parseMode'       => 'HTML',
             'replyMarkup'     => null,
         ];

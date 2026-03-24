@@ -496,10 +496,23 @@ class TelegramApiService extends DefaultService
      */
     public function editMessageMedia(string $botToken, array $media, array $options): mixed
     {
+        $files = [];
+        $mediaPayload = $media;
+        $mediaValue = $mediaPayload['media'] ?? null;
+        $attachmentName = 'media_file';
+
+        if ($mediaValue instanceof CURLFile) {
+            $files[$attachmentName] = $mediaValue;
+            $mediaPayload['media'] = "attach://{$attachmentName}";
+        } elseif (is_string($mediaValue) && is_file($mediaValue)) {
+            $files[$attachmentName] = $mediaValue;
+            $mediaPayload['media'] = "attach://{$attachmentName}";
+        }
+
         return $this->call($botToken, 'editMessageMedia', [
-            'media' => $media,
+            'media' => json_encode($mediaPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ...$options, // chat_id + message_id ИЛИ inline_message_id, reply_markup
-        ]);
+        ], $files);
     }
 
 

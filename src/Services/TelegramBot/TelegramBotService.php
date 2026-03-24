@@ -18,6 +18,8 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutForwardMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutCopyMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutDeleteMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutDeleteMessagesDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutEditMessageCaptionDto;
+use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutEditMessageMediaDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutEditMessageTextDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendPhotoDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendVideoDto;
@@ -77,6 +79,8 @@ class TelegramBotService extends DefaultService
                         TelegramBotOutCopyMessageDto::class => $this->copyMessage($dto),
                         TelegramBotOutDeleteMessageDto::class => $this->deleteMessage($dto),
                         TelegramBotOutDeleteMessagesDto::class => $this->deleteMessages($dto),
+                        TelegramBotOutEditMessageCaptionDto::class => $this->editMessageCaption($dto),
+                        TelegramBotOutEditMessageMediaDto::class => $this->editMessageMedia($dto),
                         TelegramBotOutEditMessageTextDto::class => $this->editMessageText($dto),
                         TelegramBotOutSendPhotoDto::class => $this->sendPhoto($dto),
                         TelegramBotOutSendVideoDto::class => $this->sendVideo($dto),
@@ -593,6 +597,58 @@ class TelegramBotService extends DefaultService
                 'parse_mode'        => $dto->parseMode,
                 'reply_markup'      => $dto->replyMarkup ? json_encode($dto->replyMarkup) : null,
             ], static fn ($v) => $v !== null),
+        );
+
+        return TelegramBotOutResponseDto::create($dto, $json);
+    }
+
+
+    /**
+     * Отправляет в бот редактирование подписи сообщения
+     *
+     * @param TelegramBotOutEditMessageCaptionDto $dto
+     * @return TelegramBotOutResponseDto
+     */
+    protected function editMessageCaption(TelegramBotOutEditMessageCaptionDto $dto): TelegramBotOutResponseDto
+    {
+        $json = $this->telegramApiService->editMessageCaption(
+            botToken: $dto->token,
+            caption: $dto->caption,
+            options: array_filter([
+                'chat_id'           => $dto->externalChatId,
+                'message_id'        => $dto->messageId,
+                'inline_message_id' => $dto->inlineMessageId,
+                'parse_mode'        => $dto->parseMode,
+                'reply_markup'      => $dto->replyMarkup ? json_encode($dto->replyMarkup) : null,
+            ], static fn ($value) => $value !== null),
+        );
+
+        return TelegramBotOutResponseDto::create($dto, $json);
+    }
+
+
+    /**
+     * Отправляет в бот редактирование медиа сообщения
+     *
+     * @param TelegramBotOutEditMessageMediaDto $dto
+     * @return TelegramBotOutResponseDto
+     */
+    protected function editMessageMedia(TelegramBotOutEditMessageMediaDto $dto): TelegramBotOutResponseDto
+    {
+        $json = $this->telegramApiService->editMessageMedia(
+            botToken: $dto->token,
+            media: [
+                'type'  => $dto->mediaType,
+                'media' => $dto->media,
+                ...($dto->caption !== null ? ['caption' => $dto->caption] : []),
+                ...($dto->parseMode !== null ? ['parse_mode' => $dto->parseMode] : []),
+            ],
+            options: array_filter([
+                'chat_id'           => $dto->externalChatId,
+                'message_id'        => $dto->messageId,
+                'inline_message_id' => $dto->inlineMessageId,
+                'reply_markup'      => $dto->replyMarkup ? json_encode($dto->replyMarkup) : null,
+            ], static fn ($value) => $value !== null),
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
