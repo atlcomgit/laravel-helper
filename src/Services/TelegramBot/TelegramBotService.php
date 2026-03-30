@@ -122,20 +122,11 @@ class TelegramBotService extends DefaultService
             $safeMessage = $token ? $this->maskTelegramToken($exception->getMessage(), $token) : $exception->getMessage();
             $safeDtoArray = $token ? $this->maskTelegramTokenInArray($dtoArray, $token) : $dtoArray;
 
-            !isDebug() ?: logger()->error($safeMessage, [
-                'dto_class' => $dto::class,
-                'dto'       => $safeDtoArray,
-                'trace'     => $exception->getTraceAsString(),
-            ]);
-
             // Важно: уведомление об ошибке не должно ломать выполнение очереди.
             // При сетевых/конфигурационных проблемах telegram() может зависнуть или выбросить исключение.
             try {
                 // telegram($exception);
             } catch (Throwable $telegramException) {
-                !isDebug() ?: logger()->warning('Не удалось отправить исключение в Telegram', [
-                    'error' => $telegramException->getMessage(),
-                ]);
             }
 
         } finally {

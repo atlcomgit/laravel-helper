@@ -118,34 +118,17 @@ class TelegramApiService extends DefaultService
                 $safeEndpoint = $this->maskTelegramEndpoint("bot{$botToken}/{$method}", $botToken);
 
                 try {
-                    !isDebug() ?: logger()->info('Отправка api запроса в telegram', [
-                        'attempt'  => $attempt,
-                        'endpoint' => $safeEndpoint,
-                    ]);
                     $response = $requestFactory()->post("bot{$botToken}/{$method}", $params);
+
                     break;
 
                 } catch (ConnectionException $exception) {
                     if ($attempt >= $retryTimes) {
-                        !isDebug() ?: logger()->error('Ошибка отправки api запроса в telegram', [
-                            'attempt'         => $attempt,
-                            'endpoint'        => $safeEndpoint,
-                            'error'           => $this->maskTelegramTokenInText($exception->getMessage(), $botToken),
-                            'handler_context' => $this->extractHandlerContext($exception, $botToken),
-                        ]);
 
                         throw $exception;
                     }
 
                     $sleepMs = $retrySleep;
-
-                    !isDebug() ?: logger()->warning('Повторная отправка api запроса в telegram', [
-                        'attempt'         => $attempt,
-                        'endpoint'        => $safeEndpoint,
-                        'error'           => $this->maskTelegramTokenInText($exception->getMessage(), $botToken),
-                        'sleep_ms'        => $sleepMs,
-                        'handler_context' => $this->extractHandlerContext($exception, $botToken),
-                    ]);
 
                     $sleepMs === 0 ?: usleep($sleepMs * 1000);
                 }

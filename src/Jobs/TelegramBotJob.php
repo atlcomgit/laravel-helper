@@ -36,28 +36,6 @@ class TelegramBotJob extends DefaultJob
      */
     public function __invoke()
     {
-        try {
-            !isDebug() ?: logger()->debug('TelegramBotJob: start', [
-                'uuid'       => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
-                'job_id'     => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
-                'queue'      => method_exists($this->job, 'getQueue') ? $this->job->getQueue() : null,
-                'connection' => method_exists($this->job, 'getConnectionName') ? $this->job->getConnectionName() : null,
-                'attempts'   => $this->attempts(),
-                'tries'      => $this->tries,
-                'dto'        => [
-                    'class'          => $this->dto::class,
-                    'slug'           => property_exists($this->dto, 'slug') ? $this->dto->slug : null,
-                    'externalChatId' => property_exists($this->dto, 'externalChatId')
-                        ? $this->dto->externalChatId
-                        : null,
-                ],
-            ]);
-        } catch (Throwable $exception) {
-            !isDebug() ?: logger()->debug('TelegramBotJob: debug log failed', [
-                'error' => $exception->getMessage(),
-            ]);
-        }
-
         // Очищаем маркер ошибки от предыдущих попыток/внешних вызовов,
         // чтобы не уходить в повтор без реального падения текущей отправки.
         if (is_array($this->dto->meta)) {
@@ -82,24 +60,10 @@ class TelegramBotJob extends DefaultJob
             ];
 
             if ($retryAttempt >= (int)$this->tries) {
-                !isDebug() ?: logger()->debug('TelegramBotJob: fail', [
-                    'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
-                    'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
-                    'attempts' => $this->attempts(),
-                    'tries'    => $this->tries,
-                ]);
-
                 $this->fail(new LaravelHelperException('Не удалось отправить сообщение в Telegram после нескольких попыток'));
 
                 return;
             }
-
-            !isDebug() ?: logger()->debug('TelegramBotJob: release', [
-                'uuid'     => method_exists($this->job, 'uuid') ? $this->job->uuid() : null,
-                'job_id'   => method_exists($this->job, 'getJobId') ? $this->job->getJobId() : null,
-                'attempts' => $this->attempts(),
-                'delay'    => 0,
-            ]);
 
             // Делаем dispatch задачи в ready-очередь, чтобы worker подхватил её мгновенно
             (
