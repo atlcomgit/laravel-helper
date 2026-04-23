@@ -183,7 +183,7 @@ class HttpLogDto extends Dto
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
                         'responseData'    => '[' . $response::class . ']',
-                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
@@ -192,7 +192,7 @@ class HttpLogDto extends Dto
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
                         'responseData'    => '[' . $response::class . ', ' . $response->getFile()->getMimeType() . ']',
-                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
@@ -201,7 +201,7 @@ class HttpLogDto extends Dto
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
                         'responseData'    => Hlp::castToString($response->getContent()),
-                        'status'          => $response->getStatusCode() === ResponseIn::HTTP_OK
+                        'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
@@ -242,6 +242,19 @@ class HttpLogDto extends Dto
                 'duration' => $duration ?? null,
                 'size'     => $size,
             ]);
+    }
+
+
+    /**
+     * Проверяет, что код входящего HTTP-ответа относится к успешному диапазону.
+     *
+     * @param int $statusCode
+     * @return bool
+     */
+    private static function isSuccessfulInboundStatusCode(int $statusCode): bool
+    {
+        return $statusCode >= ResponseIn::HTTP_OK
+            && $statusCode < ResponseIn::HTTP_MULTIPLE_CHOICES;
     }
 
 
