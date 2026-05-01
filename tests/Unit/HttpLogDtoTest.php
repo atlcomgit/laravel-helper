@@ -84,8 +84,8 @@ final class HttpLogDtoTest extends TestCase
     public static function successfulInboundStatusCodes(): array
     {
         return [
-            'ok' => [200],
-            'created' => [201],
+            'ok'         => [200],
+            'created'    => [201],
             'no_content' => [204],
         ];
     }
@@ -99,9 +99,9 @@ final class HttpLogDtoTest extends TestCase
     public static function failedInboundStatusCodes(): array
     {
         return [
-            'redirect' => [302],
+            'redirect'             => [302],
             'unprocessable_entity' => [422],
-            'server_error' => [500],
+            'server_error'         => [500],
         ];
     }
 
