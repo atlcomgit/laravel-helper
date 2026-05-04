@@ -44,6 +44,20 @@ class TelegramBotMessagePreviousMessageWithSlugRelation extends Relation
 
 
     /**
+     * Возвращает пустую коллекцию для жадной загрузки
+     *
+     * Стандартный eager load Relation вызывает get() без ограничений, а
+     * это отношение вычисляется вручную в match() и getResults().
+     *
+     * @return EloquentCollection<int, TelegramBotMessage>
+     */
+    public function getEager(): EloquentCollection
+    {
+        return $this->related->newCollection();
+    }
+
+
+    /**
      * Инициализирует отношение на наборе моделей
      *
      * @param array $models
