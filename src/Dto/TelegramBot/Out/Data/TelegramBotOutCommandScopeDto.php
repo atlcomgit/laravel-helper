@@ -9,6 +9,9 @@ use Atlcom\LaravelHelper\Enums\TelegramBotCommandScopeEnum;
 
 /**
  * DTO области видимости команд бота Telegram (BotCommandScope)
+ * 
+ * @method self chatId(?int $chatId)
+ * @method self userId(?int $userId)
  */
 class TelegramBotOutCommandScopeDto extends DefaultDto
 {

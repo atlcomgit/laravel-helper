@@ -10,6 +10,12 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO отправки аудио (sendAudio)
+ * 
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self audio(string $audio)
+ * @method self caption(?string $caption)
+ * @method self slug(?string $slug)
+ * @method self options(?array $options)
  */
 class TelegramBotOutSendAudioDto extends TelegramBotOutDto
 {

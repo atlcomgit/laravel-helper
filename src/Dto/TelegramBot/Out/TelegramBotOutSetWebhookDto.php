@@ -9,7 +9,9 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 
 /**
- * Dto бота telegram
+ * DTO для установки вебхука бота (setWebhook)
+ * 
+ * @method self url(string $url)
  */
 class TelegramBotOutSetWebhookDto extends TelegramBotOutDto
 {

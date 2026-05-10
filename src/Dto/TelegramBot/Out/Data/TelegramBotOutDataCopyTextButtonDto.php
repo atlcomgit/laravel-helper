@@ -7,9 +7,11 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data;
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 
 /**
+ * Dto кнопки Telegram для копирования текста.
+ *
  * @method self text(string $text)
  */
-class TelegramBotOutMenuButtonDto extends DefaultDto
+class TelegramBotOutDataCopyTextButtonDto extends DefaultDto
 {
     public string $text;
 }

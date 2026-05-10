@@ -8,6 +8,15 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO редактирования медиа сообщения (editMessageMedia)
+ * 
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self messageId(?int $messageId)
+ * @method self inlineMessageId(?string $inlineMessageId)
+ * @method self mediaType(string $mediaType)
+ * @method self media(string $media)
+ * @method self caption(?string $caption)
+ * @method self parseMode(string $parseMode)
+ * @method self replyMarkup(?array $replyMarkup)
  */
 class TelegramBotOutEditMessageMediaDto extends TelegramBotOutDto
 {

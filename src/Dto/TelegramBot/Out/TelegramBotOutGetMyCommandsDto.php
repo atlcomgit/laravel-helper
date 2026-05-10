@@ -10,6 +10,9 @@ use Atlcom\LaravelHelper\Enums\TelegramBotLanguageEnum;
 
 /**
  * DTO для получения команд бота (getMyCommands)
+ * 
+ * @method self scope(?TelegramBotOutCommandScopeDto $scope)
+ * @method self language(?TelegramBotLanguageEnum $language)
  */
 class TelegramBotOutGetMyCommandsDto extends TelegramBotOutDto
 {

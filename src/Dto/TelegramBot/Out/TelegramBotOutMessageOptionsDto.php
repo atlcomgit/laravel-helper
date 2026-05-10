@@ -10,7 +10,7 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotOptionTrait;
 /**
  * Dto опций бота telegram
  * 
- * @method TelegramBotOutSendMessageDto disableWebPagePreview(bool $value)
+ * @method self disableWebPagePreview(bool $value)
  */
 class TelegramBotOutMessageOptionsDto extends DefaultDto
 {

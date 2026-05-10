@@ -10,6 +10,12 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO отправки видео (sendVideo)
+ * 
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self video(string $video)
+ * @method self caption(?string $caption)
+ * @method self slug(?string $slug)
+ * @method self options(?array $options)
  */
 class TelegramBotOutSendVideoDto extends TelegramBotOutDto
 {

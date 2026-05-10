@@ -10,12 +10,12 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\Out\Traits\TelegramBotOptionTrait;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
- * Dto бота telegram
+ * DTO отправки сообщений (sendMessage)
  * 
- * @method TelegramBotOutSendMessageDto resizeKeyboard(bool $value)
- * @method TelegramBotOutSendMessageDto oneTimeKeyboard(bool $value)
- * @method TelegramBotOutSendMessageDto removeKeyboard(bool $value)
- * @method TelegramBotOutSendMessageDto disableWebPagePreview(bool $value)
+ * @method self resizeKeyboard(bool $value)
+ * @method self oneTimeKeyboard(bool $value)
+ * @method self removeKeyboard(bool $value)
+ * @method self disableWebPagePreview(bool $value)
  */
 class TelegramBotOutSendMessageDto extends TelegramBotOutDto
 {

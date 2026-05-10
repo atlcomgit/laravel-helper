@@ -10,6 +10,9 @@ use Atlcom\LaravelHelper\Enums\TelegramBotLanguageEnum;
 
 /**
  * DTO для удаления команд бота (deleteMyCommands)
+ * 
+ * @method self scope(?TelegramBotOutCommandScopeDto $scope)
+ * @method self language(?TelegramBotLanguageEnum $language)
  */
 class TelegramBotOutUnsetMyCommandsDto extends TelegramBotOutDto
 {

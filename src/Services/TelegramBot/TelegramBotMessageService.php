@@ -34,6 +34,29 @@ use UnitEnum;
  */
 class TelegramBotMessageService extends DefaultService
 {
+    private const INLINE_BUTTON_ACTION_KEYS = [
+        'callback',
+        'callbackData',
+        'callback_data',
+        'url',
+        'webApp',
+        'web_app',
+        'loginUrl',
+        'login_url',
+        'switchInlineQuery',
+        'switch_inline_query',
+        'switchInlineQueryCurrentChat',
+        'switch_inline_query_current_chat',
+        'switchInlineQueryChosenChat',
+        'switch_inline_query_chosen_chat',
+        'copyText',
+        'copy_text',
+        'callbackGame',
+        'callback_game',
+        'pay',
+    ];
+
+
     public function __construct(
         private TelegramBotMessageRepository $telegramBotMessageRepository,
         private TelegramBotChatRepository $telegramBotChatRepository,
@@ -170,11 +193,9 @@ class TelegramBotMessageService extends DefaultService
 
                 is_array($button) && !is_scalar(Hlp::arrayFirst($button)) => $this->prepareButtons($button),
 
-                is_array($button) && isset($button['text']) && isset($button['callback'])
-                => TelegramBotOutDataButtonCallbackDto::create($button),
-                is_array($button) && isset($button['text']) && isset($button['callbackData'])
-                => TelegramBotOutDataButtonCallbackDto::create($button),
-                is_array($button) && isset($button['text']) && isset($button['callback_data'])
+                is_array($button)
+                && isset($button['text'])
+                && $this->hasInlineButtonAction($button)
                 => TelegramBotOutDataButtonCallbackDto::create($button),
                 is_array($button) && isset($button['text']) && isset($button['url'])
                 => TelegramBotOutDataButtonUrlDto::create($button),
@@ -185,6 +206,24 @@ class TelegramBotMessageService extends DefaultService
         );
 
         return array_filter($buttons);
+    }
+
+
+    /**
+     * Проверяет наличие action-поля inline кнопки Telegram.
+     *
+     * @param array $button
+     * @return bool
+     */
+    private function hasInlineButtonAction(array $button): bool
+    {
+        foreach (self::INLINE_BUTTON_ACTION_KEYS as $key) {
+            if (array_key_exists($key, $button)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

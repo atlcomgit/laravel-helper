@@ -6,6 +6,10 @@ namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
 
+/**
+ * @method self text(string $text)
+ * @method self requestContact(?bool $requestContact)
+ */
 class TelegramBotOutContactButtonDto extends DefaultDto
 {
     public string $text;

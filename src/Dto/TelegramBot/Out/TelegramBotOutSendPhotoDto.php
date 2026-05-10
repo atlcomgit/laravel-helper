@@ -10,6 +10,12 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO отправки фото (sendPhoto)
+ * 
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self photo(string $photo)
+ * @method self caption(?string $caption)
+ * @method self slug(?string $slug)
+ * @method self options(?array $options)
  */
 class TelegramBotOutSendPhotoDto extends TelegramBotOutDto
 {

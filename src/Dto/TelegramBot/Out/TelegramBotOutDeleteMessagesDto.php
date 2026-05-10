@@ -10,7 +10,8 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 /**
  * DTO удаления сообщений (deleteMessages)
  * 
- * @method TelegramBotOutDeleteMessagesDto externalMessageIds(array $value)
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self externalMessageIds(array $value)
  */
 class TelegramBotOutDeleteMessagesDto extends TelegramBotOutDto
 {

@@ -10,6 +10,12 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInMessageDto;
 
 /**
  * Dto бота telegram
+ * 
+ * @method self status(bool $status)
+ * @method self result(?bool $result)
+ * @method self description(?string $description)
+ * @method self message(?TelegramBotInMessageDto $message)
+ * @method self deletedMessages(?array $deletedMessages)
  */
 class TelegramBotOutResponseDto extends DefaultDto
 {

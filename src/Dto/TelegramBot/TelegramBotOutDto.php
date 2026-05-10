@@ -12,12 +12,13 @@ use Atlcom\LaravelHelper\Jobs\TelegramBotJob;
 use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotDto;
 
 /**
- * Dto бота telegram
+ * DTO для отправки сообщений бота телеграм
  * 
  * @method self previousMessageId(?int $value)
  * @method self replyToExternalMessageId(?int $value)
  * @method self replyToTelegramBotMessageId(?int $value)
  * @method self meta(?array $value)
+ * @method self useSendSync(?bool $value)
  */
 class TelegramBotOutDto extends TelegramBotDto
 {

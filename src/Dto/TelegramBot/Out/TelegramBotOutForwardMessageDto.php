@@ -8,6 +8,11 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO пересылки сообщения (forwardMessage)
+ * 
+ * @method self externalChatId(string|int $externalChatId)
+ * @method self fromChatId(string|int $fromChatId)
+ * @method self externalMessageId(int $externalMessageId)
+ * @method self disableNotification(?bool $disableNotification)
  */
 class TelegramBotOutForwardMessageDto extends TelegramBotOutDto
 {

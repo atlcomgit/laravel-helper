@@ -13,6 +13,10 @@ use Illuminate\Support\Collection;
 
 /**
  * DTO для установки команд бота (setMyCommands)
+ * 
+ * @method self commands(?array|Collection $commands)
+ * @method self scope(?TelegramBotOutCommandScopeDto $scope)
+ * @method self language(?TelegramBotLanguageEnum $language)
  */
 class TelegramBotOutSetMyCommandsDto extends TelegramBotOutDto
 {

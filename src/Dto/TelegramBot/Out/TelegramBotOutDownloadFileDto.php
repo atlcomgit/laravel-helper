@@ -8,6 +8,10 @@ use Atlcom\LaravelHelper\Dto\TelegramBot\TelegramBotOutDto;
 
 /**
  * DTO для загрузки файла из Telegram
+ * 
+ * @method self fileId(string $fileId)
+ * @method self savePath(string $savePath)
+ * @method self downloadedFilePath(?string $downloadedFilePath)
  */
 class TelegramBotOutDownloadFileDto extends TelegramBotOutDto
 {

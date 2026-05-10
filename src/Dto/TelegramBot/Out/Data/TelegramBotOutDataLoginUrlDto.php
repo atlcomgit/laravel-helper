@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data;
 
 use Atlcom\LaravelHelper\Defaults\DefaultDto;
-use Atlcom\LaravelHelper\Enums\TelegramBotButtonStyleEnum;
 
 /**
- * @method self text(string $text)
+ * Dto описания LoginUrl для inline кнопки Telegram.
+ *
  * @method self url(string $url)
- * @method self style(?TelegramBotButtonStyleEnum $style)
- * @method self iconCustomEmojiId(?string $iconCustomEmojiId)
+ * @method self forwardText(?string $forwardText)
+ * @method self botUsername(?string $botUsername)
+ * @method self requestWriteAccess(?bool $requestWriteAccess)
  */
-class TelegramBotOutDataButtonUrlDto extends DefaultDto
+class TelegramBotOutDataLoginUrlDto extends DefaultDto
 {
-    public string                      $text;
-    public string                      $url;
-    public ?TelegramBotButtonStyleEnum $style             = null;
-    public ?string                     $iconCustomEmojiId = null;
+    public string  $url;
+    public ?string $forwardText        = null;
+    public ?string $botUsername        = null;
+    public ?bool   $requestWriteAccess = null;
 
 
     /**
@@ -29,7 +30,9 @@ class TelegramBotOutDataButtonUrlDto extends DefaultDto
     protected function mappings(): array
     {
         return [
-            'iconCustomEmojiId' => ['iconCustomEmojiId', 'icon_custom_emoji_id'],
+            'forwardText'        => ['forwardText', 'forward_text'],
+            'botUsername'        => ['botUsername', 'bot_username'],
+            'requestWriteAccess' => ['requestWriteAccess', 'request_write_access'],
         ];
     }
 
@@ -42,7 +45,9 @@ class TelegramBotOutDataButtonUrlDto extends DefaultDto
     protected function serializationMappings(): array
     {
         return [
-            'iconCustomEmojiId' => 'icon_custom_emoji_id',
+            'forwardText'        => 'forward_text',
+            'botUsername'        => 'bot_username',
+            'requestWriteAccess' => 'request_write_access',
         ];
     }
 
