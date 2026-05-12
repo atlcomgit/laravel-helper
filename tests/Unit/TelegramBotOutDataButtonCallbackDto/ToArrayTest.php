@@ -49,4 +49,26 @@ final class ToArrayTest extends TestCase
             ],
         ], $dto->toArray());
     }
+
+
+    /**
+     * Тест приведения числового callback к строке
+     * @see \Atlcom\LaravelHelper\Dto\TelegramBot\Out\Data\TelegramBotOutDataButtonCallbackDto::toArray()
+     *
+     * @return void
+     */
+    #[Test]
+    public function toArrayCastsIntegerCallbackToString(): void
+    {
+        $dto = TelegramBotOutDataButtonCallbackDto::create([
+            'text'     => 'City',
+            'callback' => 123,
+        ]);
+
+        $this->assertSame('123', $dto->callback);
+        $this->assertSame([
+            'text'          => 'City',
+            'callback_data' => '123',
+        ], $dto->toArray());
+    }
 }

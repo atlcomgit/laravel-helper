@@ -9,7 +9,7 @@ use Atlcom\LaravelHelper\Enums\TelegramBotButtonStyleEnum;
 
 /**
  * @method self text(string $text)
- * @method self callback(string $callback)
+ * @method self callback(string|int $callback)
  * @method self style(?TelegramBotButtonStyleEnum $style)
  * @method self iconCustomEmojiId(?string $iconCustomEmojiId)
  * @method self url(?string $url)
@@ -49,6 +49,7 @@ class TelegramBotOutDataButtonCallbackDto extends DefaultDto
     protected function casts(): array
     {
         return [
+            'callback'                        => 'string',
             'style'                           => TelegramBotButtonStyleEnum::class,
             'webApp'                          => TelegramBotOutDataWebAppInfoDto::class,
             'web_app'                         => TelegramBotOutDataWebAppInfoDto::class,
