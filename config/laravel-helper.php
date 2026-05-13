@@ -682,6 +682,8 @@ return [
         'name'                => (string)env('HELPER_TELEGRAM_BOT_NAME', ''),
         // Ссылка на бота телеграм
         'link'                => (string)env('HELPER_TELEGRAM_BOT_LINK', ''),
+        // Версия дерева сообщений бота
+        'message_version'     => (string)env('HELPER_TELEGRAM_BOT_MESSAGE_VERSION', '1'),
         // Webhook бота телеграм
         'webhook'             => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK', ''),
         // Название соединения для записи данных бота
