@@ -127,12 +127,11 @@ class LaravelHelperServiceProvider extends ServiceProvider
 
         $this->app->singleton(ModelLogObserver::class);
 
-        // Переопределение менеджера почты для поддержки логирования
-        if (Lh::config(ConfigEnum::MailLog, 'enabled')) {
-            $this->app->extend('mail.manager', function ($service, $app) {
-                return new \Atlcom\LaravelHelper\Mail\HelperMailManager($app);
-            });
-        }
+        // Переопределение менеджера почты для поддержки логирования.
+        // HelperMailer сам проверяет конфиг и не логирует письма, если это выключено.
+        $this->app->extend('mail.manager', function ($service, $app) {
+            return new \Atlcom\LaravelHelper\Mail\HelperMailManager($app);
+        });
 
         // Регистрация обработчика соединений
         if (

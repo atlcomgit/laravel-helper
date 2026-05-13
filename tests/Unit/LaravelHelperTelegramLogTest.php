@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Tests\Unit;
 
-use Atlcom\LaravelHelper\Defaults\DefaultTest;
+use Atlcom\LaravelHelper\Tests\PackageTestCase;
 use Exception;
 use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Тесты отправки сообщений в телеграм
  */
-final class LaravelHelperTelegramLogTest extends DefaultTest
+final class LaravelHelperTelegramLogTest extends PackageTestCase
 {
     #[Test]
     public function exception(): void

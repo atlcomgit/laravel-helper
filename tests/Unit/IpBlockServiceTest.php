@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Tests\Unit;
 
-use Atlcom\LaravelHelper\Defaults\DefaultTest;
+use Atlcom\LaravelHelper\Tests\PackageTestCase;
 use Atlcom\LaravelHelper\Events\IpBlockEvent;
 use Atlcom\LaravelHelper\Services\IpBlockService;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Test;
 /**
  * Тесты сервиса блокировки ip адресов
  */
-final class IpBlockServiceTest extends DefaultTest
+final class IpBlockServiceTest extends PackageTestCase
 {
     private string $storageFile;
 

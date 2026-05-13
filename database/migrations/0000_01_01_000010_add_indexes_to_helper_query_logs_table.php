@@ -69,15 +69,21 @@ return new class extends Migration {
         $config = ConfigEnum::QueryLog;
         $connection = Lh::getConnection($config) ?? null;
         $table = Lh::getTable($config) ?? null;
+        $schema = Schema::connection($connection);
 
-        if (!$table || !Schema::connection($connection)->hasTable($table)) {
+        if (!$table || !$schema->hasTable($table)) {
             return;
         }
 
-        Schema::connection($connection)->table($table, static function (Blueprint $table) {
-            $table->dropIndexIfExists('helper_query_logs_duration_index');
-            $table->dropIndexIfExists('helper_query_logs_memory_index');
-        });
+        $dropDurationIndex = $schema->hasIndex($table, 'helper_query_logs_duration_index');
+        $dropMemoryIndex = $schema->hasIndex($table, 'helper_query_logs_memory_index');
+
+        if ($dropDurationIndex || $dropMemoryIndex) {
+            $schema->table($table, static function (Blueprint $table) use ($dropDurationIndex, $dropMemoryIndex) {
+                !$dropDurationIndex ?: $table->dropIndex('helper_query_logs_duration_index');
+                !$dropMemoryIndex ?: $table->dropIndex('helper_query_logs_memory_index');
+            });
+        }
 
         DB::connection($connection)->statement("
             DROP INDEX IF EXISTS helper_query_logs_status_created_index

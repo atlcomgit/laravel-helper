@@ -30,7 +30,7 @@ use Illuminate\Foundation\Auth\User;
  * @property string|null $subject
  * @property string|null $body
  * @property array|null $attachments
- * @property string|null $error_message
+ * @property string|null $message
  * @property float|null $duration
  * @property int|null $memory
  * @property int|null $size

@@ -33,6 +33,25 @@ trait TestingTrait
 
 
     /**
+     * Настройка тестового окружения пакета через Testbench
+     *
+     * @param mixed $app
+     * @return void
+     */
+    protected function getEnvironmentSetUp($app): void
+    {
+        $app['config']->set('app.env', static::ENV);
+        $app['config']->set('database.default', static::ENV);
+        $app['config']->set("database.connections." . static::ENV, [
+            'driver'                  => 'sqlite',
+            'database'                => ':memory:',
+            'prefix'                  => '',
+            'foreign_key_constraints' => true,
+        ]);
+    }
+
+
+    /**
      * Подключает провайдеры к тестам
      *
      * @param mixed $app

@@ -133,8 +133,8 @@ final class MailLogTest extends TestCase
         }
 
         $this->assertDatabaseHas('helper_mail_logs', [
-            'status'        => MailLogStatusEnum::Failed,
-            'error_message' => 'Mail Error',
+            'status'  => MailLogStatusEnum::Failed,
+            'message' => 'Mail Error',
         ]);
     }
 }

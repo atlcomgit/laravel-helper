@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Tests\Unit;
 
-use Atlcom\LaravelHelper\Defaults\DefaultTest;
+use Atlcom\LaravelHelper\Tests\PackageTestCase;
 use Atlcom\LaravelHelper\Enums\IpBlockRuleEnum;
 use Atlcom\LaravelHelper\Middlewares\IpBlockMiddleware;
 use Atlcom\LaravelHelper\Services\IpBlockService;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Тесты middleware блокировки ip адресов
  */
-final class IpBlockMiddlewareTest extends DefaultTest
+final class IpBlockMiddlewareTest extends PackageTestCase
 {
     private string $storageFile;
 
