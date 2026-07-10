@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Dto;
 
 use Atlcom\Dto;
-use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Enums\ConsoleLogStatusEnum;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
@@ -104,15 +103,6 @@ class ConsoleLogDto extends Dto
 
 
     /**
-     * @inheritDoc
-     */
-    protected function onSerialized(array &$array): void
-    {
-        $array['output'] = Hlp::sqlSafeValue($array['output'] ?? null);
-    }
-
-
-    /**
      * Возвращает длительность работы скрипта
      *
      * @return float
@@ -144,6 +134,10 @@ class ConsoleLogDto extends Dto
     {
         static $tableExists = null;
 
+        if (!$this->shouldStore()) {
+            return;
+        }
+
         if (is_null($tableExists)) {
             $tableExists = Schema::connection(Lh::getConnection(ConfigEnum::ConsoleLog))
                 ->hasTable(Lh::getTable(ConfigEnum::ConsoleLog));
@@ -171,18 +165,27 @@ class ConsoleLogDto extends Dto
      */
     public function dispatch(): static
     {
-        if (
-            Lh::canDispatch($this)
-            && (
-                $this->withConsoleLog === true
-                || ($this->withConsoleLog !== false && Lh::config(ConfigEnum::ConsoleLog, 'global'))
-            )
-        ) {
+        if ($this->shouldStore()) {
             (Lh::config(ConfigEnum::ConsoleLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
                 ? ConsoleLogJob::dispatchSync($this)
                 : ConsoleLogJob::dispatch($this);
         }
 
         return $this;
+    }
+
+
+    /**
+     * Проверяет необходимость записи лога консольной команды
+     *
+     * @return bool
+     */
+    private function shouldStore(): bool
+    {
+        return Lh::canDispatch($this)
+            && (
+                $this->withConsoleLog === true
+                || ($this->withConsoleLog !== false && Lh::config(ConfigEnum::ConsoleLog, 'global'))
+            );
     }
 }

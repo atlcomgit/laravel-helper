@@ -6,6 +6,7 @@ namespace Atlcom\LaravelHelper\Tests\Unit;
 
 use Atlcom\LaravelHelper\Tests\PackageTestCase;
 use Atlcom\LaravelHelper\Events\IpBlockEvent;
+use Atlcom\LaravelHelper\Enums\IpBlockRuleEnum;
 use Atlcom\LaravelHelper\Services\IpBlockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -154,5 +155,122 @@ final class IpBlockServiceTest extends PackageTestCase
 
         $this->assertFalse($service->isBlockedIp('198.51.101.25'));
         $this->assertFalse($service->isBlockedIp('203.0.114.77'));
+    }
+
+
+    #[Test]
+    public function doesNotFailWhenStateStorageIsUnavailable(): void
+    {
+        $parentFile = storage_path('framework/testing/ip-block-parent-file');
+
+        @unlink($parentFile);
+        if (!is_dir(dirname($parentFile))) {
+            mkdir(dirname($parentFile), 0755, true);
+        }
+        file_put_contents($parentFile, 'not a directory');
+
+        try {
+            Config::set('laravel-helper.ip_block.storage_file', "{$parentFile}/state.php");
+
+            $service = app(IpBlockService::class);
+            $request = Request::create('/test', 'GET');
+            $request->server->set('REMOTE_ADDR', '203.0.113.40');
+
+            $service->registerIncomingRequest($request);
+
+            $this->assertFalse($service->isBlockedIp('203.0.113.40'));
+        } finally {
+            @unlink($parentFile);
+        }
+    }
+
+
+    #[Test]
+    public function storesStateRelativeToCurrentStoragePath(): void
+    {
+        $relativePath = 'framework/testing/ip-block-relative-state.php';
+        $targetPath = storage_path($relativePath);
+
+        @unlink($targetPath);
+        Config::set('laravel-helper.ip_block.storage_file', $relativePath);
+
+        try {
+            app(IpBlockService::class)->blockIp('203.0.113.41', 'manual_reason', 'manual');
+
+            $this->assertFileExists($targetPath);
+        } finally {
+            @unlink($targetPath);
+        }
+    }
+
+
+    #[Test]
+    public function mapsCachedDefaultStoragePathFromAnotherRootToCurrentStoragePath(): void
+    {
+        $targetPath = storage_path('framework/ip-block-state.php');
+
+        @unlink($targetPath);
+        Config::set('laravel-helper.ip_block.storage_file', '/tmp/old-project/storage/framework/ip-block-state.php');
+
+        try {
+            app(IpBlockService::class)->blockIp('203.0.113.42', 'manual_reason', 'manual');
+
+            $this->assertFileExists($targetPath);
+        } finally {
+            @unlink($targetPath);
+        }
+    }
+
+
+    #[Test]
+    public function updateRulesCanClearSuspiciousPayloadPatterns(): void
+    {
+        $service = app(IpBlockService::class);
+
+        $service->updateRules([
+            IpBlockRuleEnum::SuspiciousPayload->value => [
+                'enabled'  => true,
+                'patterns' => ['custom-pattern'],
+            ],
+        ]);
+
+        $this->assertSame(['custom-pattern'], $service->getRules()['rules'][IpBlockRuleEnum::SuspiciousPayload->value]['patterns']);
+
+        $service->updateRules([
+            IpBlockRuleEnum::SuspiciousPayload->value => [
+                'patterns' => [],
+            ],
+        ]);
+
+        $this->assertSame([], $service->getRules()['rules'][IpBlockRuleEnum::SuspiciousPayload->value]['patterns']);
+    }
+
+
+    #[Test]
+    public function metricsUpdatesKeepRulesWhenStateFileIsTemporarilyUnreadable(): void
+    {
+        $service = app(IpBlockService::class);
+
+        $service->updateRules([
+            IpBlockRuleEnum::RequestsPerMinute->value => [
+                'enabled' => true,
+                'limit'   => 777,
+            ],
+            IpBlockRuleEnum::SuspiciousPayload->value => [
+                'enabled'  => true,
+                'patterns' => ['custom-pattern'],
+            ],
+        ]);
+
+        file_put_contents($this->storageFile, '');
+
+        $request = Request::create('/test', 'GET');
+        $request->server->set('REMOTE_ADDR', '203.0.113.43');
+
+        $service->registerIncomingRequest($request);
+        $rules = $service->getRules()['rules'];
+
+        $this->assertSame(777, $rules[IpBlockRuleEnum::RequestsPerMinute->value]['limit']);
+        $this->assertSame(['custom-pattern'], $rules[IpBlockRuleEnum::SuspiciousPayload->value]['patterns']);
     }
 }

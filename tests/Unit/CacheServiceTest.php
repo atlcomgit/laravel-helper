@@ -171,4 +171,15 @@ final class CacheServiceTest extends PackageTestCase
         $this->assertFalse(DB::table('cache')->where('key', $queryCacheKey)->exists());
         $this->assertTrue(DB::table('cache')->where('key', $otherCacheKey)->exists());
     }
+
+
+    #[Test]
+    public function databaseStoreClearCacheDoesNothingWhenCacheTableDoesNotExist(): void
+    {
+        Schema::dropIfExists('cache');
+
+        app(CacheService::class)->clearCache(ConfigEnum::QueryCache, ['users']);
+
+        $this->assertFalse(Schema::hasTable('cache'));
+    }
 }

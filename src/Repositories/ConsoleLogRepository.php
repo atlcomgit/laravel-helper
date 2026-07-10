@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Atlcom\LaravelHelper\Repositories;
 
+use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultRepository;
 use Atlcom\LaravelHelper\Dto\ConsoleLogDto;
 use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Models\ConsoleLog;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -50,24 +52,24 @@ class ConsoleLogRepository extends DefaultRepository
     public function update(ConsoleLogDto $dto): void
     {
         $this->withoutTelescope(function () use ($dto) {
-            $this->model::query()
+            $query = $this->model::query()
                 ->withoutQueryLog()
                 ->withoutQueryCache()
-                ->ofUuid($dto->uuid)
-                ->update(
-                    $dto->includeArray(
-                        is_null($dto->output)
-                        ? []
-                        : [
-                            'output' => match (DB::connection()->getDriverName()) {
-                                'pgsql' => DB::raw("COALESCE(output, '') || '{$dto->output}'"),
+                ->ofUuid($dto->uuid);
 
-                                default => DB::raw("CONCAT(COALESCE(output, ''), '{$dto->output}')"),
-                            },
-                        ]
-                    )
-                        ->toArray(),
-                );
+            $query->update(
+                $dto->includeArray(
+                    is_null($dto->output)
+                    ? []
+                    : [
+                        'output' => DB::raw($this->outputConcatSql(
+                            $query->getModel()->getConnection(),
+                            $dto->output,
+                        )),
+                    ]
+                )
+                    ->toArray(),
+            );
         });
     }
 
@@ -87,5 +89,28 @@ class ConsoleLogRepository extends DefaultRepository
                 ->whereDate('created_at', '<=', now()->subDays($days))
                 ->delete()
         );
+    }
+
+
+    /**
+     * Возвращает безопасное выражение конкатенации вывода команды
+     *
+     * @param Connection $connection
+     * @param string $output
+     * @return string
+     */
+    private function outputConcatSql(Connection $connection, string $output): string
+    {
+        $safeOutput = (string)Hlp::sqlSafeValue($output);
+        $quotedOutput = $connection->getPdo()->quote($safeOutput);
+
+        if ($quotedOutput === false) {
+            $quotedOutput = "''";
+        }
+
+        return match ($connection->getDriverName()) {
+            'pgsql' => "COALESCE(output, '') || {$quotedOutput}",
+            default => "CONCAT(COALESCE(output, ''), {$quotedOutput})",
+        };
     }
 }

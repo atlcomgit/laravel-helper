@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Сервис блокировки ip адресов
@@ -365,7 +366,7 @@ class IpBlockService extends DefaultService
     {
         $state = $this->getState();
         $current = (array)($state['rules'] ?? []);
-        $state['rules'] = array_replace_recursive($current, $this->withoutNullsRecursive($rules));
+        $state['rules'] = $this->mergeRuleUpdates($current, $this->withoutNullsRecursive($rules));
 
         $this->setState($state, false);
 
@@ -586,14 +587,6 @@ class IpBlockService extends DefaultService
         $stateRules = (array)($this->getState()['rules'] ?? []);
         $configRule = (array)Lh::config(ConfigEnum::IpBlock, "rules.{$name}", []);
         $stateRule = (array)($stateRules[$name] ?? []);
-
-        if (
-            array_key_exists('patterns', $stateRule)
-            && is_array($stateRule['patterns'])
-            && empty(array_filter($stateRule['patterns'], static fn ($item) => (string)$item !== ''))
-        ) {
-            unset($stateRule['patterns']);
-        }
 
         return array_replace($configRule, $stateRule);
     }
@@ -882,7 +875,9 @@ class IpBlockService extends DefaultService
 
         if ($preserveRules) {
             $latest = $this->readState();
-            $effectiveRules = (array)($latest['rules'] ?? []);
+            $latestRules = (array)($latest['rules'] ?? []);
+
+            $effectiveRules = $latestRules ?: $effectiveRules;
         }
 
         $this->state = [
@@ -902,7 +897,43 @@ class IpBlockService extends DefaultService
      */
     private function getStorageFilePath(): string
     {
-        return (string)Lh::config(ConfigEnum::IpBlock, 'storage_file', storage_path('framework/ip-block-state.php'));
+        $path = trim((string)Lh::config(ConfigEnum::IpBlock, 'storage_file', 'framework/ip-block-state.php'));
+
+        if ($path === '') {
+            return storage_path('framework/ip-block-state.php');
+        }
+
+        $normalizedPath = str_replace('\\', '/', $path);
+        $normalizedDefaultPath = str_replace('\\', '/', storage_path('framework/ip-block-state.php'));
+
+        if (
+            $normalizedPath !== $normalizedDefaultPath
+            && str_ends_with($normalizedPath, '/storage/framework/ip-block-state.php')
+        ) {
+            return storage_path('framework/ip-block-state.php');
+        }
+
+        if (str_starts_with($normalizedPath, 'storage/')) {
+            return storage_path(substr($normalizedPath, strlen('storage/')));
+        }
+
+        if (!$this->isAbsolutePath($path)) {
+            return storage_path($path);
+        }
+
+        return $path;
+    }
+
+
+    /**
+     * Проверяет является ли путь абсолютным
+     *
+     * @param string $path
+     * @return bool
+     */
+    private function isAbsolutePath(string $path): bool
+    {
+        return str_starts_with($path, '/') || preg_match('/^[A-Za-z]:[\\\\\/]/', $path) === 1;
     }
 
 
@@ -915,25 +946,44 @@ class IpBlockService extends DefaultService
     {
         $path = $this->getStorageFilePath();
 
-        if (!is_file($path)) {
+        try {
+            if (!is_file($path)) {
+                return [];
+            }
+
+            $resource = fopen($path, 'r');
+
+            if (!is_resource($resource)) {
+                return [];
+            }
+
+            try {
+                if (!flock($resource, LOCK_SH)) {
+                    return [];
+                }
+
+                $content = (string)stream_get_contents($resource);
+
+                if (str_starts_with(ltrim($content), '<?php')) {
+                    $state = require $path;
+
+                    return is_array($state) ? $state : [];
+                }
+            } finally {
+                flock($resource, LOCK_UN);
+                fclose($resource);
+            }
+
+            $state = (array)(json_decode($content, true) ?: []);
+
+            if (!empty($state)) {
+                $this->writeState($state);
+            }
+
+            return $state;
+        } catch (Throwable) {
             return [];
         }
-
-        $content = (string)file_get_contents($path);
-
-        if (str_starts_with(ltrim($content), '<?php')) {
-            $state = require $path;
-
-            return is_array($state) ? $state : [];
-        }
-
-        $state = (array)(json_decode($content, true) ?: []);
-
-        if (!empty($state)) {
-            $this->writeState($state);
-        }
-
-        return $state;
     }
 
 
@@ -948,37 +998,39 @@ class IpBlockService extends DefaultService
         $path = $this->getStorageFilePath();
         $dir = dirname($path);
 
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-
-        $resource = fopen($path, 'c+');
-
-        if (!is_resource($resource)) {
-            return;
-        }
-
         try {
-            if (!flock($resource, LOCK_EX)) {
-                fclose($resource);
-
+            if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
                 return;
             }
 
-            ftruncate($resource, 0);
-            rewind($resource);
-            $php = '<?php' . PHP_EOL . PHP_EOL . 'return ' . var_export($state, true) . ';' . PHP_EOL;
-            fwrite($resource, $php);
-            fflush($resource);
-            flock($resource, LOCK_UN);
-        } finally {
-            fclose($resource);
-        }
+            $resource = fopen($path, 'c+');
 
-        // Инвалидируем OPcache для файла состояния,
-        // чтобы следующий require вернул свежие данные
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($path, true);
+            if (!is_resource($resource)) {
+                return;
+            }
+
+            try {
+                if (!flock($resource, LOCK_EX)) {
+                    return;
+                }
+
+                ftruncate($resource, 0);
+                rewind($resource);
+                $php = '<?php' . PHP_EOL . PHP_EOL . 'return ' . var_export($state, true) . ';' . PHP_EOL;
+                fwrite($resource, $php);
+                fflush($resource);
+                flock($resource, LOCK_UN);
+            } finally {
+                fclose($resource);
+            }
+
+            // Инвалидируем OPcache для файла состояния,
+            // чтобы следующий require вернул свежие данные
+            if (function_exists('opcache_invalidate')) {
+                opcache_invalidate($path, true);
+            }
+        } catch (Throwable) {
+            return;
         }
     }
 
@@ -1003,6 +1055,31 @@ class IpBlockService extends DefaultService
             }
 
             $result[$key] = $item;
+        }
+
+        return $result;
+    }
+
+
+    /**
+     * Объединяет обновления правил без рекурсивного слияния list-массивов
+     *
+     * @param array $current
+     * @param array $updates
+     * @return array
+     */
+    private function mergeRuleUpdates(array $current, array $updates): array
+    {
+        $result = $current;
+
+        foreach ($updates as $rule => $ruleUpdates) {
+            if (is_array($ruleUpdates)) {
+                $result[$rule] = array_replace((array)($result[$rule] ?? []), $ruleUpdates);
+
+                continue;
+            }
+
+            $result[$rule] = $ruleUpdates;
         }
 
         return $result;

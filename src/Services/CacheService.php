@@ -460,10 +460,16 @@ class CacheService extends DefaultService
                 // CACHE_STORE=database
                 case DatabaseStore::class:
                     $tableCache = config('cache.stores.database.table', 'cache');
+                    $connection = DB::connection(config('cache.stores.database.connection'));
+
+                    if (!$connection->getSchemaBuilder()->hasTable($tableCache)) {
+                        break;
+                    }
+
                     $tags = $this->getDatabaseStoreClearTags($config, $tags);
 
                     if (in_array('*', $tags, true)) {
-                        DB::table($tableCache)->delete();
+                        $connection->table($tableCache)->delete();
                         break;
                     }
 
@@ -471,7 +477,7 @@ class CacheService extends DefaultService
                         break;
                     }
 
-                    DB::table($tableCache)
+                    $connection->table($tableCache)
                         ->where(static function ($query) use ($tags) {
                             foreach ($tags as $tag) {
                                 $query->orWhere(

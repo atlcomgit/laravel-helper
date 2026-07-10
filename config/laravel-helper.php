@@ -377,7 +377,7 @@ return [
         // HTTP статус при блокировке
         'response_status'           => (int)env('HELPER_IP_BLOCK_RESPONSE_STATUS', 403),
         // Путь к файлу со списком блокировок и счетчиков
-        'storage_file'              => (string)env('HELPER_IP_BLOCK_STORAGE_FILE', storage_path('framework/ip-block-state.php')),
+        'storage_file'              => (string)env('HELPER_IP_BLOCK_STORAGE_FILE', 'framework/ip-block-state.php'),
         // Чувствительность к регистру для паттернов
         'patterns_case_insensitive' => (bool)env('HELPER_IP_BLOCK_PATTERNS_CASE_INSENSITIVE', true),
         // Список URL-паттернов, исключённых из проверки suspicious_payload (регулярные выражения)
