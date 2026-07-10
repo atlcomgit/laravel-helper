@@ -33,6 +33,8 @@ class CacheService extends DefaultService
     public const CACHE_FILE_TRY_COUNT = 3;
     // Разделитель ключа кеша
     public const CACHE_TAGS_DELIMITER = '__';
+    // Префикс gzip payload для database store, закодированного в ASCII-safe base64
+    private const CACHE_DATABASE_GZ_BASE64_PREFIX = 'lh-gzbase64:v1:';
 
 
     /**
@@ -177,10 +179,17 @@ class CacheService extends DefaultService
     public function setCache(ConfigEnum $config, ?array $tags, string $key, mixed $value, int $ttl): bool
     {
         $driver = Lh::config($config, 'driver') ?: config('cache.default');
+        $isDatabaseStore = $driver && Cache::driver($driver)->getStore()::class === DatabaseStore::class;
         $gzDeflate = (Lh::config($config, 'gzdeflate.enabled') ?? false)
             ? (Lh::config($config, 'gzdeflate.level') ?? -1)
             : false;
-        $value = ($gzDeflate !== false) ? gzdeflate(serialize($value), $gzDeflate) : serialize($value);
+        $value = serialize($value);
+        if ($gzDeflate !== false) {
+            $value = gzdeflate($value, $gzDeflate);
+            $value = $isDatabaseStore
+                ? self::CACHE_DATABASE_GZ_BASE64_PREFIX . base64_encode($value)
+                : $value;
+        }
         in_array($config->value, $tags) ?: $tags = [$config->value, ...$tags];
 
         if (!$driver) {
@@ -262,6 +271,7 @@ class CacheService extends DefaultService
     {
         $result = null;
         $driver = Lh::config($config, 'driver') ?: config('cache.default');
+        $isDatabaseStore = $driver && Cache::driver($driver)->getStore()::class === DatabaseStore::class;
         in_array($config->value, $tags) ?: $tags = [$config->value, ...$tags];
 
         if (!$driver) {
@@ -332,12 +342,29 @@ class CacheService extends DefaultService
             ? (Lh::config($config, 'gzdeflate.level') ?? -1)
             : false;
 
-        // Проверка на бинарные данные (невалидный UTF-8) — признак повреждённого кэша
+        // Без gzip cache payload должен быть обычной сериализованной строкой, а не бинарными данными.
         if (!is_null($result) && is_string($result) && !mb_check_encoding($result, 'UTF-8')) {
-            // Данные бинарные, но gzdeflate выключен — кэш повреждён
             if ($gzDeflate === false) {
                 return null;
             }
+        }
+
+        if (
+            $gzDeflate !== false
+            && $isDatabaseStore
+            && is_string($result)
+            && str_starts_with($result, self::CACHE_DATABASE_GZ_BASE64_PREFIX)
+        ) {
+            $decoded = base64_decode(
+                substr($result, strlen(self::CACHE_DATABASE_GZ_BASE64_PREFIX)),
+                true,
+            );
+
+            if ($decoded === false) {
+                return null;
+            }
+
+            $result = $decoded;
         }
 
         $result = is_null($result)
@@ -347,9 +374,6 @@ class CacheService extends DefaultService
                 ? ((($tmp = @unserialize(@gzinflate($result))) === false) ? null : $tmp)
                 : @unserialize($result)
             );
-
-        //?!? проблема после gzinflate($result) данные остаются бинарные
-
         return $result;
     }
 
@@ -363,7 +387,7 @@ class CacheService extends DefaultService
      */
     public function clearCache(ConfigEnum $config, array $tags): void
     {
-        if (!Lh::config(ConfigEnum::QueryCache, 'enabled')) {
+        if (!Lh::config($config, 'enabled')) {
             return;
         }
 
@@ -436,8 +460,28 @@ class CacheService extends DefaultService
                 // CACHE_STORE=database
                 case DatabaseStore::class:
                     $tableCache = config('cache.stores.database.table', 'cache');
-                    $tag = '__' . Hlp::stringConcat('__', $tags) . '__';
-                    DB::table($tableCache)->where('key', 'like', "%{$tag}%")->delete();
+                    $tags = $this->getDatabaseStoreClearTags($config, $tags);
+
+                    if (in_array('*', $tags, true)) {
+                        DB::table($tableCache)->delete();
+                        break;
+                    }
+
+                    if ($tags === []) {
+                        break;
+                    }
+
+                    DB::table($tableCache)
+                        ->where(static function ($query) use ($tags) {
+                            foreach ($tags as $tag) {
+                                $query->orWhere(
+                                    'key',
+                                    'like',
+                                    '%' . static::CACHE_TAGS_DELIMITER . $tag . static::CACHE_TAGS_DELIMITER . '%',
+                                );
+                            }
+                        })
+                        ->delete();
                     break;
 
                 // CACHE_STORE=array
@@ -466,5 +510,64 @@ class CacheService extends DefaultService
                     break;
             }
         }
+    }
+
+
+    /**
+     * Возвращает теги для поиска ключей database store.
+     *
+     * DatabaseStore не поддерживает Laravel tags, поэтому query cache кодирует теги в key.
+     * Служебный root tag используется только для полной очистки конкретного cache config.
+     *
+     * @param ConfigEnum $config
+     * @param array $tags
+     * @return array<int, string>
+     */
+    private function getDatabaseStoreClearTags(ConfigEnum $config, array $tags): array
+    {
+        $isFullFlush = in_array('*', $tags, true);
+        $isConfigFlush = in_array($config->value, $tags, true);
+        $rootTag = $this->getDatabaseStoreRootTag($config);
+
+        if ($isFullFlush) {
+            return ['*'];
+        }
+
+        if ($isConfigFlush) {
+            return $rootTag ? [$rootTag] : [];
+        }
+
+        $tags = Hlp::arrayDeleteValues(
+            $tags,
+            array_values(array_filter([
+                Hlp::pathClassName($this::class),
+                $rootTag,
+                'ttl_*',
+                'hash_*',
+            ])),
+        );
+
+        return collect($tags)
+            ->map(static fn ($tag) => Hlp::castToString($tag))
+            ->filter(static fn (string $tag) => $tag !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+
+    /**
+     * Возвращает root tag, который реально присутствует в database cache key.
+     *
+     * @param ConfigEnum $config
+     * @return string|null
+     */
+    private function getDatabaseStoreRootTag(ConfigEnum $config): ?string
+    {
+        return match ($config) {
+            ConfigEnum::QueryCache => Hlp::pathClassName(QueryCacheService::class),
+
+            default => null,
+        };
     }
 }

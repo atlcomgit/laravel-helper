@@ -18,6 +18,8 @@ enum FilterComponentEnum: string
     case Select        = 'v-select';
     case ComboboxRadio = 'ComboboxRadio';
     case ComboboxCheck = 'ComboboxCheck';
+    case AutocompleteRadio = 'AutocompleteRadio';
+    case AutocompleteCheck = 'AutocompleteCheck';
     case Date          = 'v-date-picker';
     case DateInterval  = 'DateInterval';
 
@@ -47,6 +49,8 @@ enum FilterComponentEnum: string
             self::Select        => 'Выбор одного значения',
             self::ComboboxRadio => 'Выбор одного значений',
             self::ComboboxCheck => 'Выбор нескольких значений',
+            self::AutocompleteRadio => 'Поиск и выбор одного значения',
+            self::AutocompleteCheck => 'Поиск и выбор нескольких значений',
             self::Date          => 'Выбор одной даты',
             self::DateInterval  => 'Выбор интервала дат',
 

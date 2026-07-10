@@ -27,6 +27,7 @@ class TableFilterDto extends DefaultDto
     public ?string                         $label;
     public ?string                         $column;
     public ?array                          $items;
+    public ?array                          $autocomplete;
     public ?Closure                        $closure;
 
 
@@ -130,6 +131,47 @@ class TableFilterDto extends DefaultDto
             label: static::getLabel($modelClassOrLabel, $column),
             items: $items instanceof Collection ? $items->all() : $items,
             operator: FilterOperatorEnum::Closure,
+            closure: $closure,
+        )->toArray();
+    }
+
+
+    /**
+     * Возвращает фильтр: Поиск значения через общий endpoint autocomplete
+     *
+     * @param string $modelClassOrLabel
+     * @param string $column
+     * @param string $resource
+     * @param string $field
+     * @param Closure|null $closure
+     * @param FilterOperatorEnum|null $operator
+     * @param bool $multiple
+     * @param int $minLength
+     * @param int $limit
+     * @return array
+     */
+    public static function autocomplete(
+        string $modelClassOrLabel,
+        string $column,
+        string $resource,
+        string $field,
+        ?Closure $closure = null,
+        ?FilterOperatorEnum $operator = null,
+        bool $multiple = true,
+        int $minLength = 2,
+        int $limit = 20,
+    ): array {
+        return static::create(
+            component: $multiple ? FilterComponentEnum::AutocompleteCheck : FilterComponentEnum::AutocompleteRadio,
+            label: static::getLabel($modelClassOrLabel, $column),
+            column: $column,
+            operator: $operator ?? ($closure ? FilterOperatorEnum::Closure : ($multiple ? FilterOperatorEnum::In : FilterOperatorEnum::Equal)),
+            autocomplete: [
+                'resource' => $resource,
+                'field' => $field,
+                'minLength' => max(0, $minLength),
+                'limit' => max(1, $limit),
+            ],
             closure: $closure,
         )->toArray();
     }
