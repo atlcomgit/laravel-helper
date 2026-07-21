@@ -275,6 +275,37 @@ class TelegramApiService extends DefaultService
 
 
     /**
+     * Отправляет типизированное rich-сообщение через Telegram Bot API.
+     *
+     * @param string               $botToken        Токен Telegram-бота
+     * @param string|int           $chatId          ID чата или username (например, @username)
+     * @param array<string, mixed> $richMessage     Структура rich_message по контракту Telegram Bot API
+     * @param array<string, mixed> $options         Дополнительные параметры rich-сообщения
+     * @param int|null             $messageThreadId ID темы форума, если сообщение отправляется в тему
+     * @return mixed                                Ответ Telegram API
+     */
+    public function sendRichMessage(
+        string $botToken,
+        string|int $chatId,
+        array $richMessage,
+        array $options = [],
+        ?int $messageThreadId = null,
+    ): mixed {
+        return $this->call(
+            botToken: $botToken,
+            method: 'sendRichMessage',
+            params: [
+                ...$options,
+                'chat_id'      => $chatId,
+                'rich_message' => $richMessage,
+                ...($messageThreadId ? ['message_thread_id' => $messageThreadId] : []),
+            ],
+            json: true,
+        );
+    }
+
+
+    /**
      * Отправляет сообщение с файлом в начале сообщения
      *
      * @param string $botToken Токен Telegram-бота
