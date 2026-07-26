@@ -11,6 +11,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Queue\MaxAttemptsExceededException;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -72,6 +73,17 @@ class DefaultExceptionHandler extends Handler
      */
     public function render($request, Throwable $e)
     {
+        // Laravel-валидация должна сохранять стандартный errors bag для привязки ошибок к полям формы.
+        if ($e instanceof ValidationException) {
+            return response()->json([
+                'code' => 422,
+                'status' => false,
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+                'uuid' => uuid(),
+            ], 422, [], Hlp::jsonFlags());
+        }
+
         try {
             // Если запрос картинки и она не найдена
             if (

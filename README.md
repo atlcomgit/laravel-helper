@@ -438,6 +438,8 @@ class ExampleController extends DefaultController
 }
 ```
 
+Ошибки Laravel-валидации возвращаются со статусом `422` и содержат объект `errors`, пригодный для привязки сообщений к полям формы.
+
 ##### DefaultEvent
 
 Расширение класса событий
