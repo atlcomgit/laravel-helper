@@ -10,6 +10,7 @@ use Atlcom\LaravelHelper\Enums\ConfigEnum;
 use Atlcom\LaravelHelper\Events\QueryLogEvent;
 use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Services\QueryLogService;
+use Throwable;
 
 /**
  * @internal
@@ -23,6 +24,9 @@ class QueryLogJob extends DefaultJob
     public function __construct(protected QueryLogDto $dto)
     {
         $this->onQueue(Lh::config(ConfigEnum::QueryLog, 'queue'));
+
+        !($connection = Lh::config(ConfigEnum::QueryLog, 'queue_connection'))
+            ?: $this->onConnection($connection);
     }
 
 
@@ -33,8 +37,12 @@ class QueryLogJob extends DefaultJob
      */
     public function __invoke()
     {
-        app(QueryLogService::class)->log($this->dto);
+        try {
+            app(QueryLogService::class)->log($this->dto);
 
-        event(new QueryLogEvent($this->dto));
+            event(new QueryLogEvent($this->dto));
+        } catch (Throwable) {
+            // Сбой query-log repository или listener не должен завершать бизнес-задачу ошибкой.
+        }
     }
 }

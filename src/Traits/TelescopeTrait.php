@@ -20,10 +20,10 @@ trait TelescopeTrait
         $telescope = telescope();
         telescope(false);
 
-        $result = $callable();
-
-        telescope($telescope);
-
-        return $result;
+        try {
+            return $callable();
+        } finally {
+            telescope($telescope);
+        }
     }
 }

@@ -277,6 +277,14 @@ class ExampleRepository extends DefaultRepository
 }
 ```
 
+Ошибки инфраструктуры QueryLog не изменяют результат бизнес-запроса и не заменяют его исходное исключение.
+Для асинхронной записи failed-логов из PostgreSQL-транзакций используйте очередь, независимую от основного
+DB-соединения:
+
+```dotenv
+HELPER_QUERY_LOG_QUEUE_CONNECTION=redis
+```
+
 ##### QueueLog
 
 Логирование очередей в таблице helper_queue_logs (withQueueLog или withLog)

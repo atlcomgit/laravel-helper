@@ -95,7 +95,7 @@ trait QueryLogMethodsTrait
 
             if (Lh::canDispatch($dto)) {
                 !(Lh::config(ConfigEnum::QueryLog, 'store_on_start') && !is_numeric($exceedDurationMs))
-                    ?: $dto->dispatch();
+                    ?: $this->dispatchQueryLogSafely($dto);
                 $result[] = $dto;
             }
         }
@@ -167,7 +167,7 @@ trait QueryLogMethodsTrait
                 !is_numeric($exceedDurationMs)
                 || (int)($dto->duration * 1000) >= (int)$exceedDurationMs
             ) {
-                $dto->dispatch();
+                $this->dispatchQueryLogSafely($dto);
             }
         }
     }
@@ -200,7 +200,23 @@ trait QueryLogMethodsTrait
                 'exception' => Hlp::exceptionToArray($exception),
             ];
 
+            $this->dispatchQueryLogSafely($dto);
+        }
+    }
+
+
+    /**
+     * Отправляет query-log без влияния observability на бизнес-операцию
+     *
+     * @param QueryLogDto $dto
+     * @return void
+     */
+    private function dispatchQueryLogSafely(QueryLogDto $dto): void
+    {
+        try {
             $dto->dispatch();
+        } catch (Throwable) {
+            // Последняя защитная граница для пользовательских наследников QueryLogDto.
         }
     }
 }

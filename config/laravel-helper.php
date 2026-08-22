@@ -558,6 +558,8 @@ return [
         'enabled'             => (bool)env('HELPER_QUERY_LOG_ENABLED', false),
         // Название очереди для логов
         'queue'               => (string)env('HELPER_QUERY_LOG_QUEUE', 'default'),
+        // Отдельное подключение очереди, независимое от бизнес-транзакции
+        'queue_connection'    => env('HELPER_QUERY_LOG_QUEUE_CONNECTION'),
         // Запуск очереди синхронно
         'queue_dispatch_sync' => (bool)env('HELPER_QUERY_LOG_QUEUE_DISPATCH_SYNC'),
         // Название соединения для записи логов

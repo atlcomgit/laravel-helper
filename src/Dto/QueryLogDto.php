@@ -11,6 +11,8 @@ use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Jobs\QueryLogJob;
 use Atlcom\LaravelHelper\Models\QueryLog;
 use Carbon\Carbon;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Throwable;
 
 /**
  * @internal
@@ -133,10 +135,21 @@ class QueryLogDto extends Dto
      */
     public function dispatch(): static
     {
-        if (Lh::canDispatch($this)) {
-            (Lh::config(ConfigEnum::QueryLog, 'queue_dispatch_sync') ?? (isLocal() || isDev() || isTesting()))
-                ? QueryLogJob::dispatchSync($this)
-                : QueryLogJob::dispatch($this);
+        try {
+            if (!Lh::canDispatch($this)) {
+                return $this;
+            }
+
+            $dispatcher = app(Dispatcher::class);
+            $job = new QueryLogJob($this);
+            $sync = Lh::config(ConfigEnum::QueryLog, 'queue_dispatch_sync')
+                ?? (isLocal() || isDev() || isTesting());
+
+            $sync
+                ? $dispatcher->dispatchSync($job)
+                : $dispatcher->dispatch($job);
+        } catch (Throwable) {
+            // Ошибка observability не должна влиять на бизнес-запрос или маскировать его исключение.
         }
 
         return $this;
