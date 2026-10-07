@@ -6,6 +6,8 @@ namespace Atlcom\LaravelHelper\Services\TelegramBot;
 
 use Atlcom\Hlp;
 use Atlcom\LaravelHelper\Defaults\DefaultService;
+use Atlcom\LaravelHelper\Enums\ConfigEnum;
+use Atlcom\LaravelHelper\Facades\Lh;
 use Atlcom\LaravelHelper\Dto\TelegramBot\In\TelegramBotInDeletedMessageDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutResponseDto;
 use Atlcom\LaravelHelper\Dto\TelegramBot\Out\TelegramBotOutSendDocumentDto;
@@ -405,9 +407,12 @@ class TelegramBotService extends DefaultService
      */
     protected function setWebhook(TelegramBotOutSetWebhookDto $dto): TelegramBotOutResponseDto
     {
+        // Секрет из конфигурации бота передаётся всегда, чтобы переустановка webhook не отключала его проверку
+        $secret = (string)Lh::config(ConfigEnum::TelegramBot, 'webhook_secret');
         $json = $this->telegramApiService->setWebhook(
             botToken: $dto->token,
             url: $dto->url,
+            options: $secret === '' ? [] : ['secret_token' => $secret],
         );
 
         return TelegramBotOutResponseDto::create($dto, $json);
