@@ -701,9 +701,8 @@ return [
         // Webhook бота телеграм
         'webhook'             => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK', ''),
         // Секрет webhook бота (secret_token): передаётся в setWebhook, Telegram возвращает его
-        // в заголовке X-Telegram-Bot-Api-Secret-Token каждого запроса webhook. Пустое значение — без секрета.
-        // TELEGRAM_PAYMENT_WEBHOOK_SECRET — устаревшее имя, читается до переноса значения в env
-        'webhook_secret'      => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK_SECRET', env('TELEGRAM_PAYMENT_WEBHOOK_SECRET', '')),
+        // в заголовке X-Telegram-Bot-Api-Secret-Token каждого запроса webhook. Пустое значение — без секрета
+        'webhook_secret'      => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK_SECRET', ''),
         // Название соединения для записи данных бота
         'connection'          => (string)env('HELPER_TELEGRAM_BOT_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи чатов телеграм бота
