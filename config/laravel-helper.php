@@ -43,6 +43,16 @@ $ipBlockSuspiciousPatterns = empty(array_filter($ipBlockSuspiciousPatternsEnv, s
     ? $ipBlockSuspiciousPatternsDefault
     : $ipBlockSuspiciousPatternsEnv;
 
+// Список email, для которых серверная проверка Google reCAPTCHA не требуется
+$googleRecaptchaExcludedEmails = explode(
+    ',',
+    (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_EXCLUDED_EMAILS', ''),
+);
+$googleRecaptchaExcludedEmails = array_values(array_filter(
+    array_map(static fn (string $email): string => strtolower(trim($email)), $googleRecaptchaExcludedEmails),
+    static fn (string $email): bool => $email !== '',
+));
+
 return [
     // Включение пакета хелпера
     'enabled'                      => (bool)env('HELPER_ENABLED', true),
@@ -269,17 +279,19 @@ return [
         // Сервис Google reCAPTCHA v3
         'googleRecaptchaCom' => [
             // Флаг включения макроса
-            'enabled'    => (bool)env('HELPER_HTTP_GOOGLE_RECAPTCHA_ENABLED', false),
+            'enabled'         => (bool)env('HELPER_HTTP_GOOGLE_RECAPTCHA_ENABLED', false),
             // Url адрес для проверки токена reCAPTCHA
-            'url'        => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_URL', 'https://www.google.com/recaptcha/api'),
+            'url'             => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_URL', 'https://www.google.com/recaptcha/api'),
             // Секретный ключ reCAPTCHA
-            'secret_key' => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SECRET_KEY', ''),
+            'secret_key'      => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SECRET_KEY', ''),
             // Публичный ключ reCAPTCHA (site key)
-            'site_key'   => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SITE_KEY', ''),
+            'site_key'        => (string)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SITE_KEY', ''),
+            // Email, для которых серверная проверка reCAPTCHA не требуется
+            'excluded_emails' => $googleRecaptchaExcludedEmails,
             // Минимальный допустимый score (0.0 - 1.0)
-            'score'      => (float)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SCORE', 0.5),
+            'score'           => (float)env('HELPER_HTTP_GOOGLE_RECAPTCHA_SCORE', 0.5),
             // Таймаут подключения api к сервису
-            'timeout'    => (int)env('HELPER_HTTP_GOOGLE_RECAPTCHA_TIMEOUT', 10),
+            'timeout'         => (int)env('HELPER_HTTP_GOOGLE_RECAPTCHA_TIMEOUT', 10),
         ],
     ],
 
@@ -689,8 +701,9 @@ return [
         // Webhook бота телеграм
         'webhook'             => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK', ''),
         // Секрет webhook бота (secret_token): передаётся в setWebhook, Telegram возвращает его
-        // в заголовке X-Telegram-Bot-Api-Secret-Token каждого запроса webhook. Пустое значение — без секрета
-        'webhook_secret'      => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK_SECRET', ''),
+        // в заголовке X-Telegram-Bot-Api-Secret-Token каждого запроса webhook. Пустое значение — без секрета.
+        // TELEGRAM_PAYMENT_WEBHOOK_SECRET — устаревшее имя, читается до переноса значения в env
+        'webhook_secret'      => (string)env('HELPER_TELEGRAM_BOT_WEBHOOK_SECRET', env('TELEGRAM_PAYMENT_WEBHOOK_SECRET', '')),
         // Название соединения для записи данных бота
         'connection'          => (string)env('HELPER_TELEGRAM_BOT_CONNECTION', env('DB_CONNECTION', 'sqlite')),
         // Название таблицы для записи чатов телеграм бота
