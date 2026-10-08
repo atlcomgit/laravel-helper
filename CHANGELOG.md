@@ -1,5 +1,21 @@
 # История изменений проекта
 
+## Без номера: Исправлен драйвер SQL Server и добавлен MariaDB в фабрике подключений
+
+- Дата: 2026-10-08.
+- Автор: 🅰️🅻🅴🅺.
+- Ветка: master.
+- Что сделано: фабрика подключений распознаёт драйвер SQL Server по стандартному имени Laravel `sqlsrv` вместо
+  несуществующего `sqlserver` и поддерживает драйвер `mariadb` через новый `MariaDbConnection`.
+- Ключевые моменты: раньше подключения SQL Server и MariaDB создавались стандартными классами Laravel без
+  `ConnectionTrait`, поэтому кеширование и логирование запросов для них не работали; теперь фабрика покрывает все
+  стандартные драйверы Laravel (`mysql`, `mariadb`, `pgsql`, `sqlite`, `sqlsrv`). Драйвер `mariadb` есть начиная с
+  Laravel 11.
+- Файлы:
+    CHANGELOG.md
+    src/Databases/Connections/ConnectionFactory.php
+    src/Databases/Connections/MariaDbConnection.php
+
 ## 365988414: QueryLog не маскирует исходные ошибки бизнес-запросов
 
 - Дата: 2026-08-22.

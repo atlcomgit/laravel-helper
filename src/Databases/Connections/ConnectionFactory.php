@@ -13,8 +13,9 @@ class ConnectionFactory extends \Illuminate\Database\Connectors\ConnectionFactor
     {
         return match ($driver) {
             'mysql' => new MySqlConnection($connection, $database, $prefix, $config),
+            'mariadb' => new MariaDbConnection($connection, $database, $prefix, $config),
             'pgsql' => new PostgresConnection($connection, $database, $prefix, $config),
-            'sqlserver' => new SqlServerConnection($connection, $database, $prefix, $config),
+            'sqlsrv' => new SqlServerConnection($connection, $database, $prefix, $config),
             'sqlite' => new SQLiteConnection($connection, $database, $prefix, $config),
 
             default => parent::createConnection($driver, $connection, $database, $prefix, $config),
