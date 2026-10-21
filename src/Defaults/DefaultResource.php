@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atlcom\LaravelHelper\Defaults;
 
 use Atlcom\Hlp;
+use Atlcom\LaravelHelper\Enums\ResourceEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use UnitEnum;
@@ -56,6 +57,38 @@ abstract class DefaultResource extends JsonResource
     public function getStructure(): UnitEnum|string|null
     {
         return $this->structure;
+    }
+
+
+    /**
+     * Формирует массив ресурса; ответам форм добавляет описания полей модели в ключ descriptions.
+     * Явно заданный ресурсом ключ descriptions имеет приоритет над описаниями модели.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\ModelDescriptionsTest
+     *
+     * @param Request|null $request
+     * @return array
+     */
+    public function resolve($request = null)
+    {
+        $data = parent::resolve($request);
+
+        if (
+            !is_array($data)
+            || array_key_exists('descriptions', $data)
+            || !in_array(
+                $this->structure,
+                [ResourceEnum::Form, ResourceEnum::FormCreate, ResourceEnum::FormUpdate],
+                true,
+            )
+            || !is_object($this->resource)
+            || !method_exists($this->resource, 'getDescriptions')
+        ) {
+            return $data;
+        }
+
+        $descriptions = $this->resource->getDescriptions();
+
+        return $descriptions ? [...$data, 'descriptions' => $descriptions] : $data;
     }
 
 

@@ -263,4 +263,17 @@ trait ModelTrait
     {
         return property_exists($this, 'fields') ? $this->fields : [];
     }
+
+
+    /**
+     * Возвращает подробные описания полей модели из свойства $descriptions.
+     * Описание объясняет назначение поля и его тонкости в логике приложения; формы показывают его по кнопке (i).
+     * @see \Atlcom\LaravelHelper\Tests\Unit\ModelDescriptionsTest
+     *
+     * @return array<string, string>
+     */
+    public function getDescriptions(): array
+    {
+        return property_exists($this, 'descriptions') ? $this->descriptions : [];
+    }
 }
