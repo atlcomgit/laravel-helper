@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Создаёт аннотированный тег по VERSION именно из завершённого коммита, а не из рабочей копии.
+set -euo pipefail
+
+repoRoot="$(git rev-parse --show-toplevel)"
+commit="$(git -C "$repoRoot" rev-parse --verify HEAD)"
+if ! version="$(git -C "$repoRoot" show "$commit:VERSION" 2>/dev/null)"; then
+    printf '%s\n' 'Коммит уже создан, но тег не создан: в коммите отсутствует VERSION.' >&2
+    exit 1
+fi
+if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    printf '%s\n' 'Коммит уже создан, но тег не создан: неверный формат VERSION.' >&2
+    exit 1
+fi
+
+# Повторный вызов безопасен; тег другого коммита не перезаписывается даже при обходе pre-commit.
+if git -C "$repoRoot" show-ref --verify --quiet "refs/tags/$version"; then
+    taggedCommit="$(git -C "$repoRoot" rev-parse --verify "refs/tags/$version^{commit}" 2>/dev/null)" \
+        || taggedCommit=''
+    if [[ "$taggedCommit" == "$commit" ]]; then
+        exit 0
+    fi
+    printf 'Коммит уже создан, но тег %s занят другим объектом и оставлен без изменений.\n' "$version" >&2
+    exit 1
+fi
+
+# Аннотированные теги отправляются обычным push при push.followTags=true; сам хук сеть не использует.
+if ! git -C "$repoRoot" tag --annotate --message="Версия $version" "$version" "$commit"; then
+    printf '%s\n' 'Коммит уже создан. После устранения ошибки повторите: bash .githooks/post-commit' >&2
+    exit 1
+fi
+printf 'Создан тег: %s\n' "$version"

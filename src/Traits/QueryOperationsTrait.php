@@ -45,23 +45,19 @@ trait QueryOperationsTrait
             $status = false;
             $this->syncQueryProperties();
             $queryCacheService = app(QueryCacheService::class);
-            $tables = $queryCacheService->getTablesFromModels(
-                [$this],
-            );
+            // Таблицы нужны только кешу запросов: без запроса кеша разбор модели не выполняется.
+            $isQueryCacheRequested = $this->isQueryCacheRequested();
+            $tables = $isQueryCacheRequested
+                ? $queryCacheService->getTablesFromModels([$this])
+                : [];
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($this);
 
             if (
                 $tables
-                && Lh::config(ConfigEnum::QueryCache, 'enabled')
+                && $isQueryCacheRequested
                 && (Lh::notFoundIgnoreTables($tables))
-                && (
-                    $this->withQueryCache === true
-                    || is_integer($this->withQueryCache)
-                    || ($this->withQueryCache !== false
-                        && Lh::config(ConfigEnum::QueryCache, 'global'))
-                )
             ) {
                 $this->setQueryCacheClass($this::class);
 
@@ -155,8 +151,15 @@ trait QueryOperationsTrait
             $status = false;
             $this->syncQueryProperties();
             $queryCacheService = app(QueryCacheService::class);
-            $sql = sql($query, $bindings);
-            $tables = $queryCacheService->getTablesFromSql($sql);
+            // SQL с параметрами нужен только кешу и журналу запросов (выключенный журнал его не читает),
+            // разбор таблиц — только кешу запросов.
+            $isQueryCacheRequested = $this->isQueryCacheRequested();
+            $sql = $isQueryCacheRequested || Lh::config(ConfigEnum::QueryLog, 'enabled')
+                ? sql($query, $bindings)
+                : '';
+            $tables = $isQueryCacheRequested
+                ? $queryCacheService->getTablesFromSql($sql)
+                : [];
             $cacheKey = $isCached = $isFromCache = null;
 
             $arrayQueryLogDto = $this->createQueryLog($sql);
@@ -165,13 +168,7 @@ trait QueryOperationsTrait
             if (
                 $tables
                 && (Lh::notFoundIgnoreTables($tables))
-                && Lh::config(ConfigEnum::QueryCache, 'enabled')
-                && (
-                    $this->withQueryCache === true
-                    || is_integer($this->withQueryCache)
-                    || ($this->withQueryCache !== false
-                        && Lh::config(ConfigEnum::QueryCache, 'global'))
-                )
+                && $isQueryCacheRequested
                 && ($this->getQueryCacheClass() === $this::class
                     || $this instanceof Connection)
             ) {
@@ -709,6 +706,23 @@ trait QueryOperationsTrait
         );
 
         return $result;
+    }
+
+
+    /**
+     * Проверяет, запрошен ли кеш для текущего запроса: включён в настройках и разрешён флагом запроса или глобально
+     * @see \Atlcom\LaravelHelper\Tests\Unit\QueryOperationsTraitTest
+     *
+     * @return bool
+     */
+    protected function isQueryCacheRequested(): bool
+    {
+        return (bool)Lh::config(ConfigEnum::QueryCache, 'enabled')
+            && (
+                $this->withQueryCache === true
+                || is_integer($this->withQueryCache)
+                || ($this->withQueryCache !== false && Lh::config(ConfigEnum::QueryCache, 'global'))
+            );
     }
 
 

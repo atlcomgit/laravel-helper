@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# Повышает patch-версию и добавляет только VERSION в индекс будущего коммита.
+set -euo pipefail
+
+# Git использует отдельный индекс для коммита выбранных путей: не оставляем VERSION вне основного индекса.
+case "${GIT_INDEX_FILE:-}" in
+    */next-index-*|next-index-*)
+        printf '%s\n' 'Версионирование: сначала добавьте нужные файлы в индекс, затем выполните git commit без путей.' >&2
+        exit 1
+        ;;
+esac
+
+# Пустая попытка коммита не должна создавать изменение только ради новой версии.
+repoRoot="$(git rev-parse --show-toplevel)"
+if git -C "$repoRoot" diff --cached --quiet; then
+    exit 0
+fi
+
+versionFile="$repoRoot/VERSION"
+if [[ ! -f "$versionFile" || -L "$versionFile" ]]; then
+    printf '%s\n' 'Версионирование: VERSION должен быть обычным файлом в корне репозитория.' >&2
+    exit 1
+fi
+
+# Не затираем отличающееся содержимое VERSION, которое пользователь уже подготовил в индексе.
+version="$(< "$versionFile")"
+if stagedVersion="$(git -C "$repoRoot" show :VERSION 2>/dev/null)" && [[ "$stagedVersion" != "$version" ]]; then
+    printf '%s\n' 'Версионирование: содержимое VERSION в рабочем каталоге и индексе различается.' >&2
+    exit 1
+fi
+
+# База из HEAD делает повтор после отменённого коммита идемпотентным; первый запуск использует прежний тег.
+if ! previousVersion="$(git -C "$repoRoot" show HEAD:VERSION 2>/dev/null)"; then
+    previousVersion="$(git -C "$repoRoot" describe --tags --abbrev=0 --match 'v[0-9]*' HEAD 2>/dev/null)" \
+        || previousVersion="$version"
+fi
+
+# Сохраняем префикс и ведущие нули; ограничение длины patch исключает переполнение арифметики Bash.
+if [[ ! "$previousVersion" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]{1,18})$ ]]; then
+    printf '%s\n' 'Версионирование: ожидается версия vMAJOR.MINOR.PATCH с patch длиной до 18 цифр.' >&2
+    exit 1
+fi
+versionPrefix="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+patch="${BASH_REMATCH[3]}"
+patchWidth="${#patch}"
+patchNumber="$((10#$patch))"
+
+# Занятые локальные номера пропускаем, но никогда не перемещаем и не удаляем существующие теги.
+while true; do
+    if (( patchNumber >= 999999999999999999 )); then
+        printf '%s\n' 'Версионирование: исчерпан допустимый диапазон patch.' >&2
+        exit 1
+    fi
+    patchNumber="$((patchNumber + 1))"
+    printf -v nextVersion '%s.%0*d' "$versionPrefix" "$patchWidth" "$patchNumber"
+    if ! git -C "$repoRoot" show-ref --verify --quiet "refs/tags/$nextVersion"; then
+        break
+    fi
+done
+
+# Разрешаем исходное значение или уже подготовленный результат предыдущей попытки, но не чужую ручную правку.
+if [[ "$version" != "$previousVersion" && "$version" != "$nextVersion" ]]; then
+    printf 'Версионирование: VERSION должен содержать %s или подготовленную версию %s.\n' \
+        "$previousVersion" "$nextVersion" >&2
+    exit 1
+fi
+
+printf '%s\n' "$nextVersion" > "$versionFile"
+git -C "$repoRoot" add -- VERSION
+printf 'Версия коммита: %s\n' "$nextVersion"

@@ -850,15 +850,22 @@ return [
             'enabled' => (bool)env('HELPER_TESTING_HELPER_LOGS_ENABLED', false),
         ],
 
+        // Вывод имени каждого теста перед его выполнением
+        'test_name'   => [
+            'enabled' => (bool)env('HELPER_TESTING_LOG_TEST_NAME_ENABLED', true),
+        ],
+
         // Пользователь для тестов
         'user'        => [
             'email' => (string)env('HELPER_TESTING_LOG_USER_EMAIL', 'testing@test.ru'),
         ],
         // Настройка тестовой базы данных
         'database'    => [
-            'name'  => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
-            'fresh' => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
-            'seed'  => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
+            'name'    => (string)env('HELPER_TESTING_LOG_DATABASE_NAME', 'testing'),
+            // Подготовка БД трейтом TestingTrait; false, если проект готовит тестовую БД самостоятельно
+            'prepare' => (bool)env('HELPER_TESTING_LOG_DATABASE_PREPARE_ENABLED', true),
+            'fresh'   => (bool)env('HELPER_TESTING_LOG_DATABASE_FRESH_ENABLED', true),
+            'seed'    => (bool)env('HELPER_TESTING_LOG_DATABASE_SEED_ENABLED', true),
         ],
     ],
 
