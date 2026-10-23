@@ -1,0 +1,129 @@
+name: Синхронизация GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Уже опубликованный тег, например v1.04.77
+        required: true
+        type: string
+
+# Права записи выдаются только заданию публикации; исходники пакета не исполняются.
+permissions: {}
+
+jobs:
+  version:
+    name: Определить серию версии
+    if: github.event_name != 'push' || !github.event.deleted
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      series: ${{ steps.version.outputs.series }}
+    steps:
+      - name: Проверить формат тега
+        id: version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          # Значение передаётся через окружение, а не подставляется в исполняемый код.
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            printf '%s\n' 'Ожидается тег в формате vMAJOR.MINOR.PATCH.' >&2
+            exit 1
+          fi
+          printf 'tag=%s\nseries=v%s.%s\n' \
+            "$RELEASE_TAG" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Обновить или создать релиз серии
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    # В одной серии публикации последовательны, разные серии не вытесняют ожидающие задания друг друга.
+    concurrency:
+      group: release-${{ needs.version.outputs.series }}
+      cancel-in-progress: false
+    steps:
+      - name: Синхронизировать релиз с последним тегом серии
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          RELEASE_TAG: ${{ needs.version.outputs.tag }}
+          RELEASE_SERIES: ${{ needs.version.outputs.series }}
+        with:
+          script: |
+            // Контекст репозитория и проверенный тег поступают из задания version.
+            const repository = context.repo;
+            const requestedTag = process.env.RELEASE_TAG;
+            const series = process.env.RELEASE_SERIES;
+            const prefix = `${series}.`;
+
+            // Учитываем все страницы тегов и не создаём отсутствующий тег через API релизов.
+            const tags = await github.paginate(github.rest.repos.listTags, {
+              ...repository, per_page: 100,
+            });
+            if (!tags.some(tag => tag.name === requestedTag)) {
+              throw new Error(`Тег ${requestedTag} не опубликован или уже удалён.`);
+            }
+
+            // Максимальный patch защищает от обратного порядка запусков и замены ожидающего задания.
+            let targetTag = requestedTag;
+            let targetPatch = BigInt(requestedTag.slice(prefix.length));
+            for (const tag of tags) {
+              if (!tag.name.startsWith(prefix)) continue;
+              const patch = tag.name.slice(prefix.length);
+              if (!/^\d+$/.test(patch)) continue;
+              if (BigInt(patch) > targetPatch) {
+                targetTag = tag.name;
+                targetPatch = BigInt(patch);
+              }
+            }
+
+            // Серия определяется тегом, а не изменяемым заголовком; поддержаны прежние теги без patch.
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              ...repository, per_page: 100,
+            });
+            const matches = releases.filter(release => release.tag_name === series
+              || (release.tag_name.startsWith(prefix) && /^\d+$/.test(release.tag_name.slice(prefix.length))));
+            if (matches.length > 1) {
+              throw new Error(`Для ${series} найдено несколько релизов: автоматический выбор небезопасен.`);
+            }
+
+            // Обновление меняет только тег: описание, заголовок, вложения и состояние релиза сохраняются.
+            const release = matches[0];
+            if (release) {
+              if (release.draft || release.prerelease) {
+                throw new Error(`Релиз ${series} является черновиком или предварительным выпуском.`);
+              }
+              const currentPatch = release.tag_name === series ? -1n : BigInt(release.tag_name.slice(prefix.length));
+              if (currentPatch >= targetPatch) {
+                core.info(`Релиз ${series} уже указывает на ${release.tag_name}; изменений нет.`);
+                return;
+              }
+              if (release.immutable) {
+                throw new Error(`Релиз ${series} неизменяемый: GitHub запрещает смену тега.`);
+              }
+              await github.rest.repos.updateRelease({
+                ...repository, release_id: release.id, tag_name: targetTag,
+              });
+              core.info(`Релиз ${series} обновлён: ${release.tag_name} -> ${targetTag}.`);
+              return;
+            }
+
+            // Для новой серии создаём один опубликованный релиз с автоматически сформированными заметками.
+            await github.rest.repos.createRelease({
+              ...repository,
+              tag_name: targetTag,
+              name: series,
+              generate_release_notes: true,
+              draft: false,
+              prerelease: false,
+              make_latest: 'legacy',
+            });
+            core.info(`Создан релиз ${series} для ${targetTag}.`);

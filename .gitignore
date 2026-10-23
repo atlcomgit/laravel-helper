@@ -25,4 +25,6 @@ yarn-error.log
 
 /composer.phar
 /.phpunit.result.cache
-.github
+# Локальные инструкции скрыты, но workflow публикации должен попадать в репозиторий.
+/.github/*
+!/.github/workflows/

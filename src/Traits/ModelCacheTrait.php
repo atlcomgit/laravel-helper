@@ -66,10 +66,18 @@ trait ModelCacheTrait
      */
     public function newEloquentBuilder($query)
     {
+        // Построитель создаётся для каждого запроса модели, поэтому флаги читаются одним обращением к конфигурации:
+        // каждый Lh::config(..., 'enabled') заново проверял бы глобальный выключатель laravel-helper.enabled
+        $config = (array)config('laravel-helper');
+        $helperEnabled = !array_key_exists('enabled', $config) || (bool)$config['enabled'];
+
         if (
-            Lh::config(ConfigEnum::QueryCache, 'enabled')
-            || Lh::config(ConfigEnum::QueryLog, 'enabled')
-            || Lh::config(ConfigEnum::ModelLog, 'enabled')
+            $helperEnabled
+            && (
+                ($config[ConfigEnum::QueryCache->value]['enabled'] ?? null)
+                || ($config[ConfigEnum::QueryLog->value]['enabled'] ?? null)
+                || ($config[ConfigEnum::ModelLog->value]['enabled'] ?? null)
+            )
         ) {
             $builder = new EloquentBuilder($query);
             $builder->getQuery()->setQueryCache(null);

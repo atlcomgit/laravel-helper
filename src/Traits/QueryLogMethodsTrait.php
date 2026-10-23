@@ -34,9 +34,13 @@ trait QueryLogMethodsTrait
         $result = [];
         $exceedDurationMs = false;
 
+        // Выключенный сервис лога запросов не пишет и превышения времени, поэтому порог не читается
+        if (!Lh::config(ConfigEnum::QueryLog, 'enabled')) {
+            return $result;
+        }
+
         if (
-            !($enabled = Lh::config(ConfigEnum::QueryLog, 'enabled'))
-            || !(
+            !(
                 $this->withQueryLog === true
                 || ($this->withQueryLog !== false && Lh::config(ConfigEnum::QueryLog, 'global'))
             )
@@ -44,8 +48,8 @@ trait QueryLogMethodsTrait
             // Лог запроса выключен, проверяем время превышения
             $exceedDurationMs = Lh::config(ConfigEnum::QueryLog, 'exceed_duration_ms') ?? false;
 
-            // Если сервис лога запросов выключен или время превышения не задано, то выходим
-            if (!$enabled || !is_numeric($exceedDurationMs)) {
+            // Если время превышения не задано, то выходим
+            if (!is_numeric($exceedDurationMs)) {
                 return $result;
             }
         }
