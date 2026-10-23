@@ -1,5 +1,31 @@
 # История изменений проекта
 
+## Без номера: Итоговый отчёт тестов
+
+- Дата: 2026-10-23.
+- Автор: 🅰️🅻🅴🅺.
+- Ветка: master.
+- Что сделано: добавлено расширение PHPUnit `TestReportExtension`, которое после всех тестов печатает итоговый отчёт:
+  время прогона и суммарное время в тестах, ускорение и разброс загрузки процессов paratest, пик памяти, число тестов
+  по результатам, утверждения, среднюю длительность и скорость, минимум, медиану, p95 и максимум, распределение по
+  интервалам, медленные тесты и классы, тесты с ошибкой. Подключается в `phpunit.xml`, параметры `slowSeconds`
+  (порог медленного теста) и `slowLimit` (длина списка).
+- Ключевые моменты: при paratest воркеры передают результаты главному процессу через временный каталог из переменной
+  окружения `LARAVEL_HELPER_TESTING_REPORT_DIR`; главный процесс печатает отчёт после итогов paratest и удаляет
+  каталог. Отчёт не печатается с `--teamcity` и `--no-output` и не меняет код завершения; счёт ошибок совпадает с
+  итогами PHPUnit, включая ошибки `setUpBeforeClass` и `tearDownAfterClass`. Проверено на PHPUnit 10.5 и 11.5,
+  paratest 7.8. Добавлены тесты `TestReportTest`, `TestReportCollectorTest` и `TestReportExtensionTest`.
+- Файлы:
+    CHANGELOG.md
+    README.md
+    src/Testing/TestReport.php
+    src/Testing/TestReportCollector.php
+    src/Testing/TestReportExtension.php
+    src/Testing/TestReportStorage.php
+    tests/Unit/TestReportCollectorTest.php
+    tests/Unit/TestReportExtensionTest.php
+    tests/Unit/TestReportTest.php
+
 ## Без номера: Сокращено чтение конфигурации на каждом запросе модели
 
 - Дата: 2026-10-23.
