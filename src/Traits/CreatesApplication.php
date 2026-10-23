@@ -20,7 +20,9 @@ trait CreatesApplication
      */
     public function createApplication()
     {
-        $parentClass = get_parent_class($this);
+        // parent:: в трейте относится к родителю класса, подключившего трейт, а не к классу конкретного теста:
+        // в Laravel 10 метод родителя абстрактный, а у наследника DefaultTest он уже реализован этим трейтом
+        $parentClass = get_parent_class(self::class);
         $canUseParentCreateApplication = $parentClass
             && method_exists($parentClass, 'createApplication')
             && !(new ReflectionMethod($parentClass, 'createApplication'))->isAbstract();

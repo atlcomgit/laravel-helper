@@ -49,17 +49,12 @@ return new class extends Migration {
             });
         }
 
-        // Составной индекс (status, created_at) для команды очистки через raw SQL
-        // Blueprint::index не поддерживает DESC, поэтому используем raw SQL
+        // Составной индекс (status, created_at DESC) для команды очистки: Blueprint::index не поддерживает DESC.
+        // Наличие индекса уже проверено, поэтому без IF NOT EXISTS, которого нет в MySQL
         if (!$schema->hasIndex($table, 'helper_query_logs_status_created_index')) {
-            $connection = DB::connection($connection)->getDriverName() === 'pgsql'
-                ? $connection
-                : null;
-
-            DB::connection($connection)->statement("
-                CREATE INDEX IF NOT EXISTS helper_query_logs_status_created_index
-                ON {$table} (status, created_at DESC)
-            ");
+            DB::connection($connection)->statement(
+                "CREATE INDEX helper_query_logs_status_created_index ON {$table} (status, created_at DESC)",
+            );
         }
     }
 
@@ -77,17 +72,19 @@ return new class extends Migration {
 
         $dropDurationIndex = $schema->hasIndex($table, 'helper_query_logs_duration_index');
         $dropMemoryIndex = $schema->hasIndex($table, 'helper_query_logs_memory_index');
+        // DROP INDEX IF EXISTS не поддерживает MySQL: индекс удаляется средствами Blueprint после проверки наличия
+        $dropStatusCreatedIndex = $schema->hasIndex($table, 'helper_query_logs_status_created_index');
 
-        if ($dropDurationIndex || $dropMemoryIndex) {
-            $schema->table($table, static function (Blueprint $table) use ($dropDurationIndex, $dropMemoryIndex) {
-                !$dropDurationIndex ?: $table->dropIndex('helper_query_logs_duration_index');
-                !$dropMemoryIndex ?: $table->dropIndex('helper_query_logs_memory_index');
-            });
+        if ($dropDurationIndex || $dropMemoryIndex || $dropStatusCreatedIndex) {
+            $schema->table(
+                $table,
+                static function (Blueprint $table) use ($dropDurationIndex, $dropMemoryIndex, $dropStatusCreatedIndex) {
+                    !$dropDurationIndex ?: $table->dropIndex('helper_query_logs_duration_index');
+                    !$dropMemoryIndex ?: $table->dropIndex('helper_query_logs_memory_index');
+                    !$dropStatusCreatedIndex ?: $table->dropIndex('helper_query_logs_status_created_index');
+                },
+            );
         }
-
-        DB::connection($connection)->statement("
-            DROP INDEX IF EXISTS helper_query_logs_status_created_index
-        ");
     }
 
 

@@ -23,8 +23,11 @@ return new class extends Migration {
         $table = Lh::getTable($config)
             ?? throw new Exception("Не указан параметр в конфиге: {$config->value}");
 
+        // Обычный индекс по JSON-колонке поддерживает PostgreSQL (jsonb), MySQL допускает только индекс по выражению
+        $indexJson = Schema::connection($connection)->getConnection()->getDriverName() === 'pgsql';
+
         if (!Schema::connection($connection)->hasTable($table)) {
-            Schema::connection($connection)->create($table, function (Blueprint $table) {
+            Schema::connection($connection)->create($table, function (Blueprint $table) use ($indexJson) {
                 $table->id();
 
                 $table->uuid('uuid')->nullable(false)->index()
@@ -38,8 +41,9 @@ return new class extends Migration {
 
                 $table->string('from')->nullable(true)->index()
                     ->comment('Отправитель');
-                $table->jsonb('to')->nullable(true)->index()
+                $table->jsonb('to')->nullable(true)
                     ->comment('Получатели');
+                !$indexJson ?: $table->index('to');
                 $table->jsonb('cc')->nullable(true)
                     ->comment('Копии');
                 $table->jsonb('bcc')->nullable(true)

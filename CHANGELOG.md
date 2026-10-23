@@ -1,5 +1,28 @@
 # История изменений проекта
 
+## Без номера: Тесты и миграции пакета в проектах на Laravel 10 и MySQL
+
+- Дата: 2026-10-24.
+- Автор: 🅰️🅻🅴🅺.
+- Ветка: master.
+- Что сделано: `CreatesApplication` (подключается через `TestingTrait` и `DefaultTest`) снова создаёт приложение в
+  Laravel 10: реализация `createApplication()` ищется у родителя класса, подключившего трейт, а не у родителя класса
+  конкретного теста, поэтому абстрактный метод Laravel 10 больше не вызывается. Миграции пакета выполняются в MySQL:
+  индекс по JSON-колонке `to` таблицы `helper_mail_logs` создаётся только в PostgreSQL, а составной индекс
+  `helper_query_logs (status, created_at DESC)` создаётся и удаляется без `IF [NOT] EXISTS` и на подключении журнала
+  запросов, а не на подключении по умолчанию.
+- Ключевые моменты: в проекте на Laravel 10 и MySQL (expour-server) с версиями пакета после ноября 2025 падали все
+  тесты, не доходя до проверок; с исправлениями все 584 теста проекта проходят. Структура таблиц в PostgreSQL не
+  меняется, уже выполненные миграции повторно не запускаются. Добавлены тесты `CreatesApplicationTest` и
+  `PackageMigrationsTest`.
+- Файлы:
+    CHANGELOG.md
+    database/migrations/0000_01_01_000009_create_helper_mail_logs_table.php
+    database/migrations/0000_01_01_000010_add_indexes_to_helper_query_logs_table.php
+    src/Traits/CreatesApplication.php
+    tests/Unit/CreatesApplicationTest.php
+    tests/Unit/PackageMigrationsTest.php
+
 ## Без номера: Итоговый отчёт тестов
 
 - Дата: 2026-10-23.
