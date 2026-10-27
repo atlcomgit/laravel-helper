@@ -347,6 +347,8 @@ return [
         ],
         // Флаг включения записи логов только после получения ответа на запрос
         'only_response'       => (bool)env('HELPER_HTTP_LOG_ONLY_RESPONSE', true),
+        // Максимальный размер тела запроса и ответа в логе в байтах (0 — без ограничения)
+        'data_max_length'     => (int)env('HELPER_HTTP_LOG_DATA_MAX_LENGTH', 1048576),
         // Входящие запросы
         'in'                  => [
             // Флаг включения логов

@@ -30,6 +30,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class HttpLogDto extends Dto
 {
     public const AUTO_MAPPINGS_ENABLED = true;
+    /** Размер тела запроса и ответа в логе по умолчанию в байтах, если в конфиге нет data_max_length */
+    public const DATA_MAX_LENGTH = 1048576;
 
     public ?string $uuid;
 
@@ -56,6 +58,9 @@ class HttpLogDto extends Dto
 
     public ?Exception $exception;
 
+    /** @var array<string, array{excluded: bool, hash: ?string}> Решения по полным телам и отпечатки их префиксов. */
+    private array $truncatedDataExclusions = [];
+
 
     /**
      * @inheritDoc
@@ -76,6 +81,7 @@ class HttpLogDto extends Dto
 
     /**
      * Создает dto из http запроса
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
      *
      * @param string|null $uuid
      * @param RequestIn|RequestOut|null $request
@@ -87,6 +93,15 @@ class HttpLogDto extends Dto
         RequestIn|RequestOut|null $request = null,
         ?array $info = null,
     ): static {
+        // Исходное тело нужно для размера и исключений; в DTO сохраняется только ограниченный фрагмент.
+        $requestData = match (true) {
+            $request instanceof RequestIn => $request->getContent(),
+            $request instanceof RequestOut => $request->body(),
+
+            default => null,
+        };
+        $limitedRequestData = static::limitData($requestData);
+
         return static::create([
             'uuid'   => $uuid,
             'status' => HttpLogStatusEnum::Process,
@@ -101,7 +116,7 @@ class HttpLogDto extends Dto
                     'ip'             => ip(),
                     'url'            => $request->getUri(),
                     'requestHeaders' => $request->headers->all(),
-                    'requestData'    => $request->getContent(),
+                    'requestData'    => $limitedRequestData,
                 ],
                 $request instanceof RequestOut => [
                     'url'            => $url = $request->url(),
@@ -111,7 +126,7 @@ class HttpLogDto extends Dto
                     'method'         => Str::lower($request->method()),
                     'ip'             => ip(),
                     'requestHeaders' => $request->headers(),
-                    'requestData'    => $request->body(),
+                    'requestData'    => $limitedRequestData,
                     'cacheKey'       => ($request->header(HttpLogService::HTTP_HEADER_CACHE_KEY) ?? [])[0] ?? null,
                     'isCached'       => Hlp::castToBool(
                         ($request->header(HttpLogService::HTTP_HEADER_CACHE_SET) ?? [])[0] ?? null
@@ -126,23 +141,16 @@ class HttpLogDto extends Dto
 
             'info'   => [
                 ...($info ?? []),
-                'request_data_size' => Hlp::sizeBytesToString(
-                    Str::length(
-                        match (true) {
-                            $request instanceof RequestIn => $request->getContent(),
-                            $request instanceof RequestOut => $request->body(),
-
-                            default => '',
-                        },
-                    ),
-                ),
+                'request_data_size' => Hlp::sizeBytesToString(Str::length($requestData ?? '')),
+                ...($limitedRequestData !== $requestData ? ['request_data_truncated' => true] : []),
             ],
-        ]);
+        ])->rememberDataExclusion('requestData', $requestData);
     }
 
 
     /**
      * Создает dto из http ответа
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
      *
      * @param string|null $uuid
      * @param RequestIn|RequestOut|null $request
@@ -166,14 +174,30 @@ class HttpLogDto extends Dto
             default => null,
         };
         $duration = $startAt ? Carbon::createFromTimestampMs($startAt)->diffInMilliseconds() / 1000 : 0;
+        // Файл ответа может быть удалён сразу после отправки (deleteFileAfterSend): тогда размер и тип из заголовков
+        $file = $response instanceof BinaryFileResponse ? $response->getFile() : null;
+        $isFileExists = $file?->isFile() ?? false;
         $size = match (true) {
             $response instanceof StreamedResponse => Str::length($response->getContent()),
-            $response instanceof BinaryFileResponse => $response->getFile()->getSize(),
+            $response instanceof BinaryFileResponse => $isFileExists
+                ? $file->getSize()
+                : (int)$response->headers->get('Content-Length', '0'),
             $response instanceof ResponseIn => Str::length($response->getContent()),
             $response instanceof ResponseOut => Str::length($response->body()),
 
             default => 0,
         };
+        // Проверка исключений использует исходное представление ответа, но не сохраняет его в DTO.
+        $responseData = match (true) {
+            $response instanceof StreamedResponse => '[' . $response::class . ']',
+            $response instanceof BinaryFileResponse => '[' . $response::class . ', '
+                . ($isFileExists ? $file->getMimeType() : $response->headers->get('Content-Type')) . ']',
+            $response instanceof ResponseIn => Hlp::castToString($response->getContent()),
+            $response instanceof ResponseOut => Hlp::castToString($response->body()),
+
+            default => is_object($response) ? $response::class : $response,
+        };
+        $limitedResponseData = static::limitData($responseData);
 
         return ($dto = static::createByRequest($uuid, $request))
             ->merge([
@@ -182,7 +206,7 @@ class HttpLogDto extends Dto
                         'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData'    => '[' . $response::class . ']',
+                        'responseData'    => $limitedResponseData,
                         'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
@@ -191,7 +215,7 @@ class HttpLogDto extends Dto
                         'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData'    => '[' . $response::class . ', ' . $response->getFile()->getMimeType() . ']',
+                        'responseData'    => $limitedResponseData,
                         'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
@@ -200,7 +224,7 @@ class HttpLogDto extends Dto
                         'responseCode'    => $response->getStatusCode(),
                         'responseMessage' => $response::$statusTexts[$response->getStatusCode()],
                         'responseHeaders' => $response->headers->all(),
-                        'responseData'    => Hlp::castToString($response->getContent()),
+                        'responseData'    => $limitedResponseData,
                         'status'          => static::isSuccessfulInboundStatusCode($response->getStatusCode())
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
@@ -209,14 +233,14 @@ class HttpLogDto extends Dto
                         'responseCode'    => $response->status(),
                         'responseMessage' => $response->reason(),
                         'responseHeaders' => $response->headers(),
-                        'responseData'    => Hlp::castToString($response->body()),
+                        'responseData'    => $limitedResponseData,
                         'status'          => $response->successful()
                             ? HttpLogStatusEnum::Success
                             : HttpLogStatusEnum::Failed
                     ],
 
                     default => [
-                        'responseData' => is_object($response) ? $response::class : $response,
+                        'responseData' => $limitedResponseData,
                         'status'       => HttpLogStatusEnum::Failed,
                     ],
                 },
@@ -225,6 +249,7 @@ class HttpLogDto extends Dto
                     ...($dto->info ?? []),
                     'duration'           => Hlp::timeSecondsToString(value: $duration, withMilliseconds: true),
                     'response_data_size' => Hlp::sizeBytesToString($size),
+                    ...($limitedResponseData !== $responseData ? ['response_data_truncated' => true] : []),
                 ],
                 ...(isset($attributes['cacheKey']) ? ['cacheKey' => $attributes['cacheKey']] : []),
                 ...(isset($attributes['isCached'])
@@ -241,7 +266,78 @@ class HttpLogDto extends Dto
                 ),
                 'duration' => $duration ?? null,
                 'size'     => $size,
-            ]);
+            ])
+            ->rememberDataExclusion('responseData', $responseData);
+    }
+
+
+    /**
+     * Проверяет исключения по полным усечённым телам и актуальным значениям остальных полей.
+     * Повторная проверка префикса запрещена: он может совпасть с шаблоном, не совпадающим с полным телом.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedPrefixDoesNotCreateExclusion()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyKeepsExclusionsForUpdatedMetadata()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::untruncatedBodyKeepsExistingExclusion()
+     *
+     * @return bool
+     */
+    public function notFoundConfigExclude(): bool
+    {
+        $this->forgetChangedDataExclusions();
+
+        return !in_array(true, array_column($this->truncatedDataExclusions, 'excluded'), true)
+            && Lh::notFoundConfigExclude(
+                'laravel-helper.http_log.' . $this->type->value . '.exclude',
+                $this->excludeKeys(array_keys($this->truncatedDataExclusions)),
+            );
+    }
+
+
+    /**
+     * Запоминает результат фильтрации и отпечаток префикса, не удерживая полное тело в DTO или очереди.
+     * Штатный проверяющий метод сохраняет формат ключей и семантику существующих шаблонов исключений.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
+     *
+     * @param string $property Имя свойства requestData или responseData.
+     * @param string|null $data Полное тело до применения лимита.
+     * @return static
+     */
+    private function rememberDataExclusion(string $property, ?string $data): static
+    {
+        if (
+            $data === $this->{$property}
+            || $this->type === null
+            || !Lh::config(ConfigEnum::HttpLog, 'enabled')
+            || !Lh::config(ConfigEnum::HttpLog, $this->type->value . '.enabled')
+        ) {
+            return $this;
+        }
+
+        $this->truncatedDataExclusions[$property] = [
+            'excluded' => !Lh::notFoundConfigExclude(
+                'laravel-helper.http_log.' . $this->type->value . '.exclude',
+                $this->onlyKeys($property)->includeArray([$property => $data]),
+            ),
+            'hash' => $this->{$property} === null ? null : hash('sha256', $this->{$property}),
+        ];
+
+        return $this;
+    }
+
+
+    /**
+     * Сбрасывает решения при замене публичных тел через merge, заполнение или прямое присвоение.
+     * Отпечаток проверяется только для усечённых полей и не удерживает прежнее тело в памяти.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyRechecksReplacement()
+     *
+     * @return void
+     */
+    private function forgetChangedDataExclusions(): void
+    {
+        foreach ($this->truncatedDataExclusions as $property => $exclusion) {
+            if ($exclusion['hash'] !== ($this->{$property} === null ? null : hash('sha256', $this->{$property}))) {
+                unset($this->truncatedDataExclusions[$property]);
+            }
+        }
     }
 
 
@@ -255,6 +351,27 @@ class HttpLogDto extends Dto
     {
         return $statusCode >= ResponseIn::HTTP_OK
             && $statusCode < ResponseIn::HTTP_MULTIPLE_CHOICES;
+    }
+
+
+    /**
+     * Обрезает тело запроса или ответа до размера из настройки data_max_length, не разрывая символы UTF-8
+     *
+     * Ограничение выполняется до дальнейшей обработки данных: иначе тело ответа в десятки мегабайт копируется
+     * при сериализации и записи лога и исчерпывает память процесса. Обрезанное тело больше не является JSON,
+     * поэтому при сериализации и записи сохраняется, как любой текст не в формате JSON, первыми 2048 символами.
+     * Если в опубликованном конфиге приложения нет ключа data_max_length, действует DATA_MAX_LENGTH.
+     *
+     * @param string|null $data
+     * @return string|null
+     */
+    private static function limitData(?string $data): ?string
+    {
+        $maxLength = (int)(Lh::config(ConfigEnum::HttpLog, 'data_max_length') ?? static::DATA_MAX_LENGTH);
+
+        return $maxLength > 0 && $data !== null && strlen($data) > $maxLength
+            ? mb_strcut($data, 0, $maxLength, 'UTF-8')
+            : $data;
     }
 
 
@@ -276,15 +393,42 @@ class HttpLogDto extends Dto
 
 
     /**
+     * Очищает данные очереди и сохраняет решения по исходным телам при штатном усечении текста.
      * @see parent::__serialize()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::largeResponseKeepsOnlyBoundedPayload()
+     *
      * @return array
      */
     public function __serialize(): array
     {
+        $this->forgetChangedDataExclusions();
         $this->requestData = Hlp::stringTruncateBetweenQuotes($this->removeMultipartBinary($this->requestData), 2048);
         $this->responseData = Hlp::stringTruncateBetweenQuotes($this->removeMultipartBinary($this->responseData), 2048);
 
+        // Штатная очистка для очереди не является заменой тела и сохраняет решение по исходным данным.
+        foreach (array_keys($this->truncatedDataExclusions) as $property) {
+            $this->truncatedDataExclusions[$property]['hash'] = $this->{$property} === null
+                ? null
+                : hash('sha256', $this->{$property});
+        }
+
         return parent::__serialize();
+    }
+
+
+    /**
+     * Восстанавливает решения по полным телам, поскольку родитель заполняет только доступные ему свойства.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedPrefixDoesNotCreateExclusion()
+     *
+     * @param array $data Сериализованные поля DTO с приватным состоянием исключений.
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        parent::__unserialize($data);
+        $this->truncatedDataExclusions = $data["\0" . self::class . "\0truncatedDataExclusions"] ?? [];
     }
 
 

@@ -244,7 +244,11 @@ class LaravelHelperService extends DefaultService
 
     /**
      * Проверяет на возможность отправки Dto в очередь для обработки
+     * Для HTTP учитывает результат исключений по полным телам, сохранённый до их усечения.
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedBodyPreservesExclusion()
+     * @see \Atlcom\LaravelHelper\Tests\Unit\HttpLogDtoTest::truncatedPrefixDoesNotCreateExclusion()
      *
+     * @param Dto $dto
      * @return bool
      */
     public function canDispatch(Dto $dto): bool
@@ -273,7 +277,7 @@ class LaravelHelperService extends DefaultService
                 $type = $dto->type->value;
                 $can = $this->config($config, 'enabled')
                     && $this->config($config, "{$type}.enabled")
-                    && $this->notFoundConfigExclude("laravel-helper.{$config->value}.{$type}.exclude", $dto)
+                    && $dto->notFoundConfigExclude()
                     && (!in_array($dto->method, [HttpLogMethodEnum::Head->value, HttpLogMethodEnum::Options->value]))
                 ;
                 break;
