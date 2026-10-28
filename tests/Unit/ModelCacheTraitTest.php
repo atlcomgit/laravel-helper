@@ -69,6 +69,30 @@ final class ModelCacheTraitTest extends PackageTestCase
 
 
     /**
+     * Включённый кеш запросов подключает наблюдатель кеша при загрузке модели без исключения Laravel 13
+     * @see \Atlcom\LaravelHelper\Traits\ModelCacheTrait::bootModelCacheTrait()
+     *
+     * @return void
+     */
+    #[Test]
+    public function bootModelCacheTraitRegistersObserverAfterModelBoot(): void
+    {
+        config([
+            'laravel-helper.enabled'             => true,
+            'laravel-helper.query_cache.enabled' => true,
+        ]);
+
+        // Модель используется только здесь, поэтому первая загрузка проходит с включённым кешем запросов
+        new ModelCacheTraitObserverTestModel();
+
+        $this->assertTrue(
+            ModelCacheTraitObserverTestModel::getEventDispatcher()
+                ->hasListeners('eloquent.created: ' . ModelCacheTraitObserverTestModel::class),
+        );
+    }
+
+
+    /**
      * Возвращает разделы конфигурации, каждый из которых подключает построитель пакета
      *
      * @return array<string, array{string}>
@@ -91,4 +115,14 @@ class ModelCacheTraitTestModel extends DefaultModel
 {
     /** Имя таблицы не используется: проверяется только создание построителя */
     protected $table = 'model_cache_trait_checks';
+}
+
+
+/**
+ * Тестовая модель для проверки подключения наблюдателя кеша при первой загрузке модели
+ */
+class ModelCacheTraitObserverTestModel extends DefaultModel
+{
+    /** Имя таблицы не используется: проверяется только регистрация наблюдателя */
+    protected $table = 'model_cache_trait_observer_checks';
 }

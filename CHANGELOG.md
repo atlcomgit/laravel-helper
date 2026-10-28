@@ -1,5 +1,30 @@
 # История изменений проекта
 
+## Без номера: Совместимость с Laravel 13
+
+- Дата: 2026-10-28.
+- Автор: 🅰️🅻🅴🅺.
+- Ветка: master.
+- Что сделано: `ConnectionTrait::select()` и `QueryOperationsTrait::querySelect()` принимают аргумент `$fetchUsing`
+  из сигнатуры `Connection::select()` Laravel 13 и передают его в `parent::select()`: без него приложение на
+  Laravel 13 падало при загрузке классов соединений пакета (`Declaration ... must be compatible`).
+  `ModelCacheTrait::bootModelCacheTrait()` подключает наблюдатель кеша запросов после загрузки модели через
+  `whenBooted()`, если метод есть (Laravel 12.x и новее): `observe()` создаёт экземпляр модели, а Laravel 13
+  запрещает это во время `boot()` — при включённом кеше запросов `LogicException` возникал на каждой модели
+  `DefaultModel`.
+- Ключевые моменты: в Laravel 10–12 лишний аргумент `parent::select()` игнорируется; без `whenBooted()`
+  (Laravel 10, 11 и ранние 12.x) наблюдатель подключается сразу при загрузке, как раньше. Проверено в проекте
+  на Laravel 13.39: полный набор тестов проекта
+  без ошибок и HTTP-запросы с включёнными журналами и кешем запросов. Добавлены тесты в `ModelCacheTraitTest`
+  и `QueryOperationsTraitTest`; в пакете они не запускались.
+- Файлы:
+    CHANGELOG.md
+    src/Traits/ConnectionTrait.php
+    src/Traits/ModelCacheTrait.php
+    src/Traits/QueryOperationsTrait.php
+    tests/Unit/ModelCacheTraitTest.php
+    tests/Unit/QueryOperationsTraitTest.php
+
 ## CRM-173: Журнал HTTP без исчерпания памяти на больших ответах и скачивании файлов
 
 - Дата: 2026-10-27.

@@ -41,12 +41,13 @@ trait ConnectionTrait
      * @param  string  $query
      * @param  array  $bindings
      * @param  bool  $useReadPdo
+     * @param  array  $fetchUsing - режим выборки PDO из сигнатуры Laravel 13 (более ранние версии его не принимают)
      * @return array
      */
     // #[Override()]
-    public function select($query, $bindings = [], $useReadPdo = true)
+    public function select($query, $bindings = [], $useReadPdo = true, array $fetchUsing = [])
     {
-        return $this->querySelect($query, $bindings, $useReadPdo);
+        return $this->querySelect($query, $bindings, $useReadPdo, $fetchUsing);
     }
 
 

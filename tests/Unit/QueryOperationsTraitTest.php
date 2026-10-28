@@ -6,11 +6,14 @@ namespace Atlcom\LaravelHelper\Tests\Unit;
 
 use Atlcom\LaravelHelper\Services\QueryCacheService;
 use Atlcom\LaravelHelper\Tests\PackageTestCase;
+use Atlcom\LaravelHelper\Traits\ConnectionTrait;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionMethod;
+use ReflectionParameter;
 
 /**
  * Тесты ленивого разбора SQL в чтениях QueryOperationsTrait
@@ -78,5 +81,32 @@ final class QueryOperationsTraitTest extends PackageTestCase
 
         $this->assertSame(1, (int)DB::selectOne('select 1 as value')->value);
         $this->assertSame([1], DB::table('query_operations_checks')->get()->pluck('id')->map('intval')->all());
+    }
+
+
+    /**
+     * Чтение через соединение пакета принимает аргумент fetchUsing из сигнатуры Connection::select() Laravel 13
+     * @see \Atlcom\LaravelHelper\Traits\ConnectionTrait::select()
+     *
+     * @return void
+     */
+    #[Test]
+    public function selectAcceptsFetchUsingArgumentOfLaravel13Signature(): void
+    {
+        config([
+            'laravel-helper.query_cache.enabled' => false,
+            'laravel-helper.query_log.enabled'   => false,
+        ]);
+        $connection = DB::connection();
+        $this->assertContains(ConnectionTrait::class, class_uses_recursive($connection));
+
+        // Без параметра fetchUsing класс соединения несовместим с родительским select() Laravel 13
+        $parameters = array_map(
+            static fn (ReflectionParameter $parameter): string => $parameter->getName(),
+            (new ReflectionMethod($connection, 'select'))->getParameters(),
+        );
+        $this->assertSame(['query', 'bindings', 'useReadPdo', 'fetchUsing'], $parameters);
+
+        $this->assertSame(1, (int)$connection->select('select 1 as value', [], true, [])[0]->value);
     }
 }

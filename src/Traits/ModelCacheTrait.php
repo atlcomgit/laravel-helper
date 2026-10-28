@@ -45,14 +45,18 @@ trait ModelCacheTrait
 
 
     /**
-     * Автозагрузка трейта
+     * Автозагрузка трейта: подключает наблюдатель кеша запросов при включённом кеше.
+     * Если у модели есть whenBooted() (Laravel 12.x и новее), регистрация откладывается до завершения загрузки:
+     * observe() создаёт экземпляр модели, а Laravel 13 запрещает это во время boot() и выбрасывает LogicException.
      *
      * @return void
      */
     protected static function bootModelCacheTrait()
     {
         if (App::getFacadeApplication() && Lh::config(ConfigEnum::QueryCache, 'enabled')) {
-            static::observe(QueryCacheObserver::class);
+            method_exists(static::class, 'whenBooted')
+                ? static::whenBooted(static fn () => static::observe(QueryCacheObserver::class))
+                : static::observe(QueryCacheObserver::class);
         }
     }
 

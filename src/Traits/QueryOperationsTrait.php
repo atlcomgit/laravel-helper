@@ -140,12 +140,15 @@ trait QueryOperationsTrait
      * @param string $query
      * @param array $bindings
      * @param bool $useReadPdo
+     * @param array $fetchUsing - режим выборки PDO для parent::select() в Laravel 13 (ранние версии лишний
+     *     аргумент игнорируют)
      * @return Collection<int, stdClass>|array<int, stdClass>
      */
     public function querySelect(
         $query,
         $bindings = [],
         $useReadPdo = true,
+        array $fetchUsing = [],
     ): Collection|array {
         try {
             $status = false;
@@ -189,9 +192,9 @@ trait QueryOperationsTrait
                             tags: $tags,
                             key: $cacheKey,
                         )
-                        ?? parent::select($query, $bindings, $useReadPdo)
+                        ?? parent::select($query, $bindings, $useReadPdo, $fetchUsing)
                     )
-                    : parent::select($query, $bindings, $useReadPdo);
+                    : parent::select($query, $bindings, $useReadPdo, $fetchUsing);
 
                 $hasCache ?: $isCached = $queryCacheService->setQueryCache(
                     tags: $tags,
@@ -215,7 +218,7 @@ trait QueryOperationsTrait
                         }
                     );
             } else {
-                $result = parent::select($query, $bindings, $useReadPdo);
+                $result = parent::select($query, $bindings, $useReadPdo, $fetchUsing);
             }
 
             $status = true;
