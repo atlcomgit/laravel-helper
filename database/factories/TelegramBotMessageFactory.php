@@ -36,8 +36,9 @@ class TelegramBotMessageFactory extends Factory
 
         return [
             'uuid' => uuid(),
-            'external_message_id' => fake()->randomNumber(),
-            'external_update_id' => fake()->randomNumber(),
+            // Ненулевые ID: код проверяет внешние ID на пустоту, а randomNumber() иногда давал 0
+            'external_message_id' => fake()->numberBetween(100_000_000, 999_999_999),
+            'external_update_id' => fake()->numberBetween(100_000_000, 999_999_999),
             'telegram_bot_chat_id' => $telegramBotChat?->id,
             'telegram_bot_user_id' => $telegramBotUser?->id,
             'telegram_bot_message_id' => $telegramBotMessage?->id,

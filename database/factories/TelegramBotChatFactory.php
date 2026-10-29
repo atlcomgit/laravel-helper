@@ -28,7 +28,8 @@ class TelegramBotChatFactory extends Factory
     {
         return [
             'uuid' => uuid(),
-            'external_chat_id' => fake()->randomNumber(),
+            // Ненулевой ID: код проверяет внешние ID на пустоту, а randomNumber() иногда давал 0
+            'external_chat_id' => fake()->numberBetween(100_000_000, 999_999_999),
             'name' => fake()->name(),
             'chat_name' => fake()->name(),
             'type' => fake()->word(),
